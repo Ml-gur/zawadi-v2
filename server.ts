@@ -162,6 +162,14 @@ const AFRICAN_COUNTRIES = [
   "Burundi"
 ];
 
+app.use((_req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (_req.method === 'OPTIONS') return res.sendStatus(200);
+  next();
+});
+
 app.use(express.json({
   verify: (req: any, _res, buf) => {
     req.rawBody = buf.toString('utf8');
@@ -1234,7 +1242,24 @@ app.post('/api/essays/generate', verifyAuth, async (req: any, res) => {
   if (user?.plan === 'institutional') limit = 9999;
 
   if (genEntry >= limit) {
-    return res.status(430).json({ error: `Daily limit reached. Up to ${limit} essay generations allowed on the ${user?.plan || 'explorer'} tier.` });
+    const planInfo: Record<string, { label: string; limit: number; upgrade: string }> = {
+      explorer: { label: 'Explorer', limit: 3, upgrade: 'plus' },
+      plus: { label: 'Scholar Plus', limit: 10, upgrade: 'pro' },
+      pro: { label: 'Application Pro', limit: 25, upgrade: '' },
+    };
+    const p = user?.plan || 'explorer';
+    const info = planInfo[p] || planInfo.explorer;
+    const nextPlan = info.upgrade
+      ? ` Upgrade to **${planInfo[info.upgrade]?.label || info.upgrade}** (${planInfo[info.upgrade]?.limit || 'more'} per day) for more generations.`
+      : '';
+    const friendlyName = p === 'explorer' ? 'the free plan' : `your current plan`;
+    return res.status(430).json({
+      error: `You've used all ${limit} essay generations available today on ${friendlyName}${nextPlan}`,
+      daily_limit: limit,
+      plan: p,
+      upgrade_to: info.upgrade || null,
+      upgrade_message: nextPlan ? `Upgrade to ${planInfo[info.upgrade]?.label} for ${planInfo[info.upgrade]?.limit} daily generations` : null,
+    });
   }
 
   let generatedText = "";
@@ -3933,6 +3958,103 @@ async function startServer() {
       }
     } catch (err: any) {
       console.warn('[Server] Could not load AI config from DB, using env defaults');
+    }
+
+    // Ensure mentor tables exist on startup
+    if (IS_SUPABASE_MODE && supabaseAdmin) {
+      try {
+        await supabaseAdmin.rpc('exec_sql', {
+          sql: `
+CREATE TABLE IF NOT EXISTS mentor_profiles (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  mentor_email TEXT UNIQUE NOT NULL,
+  display_name TEXT NOT NULL,
+  bio TEXT DEFAULT '',
+  specializations JSONB DEFAULT '[]',
+  max_concurrent_reviews INTEGER DEFAULT 3,
+  is_active BOOLEAN DEFAULT true,
+  total_reviews_completed INTEGER DEFAULT 0,
+  average_mentor_score REAL DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS mentor_review_requests (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  request_reference TEXT UNIQUE NOT NULL,
+  user_email TEXT NOT NULL,
+  user_first_name TEXT DEFAULT '',
+  user_country TEXT DEFAULT '',
+  user_plan TEXT DEFAULT 'explorer',
+  essay_id TEXT NOT NULL,
+  essay_version INTEGER DEFAULT 1,
+  essay_content TEXT NOT NULL,
+  scholarship_name TEXT NOT NULL,
+  scholarship_provider TEXT,
+  scholarship_deadline TEXT,
+  scholarship_host_region TEXT,
+  student_notes TEXT,
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending','assigned','under_review','submitted_by_mentor','approved_by_admin','delivered_to_student','cancelled')),
+  priority TEXT DEFAULT 'medium' CHECK (priority IN ('low','medium','high','urgent')),
+  response_deadline TIMESTAMPTZ,
+  feedback_type TEXT DEFAULT 'basic',
+  includes_revised_sections BOOLEAN DEFAULT false,
+  includes_strategy_session BOOLEAN DEFAULT false,
+  assigned_mentor_email TEXT,
+  assigned_mentor_name TEXT,
+  assigned_at TIMESTAMPTZ,
+  mentor_started_review_at TIMESTAMPTZ,
+  mentor_submitted_at TIMESTAMPTZ,
+  feedback_overall_assessment TEXT,
+  feedback_opening TEXT,
+  feedback_narrative TEXT,
+  feedback_evidence TEXT,
+  feedback_cultural_authenticity TEXT,
+  feedback_closing TEXT,
+  feedback_general_advice TEXT,
+  revised_sections JSONB DEFAULT '[]',
+  mentor_confidence_score REAL,
+  estimated_success_probability REAL,
+  mentor_private_notes TEXT,
+  admin_approved_by TEXT,
+  admin_approved_at TIMESTAMPTZ,
+  admin_approval_notes TEXT,
+  admin_rejection_reason TEXT,
+  delivered_at TIMESTAMPTZ,
+  requested_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS mentor_feedback_ratings (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  request_id TEXT NOT NULL REFERENCES mentor_review_requests(id),
+  rated_by_email TEXT NOT NULL,
+  helpfulness_rating INTEGER CHECK (helpfulness_rating BETWEEN 1 AND 5),
+  accuracy_rating INTEGER CHECK (accuracy_rating BETWEEN 1 AND 5),
+  clarity_rating INTEGER CHECK (clarity_rating BETWEEN 1 AND 5),
+  would_recommend BOOLEAN DEFAULT false,
+  student_comment TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS notifications (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_email TEXT NOT NULL,
+  message TEXT NOT NULL,
+  type TEXT DEFAULT 'general',
+  related_id TEXT,
+  is_read BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+`
+        });
+        console.log('[BOOT] Mentor tables verified/created');
+      } catch {
+        const { error: err1 } = await supabaseAdmin.from('mentor_profiles').select('id').limit(1);
+        if (err1 && err1.code === '42P01') {
+          console.warn('[BOOT] Could not auto-create mentor tables via RPC. Please run the SQL from database.sql in Supabase SQL Editor.');
+        }
+      }
     }
 
     const scheduler = initializePipelineScheduler();

@@ -368,7 +368,7 @@ export default function App() {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: user.email, essay_type: essayType, scholarship_name: scholarshipName, prompt, stage, previous_content: previousContent, word_count: wordCount })
     });
-    if (!response.ok) { const errBody = await response.json(); throw new Error(errBody.error || "Generation endpoint faulted."); }
+    if (!response.ok) { const errBody = await response.json(); const err = new Error(errBody.error || "Generation endpoint faulted."); (err as any).status = response.status; throw err; }
     const resData = await response.json();
     const essayId = resData.id || resData.essay?.id || "temp";
     if (resData.id || resData.essay) {

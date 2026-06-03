@@ -1,7 +1,6 @@
 {
-  "redirects": [
-    { "source": "/(.*)", "destination": "https://www.techsari.online/$1", "permanent": true }
-  ],
+  "buildCommand": "npm run generate-icons && vite build",
+  "outputDirectory": "dist",
   "rewrites": [
     { "source": "/((?!robots\\.txt|sitemap\\.xml|og-image\\.png|icon\\.svg|manifest\\.webmanifest|pwa-icon-192\\.png|pwa-icon-512\\.png|sw\\.js|workbox-.*\\.js|assets/.*).*)", "destination": "/index.html" }
   ],
@@ -15,7 +14,7 @@
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://js.paystack.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://www.techsari.online; connect-src 'self' https://api.openrouter.ai https://*.supabase.co; frame-src https://standard.paystack.com; font-src 'self' data:; manifest-src 'self'" },
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://js.paystack.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://www.techsari.online; connect-src 'self' https://api.deepseek.com https://api.openrouter.ai https://*.supabase.co; frame-src https://standard.paystack.com; font-src 'self' data:; manifest-src 'self' https://api.deepseek.com" },
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
         { "key": "X-Content-Type-Options", "value": "nosniff" }
       ]

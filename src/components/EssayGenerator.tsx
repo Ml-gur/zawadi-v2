@@ -199,10 +199,17 @@ export default function EssayGenerator({
         addMessage('ai', `Here's your draft! Take a look in the workspace panel.\n\nWould you like me to **critique** this draft and suggest improvements? Just say "yes" or share any specific concerns.`);
       });
     } catch (e: any) {
-      toast.error(e.message || 'Generation failed');
+      const msg = e.message || 'Generation failed';
+      if (e.status === 430) {
+        addMessage('ai', `⚠️ ${msg}\n\nYou can still work on existing essays or visit the **Subscription Plans** page to upgrade for more generations.`);
+      } else {
+        toast.error(msg);
+      }
       setConvStage('collecting_info');
       setStage('idle');
-      addMessage('ai', 'Sorry, something went wrong. Let\'s try again — tell me about the scholarship you\'re applying for.');
+      if (e.status !== 430) {
+        addMessage('ai', 'Sorry, something went wrong. Let\'s try again — tell me about the scholarship you\'re applying for.');
+      }
     }
   };
 
@@ -220,7 +227,12 @@ export default function EssayGenerator({
         addMessage('ai', `Here's my critique. Review it in the workspace.\n\nReady for me to **polish** the essay with these improvements? Just say "polish" or "yes"!`);
       });
     } catch (e: any) {
-      toast.error(e.message || 'Critique failed');
+      const msg = e.message || 'Critique failed';
+      if (e.status === 430) {
+        addMessage('ai', `⚠️ ${msg}\n\nYou can upgrade your plan for more essay generations.`);
+      } else {
+        toast.error(msg);
+      }
       setConvStage('draft_ready');
       setStage('ready_draft');
     }
@@ -242,7 +254,12 @@ export default function EssayGenerator({
         addMessage('ai', `Your polished essay is ready! You can **copy it**, **save it to your Document Vault**, or **send it for a mentor review** to get expert feedback.\n\nWhat would you like to do next?`);
       });
     } catch (e: any) {
-      toast.error(e.message || 'Polish failed');
+      const msg = e.message || 'Polish failed';
+      if (e.status === 430) {
+        addMessage('ai', `⚠️ ${msg}\n\nYou can upgrade your plan for more essay generations.`);
+      } else {
+        toast.error(msg);
+      }
       setConvStage('critique_ready');
       setStage('ready_critique');
     }

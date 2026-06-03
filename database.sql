@@ -1273,6 +1273,92 @@ VALUES ('default', 'gemini', '', '', '')
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
+-- 13. Mentor Review System Tables
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS mentor_profiles (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  mentor_email TEXT UNIQUE NOT NULL,
+  display_name TEXT NOT NULL,
+  bio TEXT DEFAULT '',
+  specializations JSONB DEFAULT '[]',
+  max_concurrent_reviews INTEGER DEFAULT 3,
+  is_active BOOLEAN DEFAULT true,
+  total_reviews_completed INTEGER DEFAULT 0,
+  average_mentor_score REAL DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS mentor_review_requests (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  request_reference TEXT UNIQUE NOT NULL,
+  user_email TEXT NOT NULL,
+  user_first_name TEXT DEFAULT '',
+  user_country TEXT DEFAULT '',
+  user_plan TEXT DEFAULT 'explorer',
+  essay_id TEXT NOT NULL,
+  essay_version INTEGER DEFAULT 1,
+  essay_content TEXT NOT NULL,
+  scholarship_name TEXT NOT NULL,
+  scholarship_provider TEXT,
+  scholarship_deadline TEXT,
+  scholarship_host_region TEXT,
+  student_notes TEXT,
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending','assigned','under_review','submitted_by_mentor','approved_by_admin','delivered_to_student','cancelled')),
+  priority TEXT DEFAULT 'medium' CHECK (priority IN ('low','medium','high','urgent')),
+  response_deadline TIMESTAMPTZ,
+  feedback_type TEXT DEFAULT 'basic',
+  includes_revised_sections BOOLEAN DEFAULT false,
+  includes_strategy_session BOOLEAN DEFAULT false,
+  assigned_mentor_email TEXT,
+  assigned_mentor_name TEXT,
+  assigned_at TIMESTAMPTZ,
+  mentor_started_review_at TIMESTAMPTZ,
+  mentor_submitted_at TIMESTAMPTZ,
+  feedback_overall_assessment TEXT,
+  feedback_opening TEXT,
+  feedback_narrative TEXT,
+  feedback_evidence TEXT,
+  feedback_cultural_authenticity TEXT,
+  feedback_closing TEXT,
+  feedback_general_advice TEXT,
+  revised_sections JSONB DEFAULT '[]',
+  mentor_confidence_score REAL,
+  estimated_success_probability REAL,
+  mentor_private_notes TEXT,
+  admin_approved_by TEXT,
+  admin_approved_at TIMESTAMPTZ,
+  admin_approval_notes TEXT,
+  admin_rejection_reason TEXT,
+  delivered_at TIMESTAMPTZ,
+  requested_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS mentor_feedback_ratings (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  request_id TEXT NOT NULL REFERENCES mentor_review_requests(id),
+  rated_by_email TEXT NOT NULL,
+  helpfulness_rating INTEGER CHECK (helpfulness_rating BETWEEN 1 AND 5),
+  accuracy_rating INTEGER CHECK (accuracy_rating BETWEEN 1 AND 5),
+  clarity_rating INTEGER CHECK (clarity_rating BETWEEN 1 AND 5),
+  would_recommend BOOLEAN DEFAULT false,
+  student_comment TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS notifications (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_email TEXT NOT NULL,
+  message TEXT NOT NULL,
+  type TEXT DEFAULT 'general',
+  related_id TEXT,
+  is_read BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================
 -- 14. SETUP COMPLETE
 -- ============================================================
 
@@ -1285,3 +1371,7 @@ SELECT COUNT(*) || ' essays' AS result FROM essays;
 SELECT COUNT(*) || ' bot_ingestions' AS result FROM bot_ingestions;
 SELECT COUNT(*) || ' payments' AS result FROM payments;
 SELECT COUNT(*) || ' audit_logs' AS result FROM audit_logs;
+SELECT COUNT(*) || ' mentor_profiles' AS result FROM mentor_profiles;
+SELECT COUNT(*) || ' mentor_review_requests' AS result FROM mentor_review_requests;
+SELECT COUNT(*) || ' mentor_feedback_ratings' AS result FROM mentor_feedback_ratings;
+SELECT COUNT(*) || ' notifications' AS result FROM notifications;
