@@ -4222,17 +4222,32 @@ app.put('/api/admin/ai-config', verifySuperAdmin, async (req: any, res) => {
 // -------------------------------------------------------------
 // VITE DEV MIDDLEWARE + SPA FALLBACK
 // -------------------------------------------------------------
+// On Vercel: export the Express app as a serverless function (API routes only).
+// Locally: start Vite dev server with SSR middleware.
+// Production (non-Vercel): serve built static files.
 
-async function startServer() {
-  const vite = await createViteServer({
-    server: { middlewareMode: true },
-    appType: 'spa',
-  });
-  app.use(vite.middlewares);
+async function bootServer() {
+  if (process.env.VERCEL === '1') return;
 
-  app.get('*', async (req, res) => {
-    try {
-      const html = await vite.transformIndexHtml(req.url, `
+  const PORT = process.env.PORT || 3001;
+  const isProduction = process.env.NODE_ENV === 'production';
+
+  if (isProduction) {
+    const distPath = path.join(__dirname, 'dist');
+    app.use(express.static(distPath));
+    app.get('*', (_req, res) => {
+      res.sendFile(path.join(distPath, 'index.html'));
+    });
+  } else {
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: 'spa',
+    });
+    app.use(vite.middlewares);
+
+    app.get('*', async (req, res) => {
+      try {
+        const html = await vite.transformIndexHtml(req.url, `
         <!DOCTYPE html>
         <html lang="en">
           <head>
@@ -4252,158 +4267,20 @@ async function startServer() {
           </body>
         </html>
       `);
-      res.status(200).set({ 'Content-Type': 'text/html' }).end(html);
-    } catch (e: any) {
-      vite.ssrFixStacktrace(e);
-      res.status(500).end(e.message);
-    }
-  });
-
-  app.listen(PORT, async () => {
-    console.log(`Zawadi running on http://localhost:${PORT}`);
-
-    // Refresh PostgREST schema cache on boot to prevent stale-cache errors
-    if (IS_SUPABASE_MODE && supabaseAdmin) {
-      try {
-        await fetch(`${SUPABASE_URL}/rest/v1/rpc/pgrst`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': SUPABASE_SERVICE_ROLE_KEY,
-            'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`
-          },
-          body: JSON.stringify({ args: 'reload schema' })
-        });
-        console.log('[BOOT] PostgREST schema cache refreshed');
-      } catch {
-        console.warn('[BOOT] Could not refresh PostgREST schema cache; run: NOTIFY pgrst, \'reload schema\'; in Supabase SQL editor');
+        res.status(200).set({ 'Content-Type': 'text/html' }).end(html);
+      } catch (e: any) {
+        vite.ssrFixStacktrace(e);
+        res.status(500).end(e.message);
       }
-    }
+    });
+  }
 
-    // Initialize AI provider config from database
-    try {
-      const { setProviderConfig } = await import('./src/services/ai-provider');
-      if (IS_SUPABASE_MODE && supabaseAdmin) {
-        const { data: aiCfg } = await supabaseAdmin.from('ai_config').select('*').eq('id', 'default').maybeSingle();
-        if (aiCfg) {
-          setProviderConfig({
-            provider: aiCfg.provider,
-            openaiKey: aiCfg.openai_key || '',
-            deepseekKey: aiCfg.deepseek_key || '',
-            geminiKey: aiCfg.gemini_key || '',
-          });
-          console.log(`[Server] AI provider config loaded: ${aiCfg.provider}`);
-        }
-      }
-    } catch (err: any) {
-      console.warn('[Server] Could not load AI config from DB, using env defaults');
-    }
-
-    // Ensure mentor tables exist on startup
-    if (IS_SUPABASE_MODE && supabaseAdmin) {
-      try {
-        await supabaseAdmin.rpc('exec_sql', {
-          sql: `
-CREATE TABLE IF NOT EXISTS mentor_profiles (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  mentor_email TEXT UNIQUE NOT NULL,
-  display_name TEXT NOT NULL,
-  bio TEXT DEFAULT '',
-  specializations JSONB DEFAULT '[]',
-  max_concurrent_reviews INTEGER DEFAULT 3,
-  is_active BOOLEAN DEFAULT true,
-  total_reviews_completed INTEGER DEFAULT 0,
-  average_mentor_score REAL DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS mentor_review_requests (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  request_reference TEXT UNIQUE NOT NULL,
-  user_email TEXT NOT NULL,
-  user_first_name TEXT DEFAULT '',
-  user_country TEXT DEFAULT '',
-  user_plan TEXT DEFAULT 'explorer',
-  essay_id TEXT NOT NULL,
-  essay_version INTEGER DEFAULT 1,
-  essay_content TEXT NOT NULL,
-  scholarship_name TEXT NOT NULL,
-  scholarship_provider TEXT,
-  scholarship_deadline TEXT,
-  scholarship_host_region TEXT,
-  student_notes TEXT,
-  status TEXT DEFAULT 'pending' CHECK (status IN ('pending','assigned','under_review','submitted_by_mentor','approved_by_admin','delivered_to_student','cancelled')),
-  priority TEXT DEFAULT 'medium' CHECK (priority IN ('low','medium','high','urgent')),
-  response_deadline TIMESTAMPTZ,
-  feedback_type TEXT DEFAULT 'basic',
-  includes_revised_sections BOOLEAN DEFAULT false,
-  includes_strategy_session BOOLEAN DEFAULT false,
-  assigned_mentor_email TEXT,
-  assigned_mentor_name TEXT,
-  assigned_at TIMESTAMPTZ,
-  mentor_started_review_at TIMESTAMPTZ,
-  mentor_submitted_at TIMESTAMPTZ,
-  feedback_overall_assessment TEXT,
-  feedback_opening TEXT,
-  feedback_narrative TEXT,
-  feedback_evidence TEXT,
-  feedback_cultural_authenticity TEXT,
-  feedback_closing TEXT,
-  feedback_general_advice TEXT,
-  revised_sections JSONB DEFAULT '[]',
-  mentor_confidence_score REAL,
-  estimated_success_probability REAL,
-  mentor_private_notes TEXT,
-  admin_approved_by TEXT,
-  admin_approved_at TIMESTAMPTZ,
-  admin_approval_notes TEXT,
-  admin_rejection_reason TEXT,
-  delivered_at TIMESTAMPTZ,
-  requested_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS mentor_feedback_ratings (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  request_id TEXT NOT NULL REFERENCES mentor_review_requests(id),
-  rated_by_email TEXT NOT NULL,
-  helpfulness_rating INTEGER CHECK (helpfulness_rating BETWEEN 1 AND 5),
-  accuracy_rating INTEGER CHECK (accuracy_rating BETWEEN 1 AND 5),
-  clarity_rating INTEGER CHECK (clarity_rating BETWEEN 1 AND 5),
-  would_recommend BOOLEAN DEFAULT false,
-  student_comment TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE IF NOT EXISTS notifications (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_email TEXT NOT NULL,
-  message TEXT NOT NULL,
-  type TEXT DEFAULT 'general',
-  related_id TEXT,
-  is_read BOOLEAN DEFAULT false,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-`
-        });
-        console.log('[BOOT] Mentor tables verified/created');
-      } catch {
-        const { error: err1 } = await supabaseAdmin.from('mentor_profiles').select('id').limit(1);
-        if (err1 && err1.code === '42P01') {
-          console.warn('[BOOT] Could not auto-create mentor tables via RPC. Please run the SQL from database.sql in Supabase SQL Editor.');
-        }
-      }
-    }
-
-    const scheduler = initializePipelineScheduler();
-    if (scheduler) {
-      console.log('[Server] Pipeline scheduler initialized successfully');
-    } else {
-      console.warn('[Server] Pipeline scheduler could not be initialized');
-    }
+  app.listen(PORT, () => {
+    console.log(`[SERVER] Running on port ${PORT}${isProduction ? '' : ' (Vite dev mode)'}`);
   });
 }
 
-startServer();
+bootServer();
+
+export default app;
 
