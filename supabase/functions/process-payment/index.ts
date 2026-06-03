@@ -1,17 +1,31 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+// ─── Environment ──────────────────────────────────────────────────
+const ENVIRONMENT = Deno.env.get('ENVIRONMENT') || 'development'
+const PRODUCTION = ENVIRONMENT === 'production'
+
 // ─── CORS ─────────────────────────────────────────────────────────
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-paystack-signature',
+const ALLOWED_ORIGINS = PRODUCTION
+  ? ['https://www.techsari.online']
+  : ['http://localhost:5173', 'http://127.0.0.1:5173']
+
+function getCorsOrigin(req: Request): string {
+  const origin = req.headers.get('origin') || ''
+  if (ALLOWED_ORIGINS.includes(origin)) return origin
+  return ALLOWED_ORIGINS[0]
 }
 
-function corsResponse(body: unknown, status = 200) {
+function corsResponse(body: unknown, status = 200, req?: Request) {
+  const origin = req ? getCorsOrigin(req) : ALLOWED_ORIGINS[0]
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    headers: {
+      'Access-Control-Allow-Origin': origin,
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-paystack-signature',
+      'Content-Type': 'application/json',
+    },
   })
 }
 
@@ -76,7 +90,14 @@ function normalizePaystackMetadata(metadata: any): Record<string, any> {
 // ─── Main handler ─────────────────────────────────────────────────
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    const origin = getCorsOrigin(req)
+    return new Response(null, {
+      headers: {
+        'Access-Control-Allow-Origin': origin,
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, x-paystack-signature',
+      },
+    })
   }
 
   try {
@@ -218,7 +239,12 @@ async function handleInitialize(
     }
   }
 
-  // Sandbox fallback
+  // Production: fail if Paystack key is missing
+  if (PRODUCTION) {
+    return corsResponse({ error: 'Payment gateway not configured. Please contact support.' }, 500)
+  }
+
+  // Sandbox fallback (development only)
   const sandboxRef = `sandbox_${Date.now()}`
   await supabase.from('payments').upsert({
     user_email: userEmail,
@@ -359,7 +385,12 @@ async function handleVerify(
     }
   }
 
-  // Sandbox verification
+  // Production: fail if verify-without-paystack
+  if (PRODUCTION) {
+    return corsResponse({ error: 'Payment verification service unavailable.' }, 502)
+  }
+
+  // Sandbox verification (development only)
   if (!String(reference).startsWith('sandbox_')) {
     await supabase.from('payments')
       .update({ status: 'failed', failure_reason: 'Sandbox requires sandbox_ prefix' })
@@ -436,24 +467,31 @@ async function handleWebhook(
   const paystackKey = Deno.env.get('PAYSTACK_SECRET_KEY')!
   const signature = req.headers.get('x-paystack-signature')
 
-  if (paystackKey && signature) {
-    const encoder = new TextEncoder()
-    const key = await crypto.subtle.importKey(
-      'raw',
-      encoder.encode(paystackKey),
-      { name: 'HMAC', hash: 'SHA-512' },
-      false,
-      ['verify']
-    )
-    const rawBody = await req.clone().text()
-    const valid = await crypto.subtle.verify(
-      'HMAC',
-      key,
-      hexToBytes(signature),
-      encoder.encode(rawBody)
-    )
-    if (!valid) return new Response(null, { status: 401, headers: corsHeaders })
+  if (!paystackKey) {
+    console.error('[process-payment] Missing PAYSTACK_SECRET_KEY — webhook cannot verify')
+    return new Response(null, { status: 500 })
   }
+  if (!signature) {
+    console.error('[process-payment] Missing x-paystack-signature header')
+    return new Response(null, { status: 401 })
+  }
+
+  const encoder = new TextEncoder()
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(paystackKey),
+    { name: 'HMAC', hash: 'SHA-512' },
+    false,
+    ['verify']
+  )
+  const rawBody = await req.clone().text()
+  const valid = await crypto.subtle.verify(
+    'HMAC',
+    key,
+    hexToBytes(signature),
+    encoder.encode(rawBody)
+  )
+  if (!valid) return new Response(null, { status: 401 })
 
   const event = body.event
   const data = body.data

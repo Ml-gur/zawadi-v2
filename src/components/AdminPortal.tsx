@@ -1088,12 +1088,12 @@ export default function AdminPortal({
               auditLogsList={auditLogs.map((log, index) => ({
                 id: log.id || `PROP-LOG-${index}`,
                 created_at: log.created_at || 'Just Now',
-                admin_email: log.admin_email || 'Sarah Jenkins',
-                action: log.action || 'Listing Update',
-                target_type: log.target_type || 'Opportunity',
-                target_id: log.target_id || 'SCH-01',
-                details: log.details || 'Clean manual verification check',
-                ip_address: log.ip_address || '194.22.1.201'
+                admin_email: log.admin_email || '',
+                action: log.action || '',
+                target_type: log.target_type || '',
+                target_id: log.target_id || '',
+                details: log.details || '',
+                ip_address: log.ip_address || ''
               }))}
             />
           )}

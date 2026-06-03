@@ -312,7 +312,7 @@ export default function SubscriptionPlans({ user, onPlanUpdated, onNavigateToTab
             setIsProcessing(false);
           }, 3000);
         } else {
-          triggerToast(verifyData?.error || verifyError?.message || 'Sandbox upgrade failed. Check server logs.');
+          triggerToast(verifyData?.error || verifyError?.message || 'Payment verification failed. Please try again or contact support.');
           setIsProcessing(false);
         }
       } catch (err) {
@@ -337,7 +337,7 @@ export default function SubscriptionPlans({ user, onPlanUpdated, onNavigateToTab
       {/* Hero Banner Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <span className="text-xs font-bold text-secondary uppercase tracking-widest block mb-1">Affordable Premium Billing v2</span>
+          <span className="text-xs font-bold text-secondary uppercase tracking-widest block mb-1">Affordable Premium Billing</span>
           <h2 className="font-display text-2xl font-black text-primary">Academic Subscription Center</h2>
           <p className="text-xs text-on-surface-variant">Elevate your application quota limits, AI tools coefficient speeds, and human support channels</p>
         </div>

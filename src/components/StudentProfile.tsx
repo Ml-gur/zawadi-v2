@@ -19,27 +19,27 @@ export default function StudentProfile({ user, onUpdateProfile, onNavigateToTab 
   const buildFormData = (u: any) => ({
     // Step 1: Identity & Origin
     name: u.name || '',
-    country: u.country || 'Kenya',
+    country: u.country || '',
     date_of_birth: u.date_of_birth || '',
-    gender: u.gender || 'Female',
+    gender: u.gender || '',
     is_rural_origin: !!u.is_rural_origin,
 
     // Step 2: Academic Record
-    degree_level: u.degree_level || 'Bachelors',
+    degree_level: u.degree_level || '',
     gpa_system: (u.gpa_system || 'us4') as GpaSystem,
     gpa: u.gpa !== undefined ? u.gpa : '',
-    degree_class: u.degree_class || 'first',
+    degree_class: u.degree_class || '',
     institution: u.institution || '',
 
     // Step 3: Target & Destination
-    field_of_study: u.field_of_study || 'Computer Science',
+    field_of_study: u.field_of_study || '',
     target_fields: u.target_fields || [],
     destination_openness: u.destination_openness || (u.study_country_preference ? 'specific' : 'anywhere'),
     destination_regions: u.destination_regions || [],
     include_fully_funded_anywhere: u.include_fully_funded_anywhere !== false,
 
     // Step 4: Languages
-    native_language: u.native_language || 'English',
+    native_language: u.native_language || '',
     english_test_type: u.english_test_type || 'None',
     english_score: u.english_score !== undefined ? u.english_score : '',
     french_level: u.french_level || 'None',
@@ -143,7 +143,7 @@ export default function StudentProfile({ user, onUpdateProfile, onNavigateToTab 
     <div className="space-y-8 animate-sweep">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <span className="text-xs font-bold text-secondary uppercase tracking-widest block mb-1">Onboarding Portal v2</span>
+          <span className="text-xs font-bold text-secondary uppercase tracking-widest block mb-1">Onboarding Portal</span>
           <h2 className="font-display text-2xl font-black text-primary">Academic Persona Configuration</h2>
           <p className="text-xs text-on-surface-variant">Set up your personal and academic profile to find the best scholarship matches</p>
         </div>
@@ -682,8 +682,8 @@ export default function StudentProfile({ user, onUpdateProfile, onNavigateToTab 
                   className="w-full p-3 bg-surface border border-outline-variant/50 rounded-xl text-xs focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors cursor-pointer"
                 >
                   <option value="low">Low (Standard educational backing)</option>
-                  <option value="medium">Medium (Requires secondary partial grant assistance)</option>
-                  <option value="high">High need (Full Mastercard / DAAD equity support eligible)</option>
+                  <option value="medium">Medium (Partial financial assistance needed)</option>
+                  <option value="high">High need (Full funding support eligible)</option>
                 </select>
               </div>
             </div>

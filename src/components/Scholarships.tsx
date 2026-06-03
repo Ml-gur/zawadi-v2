@@ -492,7 +492,7 @@ export default function Scholarships({
                             </p>
                           </div>
                         </div>
-                        {!isDocStored && (
+                        {!isDocStored && import.meta.env.DEV && (
                           <button 
                             onClick={() => {
                               const fileName = docName.replace(' / ', '_') + "_sample.pdf";

@@ -1,6 +1,54 @@
 # Changelog
 
-## 2026-06-04
+## 2026-06-04 (continued — Security & Audit Remediation)
+
+### Critical Security Fixes
+
+**`supabase/functions/process-payment/index.ts`**
+- **Sandbox bypass fixed**: Sandbox mode (free plan upgrades without Paystack) is now gated behind `ENVIRONMENT !== 'production'`. In production, if `PAYSTACK_SECRET_KEY` is missing, both `initialize` and `verify` return 5xx errors instead of silently creating free upgrades.
+- **Webhook signature verification fixed**: Missing `x-paystack-signature` header now returns HTTP 401 instead of silently skipping verification.
+- **CORS restricted**: Updated from `Access-Control-Allow-Origin: '*'` to dynamically resolve origin against an allowlist (`https://www.techsari.online` in production, `localhost:5173` in development).
+
+**`supabase/migrations/005_rls_and_fixes.sql`** (new migration)
+- **RLS added to 6 unprotected tables**: `payments`, `audit_logs`, `bot_ingestions`, `contact_submissions`, `recommendation_feedback`, `pipeline_runs` — all now have proper row-level security policies.
+- **Payments**: users can SELECT/INSERT/UPDATE own records only.
+- **Audit logs, bot ingestions, pipeline runs**: service_role only (no direct public access).
+- **Contact submissions**: anon INSERT allowed (for contact form), service_role only for SELECT/UPDATE.
+- **Storage bucket ownership fixed**: `scholarship-docs` bucket RLS now requires `storage.foldername(name)[1] = auth.email()` for SELECT/INSERT/DELETE — users can only access their own folder.
+- **Document plan limit trigger**: New `check_document_plan_limit()` trigger on `documents` table prevents inserts beyond plan limits (Explorer=15, Plus=50, Pro/Institutional=unlimited). Returns clear error message with plan name.
+- **Reapplied all missing RLS policies** for `essay_soul_profiles`, `mentor_review_requests`, `mentor_profiles`, `mentor_feedback_ratings`, `notifications` (safe DROP/CREATE pattern).
+
+**`supabase/config.toml`**
+- Password minimum length increased from 6 → 8.
+- Password requirements set to `lower_upper_letters_digits`.
+- Email confirmations enabled (`enable_confirmations = true`).
+- Secure password change enabled (`secure_password_change = true`).
+
+**`.env`**
+- Live keys annotated with prominent warnings. User must rotate `PAYSTACK_SECRET_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, and `DEEPSEEK_API_KEY` in respective dashboards and set via `supabase secrets set`.
+
+### Medium Priority Fixes
+
+**`src/components/SubscriptionPlans.tsx`**
+- Removed sandbox leak: error message changed from `'Sandbox upgrade failed. Check server logs.'` → `'Payment verification failed. Please try again or contact support.'`
+- Removed "v2" marker: `'Affordable Premium Billing v2'` → `'Affordable Premium Billing'`
+
+**`src/components/AdminPortal.tsx`**
+- Replaced fake audit log fallback values (`'Sarah Jenkins'`, `'SCH-01'`, `'194.22.1.201'`, etc.) with empty strings.
+- Null admin_email/action/target_type/target_id/details/ip_address now show as blank instead of fabricated data.
+
+**`src/components/StudentProfile.tsx`**
+- Removed biased default values: `country` no longer defaults to `'Kenya'`, `gender` to `'Female'`, `degree_level` to `'Bachelors'`, `field_of_study` to `'Computer Science'`, `native_language` to `'English'`. All now default to empty string.
+- Fixed financial need dropdown jargon: `'Requires secondary partial grant assistance'` → `'Partial financial assistance needed'`, `'Full Mastercard / DAAD equity support eligible'` → `'Full funding support eligible'`.
+- Fixed "v2" marker: `'Onboarding Portal v2'` → `'Onboarding Portal'`
+
+**`src/components/Scholarships.tsx`**
+- Sample document upload button gated behind `import.meta.env.DEV` — no longer visible in production builds.
+
+**Removed `_test_jwt.mjs`**
+- Deleted test file containing a real admin JWT signed with known secret.
+
+## 2026-06-04 (Initial)
 
 ### Removed: All Express.js API calls — fully migrated to Supabase Edge Functions
 
