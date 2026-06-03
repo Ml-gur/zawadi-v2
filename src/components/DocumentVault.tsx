@@ -77,11 +77,16 @@ export default function DocumentVault({
     }
     setErrorMsg("");
     setUploading(true);
-    await onUploadDocument(selectedFile, docType);
-    setUploading(false);
-    setSelectedFile(null);
-    // Auto-refresh after 2s to pick up AI extraction results
-    setTimeout(() => onRefreshDocuments(), 2000);
+    try {
+      await onUploadDocument(selectedFile, docType);
+      setSelectedFile(null);
+      // Auto-refresh after 2s to pick up AI extraction results
+      setTimeout(() => onRefreshDocuments(), 2000);
+    } catch (err: any) {
+      setErrorMsg(err?.message || 'Upload failed');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const getDocIcon = (type: string) => {

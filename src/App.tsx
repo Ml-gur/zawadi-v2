@@ -376,7 +376,8 @@ export default function App() {
         uploaded_at: new Date().toISOString(),
       };
       const { data, error } = await insertDocument(doc);
-      if (!error && data) {
+      if (error) throw new Error(error.message || 'Failed to save document metadata');
+      if (data) {
         const insertedDoc = data as DocumentVaultItem;
         setDocuments(prev => [...prev, insertedDoc]);
         // Fire-and-forget AI document analysis
@@ -445,9 +446,11 @@ export default function App() {
           }
         })();
       }
-    } catch (err) {
-      console.error("Upload handler connection fault", err);
-      toast.error(err instanceof Error ? err.message : 'Upload failed. Check that the storage bucket exists and try again.');
+    } catch (err: any) {
+      console.error("Upload handler error", err);
+      const msg = err?.message || err?.error || (typeof err === 'string' ? err : '') || 'Upload failed. Check that the storage bucket "scholarship-docs" exists and you have run migration 004.';
+      toast.error(msg);
+      throw new Error(msg);
     }
   };
 

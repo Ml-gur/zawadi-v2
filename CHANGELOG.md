@@ -63,6 +63,14 @@
 - The `generate-essay` Edge Function already supported `document_ids` and loaded `ai_extraction_result` from documents to ground the essay. The system prompt now includes: "Ground all claims in the document-based evidence provided — never fabricate GPA, institutions, degrees, or other factual details."
 - The critique stage cross-references essay claims against uploaded documents.
 
+### Fixed: Document upload silently fails (re-throw errors to DocumentVault)
+
+- **Root cause**: `handleUploadDocument` in App.tsx caught all errors internally with `console.error` only. The `DocumentVault` component never knew the upload failed — it just showed the upload button re-enabling with no document appearing.
+- **Fix**: `src/App.tsx:449-454` — The catch block now calls `toast.error()` AND re-throws the error, so DocumentVault can also catch it and show an inline error message.
+- **Fix**: `src/components/DocumentVault.tsx:77-87` — Added try/catch around `onUploadDocument()` call to display inline error in the vault UI.
+- **Fix**: `src/App.tsx:378-379` — DB insert error now throws explicitly instead of silently falling through.
+- **Fix**: `supabase/migrations/004_storage_and_fixes.sql` — Fixed storage RLS policy: split `FOR ALL USING` (which blocks INSERT) into separate `FOR SELECT`, `FOR INSERT WITH CHECK`, and `FOR DELETE` policies.
+
 ### To apply database fixes
 
 Run `supabase/migrations/004_storage_and_fixes.sql` in your Supabase SQL Editor.

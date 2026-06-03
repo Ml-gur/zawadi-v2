@@ -23,10 +23,20 @@ VALUES (
 )
 ON CONFLICT (id) DO NOTHING;
 
--- 2. Storage RLS policy for documents bucket
+-- 2. Storage RLS policies for documents bucket
 DROP POLICY IF EXISTS "storage_documents_self" ON storage.objects;
-CREATE POLICY "storage_documents_self" ON storage.objects
-  FOR ALL USING (
+CREATE POLICY "storage_documents_select" ON storage.objects
+  FOR SELECT USING (
+    bucket_id = 'scholarship-docs'
+    AND auth.role() = 'authenticated'
+  );
+CREATE POLICY "storage_documents_insert" ON storage.objects
+  FOR INSERT WITH CHECK (
+    bucket_id = 'scholarship-docs'
+    AND auth.role() = 'authenticated'
+  );
+CREATE POLICY "storage_documents_delete" ON storage.objects
+  FOR DELETE USING (
     bucket_id = 'scholarship-docs'
     AND auth.role() = 'authenticated'
   );
