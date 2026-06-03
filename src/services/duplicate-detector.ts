@@ -1,5 +1,9 @@
 import { createHash } from 'crypto';
-import { supabaseAdmin } from '../../server';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.SUPABASE_URL || '';
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const supabaseAdmin = supabaseUrl ? createClient(supabaseUrl, supabaseKey) : null;
 
 export function generateFingerprint(name: string | null, provider: string | null, deadline: string | null): string {
   const normalizedName = (name || '').toLowerCase().trim();

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
+import { supabase } from '../lib/supabase';
 import { SEO } from './SEO';
 
 const contactSchema = {
@@ -35,20 +36,17 @@ export default function ContactPage({ onBack }: { onBack: () => void }) {
 
     setSending(true);
     try {
-      const token = localStorage.getItem('zawadi_token');
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const { error } = await supabase
+        .from('contact_submissions')
+        .insert({
+          name: name.trim(),
+          email: email.trim(),
+          subject,
+          message: message.trim(),
+          status: 'new',
+        });
 
-      const res = await fetch('/api/contact', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ name: name.trim(), email: email.trim(), subject, message: message.trim() })
-      });
-
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || 'Failed to send message');
-      }
+      if (error) throw error;
 
       setSent(true);
       setName('');

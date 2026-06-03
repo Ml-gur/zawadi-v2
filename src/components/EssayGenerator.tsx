@@ -1,18 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import toast from 'react-hot-toast';
+import { supabase } from '../lib/supabase';
 import { EssayStudioGeneration } from '../types';
 
 interface EssayGeneratorProps {
   user: any;
   essays: EssayStudioGeneration[];
   scholarships?: any[];
+  documents?: any[];
   onGenerateEssay: (
     essayType: string,
     scholarshipName: string,
     prompt: string,
     stage: 'draft' | 'critique' | 'polish',
     previousContent?: string,
-    wordCount?: number
+    wordCount?: number,
+    documentIds?: string[]
   ) => Promise<{ id: string; content: string; remaining_today: number; daily_limit: number }>;
   onNavigateToTab: (tab: string) => void;
   onUploadMetadata: (file: File, docType: string) => void;
@@ -30,6 +33,7 @@ export default function EssayGenerator({
   user,
   essays,
   scholarships = [],
+  documents = [],
   onGenerateEssay,
   onNavigateToTab,
   onUploadMetadata
@@ -57,6 +61,13 @@ export default function EssayGenerator({
     wordCount: 500,
   });
   const [collectingStep, setCollectingStep] = useState<'scholarship' | 'essay_type' | 'notes'>('scholarship');
+
+  // Filter to analyzed documents (those with ai_extraction_result)
+  const analyzedDocIds = useMemo(() => {
+    return documents
+      .filter((d: any) => d.ai_extraction_result)
+      .map((d: any) => d.id);
+  }, [documents]);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const streamEndRef = useRef<HTMLDivElement>(null);
@@ -160,20 +171,17 @@ export default function EssayGenerator({
       return;
     }
     try {
-      const token = localStorage.getItem('zawadi_token');
-      const res = await fetch('/api/essays/request-mentor-review', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('mentor-review', {
+        body: {
+          action: 'request-review',
           essay_id: currentEssayId,
           essay_content: finalProduct,
           scholarship_name: collected.scholarshipName,
           student_notes: collected.notes,
-        }),
+        },
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: 'Request failed' }));
-        toast.error(err.error || 'Failed to send for mentor review');
+      if (error || data?.error) {
+        toast.error(data?.error || error?.message || 'Failed to send for mentor review');
         return;
       }
       toast.success('Essay sent for mentor review! You\'ll be notified when feedback is ready.');
@@ -188,7 +196,7 @@ export default function EssayGenerator({
     setStage('drafting');
     addMessage('ai', `Generating your ${collected.essayType} for **${collected.scholarshipName}**...`);
     try {
-      const res = await onGenerateEssay(collected.essayType, collected.scholarshipName, collected.notes, 'draft', undefined, collected.wordCount);
+      const res = await onGenerateEssay(collected.essayType, collected.scholarshipName, collected.notes, 'draft', undefined, collected.wordCount, analyzedDocIds);
       setCurrentEssayId(res.id);
       setDraftContent(res.content);
       setRemainingToday(res.remaining_today);
@@ -219,7 +227,7 @@ export default function EssayGenerator({
     setStage('critiquing');
     addMessage('ai', 'Analyzing your draft for structure, impact, and clarity...');
     try {
-      const res = await onGenerateEssay(collected.essayType, collected.scholarshipName, collected.notes, 'critique', draftContent, collected.wordCount);
+      const res = await onGenerateEssay(collected.essayType, collected.scholarshipName, collected.notes, 'critique', draftContent, collected.wordCount, analyzedDocIds);
       setCritiqueContent(res.content);
       streamText(res.content, 8, () => {
         setStage('ready_critique');
@@ -246,7 +254,7 @@ export default function EssayGenerator({
     setStage('polishing');
     addMessage('ai', 'Polishing your essay for maximum impact...');
     try {
-      const res = await onGenerateEssay(collected.essayType, collected.scholarshipName, collected.notes, 'polish', textToPolish, collected.wordCount);
+      const res = await onGenerateEssay(collected.essayType, collected.scholarshipName, collected.notes, 'polish', textToPolish, collected.wordCount, analyzedDocIds);
       setPolishedContent(res.content);
       streamText(res.content, 10, () => {
         setStage('ready_polish');

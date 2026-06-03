@@ -1,4 +1,4 @@
-import { GoogleGenAI } from '@google/genai';
+import { generateContent, getDefaultConfig, hasAnyKey } from './ai-provider';
 
 const VOICE_ANALYSIS_PROMPT = `You are a writing style analyst. Analyze these writing samples from the same author. Extract their authentic voice profile. Return JSON with: tone as "formal" or "semi-formal" or "conversational", preferred_sentence_length as "short" or "medium" or "long", characteristic_phrases as an array of up to 10 phrases or patterns the author uses, vocabulary_preferences as an object with simple_words_ratio as number, technical_terms as string array, cultural_references as string array, self_promotion_comfort as "low" or "medium" or "high" where low means the author avoids first person achievement claims, narrative_style as "chronological" or "thematic" or "anecdotal", distinctive_voice_description as a 50 word plain English description of what makes this person's writing identifiable.`;
 
@@ -31,20 +31,21 @@ export async function analyzeWritingVoice(user_email: string, samples: string[])
     return { profile: null, style_notes: '' };
   }
 
-  const apiKey = process.env.GOOGLE_API_KEY || '';
-  if (!apiKey || apiKey === 'your_api_key_here') {
+  const config = getDefaultConfig();
+  if (!hasAnyKey(config)) {
     return { profile: null, style_notes: '' };
   }
 
   try {
-    const client = new GoogleGenAI({ apiKey });
     const combined = samples.map((s, i) => `--- Sample ${i + 1} ---\n${s.slice(0, 2000)}`).join('\n\n');
-    const response = await client.models.generateContent({
-      model: 'gemini-2.0-flash',
-      contents: `${VOICE_ANALYSIS_PROMPT}\n\n${combined}`,
-      config: { temperature: 0.3, maxOutputTokens: 1024 }
+    const result = await generateContent({
+      prompt: `${VOICE_ANALYSIS_PROMPT}\n\n${combined}`,
+      temperature: 0.3,
+      maxOutputTokens: 1024,
     });
-    const text = response.text || '';
+    if (!result) return { profile: null, style_notes: '' };
+
+    const text = result.text || '';
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       const parsed = JSON.parse(jsonMatch[0]);

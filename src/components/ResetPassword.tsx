@@ -1,27 +1,27 @@
-import React, { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 
 interface ResetPasswordProps {
   onBackToLogin: () => void;
 }
 
 export default function ResetPassword({ onBackToLogin }: ResetPasswordProps) {
-  const [searchParams] = useSearchParams();
-  const token = searchParams.get('token') || '';
-
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [hasSession, setHasSession] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setHasSession(!!session);
+    });
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!token) {
-      setError('Invalid or missing reset token.');
-      return;
-    }
     if (password.length < 6) {
       setError('Password must be at least 6 characters');
       return;
@@ -35,33 +35,43 @@ export default function ResetPassword({ onBackToLogin }: ResetPasswordProps) {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/auth/reset-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, password }),
+      const { error: updateError } = await supabase.auth.updateUser({
+        password,
       });
-      const data = await response.json();
-      if (!response.ok) {
-        setError(data.error || 'Reset failed');
+
+      if (updateError) {
+        setError(updateError.message);
         setLoading(false);
         return;
       }
+
       setSuccess(true);
       setLoading(false);
     } catch {
-      setError('Connection error. Make sure the server is running.');
+      setError('Connection error. Please check your connection.');
       setLoading(false);
     }
   };
 
-  if (!token) {
+  // Still loading session state
+  if (hasSession === null) {
+    return (
+      <div className="min-h-[85vh] flex items-center justify-center p-6 bg-grid-pattern">
+        <div className="w-full max-w-md bg-surface-container-lowest border border-outline-variant/50 rounded-2xl p-8 shadow-xl text-center">
+          <p className="text-xs text-on-surface-variant">Checking reset link...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!hasSession) {
     return (
       <div className="min-h-[85vh] flex items-center justify-center p-6 bg-grid-pattern">
         <div className="w-full max-w-md bg-surface-container-lowest border border-outline-variant/50 rounded-2xl p-8 shadow-xl relative overflow-hidden animate-sweep">
           <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary via-secondary-container to-secondary"></div>
           <h3 className="font-display text-2xl font-black text-primary text-center mb-2">Invalid Link</h3>
           <p className="text-xs text-on-surface-variant text-center mb-8">
-            This password reset link is invalid or missing. Please request a new one.
+            This password reset link is invalid or has expired. Please request a new one.
           </p>
           <button
             type="button"

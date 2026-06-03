@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { supabase } from '../lib/supabase';
 
 interface ForgotPasswordProps {
   onBack: () => void;
@@ -8,7 +9,7 @@ export default function ForgotPassword({ onBack }: ForgotPasswordProps) {
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [resetLink, setResetLink] = useState('');
+  const [sent, setSent] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,27 +19,22 @@ export default function ForgotPassword({ onBack }: ForgotPasswordProps) {
     }
     setError('');
     setLoading(true);
-    setResetLink('');
 
     try {
-      const response = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/reset-password',
       });
-      const data = await response.json();
-      if (!response.ok) {
-        setError(data.error || 'Request failed');
+
+      if (resetError) {
+        setError(resetError.message);
         setLoading(false);
         return;
       }
-      if (data.reset_token) {
-        const origin = window.location.origin;
-        setResetLink(`${origin}/reset-password?token=${data.reset_token}`);
-      }
+
+      setSent(true);
       setLoading(false);
     } catch {
-      setError('Connection error. Make sure the server is running.');
+      setError('Connection error. Please check your connection.');
       setLoading(false);
     }
   };
@@ -59,21 +55,13 @@ export default function ForgotPassword({ onBack }: ForgotPasswordProps) {
           </div>
         )}
 
-        {resetLink ? (
+        {sent ? (
           <div className="space-y-4">
             <div className="p-4 bg-status-success/10 border border-status-success/20 text-status-success text-xs rounded-xl">
-              A reset link has been generated. Click the link below to reset your password.
-            </div>
-            <div className="p-3 bg-surface border border-outline-variant/60 rounded-xl break-all">
-              <a
-                href={resetLink}
-                className="text-secondary hover:text-primary font-medium text-xs underline"
-              >
-                {resetLink}
-              </a>
+              A password reset link has been sent to your email. Please check your inbox and follow the link to reset your password.
             </div>
             <p className="text-[10px] text-outline text-center">
-              This link expires in 1 hour.
+              The link expires in 1 hour. If you don't see the email, check your spam folder.
             </p>
             <button
               type="button"

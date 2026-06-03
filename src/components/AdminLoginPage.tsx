@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { supabase } from '../lib/supabase';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
@@ -11,22 +12,45 @@ export default function AdminLoginPage() {
     setError('');
     setLoading(true);
     try {
-      const response = await fetch('/api/admin/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
-      const data = await response.json();
-      if (!response.ok) {
-        setError(data.error || 'Login failed');
+
+      if (authError) {
+        setError(authError.message === 'Invalid login credentials'
+          ? 'Incorrect email or password'
+          : authError.message);
         setLoading(false);
         return;
       }
-      localStorage.setItem('zawadi_admin_token', data.token);
-      localStorage.setItem('zawadi_token', data.token);
+
+      if (!data.user || !data.session) {
+        setError('Login failed. Please try again.');
+        setLoading(false);
+        return;
+      }
+
+      // Verify the user has super_admin role
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', data.user.id)
+        .single();
+
+      if (profileError || !profile || profile.role !== 'super_admin') {
+        setError('Access denied. Admin privileges required.');
+        await supabase.auth.signOut();
+        setLoading(false);
+        return;
+      }
+
+      const token = data.session.access_token;
+      localStorage.setItem('zawadi_admin_token', token);
+      localStorage.setItem('zawadi_token', token);
       window.location.href = '/admin';
     } catch {
-      setError('Connection error. Make sure the server is running.');
+      setError('Connection error. Please check your connection.');
       setLoading(false);
     }
   };

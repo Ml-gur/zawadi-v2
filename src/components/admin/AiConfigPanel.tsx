@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Brain, Key, Save, CheckCircle, AlertCircle, Eye, EyeOff, Cpu } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 
 interface AiConfig {
   provider: string;
@@ -34,11 +35,8 @@ export default function AiConfigPanel() {
   async function loadConfig() {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/ai-config', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('adminToken')}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
+      const { data, error } = await supabase.functions.invoke('admin-settings', { body: {} });
+      if (data && !error) {
         setConfig(data);
         setForm({
           provider: data.provider || 'gemini',
@@ -61,24 +59,18 @@ export default function AiConfigPanel() {
       if (form.deepseek_key) body.deepseek_key = form.deepseek_key;
       if (form.gemini_key) body.gemini_key = form.gemini_key;
 
-      const res = await fetch('/api/admin/ai-config', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('adminToken')}`,
-        },
-        body: JSON.stringify(body),
+      const { data, error } = await supabase.functions.invoke('admin-settings', {
+        body: { action: 'update', ...body },
       });
 
-      if (res.ok) {
+      if (data?.success && !error) {
         setSaved(true);
         setEditMode(false);
         setForm({ ...form, openai_key: '', deepseek_key: '', gemini_key: '' });
         loadConfig();
         setTimeout(() => setSaved(false), 3000);
       } else {
-        const err = await res.json();
-        setError(err.error || 'Save failed');
+        setError(data?.error || error?.message || 'Save failed');
       }
     } catch (err: any) {
       setError(err.message || 'Network error');

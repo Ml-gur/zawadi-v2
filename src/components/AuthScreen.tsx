@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
 
 interface AuthScreenProps {
   onLoginSuccess: (email: string, token?: string) => void;
@@ -37,29 +38,55 @@ export default function AuthScreen({ onLoginSuccess, countries }: AuthScreenProp
     setLoading(true);
 
     try {
-      const endpoint = isSignUp ? '/api/auth/register' : '/api/auth/login';
-      const body = isSignUp
-        ? { email, password, name, country }
-        : { email, password };
+      if (isSignUp) {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { data: { name, country } }
+        });
 
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
+        if (error) {
+          if (error.message.includes('already registered') || error.message.includes('already exists')) {
+            setErrorMsg('An account with this email already exists');
+          } else {
+            setErrorMsg(error.message);
+          }
+          setLoading(false);
+          return;
+        }
 
-      if (response.ok) {
-        const data = await response.json();
-        await onLoginSuccess(data.user.email, data.token);
+        if (data.user && data.session) {
+          await onLoginSuccess(data.user.email!, data.session.access_token);
+        } else {
+          // Email confirmation may be required — user exists but no session
+          setErrorMsg('Registration successful! Please check your email for a confirmation link, then sign in.');
+        }
+        setLoading(false);
+        return;
+      } else {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (error) {
+          if (error.message.includes('Invalid login credentials')) {
+            setErrorMsg('Incorrect email or password');
+          } else {
+            setErrorMsg(error.message);
+          }
+          setLoading(false);
+          return;
+        }
+
+        if (data.user && data.session) {
+          await onLoginSuccess(data.user.email!, data.session.access_token);
+        }
         setLoading(false);
         return;
       }
-
-      const errData = await response.json().catch(() => ({ error: "Server error" }));
-      setErrorMsg(errData.error || "Authentication failed");
-      setLoading(false);
     } catch (err: any) {
-      setErrorMsg("Cannot reach server. Make sure the dev server is running on port 3000.");
+      setErrorMsg("Cannot reach server. Please check your connection.");
       setLoading(false);
     }
   };

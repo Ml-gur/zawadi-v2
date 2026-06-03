@@ -1,10 +1,34 @@
 import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
-import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useLocation, Link } from 'react-router-dom';
 import { Scholarship, UserProfile, ApplicationTracker as TrackerType, DocumentVaultItem, EssayStudioGeneration, BotQueueIngestion, AuditLogItem } from './types';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
 import ProfileSetupWizard from './components/ProfileSetupWizard';
 import toast, { Toaster } from 'react-hot-toast';
 import { AFRICAN_COUNTRIES } from './config/matching-config';
+import { supabase } from './lib/supabase';
+import { computeScholarshipMatch } from './lib/matching-engine';
+import { analyzeDocument } from './services/document-intelligence';
+import { analyzeWritingVoice, generateStyleSummary } from './services/essay-voice-learner';
+import {
+  getPublishedScholarships,
+  getAllScholarships,
+  upsertScholarship,
+  deleteScholarship,
+  bulkDeleteScholarships,
+  togglePublishScholarship,
+  getProfileByEmail,
+  upsertProfile,
+  getUserApplications,
+  upsertApplication,
+  deleteApplication,
+  getUserDocuments,
+  uploadDocumentToStorage,
+  insertDocument,
+  deleteDocument,
+  getUserEssays,
+  getBotIngestions,
+  getAuditLogs,
+} from './lib/supabase-queries';
 
 function DashboardSkeleton() {
   return (
@@ -77,31 +101,22 @@ export default function App() {
     paymentCallbackHandledRef.current = true;
     // Strip query params from URL
     window.history.replaceState({}, '', location.pathname);
-    const token = localStorage.getItem('zawadi_token');
-    if (!token) {
-      toast.error('Payment completed! Please log in again to activate your subscription.');
-      return;
-    }
-    // Call verify in the background
+    // Verify payment in the background
     (async () => {
       try {
-        const res = await fetch('/api/payments/verify', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ reference })
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) {
+          toast.error('Payment completed! Please log in again to activate your subscription.');
+          return;
+        }
+        const { data, error } = await supabase.functions.invoke('process-payment', {
+          body: { action: 'verify', reference }
         });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.user) {
-            setUser(data.user);
-            toast.success('Subscription activated successfully!');
-          }
+        if (!error && data?.user) {
+          setUser(data.user);
+          toast.success('Subscription activated successfully!');
         } else {
-          const err = await res.json().catch(() => ({}));
-          toast.error(err.error || 'Payment verification pending. It may take a moment.');
+          toast.error(data?.error || error?.message || 'Payment verification pending. It may take a moment.');
         }
       } catch {
         toast.error('Could not verify payment. Please contact support.');
@@ -136,29 +151,37 @@ export default function App() {
     else if (tab === 'home') { navigate('/'); setShowAuth(false); }
   };
 
-  const authFetch = (url: string, options: RequestInit = {}): Promise<Response> => {
-    const token = localStorage.getItem('zawadi_token');
-    if (token) {
-      const headers = new Headers(options.headers);
-      headers.set('Authorization', `Bearer ${token}`);
-      return fetch(url, { ...options, headers });
-    }
-    return fetch(url, options);
-  };
-
   useEffect(() => {
-    const savedToken = localStorage.getItem('zawadi_token');
-    if (savedToken) {
-      fetch('/api/auth/me', {
-        headers: { 'Authorization': `Bearer ${savedToken}` }
-      })
-        .then(r => r.json())
-        .then(data => {
-          if (data.user) setUser(data.user);
-          else localStorage.removeItem('zawadi_token');
-        })
-        .catch(() => localStorage.removeItem('zawadi_token'));
-    }
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        // Store token for backward compat
+        localStorage.setItem('zawadi_token', session.access_token);
+        // Fetch the user profile from Supabase
+        supabase.from('profiles').select('*').eq('id', session.user.id).single().then(({ data: profile, error }) => {
+          if (!error && profile) {
+            setUser(profile as UserProfile);
+            if (profile.role === 'super_admin') {
+              localStorage.setItem('zawadi_admin_token', session.access_token);
+            }
+          } else {
+            // Fallback: construct basic user from session
+            setUser({
+              email: session.user.email!,
+              name: session.user.user_metadata?.name || '',
+              country: session.user.user_metadata?.country || '',
+              role: 'student',
+              plan: 'explorer',
+            } as UserProfile);
+          }
+        }).catch(() => {
+          localStorage.removeItem('zawadi_token');
+        });
+      } else {
+        localStorage.removeItem('zawadi_token');
+      }
+    }).catch(() => {
+      localStorage.removeItem('zawadi_token');
+    });
   }, []);
 
   useEffect(() => {
@@ -197,19 +220,35 @@ export default function App() {
     return () => window.removeEventListener('open-profile-setup', handler);
   }, [user?.role]);
 
-  const fetchScholarships = async (email?: string) => {
+  const fetchScholarships = async (_email?: string) => {
     try {
-      const targetEmail = email || user?.email || '';
       const isAdmin = user?.role === 'super_admin' || user?.role === 'content_manager';
-      const params = new URLSearchParams();
-      if (targetEmail) params.set('email', targetEmail);
-      if (isAdmin) params.set('role', 'super_admin');
-      const qs = params.toString();
-      const url = qs ? `/api/scholarships?${qs}` : '/api/scholarships';
-      const response = await fetch(url);
-      if (response.ok) {
-        const data = await response.json();
-        setScholarships(data);
+      let result;
+      if (isAdmin) {
+        result = await getAllScholarships();
+      } else {
+        result = await getPublishedScholarships();
+      }
+      const { data, error } = result;
+      if (!error && data) {
+        let scholarships = data as Scholarship[];
+        if (_email) {
+          try {
+            const { data: profile } = await getProfileByEmail(_email);
+            const { data: userDocs } = await getUserDocuments(_email);
+            if (profile) {
+              scholarships = scholarships.map(s => ({
+                ...s,
+                match: computeScholarshipMatch(s, profile, userDocs || [])
+              }));
+              scholarships.sort((a, b) => (b.match?.score || 0) - (a.match?.score || 0));
+            }
+          } catch (e) {
+            console.error("Error computing match scores", e);
+            toast.error("Could not compute scholarship matches");
+          }
+        }
+        setScholarships(scholarships);
       }
     } catch (e) {
       console.error("Error loading scholarships database", e);
@@ -219,24 +258,21 @@ export default function App() {
   const fetchUserData = async (email: string) => {
     const requestId = ++fetchUserDataIdRef.current;
     try {
-      const uRes = await authFetch(`/api/users?email=${encodeURIComponent(email)}`);
-      if (uRes.ok) {
-        const uData = await uRes.json();
-        if (uData.user && fetchUserDataIdRef.current === requestId) setUser(uData.user);
-      }
+      const { data: profile, error: uErr } = await getProfileByEmail(email);
+      if (!uErr && profile && fetchUserDataIdRef.current === requestId) setUser(profile as UserProfile);
       if (fetchUserDataIdRef.current !== requestId) return;
       fetchScholarships(email);
-      const tRes = await authFetch(`/api/applications?email=${encodeURIComponent(email)}`);
-      if (tRes.ok && fetchUserDataIdRef.current === requestId) { const tData = await tRes.json(); setApplications(tData); }
-      const dRes = await authFetch(`/api/documents?email=${encodeURIComponent(email)}`);
-      if (dRes.ok && fetchUserDataIdRef.current === requestId) { const dData = await dRes.json(); setDocuments(dData); }
-      const eRes = await authFetch(`/api/essays?email=${encodeURIComponent(email)}`);
-      if (eRes.ok && fetchUserDataIdRef.current === requestId) { const eData = await eRes.json(); setEssays(eData); }
+      const { data: tData } = await getUserApplications(email);
+      if (tData && fetchUserDataIdRef.current === requestId) setApplications(tData as TrackerType[]);
+      const { data: dData } = await getUserDocuments(email);
+      if (dData && fetchUserDataIdRef.current === requestId) setDocuments(dData as DocumentVaultItem[]);
+      const { data: eData } = await getUserEssays(email);
+      if (eData && fetchUserDataIdRef.current === requestId) setEssays(eData as EssayStudioGeneration[]);
       if (user?.role === 'super_admin' && fetchUserDataIdRef.current === requestId) {
-        const bRes = await authFetch(`/api/admin/bot-queue?admin_email=${encodeURIComponent(email)}`);
-        if (bRes.ok) { const bData = await bRes.json(); setBotQueue(bData); }
-        const lRes = await authFetch(`/api/admin/logs?admin_email=${encodeURIComponent(email)}`);
-        if (lRes.ok) { const lData = await lRes.json(); setAuditLogs(lData); }
+        const { data: bData } = await getBotIngestions();
+        if (bData) setBotQueue(bData as BotQueueIngestion[]);
+        const { data: lData } = await getAuditLogs();
+        if (lData) setAuditLogs(lData as AuditLogItem[]);
       }
     } catch (e) {
       console.error("Error synchronizing sandbox state", e);
@@ -247,17 +283,37 @@ export default function App() {
     if (!token) return;
     localStorage.setItem('zawadi_token', token);
     try {
-      const response = await fetch('/api/auth/me', {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data.user);
-        setShowAuth(false);
-        if (data.user.role === 'super_admin') {
-          localStorage.setItem('zawadi_admin_token', token);
+      // Fetch the user profile from Supabase using the authenticated session
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (authUser) {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', authUser.id)
+          .single();
+
+        if (!error && profile) {
+          setUser(profile as UserProfile);
+          setShowAuth(false);
+          if (profile.role === 'super_admin') {
+            localStorage.setItem('zawadi_admin_token', token);
+            navigate('/admin');
+          } else {
+            navigate('/dashboard');
+          }
+        } else {
+          // Fallback: construct basic user from session metadata
+          const basicUser: UserProfile = {
+            email: authUser.email!,
+            name: authUser.user_metadata?.name || '',
+            country: authUser.user_metadata?.country || '',
+            role: 'student',
+            plan: 'explorer',
+          } as UserProfile;
+          setUser(basicUser);
+          setShowAuth(false);
+          navigate('/dashboard');
         }
-        navigate(data.user.role === 'super_admin' ? '/admin' : '/dashboard');
       } else {
         localStorage.removeItem('zawadi_token');
       }
@@ -267,6 +323,7 @@ export default function App() {
   };
 
   const handleLogout = () => {
+    supabase.auth.signOut();
     localStorage.removeItem('zawadi_token');
     localStorage.removeItem('zawadi_admin_token');
     setUser(null);
@@ -283,16 +340,12 @@ export default function App() {
   const handleTrackScholarship = async (scholarshipId: string, status: string, notes = '', priority = 'Normal') => {
     if (!user) return;
     try {
-      const response = await authFetch('/api/applications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: user.email, user_email: user.email, scholarship_id: scholarshipId, status, notes, priority })
-      });
-      if (response.ok) {
-        const data = await response.json();
+      const application = { email: user.email, user_email: user.email, scholarship_id: scholarshipId, status, notes, priority };
+      const { data, error } = await upsertApplication(application);
+      if (!error && data) {
         setApplications(prev => {
           const filtered = prev.filter(a => a.scholarship_id !== scholarshipId);
-          if (status !== 'not_started') filtered.push(data.application);
+          if (status !== 'not_started') filtered.push(data as TrackerType);
           return filtered;
         });
       }
@@ -304,48 +357,74 @@ export default function App() {
   const handleRemoveTrack = async (id: string) => {
     if (!user) return;
     try {
-      const response = await authFetch(`/api/applications/${id}?email=${encodeURIComponent(user.email)}`, { method: 'DELETE' });
-      if (response.ok) setApplications(prev => prev.filter(a => a.id !== id));
-      else { const errData = await response.json(); alert(errData.error || "Failed to stop tracking this scholarship."); }
+      const { error } = await deleteApplication(id);
+      if (!error) setApplications(prev => prev.filter(a => a.id !== id));
+      else alert(error.message || "Failed to stop tracking this scholarship.");
     } catch (err) { console.error("Error deleting tracked application", err); }
   };
 
   const handleUploadDocument = async (file: File, docType: string) => {
     if (!user) return;
     try {
-      const formData = new FormData();
-      formData.append('email', user.email);
-      formData.append('file', file);
-      formData.append('type', docType);
-      const response = await authFetch('/api/documents/upload', { method: 'POST', body: formData });
-      if (response.ok) { const dData = await response.json(); setDocuments(prev => [...prev, dData.document]); }
+      const { storagePath } = await uploadDocumentToStorage(user.email, file, docType);
+      const doc = {
+        user_email: user.email,
+        name: file.name,
+        type: docType,
+        size: `${(file.size / 1024).toFixed(1)} KB`,
+        file_path: storagePath,
+        uploaded_at: new Date().toISOString(),
+      };
+      const { data, error } = await insertDocument(doc);
+      if (!error && data) {
+        const insertedDoc = data as DocumentVaultItem;
+        setDocuments(prev => [...prev, insertedDoc]);
+        // Fire-and-forget AI document analysis
+        (async () => {
+          try {
+            const arrayBuf = await file.arrayBuffer();
+            const buffer = new Uint8Array(arrayBuf);
+            const { result, analyzed } = await analyzeDocument(
+              buffer as any,
+              docType,
+              user.email,
+              user.plan || 'explorer',
+              file.type,
+              file.name
+            );
+            if (analyzed && result) {
+              const { error: updateErr } = await supabase
+                .from('documents')
+                .update({ ai_extraction_result: JSON.stringify(result) })
+                .eq('id', insertedDoc.id);
+              if (!updateErr) {
+                handleRefreshDocuments();
+              }
+            }
+          } catch (err) {
+            console.error("AI document analysis failed", err);
+          }
+        })();
+      }
     } catch (err) { console.error("Upload handler connection fault", err); }
   };
 
   const handleRemoveDoc = async (id: string) => {
     if (!user) return;
     try {
-      const response = await authFetch(`/api/documents/${id}?email=${encodeURIComponent(user.email)}`, { method: 'DELETE' });
-      if (response.ok) setDocuments(prev => prev.filter(d => d.id !== id));
+      const { error } = await deleteDocument(id);
+      if (!error) setDocuments(prev => prev.filter(d => d.id !== id));
     } catch (err) { console.error("Removal folder error", err); }
   };
 
   const handleUpdateProfile = async (updatedFields: any) => {
     if (!user?.email) { toast.error('Session expired. Please log in again.'); return; }
     try {
-      const response = await authFetch('/api/users', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: user.email, ...updatedFields })
-      });
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({ error: 'Save failed' }));
-        throw new Error(errData.error || `Server error (${response.status})`);
-      }
-      const data = await response.json();
-      if (data.user) {
-        setUser(data.user);
-        // Re-fetch to ensure all fields are synced from the server
-        fetchUserData(data.user.email);
+      const { data, error } = await upsertProfile({ email: user.email, ...updatedFields });
+      if (error) throw new Error(error.message || `Server error`);
+      if (data) {
+        setUser(data as UserProfile);
+        fetchUserData(data.email);
         toast.success('Profile saved successfully!');
       }
     } catch (err: any) {
@@ -357,19 +436,21 @@ export default function App() {
   const handleRefreshDocuments = async () => {
     if (!user) return;
     try {
-      const dRes = await authFetch(`/api/documents?email=${encodeURIComponent(user.email)}`);
-      if (dRes.ok) setDocuments(await dRes.json());
+      const { data: dData } = await getUserDocuments(user.email);
+      if (dData) setDocuments(dData as DocumentVaultItem[]);
     } catch {}
   };
 
-  const handleGenerateEssay = async (essayType: string, scholarshipName: string, prompt: string, stage: 'draft' | 'critique' | 'polish', previousContent?: string, wordCount?: number) => {
+  const handleGenerateEssay = async (essayType: string, scholarshipName: string, prompt: string, stage: 'draft' | 'critique' | 'polish', previousContent?: string, wordCount?: number, documentIds?: string[]) => {
     if (!user) throw new Error("Authentication mandatory");
-    const response = await authFetch('/api/essays/generate', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: user.email, essay_type: essayType, scholarship_name: scholarshipName, prompt, stage, previous_content: previousContent, word_count: wordCount })
+    const { data: resData, error: invokeErr } = await supabase.functions.invoke('generate-essay', {
+      body: { email: user.email, essay_type: essayType, scholarship_name: scholarshipName, prompt, stage, previous_content: previousContent, word_count: wordCount, document_ids: documentIds }
     });
-    if (!response.ok) { const errBody = await response.json(); const err = new Error(errBody.error || "Generation endpoint faulted."); (err as any).status = response.status; throw err; }
-    const resData = await response.json();
+    if (invokeErr || !resData) {
+      const err = new Error(invokeErr?.message || resData?.error || "Generation endpoint faulted.");
+      (err as any).status = invokeErr ? 500 : 400;
+      throw err;
+    }
     const essayId = resData.id || resData.essay?.id || "temp";
     if (resData.id || resData.essay) {
       setEssays(prev => {
@@ -382,22 +463,40 @@ export default function App() {
         return [...filtered, payload];
       });
     }
+    
+    // Voice learning: after polish stage, analyze writing style (fire-and-forget)
+    if (stage === 'polish' && resData.content && resData.content.length > 100) {
+      (async () => {
+        try {
+          const samples = essays
+            .filter((e: any) => e.draft || e.final)
+            .map((e: any) => [e.draft, e.critique, e.final].filter(Boolean).join('\n'))
+            .concat([resData.content]);
+          const { profile, style_notes } = await analyzeWritingVoice(user.email, samples);
+          if (profile) {
+            await upsertProfile({
+              email: user.email,
+              voice_profile: profile,
+              essay_style_notes: style_notes || '',
+              essays_written: (user.essays_written || 0) + 1,
+            });
+          }
+        } catch { /* voice learning is non-critical */ }
+      })();
+    }
+    
     return { id: essayId, content: resData.content, remaining_today: resData.remaining_today, daily_limit: resData.daily_limit };
   };
 
   const handleAddScholarship = async (scholPayload: Partial<Scholarship>) => {
     if (!user) return;
     try {
-      const response = await authFetch('/api/scholarships', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...scholPayload, admin_email: user.email })
-      });
-      if (response.ok) {
-        const data = await response.json();
+      const { data, error } = await upsertScholarship(scholPayload);
+      if (!error && data) {
         setScholarships(prev => {
-          const exists = prev.some(s => s.id === data.scholarship.id);
-          if (exists) return prev.map(s => s.id === data.scholarship.id ? data.scholarship : s);
-          return [...prev, data.scholarship];
+          const exists = prev.some(s => s.id === data.id);
+          if (exists) return prev.map(s => s.id === data.id ? data as Scholarship : s);
+          return [...prev, data as Scholarship];
         });
         alert("Listing saved successfully!");
         fetchUserData(user.email);
@@ -408,25 +507,20 @@ export default function App() {
   const handleRemoveScholarship = async (id: string) => {
     if (!user) return;
     try {
-      const response = await authFetch(`/api/scholarships/${id}?admin_email=${encodeURIComponent(user.email)}`, { method: 'DELETE' });
-      if (response.ok) { setScholarships(prev => prev.filter(s => s.id !== id)); fetchUserData(user.email); }
+      const { error } = await deleteScholarship(id);
+      if (!error) { setScholarships(prev => prev.filter(s => s.id !== id)); fetchUserData(user.email); }
     } catch (err) { console.error("CRUD deletion error", err); }
   };
 
   const handleTogglePublish = async (id: string) => {
     if (!user) return;
     try {
-      const response = await authFetch(`/api/admin/scholarships/${id}/publish`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ admin_email: user.email })
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setScholarships(prev => prev.map(s => s.id === id ? { ...s, published: data.scholarship?.published ?? !s.published } : s));
+      const current = scholarships.find(s => s.id === id);
+      const { data, error } = await togglePublishScholarship(id, current?.published ?? false);
+      if (!error && data) {
+        setScholarships(prev => prev.map(s => s.id === id ? { ...s, published: data.published ?? !s.published } : s));
       } else {
-        const errData = await response.json();
-        alert(`Toggle failed: ${errData.error || 'Server error'}`);
+        alert(`Toggle failed: ${error?.message || 'Server error'}`);
       }
     } catch (err) { console.error("Toggle publish error", err); }
   };
@@ -434,33 +528,29 @@ export default function App() {
   const handleBulkRemoveScholarships = async (ids: string[]) => {
     if (!user) return;
     try {
-      const response = await authFetch('/api/admin/scholarships/bulk-delete', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ids, admin_email: user.email, email: user.email })
-      });
-      if (response.ok) { setScholarships(prev => prev.filter(s => !ids.includes(s.id))); fetchUserData(user.email); alert(`Successfully removed ${ids.length} selected opportunities!`); }
-      else { const errorData = await response.json(); alert(`Bulk deletion failed: ${errorData.error || 'Server error context'}`); }
+      const { error } = await bulkDeleteScholarships(ids);
+      if (!error) { setScholarships(prev => prev.filter(s => !ids.includes(s.id))); fetchUserData(user.email); alert(`Successfully removed ${ids.length} selected opportunities!`); }
+      else { alert(`Bulk deletion failed: ${error.message || 'Server error context'}`); }
     } catch (err) { console.error("Bulk CRUD deletion error", err); }
   };
 
   const handleTriggerScrapeCampaign = async () => {
     if (!user) return;
     try {
-      const response = await authFetch('/api/admin/bot-run', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ admin_email: user.email })
+      const { data, error } = await supabase.functions.invoke('run-pipeline', {
+        body: { action: 'trigger' }
       });
-      if (response.ok) { const data = await response.json(); setBotQueue(data.bot_queue); fetchUserData(user.email); }
+      if (!error && data) { setBotQueue(data.bot_queue); fetchUserData(user.email); }
     } catch (err) { console.error("Ingestion crawler failed", err); }
   };
 
   const handleReviewBotItem = async (id: string, status: 'approved' | 'rejected', _notes = '') => {
     if (!user) return;
     try {
-      const response = await authFetch('/api/admin/ingestions/action', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id, action: status, admin_email: user.email })
+      const { error } = await supabase.functions.invoke('run-pipeline', {
+        body: { action: 'review', id, status }
       });
-      if (response.ok) { setBotQueue(prev => prev.filter(b => b.id !== id)); fetchScholarships(); fetchUserData(user.email); }
+      if (!error) { setBotQueue(prev => prev.filter(b => b.id !== id)); fetchScholarships(); fetchUserData(user.email); }
     } catch (err) { console.error("Moderation error", err); }
   };
 
@@ -586,22 +676,15 @@ export default function App() {
               <Route path="/admin" element={
                 (() => {
                   const adminToken = localStorage.getItem('zawadi_admin_token');
-                  if (!adminToken) return <Navigate to="/admin/login" replace />;
-                  try {
-                    const payload = JSON.parse(atob(adminToken.split('.')[1]));
-                    if (payload.exp * 1000 < Date.now()) {
-                      localStorage.removeItem('zawadi_admin_token');
-                      return <Navigate to="/admin/login" replace />;
-                    }
-                    if (!payload.admin) {
-                      localStorage.removeItem('zawadi_admin_token');
-                      return <Navigate to="/admin/login" replace />;
-                    }
-                  } catch {
+                  if (!user) {
+                    // Still loading session; check if admin token exists as fallback
+                    if (adminToken) return <div className="py-24 text-center text-xs text-on-surface-variant">Loading...</div>;
+                    return <Navigate to="/admin/login" replace />;
+                  }
+                  if (user.role !== 'super_admin') {
                     localStorage.removeItem('zawadi_admin_token');
                     return <Navigate to="/admin/login" replace />;
                   }
-                  if (!user) return <div className="py-24 text-center text-xs text-on-surface-variant">Loading...</div>;
                   return <Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading admin...</div>}><AdminPortal user={user} scholarships={scholarships} botQueue={botQueue} auditLogs={auditLogs} onAddScholarship={handleAddScholarship} onRemoveScholarship={handleRemoveScholarship} onBulkRemoveScholarships={handleBulkRemoveScholarships} onTogglePublish={handleTogglePublish} onTriggerScrapeCampaign={handleTriggerScrapeCampaign} onReviewBotItem={handleReviewBotItem} /></Suspense>;
                 })()
               } />
@@ -622,7 +705,7 @@ export default function App() {
                   } />
                   <Route path="/scholarships" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading scholarships...</div>}><Scholarships user={user} scholarships={scholarships} applications={applications} documents={documents} onTrackScholarship={handleTrackScholarship} onUploadMetadata={handleUploadDocument} onNavigateToTab={handleNavigateToTab} /></Suspense>} />
                   <Route path="/vault" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading vault...</div>}><DocumentVault user={user} documents={documents} onUploadDocument={handleUploadDocument} onRemoveDoc={handleRemoveDoc} onNavigateToTab={handleNavigateToTab} onRefreshDocuments={handleRefreshDocuments} /></Suspense>} />
-                  <Route path="/essays" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading essay studio...</div>}><EssayGenerator user={user} essays={essays} scholarships={scholarships} onGenerateEssay={handleGenerateEssay} onNavigateToTab={handleNavigateToTab} onUploadMetadata={handleUploadDocument} /></Suspense>} />
+                  <Route path="/essays" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading essay studio...</div>}><EssayGenerator user={user} essays={essays} scholarships={scholarships} documents={documents} onGenerateEssay={handleGenerateEssay} onNavigateToTab={handleNavigateToTab} onUploadMetadata={handleUploadDocument} /></Suspense>} />
                   <Route path="/profile" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading profile...</div>}><StudentProfile user={user} onUpdateProfile={handleUpdateProfile} onNavigateToTab={handleNavigateToTab} /></Suspense>} />
                   <Route path="/applications" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading tracker...</div>}><ApplicationTracker scholarships={scholarships} applications={applications} onTrackScholarship={handleTrackScholarship} onRemoveTrack={handleRemoveTrack} onNavigateToTab={handleNavigateToTab} /></Suspense>} />
                   <Route path="/billing" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading plans...</div>}><SubscriptionPlans user={user} onPlanUpdated={(u) => { setUser(u); fetchUserData(u.email); }} onNavigateToTab={handleNavigateToTab} /></Suspense>} />

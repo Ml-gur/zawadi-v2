@@ -2,7 +2,11 @@ import * as cron from 'node-cron';
 import { crawlAllSources } from './crawler';
 import { validateScholarship, validatePipelineOutput } from './scholarship-validator';
 import { generateFingerprint, isDuplicate, deduplicateScholarshipArray } from './duplicate-detector';
-import { supabaseAdmin } from '../../server';
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.SUPABASE_URL || '';
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
+const supabaseAdmin = supabaseUrl ? createClient(supabaseUrl, supabaseKey) : null;
 
 export interface PipelineSummary {
   pipeline_run_id: string;
