@@ -372,6 +372,7 @@ export default function App() {
         type: docType,
         size: `${(file.size / 1024).toFixed(1)} KB`,
         file_path: storagePath,
+        mime_type: file.type,
         uploaded_at: new Date().toISOString(),
       };
       const { data, error } = await insertDocument(doc);
@@ -406,7 +407,10 @@ export default function App() {
           }
         })();
       }
-    } catch (err) { console.error("Upload handler connection fault", err); }
+    } catch (err) {
+      console.error("Upload handler connection fault", err);
+      toast.error(err instanceof Error ? err.message : 'Upload failed. Check that the storage bucket exists and try again.');
+    }
   };
 
   const handleRemoveDoc = async (id: string) => {
@@ -420,7 +424,14 @@ export default function App() {
   const handleUpdateProfile = async (updatedFields: any) => {
     if (!user?.email) { toast.error('Session expired. Please log in again.'); return; }
     try {
-      const { data, error } = await upsertProfile({ email: user.email, ...updatedFields });
+      const sanitized = { ...updatedFields };
+      const numericFields = ['gpa', 'work_experience_years', 'publications'];
+      for (const key of numericFields) {
+        if (sanitized[key] === '' || sanitized[key] === undefined || sanitized[key] === null) {
+          sanitized[key] = null;
+        }
+      }
+      const { data, error } = await upsertProfile({ email: user.email, ...sanitized });
       if (error) throw new Error(error.message || `Server error`);
       if (data) {
         setUser(data as UserProfile);

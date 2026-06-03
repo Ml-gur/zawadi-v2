@@ -79,7 +79,9 @@ export type Document = {
   type?: string;
   size?: string;
   file_path?: string;
+  mime_type?: string;
   uploaded_at?: string;
+  ai_extraction_result?: string | null;
 };
 
 export type Essay = {

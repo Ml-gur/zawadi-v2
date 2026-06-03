@@ -76,7 +76,14 @@ export default function StudentProfile({ user, onUpdateProfile, onNavigateToTab 
     setIsSubmitting(true);
     setSuccessMsg('');
     try {
-      await onUpdateProfile(formData);
+      const sanitized = { ...formData };
+      const numericFields = ['gpa', 'work_experience_years', 'publications'];
+      for (const key of numericFields) {
+        if (sanitized[key] === '' || sanitized[key] === undefined || sanitized[key] === null) {
+          sanitized[key] = null;
+        }
+      }
+      await onUpdateProfile(sanitized);
       setSuccessMsg('Profile aligned and matched successfully! Scoring models refreshed.');
       // Scroll to top of the page so the user sees the prominent success container immediately
       window.scrollTo({ top: 0, behavior: 'smooth' });
