@@ -36,7 +36,7 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
         schema={organizationSchema}
       />
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden mesh-gradient bg-grid-pattern px-6 py-12 md:py-24">
+      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden mesh-gradient bg-grid-pattern px-6 pt-8 md:pt-16 pb-12 md:pb-24">
         <div className="max-w-[1280px] mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center z-10">
 
           {/* Content */}

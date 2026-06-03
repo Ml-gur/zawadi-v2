@@ -475,16 +475,13 @@ export default function App() {
           <div className="max-w-[1280px] mx-auto px-6 py-4 flex items-center justify-between">
 
             <div className="flex items-center gap-6">
-              <div
-                onClick={() => user ? navigate('/dashboard') : navigate('/')}
-                className="flex items-center gap-2.5 cursor-pointer hover:opacity-90"
-              >
+              <Link to={user ? '/dashboard' : '/'} className="flex items-center gap-2.5 cursor-pointer hover:opacity-90">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-white shadow-md font-display font-black">Z</div>
                 <div>
                   <span className="font-display text-lg font-black text-primary tracking-tight whitespace-nowrap">Techsari Zawadi</span>
                   <span className="text-[9px] bg-primary-fixed text-primary px-1.5 py-0.5 rounded font-bold uppercase block w-max mt-0.5 tracking-wider">African Scholars</span>
                 </div>
-              </div>
+              </Link>
 
               {user && (
                 <nav className="hidden lg:flex items-center gap-1 text-xs font-bold text-on-surface-variant uppercase tracking-tight">
