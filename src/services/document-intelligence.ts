@@ -1,10 +1,15 @@
 import { generateContent, getProviderConfig, hasAnyKey } from './ai-provider';
+import { extractTextFromBuffer } from './text-extractor';
 
 const TRANSCRIPT_PROMPT = `You are a document analysis specialist. Extract structured academic data from this transcript text. Return ONLY valid JSON with these fields: institution_name as string or null, degree_level as "Undergraduate" or "Masters" or "PhD" or null, field_of_study as string or null, gpa as number or null, gpa_scale as 4.0 or 5.0 or 100 or null, graduation_year as integer or null, honors as string or null. Never guess. Return null for any field not clearly visible. No markdown, no code fences, just JSON.`;
 
 const CV_PROMPT = `Extract structured professional data from this CV text. Return ONLY valid JSON with: work_experience_years as integer or null, primary_field as string or null, skills as string array, leadership_roles as string array, publications_count as integer or null, languages as string array. No markdown, no code fences, just JSON.`;
 
 const ESSAY_PROMPT = `Analyze this personal statement or essay as a writing sample. Return ONLY valid JSON with: approximate_word_count as integer, tone as "formal" or "conversational" or "mixed", sentence_complexity as "simple" or "moderate" or "complex", key_themes as string array of up to 5 themes, vocabulary_level as "basic" or "intermediate" or "advanced", writing_sample_excerpt as the most distinctive 100 word excerpt. No markdown, no code fences, just JSON.`;
+
+const REFERENCE_LETTER_PROMPT = `Analyze this reference / recommendation letter. Return ONLY valid JSON with: relationship as string (e.g. "professor", "employer", "mentor"), sentiment as "strongly_positive" or "positive" or "neutral" or "mixed", key_strengths as string array of up to 6 qualities mentioned, acquaintance_duration_years as number or null, recommender_title as string or null, contains_qualifiers as boolean (does it include any hedging or weak praise). No markdown, no code fences, just JSON.`;
+
+const CERTIFICATE_PROMPT = `Extract structured data from this certificate or award document. Return ONLY valid JSON with: institution_name as string or null, certificate_name as string or null, issue_date as string or null, expiry_date as string or null, grade as string or null, is_academic as boolean, is_professional as boolean. No markdown, no code fences, just JSON.`;
 
 export interface TranscriptData {
   institution_name: string | null;
@@ -34,7 +39,32 @@ export interface EssaySampleData {
   writing_sample_excerpt: string;
 }
 
-export type ExtractionResult = TranscriptData | CVData | EssaySampleData;
+export interface ReferenceLetterData {
+  relationship: string | null;
+  sentiment: 'strongly_positive' | 'positive' | 'neutral' | 'mixed';
+  key_strengths: string[];
+  acquaintance_duration_years: number | null;
+  recommender_title: string | null;
+  contains_qualifiers: boolean;
+}
+
+export interface CertificateData {
+  institution_name: string | null;
+  certificate_name: string | null;
+  issue_date: string | null;
+  expiry_date: string | null;
+  grade: string | null;
+  is_academic: boolean;
+  is_professional: boolean;
+}
+
+export type ExtractionResult = TranscriptData | CVData | EssaySampleData | ReferenceLetterData | CertificateData;
+
+export interface ExtractionMetadata {
+  method: string;
+  confidence?: number;
+  warning?: string;
+}
 
 function tryParseJson(text: string): any | null {
   const jsonMatch = text.match(/\{[\s\S]*\}/);
@@ -66,27 +96,89 @@ export async function analyzeDocument(
   fileBuffer: Buffer,
   docType: string,
   _userEmail: string,
-  userPlan: string = 'explorer'
-): Promise<{ result: ExtractionResult | null; analyzed: boolean }> {
+  userPlan: string = 'explorer',
+  mimetype: string = 'application/octet-stream',
+  filename: string = 'document'
+): Promise<{ result: TranscriptData | CVData | EssaySampleData | ReferenceLetterData | CertificateData | null; analyzed: boolean; extraction?: ExtractionMetadata }> {
   const isBasic = userPlan === 'explorer';
   const normalizedType = docType.toLowerCase();
 
-  const textContent = fileBuffer.toString('utf8');
+  const extractionResult = await extractTextFromBuffer(fileBuffer, mimetype, filename);
+  const textContent = extractionResult.text;
+
+  const extractionMeta: ExtractionMetadata = {
+    method: extractionResult.method,
+    confidence: extractionResult.confidence,
+    warning: extractionResult.warning,
+  };
 
   if (normalizedType.includes('transcript')) {
     const result = await extractWithAI(TRANSCRIPT_PROMPT, textContent);
-    return { result: result as TranscriptData | null, analyzed: !!result };
+    return { result: result as TranscriptData | null, analyzed: !!result, extraction: extractionMeta };
   }
 
   if (normalizedType.includes('personal statement') || normalizedType.includes('motivation') || normalizedType.includes('statement of purpose') || normalizedType.includes('essay')) {
     const result = await extractWithAI(ESSAY_PROMPT, textContent);
-    return { result: result as EssaySampleData | null, analyzed: !!result };
+    return { result: result as EssaySampleData | null, analyzed: !!result, extraction: extractionMeta };
   }
 
   if (!isBasic && (normalizedType.includes('cv') || normalizedType.includes('resume'))) {
     const result = await extractWithAI(CV_PROMPT, textContent);
-    return { result: result as CVData | null, analyzed: !!result };
+    return { result: result as CVData | null, analyzed: !!result, extraction: extractionMeta };
   }
 
-  return { result: null, analyzed: false };
+  if (normalizedType.includes('reference letter') || normalizedType.includes('recommendation')) {
+    const result = await extractWithAI(REFERENCE_LETTER_PROMPT, textContent);
+    return { result: result as ReferenceLetterData | null, analyzed: !!result, extraction: extractionMeta };
+  }
+
+  if (normalizedType.includes('certificate') || normalizedType.includes('award') || normalizedType.includes('diploma')) {
+    const result = await extractWithAI(CERTIFICATE_PROMPT, textContent);
+    return { result: result as CertificateData | null, analyzed: !!result, extraction: extractionMeta };
+  }
+
+  return { result: null, analyzed: false, extraction: extractionMeta };
+}
+
+export interface ProfileEnrichment {
+  doc_gpa_normalised_extracted?: number | null;
+  doc_has_research_extracted?: boolean;
+  doc_publication_count_extracted?: number | null;
+  doc_work_years_extracted?: number | null;
+  doc_has_leadership_extracted?: boolean;
+  doc_reference_sentiment?: string | null;
+  doc_certificate_type?: string | null;
+}
+
+export function buildProfileEnrichment(
+  result: TranscriptData | CVData | EssaySampleData | ReferenceLetterData | CertificateData | null,
+  docType: string
+): ProfileEnrichment {
+  const enrichment: ProfileEnrichment = {};
+  const normalizedType = docType.toLowerCase();
+
+  if (result && (normalizedType.includes('transcript'))) {
+    const t = result as TranscriptData;
+    enrichment.doc_gpa_normalised_extracted = t.gpa;
+  }
+
+  if (result && (normalizedType.includes('cv') || normalizedType.includes('resume'))) {
+    const c = result as CVData;
+    enrichment.doc_work_years_extracted = c.work_experience_years;
+    enrichment.doc_has_research_extracted = (c.publications_count ?? 0) > 0;
+    enrichment.doc_publication_count_extracted = c.publications_count;
+    enrichment.doc_has_leadership_extracted = c.leadership_roles.length > 0;
+  }
+
+  if (result && (normalizedType.includes('reference letter') || normalizedType.includes('recommendation'))) {
+    const r = result as ReferenceLetterData;
+    enrichment.doc_reference_sentiment = r.sentiment;
+  }
+
+  if (result && (normalizedType.includes('certificate') || normalizedType.includes('award') || normalizedType.includes('diploma'))) {
+    const c = result as CertificateData;
+    enrichment.doc_certificate_type = c.certificate_name;
+  }
+
+  return enrichment;
 }

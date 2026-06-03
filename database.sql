@@ -276,6 +276,14 @@ ALTER TABLE payments ADD COLUMN IF NOT EXISTS failure_reason TEXT;
 
 -- 2g2. Documents — add AI extraction result column
 ALTER TABLE documents ADD COLUMN IF NOT EXISTS ai_extraction_result JSONB;
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS storage_path TEXT;
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS analysis_status TEXT DEFAULT 'pending';
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS last_analyzed_at TIMESTAMPTZ;
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS analysis_error TEXT;
+
+-- Profile — add document-enrichment columns
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS doc_reference_sentiment TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS doc_certificate_type TEXT;
 
 -- 2h. Essay Soul Profiles (voice learning)
 CREATE TABLE IF NOT EXISTS essay_soul_profiles (
@@ -414,6 +422,18 @@ CREATE TABLE IF NOT EXISTS contact_submissions (
   status      TEXT DEFAULT 'new' CHECK (status IN ('new', 'read', 'responded')),
   created_at  TEXT
 );
+
+-- 2j2. Recommendation Feedback
+CREATE TABLE IF NOT EXISTS recommendation_feedback (
+  id          TEXT PRIMARY KEY,
+  user_email  TEXT REFERENCES profiles(email) ON DELETE CASCADE,
+  scholarship_id TEXT,
+  feedback    TEXT NOT NULL CHECK (feedback IN ('relevant', 'irrelevant')),
+  comment     TEXT,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_rec_feedback_user ON recommendation_feedback(user_email);
+CREATE INDEX IF NOT EXISTS idx_rec_feedback_scholar ON recommendation_feedback(scholarship_id);
 
 -- 2k. Audit Logs
 CREATE TABLE IF NOT EXISTS audit_logs (

@@ -33,7 +33,7 @@ function saveDb(db: any) {
 }
 
 // Supabase helper wrappers for local JSON mode
-const EMPTY_DB = () => ({ scholarships: [], users: [], applications: [], documents: [], essays: [], bot_ingestions: [], payments: [], audit_logs: [], mentor_review_requests: [], mentor_profiles: [], mentor_feedback_ratings: [], notifications: [], contact_submissions: [] });
+const EMPTY_DB = () => ({ scholarships: [], users: [], applications: [], documents: [], essays: [], bot_ingestions: [], payments: [], audit_logs: [], mentor_review_requests: [], mentor_profiles: [], mentor_feedback_ratings: [], notifications: [], contact_submissions: [], recommendation_feedback: [] });
 
 async function sbGetUser(email: string): Promise<any> {
   if (!supabaseAdmin) return null;
@@ -63,6 +63,31 @@ async function sbInsertDoc(doc: any): Promise<any> {
 async function sbDeleteDoc(id: string): Promise<void> {
   if (!supabaseAdmin) return;
   await supabaseAdmin.from('documents').delete().eq('id', id);
+}
+async function sbGetDoc(id: string): Promise<any> {
+  if (!supabaseAdmin) return null;
+  const { data } = await supabaseAdmin.from('documents').select('*').eq('id', id).single();
+  return data;
+}
+async function sbUpdateDocStatus(id: string, status: string, errorMsg?: string): Promise<void> {
+  if (!supabaseAdmin) return;
+  const update: any = { analysis_status: status, last_analyzed_at: new Date().toISOString() };
+  if (errorMsg) update.analysis_error = errorMsg;
+  await supabaseAdmin.from('documents').update(update).eq('id', id);
+}
+async function updateDocStatus(id: string, status: string, errorMsg?: string): Promise<void> {
+  if (IS_SUPABASE_MODE) {
+    await sbUpdateDocStatus(id, status, errorMsg);
+  } else {
+    const db = getDb();
+    const doc = db.documents.find((d: any) => d.id === id);
+    if (doc) {
+      doc.analysis_status = status;
+      doc.last_analyzed_at = new Date().toISOString();
+      if (errorMsg) doc.analysis_error = errorMsg;
+      saveDb(db);
+    }
+  }
 }
 async function sbGetApps(email: string): Promise<any[]> {
   if (!supabaseAdmin) return [];
@@ -223,20 +248,16 @@ function getDb() {
 const uploadsDir = path.join(process.cwd(), 'uploads');
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 
-// Multer config
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadsDir),
-  filename: (_req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + '-' + file.originalname);
-  }
-});
 const fileFilter = (_req: any, file: any, cb: any) => {
   const allowed = ['application/pdf', 'image/jpeg', 'image/png'];
   if (allowed.includes(file.mimetype)) cb(null, true);
   else cb(new Error('Only PDF, JPG, and PNG files are allowed'));
 };
-const upload = multer({ storage, fileFilter, limits: { fileSize: 10 * 1024 * 1024 } });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  fileFilter,
+  limits: { fileSize: 20 * 1024 * 1024 }
+});
 
 function stripSensitive(user: any) {
   if (!user) return user;
@@ -612,6 +633,19 @@ app.post('/api/auth/reset-password', async (req, res) => {
 // REST API ROUTES — JSON DB
 // -------------------------------------------------------------
 
+const serverStartTime = Date.now();
+
+app.get('/api/health', (_req, res) => {
+  res.json({
+    status: 'ok',
+    uptime: Math.floor((Date.now() - serverStartTime) / 1000),
+    timestamp: new Date().toISOString(),
+    supabase: IS_SUPABASE_MODE,
+    ai_provider: !!process.env.GEMINI_API_KEY || !!process.env.OPENAI_API_KEY || !!process.env.DEEPSEEK_API_KEY,
+    memory_storage: true,
+  });
+});
+
 app.get('/api/config', (_req, res) => {
   res.json({
     plans: {
@@ -757,6 +791,143 @@ app.get('/api/match', async (req, res) => {
     .sort((a: any, b: any) => (b.match?.score || 0) - (a.match?.score || 0));
 
   res.json(results);
+});
+
+app.post('/api/match-rationale', async (req: any, res) => {
+  try {
+    const { user_email, scholarship_id } = req.body;
+    if (!user_email || !scholarship_id) {
+      return res.status(400).json({ error: 'user_email and scholarship_id required' });
+    }
+
+    let user: any, schol: any, userDocs: any[];
+    if (IS_SUPABASE_MODE) {
+      user = await sbGetUser(user_email);
+      schol = await sbGetScholarshipById(scholarship_id);
+      userDocs = await sbGetDocs(user_email);
+    } else {
+      const db = getDb();
+      user = db.users.find((u: any) => u.email.toLowerCase() === user_email.toLowerCase());
+      schol = db.scholarships.find((s: any) => s.id === scholarship_id);
+      userDocs = db.documents.filter((d: any) => d.user_email?.toLowerCase() === user_email.toLowerCase()) || [];
+    }
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    if (!schol) return res.status(404).json({ error: 'Scholarship not found' });
+
+    const match = computeScholarshipMatch(schol, user, userDocs);
+
+    const { generateContent, hasAnyKey } = await import('./src/services/ai-provider');
+    if (!hasAnyKey()) {
+      return res.json({ match, rationale: { summary: 'AI rationale unavailable — no AI provider configured.' } });
+    }
+
+    const systemPrompt = 'You are a scholarship matching advisor. Explain why a student matches (or does not match) a specific scholarship. Be specific, constructive, and actionable. Return ONLY valid JSON with keys: summary (2-3 sentence overall assessment), strengths (array of strings), weaknesses (array of strings or empty), suggestions (array of actionable suggestions). No markdown, no code fences.';
+
+    const userPrompt = `Student Profile:
+- Name: ${user.name || 'N/A'}
+- Country: ${user.country || 'N/A'}
+- Degree Level: ${user.degree_level || 'N/A'}
+- Field: ${user.field_of_study || 'N/A'}
+- GPA: ${user.gpa || 'N/A'}
+- Work Experience: ${user.work_experience_years || 0} years
+- Has Research: ${user.has_research ? 'Yes' : 'No'}
+- Has Leadership: ${user.has_leadership ? 'Yes' : 'No'}
+
+Scholarship:
+- Name: ${schol.name || 'N/A'}
+- Provider: ${schol.provider || 'N/A'}
+- Degree Levels: ${Array.isArray(schol.degree_levels) ? schol.degree_levels.join(', ') : schol.degree_levels || 'N/A'}
+- Fields: ${Array.isArray(schol.fields_of_study || schol.fields) ? (schol.fields_of_study || schol.fields).join(', ') : 'N/A'}
+- Countries: ${Array.isArray(schol.countries) ? schol.countries.join(', ') : schol.countries || 'N/A'}
+- Funding: ${schol.funding_type || 'N/A'}
+- Deadline: ${schol.deadline || 'N/A'}
+
+Match Score: ${match.score}/100
+${match.is_eligible ? 'Eligible: Yes' : 'Eligible: No'}
+Match Reasons: ${(match.reasons || []).join('; ')}
+${match.disqualifying_reasons?.length ? `Disqualifiers: ${match.disqualifying_reasons.join('; ')}` : ''}
+Breakdown: ${JSON.stringify(match.breakdown || {})}`;
+
+    const result = await generateContent({ systemInstruction: systemPrompt, prompt: userPrompt, temperature: 0.3, maxOutputTokens: 1024 });
+    let rationale: any = { summary: 'Unable to generate rationale at this time.' };
+    if (result?.text) {
+      const jsonMatch = result.text.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try { rationale = JSON.parse(jsonMatch[0]); } catch {}
+      }
+    }
+
+    res.json({ match, rationale });
+  } catch (err: any) {
+    console.error('[Match Rationale] Error:', err.message);
+    res.status(500).json({ error: 'Failed to generate match rationale.' });
+  }
+});
+
+app.post('/api/match/feedback', verifyAuth, async (req: any, res) => {
+  try {
+    const user_email = req.userEmail;
+    const { scholarship_id, feedback, comment } = req.body;
+    if (!scholarship_id || !feedback) {
+      return res.status(400).json({ error: 'scholarship_id and feedback required' });
+    }
+    if (!['relevant', 'irrelevant'].includes(feedback)) {
+      return res.status(400).json({ error: 'feedback must be "relevant" or "irrelevant"' });
+    }
+
+    const entry = {
+      id: 'recfb-' + Date.now(),
+      user_email,
+      scholarship_id,
+      feedback,
+      comment: comment || null,
+      created_at: new Date().toISOString(),
+    };
+
+    if (IS_SUPABASE_MODE) {
+      if (supabaseAdmin) {
+        await supabaseAdmin.from('recommendation_feedback').insert(entry);
+      }
+    } else {
+      const db = getDb();
+      if (!db.recommendation_feedback) db.recommendation_feedback = [];
+      db.recommendation_feedback.push(entry);
+      saveDb(db);
+    }
+
+    res.json({ success: true });
+  } catch (err: any) {
+    console.error('[Match Feedback] Error:', err.message);
+    res.status(500).json({ error: 'Failed to save feedback.' });
+  }
+});
+
+app.get('/api/match/feedback', verifyAuth, async (req: any, res) => {
+  try {
+    const user_email = req.userEmail;
+    let feedbackList: any[] = [];
+
+    if (IS_SUPABASE_MODE) {
+      if (supabaseAdmin) {
+        const { data } = await supabaseAdmin
+          .from('recommendation_feedback')
+          .select('*')
+          .eq('user_email', user_email)
+          .order('created_at', { ascending: false });
+        feedbackList = data || [];
+      }
+    } else {
+      const db = getDb();
+      feedbackList = (db.recommendation_feedback || [])
+        .filter((f: any) => f.user_email?.toLowerCase() === user_email?.toLowerCase())
+        .sort((a: any, b: any) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime());
+    }
+
+    res.json(feedbackList);
+  } catch (err: any) {
+    console.error('[Match Feedback] Error:', err.message);
+    res.json([]);
+  }
 });
 
 app.get('/api/users', verifyAuth, async (req: any, res) => {
@@ -1001,10 +1172,27 @@ app.post('/api/documents/upload', verifyAuth, upload.single('file'), async (req:
 
   const newDoc: any = {
     id: "doc-" + Date.now(), user_email, name: file.originalname,
-    type: docType, size: sizeFormatted, file_path: file.filename,
+    type: docType, size: sizeFormatted, file_path: file.originalname,
     uploaded_at: new Date().toISOString().split('T')[0],
-    ai_extraction_result: null
+    ai_extraction_result: null,
+    storage_path: null as string | null,
+    analysis_status: 'pending',
+    last_analyzed_at: null,
+    analysis_error: null,
   };
+
+  // Upload to Supabase Storage if in Supabase mode
+  if (IS_SUPABASE_MODE && supabaseAdmin) {
+    const storagePath = `${user_email}/${docType}/${Date.now()}_${file.originalname}`;
+    const { error: storageError } = await supabaseAdmin.storage
+      .from('scholarship-docs')
+      .upload(storagePath, file.buffer, { contentType: file.mimetype, upsert: false });
+    if (!storageError) {
+      newDoc.storage_path = storagePath;
+    } else {
+      console.error('[Upload] Supabase storage upload failed:', storageError.message);
+    }
+  }
 
   // Save document first
   if (IS_SUPABASE_MODE) {
@@ -1017,23 +1205,26 @@ app.post('/api/documents/upload', verifyAuth, upload.single('file'), async (req:
 
   // Trigger AI analysis asynchronously (non-blocking)
   const userPlan = user?.plan || 'explorer';
-  if (req.file?.path) {
-    const filePath = req.file.path;
-    analyzeDocumentAsync(filePath, docType, user_email, userPlan, newDoc.id).catch(() => {});
+  if (file.buffer) {
+    analyzeDocumentAsync(file.buffer, docType, user_email, userPlan, newDoc.id, file.mimetype, file.originalname).catch(() => {});
   }
 
   res.json({ success: true, document: newDoc });
 });
 
-async function analyzeDocumentAsync(filePath: string, docType: string, user_email: string, plan: string, docId: string) {
+async function analyzeDocumentAsync(buffer: Buffer, docType: string, user_email: string, plan: string, docId: string, mimetype: string = 'application/octet-stream', filename: string = 'document') {
   try {
-    const fs = await import('fs');
-    const buffer = fs.readFileSync(filePath);
-    const { analyzeDocument } = await import('./src/services/document-intelligence');
-    const { result, analyzed } = await analyzeDocument(buffer, docType, user_email, plan);
-    if (!analyzed || !result) return;
+    // Mark as processing
+    await updateDocStatus(docId, 'processing');
 
-    const aiResult = JSON.stringify(result);
+    const { analyzeDocument } = await import('./src/services/document-intelligence');
+    const { result, analyzed, extraction } = await analyzeDocument(buffer, docType, user_email, plan, mimetype, filename);
+    if (!analyzed || !result) {
+      await updateDocStatus(docId, 'completed');
+      return;
+    }
+
+    const aiResult = JSON.stringify({ data: result, extraction });
     // Update document record with extraction result
     if (IS_SUPABASE_MODE) {
       try {
@@ -1049,9 +1240,12 @@ async function analyzeDocumentAsync(filePath: string, docType: string, user_emai
       }
     }
 
-    // Update user profile with extracted data (only where it improves on existing)
+    // Update user profile with extracted data
     const existingUser = IS_SUPABASE_MODE ? await sbGetUser(user_email) : getDb().users.find((u: any) => u.email.toLowerCase() === user_email.toLowerCase());
     if (!existingUser) return;
+
+    const { buildProfileEnrichment } = await import('./src/services/document-intelligence');
+    const enrichmentFields = buildProfileEnrichment(result, docType);
 
     const updates: any = {};
     const r = result as any;
@@ -1069,10 +1263,38 @@ async function analyzeDocumentAsync(filePath: string, docType: string, user_emai
     }
     if (r.primary_field && !existingUser.field_of_study) updates.field_of_study = r.primary_field;
 
+    // Persist document-extracted enrichment fields (overwrites — doc data is source of truth)
+    if (enrichmentFields.doc_gpa_normalised_extracted !== undefined) {
+      updates.doc_gpa_normalised_extracted = enrichmentFields.doc_gpa_normalised_extracted;
+    }
+    if (enrichmentFields.doc_has_research_extracted !== undefined) {
+      updates.doc_has_research_extracted = enrichmentFields.doc_has_research_extracted;
+    }
+    if (enrichmentFields.doc_publication_count_extracted !== undefined) {
+      updates.doc_publication_count_extracted = enrichmentFields.doc_publication_count_extracted;
+    }
+    if (enrichmentFields.doc_work_years_extracted !== undefined) {
+      updates.doc_work_years_extracted = enrichmentFields.doc_work_years_extracted;
+    }
+    if (enrichmentFields.doc_has_leadership_extracted !== undefined) {
+      updates.doc_has_leadership_extracted = enrichmentFields.doc_has_leadership_extracted;
+    }
+    if (enrichmentFields.doc_reference_sentiment !== undefined) {
+      updates.doc_reference_sentiment = enrichmentFields.doc_reference_sentiment;
+    }
+    if (enrichmentFields.doc_certificate_type !== undefined) {
+      updates.doc_certificate_type = enrichmentFields.doc_certificate_type;
+    }
+
     if (Object.keys(updates).length > 0) {
       await sbUpsertUser({ email: user_email, ...updates });
     }
-  } catch {}
+
+    await updateDocStatus(docId, 'completed');
+  } catch (err: any) {
+    console.error('[Analyze] Failed:', err?.message);
+    await updateDocStatus(docId, 'failed', err?.message || 'Unknown error');
+  }
 }
 
 app.post('/api/documents/analyze/:id', verifyAuth, async (req: any, res) => {
@@ -1094,10 +1316,16 @@ app.post('/api/documents/analyze/:id', verifyAuth, async (req: any, res) => {
   const filePath = path.join(uploadsDir, doc.file_path || '');
   if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'File not found on disk' });
   const buffer = fs.readFileSync(filePath);
+  const docFilename = doc.name || doc.file_path || 'document';
+  const ext = path.extname(docFilename).toLowerCase();
+  let mime = 'application/octet-stream';
+  if (ext === '.pdf') mime = 'application/pdf';
+  else if (ext === '.jpg' || ext === '.jpeg') mime = 'image/jpeg';
+  else if (ext === '.png') mime = 'image/png';
   const { analyzeDocument } = await import('./src/services/document-intelligence');
-  const { result } = await analyzeDocument(buffer, doc.type, user_email, user?.plan || 'explorer');
+  const { result, extraction } = await analyzeDocument(buffer, doc.type, user_email, user?.plan || 'explorer', mime, docFilename);
   if (result) {
-    const aiResult = JSON.stringify(result);
+    const aiResult = JSON.stringify({ data: result, extraction });
     if (IS_SUPABASE_MODE) {
       const { updateDocumentAiResult } = await import('./src/lib/supabase-server');
       await updateDocumentAiResult(docId, aiResult);
@@ -1111,10 +1339,62 @@ app.post('/api/documents/analyze/:id', verifyAuth, async (req: any, res) => {
   res.json({ success: true, ai_extraction_result: result });
 });
 
+app.get('/api/documents/:id/download', verifyAuth, async (req: any, res) => {
+  const id = req.params.id;
+
+  if (IS_SUPABASE_MODE) {
+    const doc = await sbGetDoc(id);
+    if (!doc) return res.status(404).json({ error: "Document not found." });
+    if (doc.user_email?.toLowerCase() !== req.userEmail) {
+      return res.status(403).json({ error: "Access denied." });
+    }
+    if (!doc.storage_path) {
+      return res.status(404).json({ error: "File not found in storage." });
+    }
+    const { data, error } = await supabaseAdmin!.storage
+      .from('scholarship-docs')
+      .download(doc.storage_path);
+    if (error || !data) {
+      return res.status(404).json({ error: "File not found in storage." });
+    }
+    const ext = path.extname(doc.name || 'file').toLowerCase();
+    const ct = ext === '.pdf' ? 'application/pdf' : ext === '.png' ? 'image/png' : 'image/jpeg';
+    res.setHeader('Content-Type', ct);
+    res.setHeader('Content-Disposition', `attachment; filename="${doc.name}"`);
+    res.send(Buffer.from(await data.arrayBuffer()));
+    return;
+  }
+
+  const db = getDb();
+  const doc = db.documents.find((d: any) => d.id === id);
+  if (!doc) return res.status(404).json({ error: "Document not found." });
+  if (doc.user_email?.toLowerCase() !== req.userEmail) {
+    return res.status(403).json({ error: "Access denied." });
+  }
+  if (doc.file_path) {
+    const filePath = path.join(uploadsDir, doc.file_path);
+    if (fs.existsSync(filePath)) {
+      const ext = path.extname(doc.name || 'file').toLowerCase();
+      const ct = ext === '.pdf' ? 'application/pdf' : ext === '.png' ? 'image/png' : 'image/jpeg';
+      res.setHeader('Content-Type', ct);
+      res.setHeader('Content-Disposition', `attachment; filename="${doc.name}"`);
+      res.sendFile(filePath);
+      return;
+    }
+  }
+  res.status(404).json({ error: "File not found." });
+});
+
 app.delete('/api/documents/:id', verifyAuth, async (req: any, res) => {
   const id = req.params.id;
 
   if (IS_SUPABASE_MODE) {
+    const doc = await sbGetDoc(id);
+    if (doc?.storage_path) {
+      await supabaseAdmin!.storage
+        .from('scholarship-docs')
+        .remove([doc.storage_path]);
+    }
     await sbDeleteDoc(id);
     return res.json({ success: true });
   }
@@ -1229,7 +1509,7 @@ app.get('/api/essays/history', verifyAuth, async (req: any, res) => {
 app.post('/api/essays/generate', verifyAuth, async (req: any, res) => {
   const user_email = req.userEmail;
   const db = getDb();
-  const { essay_type, scholarship_name, prompt, stage, previous_content, notes, word_count, provider: reqProvider } = req.body;
+  const { essay_type, scholarship_name, prompt, stage, previous_content, notes, word_count, provider: reqProvider, document_ids } = req.body;
 
   const user = db.users.find((u: any) => u.email?.toLowerCase() === user_email?.toLowerCase());
   const todayStart = new Date().toISOString().split('T')[0];
@@ -1273,6 +1553,42 @@ app.post('/api/essays/generate', verifyAuth, async (req: any, res) => {
   const workYrs = user?.work_experience_years;
   const userName = user?.name || 'the applicant';
 
+  // Load document grounding context from specified document IDs
+  let documentContext = '';
+  if (document_ids && Array.isArray(document_ids) && document_ids.length > 0) {
+    try {
+      const docContexts: string[] = [];
+      for (const docId of document_ids) {
+        let doc: any = null;
+        if (IS_SUPABASE_MODE) {
+          doc = await sbGetDoc(docId);
+        } else {
+          doc = db.documents.find((d: any) => d.id === docId);
+        }
+        if (!doc || doc.user_email?.toLowerCase() !== user_email?.toLowerCase()) continue;
+        if (doc.ai_extraction_result) {
+          let parsed: any = null;
+          try { parsed = typeof doc.ai_extraction_result === 'string' ? JSON.parse(doc.ai_extraction_result) : doc.ai_extraction_result; } catch {}
+          const data = parsed?.data || parsed;
+          if (data && typeof data === 'object') {
+            const lines: string[] = [`--- From ${doc.name || docId} (${doc.type || 'document'}) ---`];
+            for (const [k, v] of Object.entries(data)) {
+              if (v !== null && v !== undefined && v !== '') {
+                lines.push(`  ${k}: ${Array.isArray(v) ? v.join(', ') : v}`);
+              }
+            }
+            docContexts.push(lines.join('\n'));
+          }
+        }
+      }
+      if (docContexts.length > 0) {
+        documentContext = '\nDocument-based evidence for your essay (use these facts, do not fabricate):\n' + docContexts.join('\n\n');
+      }
+    } catch (err: any) {
+      console.error('[Essay] Document grounding error:', err.message);
+    }
+  }
+
   const { generateContent, hasAnyKey, getProviderConfig, setProviderConfig, getDefaultConfig } = await import('./src/services/ai-provider');
 
   if (reqProvider) {
@@ -1290,7 +1606,8 @@ app.post('/api/essays/generate', verifyAuth, async (req: any, res) => {
 You generate high-quality, personalized scholarship essays based on the student's background and the specific scholarship.
 The student is from ${userCountry}, pursuing a ${userDegree} in ${userField}.
 Use their provided notes to write an authentic, persuasive essay.
-Write in first person from the student's perspective. Tone: confident, humble, mission-driven.`;
+Write in first person from the student's perspective. Tone: confident, humble, mission-driven.
+Ground all claims in the document-based evidence provided — never fabricate GPA, institutions, degrees, or other factual details.`;
 
         userPrompt = `Write a ${essay_type || 'Personal Statement'} essay for the "${scholarship_name}" scholarship.
 
@@ -1302,6 +1619,7 @@ Student background:
 ${hasResearch ? '- Has research experience' : ''}
 ${hasLeadership ? '- Has leadership experience' : ''}
 ${workYrs ? `- ${workYrs} years of work experience` : ''}
+${documentContext}
 
 Student's personal notes: ${userNotes || 'The student has strong academic credentials and a desire to return to Africa after studies.'}
 
@@ -1315,6 +1633,7 @@ Instructions: Write a complete, compelling essay of approximately ${word_count |
 3) One rewritten opening paragraph
 
 The student is from ${userCountry}, studying ${userField} at the ${userDegree} level.
+${documentContext ? '\nNote: The student has uploaded documents containing these verified facts — check the essay for alignment:\n' + documentContext : ''}
 
 DRAFT ESSAY: ${targetText}`;
 
@@ -3076,6 +3395,26 @@ app.get('/api/admin/audit', verifySuperAdmin, (req: any, res) => {
 app.get('/api/admin/logs', verifySuperAdmin, (req: any, res) => {
   const db = getDb();
   res.json((db.audit_logs || []).sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 200));
+});
+
+app.get('/api/admin/analysis-logs', verifySuperAdmin, async (_req: any, res) => {
+  try {
+    let docs: any[];
+    if (IS_SUPABASE_MODE) {
+      if (!supabaseAdmin) return res.json([]);
+      const { data } = await supabaseAdmin.from('documents').select('*').not('analysis_status', 'is', null).order('last_analyzed_at', { ascending: false }).limit(100);
+      docs = data || [];
+    } else {
+      const db = getDb();
+      docs = (db.documents || []).filter((d: any) => d.analysis_status).sort((a: any, b: any) => new Date(b.last_analyzed_at || 0).getTime() - new Date(a.last_analyzed_at || 0).getTime()).slice(0, 100);
+    }
+    res.json(docs.map((d: any) => ({
+      id: d.id, user_email: d.user_email, name: d.name, type: d.type, analysis_status: d.analysis_status, last_analyzed_at: d.last_analyzed_at, analysis_error: d.analysis_error || null,
+    })));
+  } catch (err: any) {
+    console.error('[Admin] Analysis logs error:', err.message);
+    res.json([]);
+  }
 });
 
 app.get('/api/admin/users', verifySuperAdmin, async (req, res) => {

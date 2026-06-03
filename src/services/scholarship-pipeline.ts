@@ -41,19 +41,11 @@ export async function runDiscoveryPipeline(): Promise<PipelineSummary> {
   console.log(`[Pipeline] Crawl complete: ${pages_crawled}/${sources_searched} pages with content`);
 
   const allScholarships: any[] = [];
-  const hasAiKey = (process.env.DEEPSEEK_API_KEY || process.env.OPENAI_API_KEY || '')
-    && (process.env.DEEPSEEK_API_KEY || '') !== 'your_deepseek_api_key_from_platform_deepseek_com';
 
+  console.log(`[Pipeline] Scholarship extraction via AI disabled. Use manual import for scholarship data.`);
   for (const result of crawlResults) {
     if (!result.content) continue;
-    if (hasAiKey) {
-      const { extractScholarshipsFromText } = await import('./deepseek-extractor');
-      const extracted = await extractScholarshipsFromText(result.url, result.content);
-      allScholarships.push(...extracted);
-    } else {
-      console.log(`[Pipeline] AI extraction skipped — no API key configured. Use manual import for scholarship data.`);
-      break;
-    }
+    // Placeholder for future non-AI extraction logic
   }
   scholarships_found = allScholarships.length;
   console.log(`[Pipeline] Extracted ${scholarships_found} raw scholarship records`);
