@@ -48,6 +48,8 @@ export default function AuthScreen({ onLoginSuccess, countries }: AuthScreenProp
         if (error) {
           if (error.message.includes('already registered') || error.message.includes('already exists')) {
             setErrorMsg('An account with this email already exists');
+          } else if (error.message.includes('Invalid login credentials')) {
+            setErrorMsg('Incorrect email or password');
           } else {
             setErrorMsg(error.message);
           }
@@ -57,9 +59,28 @@ export default function AuthScreen({ onLoginSuccess, countries }: AuthScreenProp
 
         if (data.user && data.session) {
           await onLoginSuccess(data.user.email!, data.session.access_token);
-        } else {
-          // Email confirmation may be required — user exists but no session
-          setErrorMsg('Registration successful! Please check your email for a confirmation link, then sign in.');
+          setLoading(false);
+          return;
+        }
+        
+        // No session = email confirmation may be required. Try auto-login.
+        if (data.user) {
+          const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+          if (signInData?.session) {
+            await onLoginSuccess(email, signInData.session.access_token);
+          } else if (signInErr?.message?.includes('Email not confirmed')) {
+            setErrorMsg('Account created! Please check your email for a confirmation link.');
+          } else {
+            // Account exists — try to sign in anyway
+            setErrorMsg('Account created! Signing you in automatically...');
+            const retrySignIn = await supabase.auth.signInWithPassword({ email, password });
+            if (retrySignIn.data?.session) {
+              await onLoginSuccess(email, retrySignIn.data.session.access_token);
+            }
+          }
         }
         setLoading(false);
         return;
