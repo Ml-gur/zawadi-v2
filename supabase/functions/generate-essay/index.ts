@@ -42,7 +42,8 @@ async function callAiProvider(
   maxOutputTokens: number,
   modelOverride?: string,
 ): Promise<string> {
-  const provider = cfg?.provider || 'gemini'
+  // Default: use DeepSeek if key is set, otherwise Gemini
+  const provider = cfg?.provider || (Deno.env.get('DEEPSEEK_API_KEY') ? 'deepseek' : 'gemini')
 
   // Try the configured provider first
   try {
