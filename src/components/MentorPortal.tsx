@@ -5,6 +5,7 @@ import {
   GraduationCap, Globe, Calendar, ChevronRight, RefreshCw,
   Loader2
 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 import { MENTOR_REVIEW_LIMITS, PLAN_LABELS } from '../config/plan-config';
 
 interface MentorPortalProps {
@@ -56,15 +57,11 @@ interface Notification {
   created_at: string;
 }
 
-const authFetch = (url: string, options: RequestInit = {}): Promise<Response> => {
-  const token = localStorage.getItem('zawadi_token');
-  if (token) {
-    const headers = new Headers(options.headers);
-    headers.set('Authorization', `Bearer ${token}`);
-    headers.set('Content-Type', 'application/json');
-    return fetch(url, { ...options, headers });
-  }
-  return fetch(url, { ...options, headers: { 'Content-Type': 'application/json', ...options.headers as any } });
+const invokeMentor = async (action: string, body: any = {}) => {
+  const { data, error } = await supabase.functions.invoke('mentor-review', { body: { action, ...body } });
+  if (error) return null;
+  if (data?.error) return null;
+  return data;
 };
 
 function CountdownTimer({ deadline }: { deadline: string }) {
@@ -231,13 +228,12 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
     setLoading(true);
     setError('');
     try {
-      const res = await authFetch('/api/mentor/queue');
-      if (!res.ok) {
+      const data = await invokeMentor('my-queue');
+      if (data) {
+        setQueueItems(data);
+      } else {
         setError('Failed to load queue');
-        return;
       }
-      const data: QueueItem[] = await res.json();
-      setQueueItems(data);
     } catch {
       setError('Network error loading queue');
     }
@@ -246,10 +242,19 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
 
   const fetchNotifications = async () => {
     try {
-      const res = await authFetch('/api/notifications?unread=true');
-      if (res.ok) {
-        const data = await res.json();
-        setNotifications(Array.isArray(data) ? data : []);
+      const { data, error } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_email', user?.email)
+        .order('created_at', { ascending: false })
+        .limit(20);
+      if (!error && data) {
+        setNotifications(data.map((n: any) => ({
+          id: n.id,
+          title: n.type || 'Notification',
+          message: n.message || '',
+          created_at: n.created_at,
+        })));
       }
     } catch {
       // silently fail
@@ -267,11 +272,10 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
 
   const handleBeginReview = async (item: QueueItem) => {
     try {
-      const res = await authFetch(`/api/mentor/queue/${item.id}/start`, { method: 'PATCH' });
-      if (!res.ok) return;
-      const updated = await res.json();
-      setQueueItems(prev => prev.map(q => q.id === item.id ? { ...q, ...updated, status: 'under_review' } : q));
-      setActiveReview({ ...item, ...updated, status: 'under_review' });
+      const data = await invokeMentor('start-review', { request_id: item.id });
+      if (!data) return;
+      setQueueItems(prev => prev.map(q => q.id === item.id ? { ...q, ...data, status: 'under_review' } : q));
+      setActiveReview({ ...item, ...data, status: 'under_review' });
       setFeedback({
         overall_assessment: '',
         general_advice: '',
@@ -337,13 +341,25 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
     if (!activeReview) return;
     setSubmitting(true);
     try {
-      const res = await authFetch(`/api/mentor/queue/${activeReview.id}/submit`, {
-        method: 'PATCH',
-        body: JSON.stringify(feedback),
+      const data = await invokeMentor('submit-review', {
+        request_id: activeReview.id,
+        feedback_overall_assessment: feedback.overall_assessment,
+        feedback_opening: feedback.opening_feedback,
+        feedback_narrative: feedback.narrative_feedback,
+        feedback_evidence: feedback.evidence_feedback,
+        feedback_cultural_authenticity: feedback.cultural_authenticity_feedback,
+        feedback_closing: feedback.closing_feedback,
+        feedback_general_advice: feedback.general_advice,
+        revised_sections: feedback.revised_sections,
+        mentor_confidence_score: feedback.confidence_score,
+        estimated_success_probability: feedback.success_probability,
+        mentor_private_notes: feedback.private_notes,
       });
-      if (res.ok) {
+      if (data) {
         await fetchQueue();
         setActiveReview(null);
+      } else {
+        setValidationErrors(['Failed to submit review']);
       }
     } catch {
       setValidationErrors(['Failed to submit review']);
@@ -353,7 +369,7 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
 
   const handleNotificationRead = async (id: string) => {
     try {
-      await authFetch(`/api/notifications/${id}/read`, { method: 'PATCH' });
+      await supabase.from('notifications').update({ read: true }).eq('id', id);
       setNotifications(prev => prev.filter(n => n.id !== id));
     } catch {
       // silently fail

@@ -1,5 +1,62 @@
 # Changelog
 
+## 2026-06-04
+
+### Removed: All Express.js API calls — fully migrated to Supabase Edge Functions
+
+**Breaking change**: Removed all remaining references to the old Express backend (`server.ts` was already deleted in a prior commit). All frontend API calls now go through Supabase Edge Functions or direct Supabase queries.
+
+#### Files migrated:
+
+**`src/components/SubscriptionPlans.tsx`**
+- Removed `authFetch` helper (was using `localStorage` `zawadi_token`)
+- Added `import { supabase }` 
+- Replaced `fetch('/api/payments/initialize')` → `supabase.functions.invoke('process-payment', { body: { action: 'initialize', ... } })`
+- Replaced `fetch('/api/payments/verify')` → `supabase.functions.invoke('process-payment', { body: { action: 'verify', ... } })` (both Pop callback and sandbox)
+- Replaced `fetch('/api/payments/abandon')` → `supabase.functions.invoke('process-payment', { body: { action: 'abandon', ... } })`
+- **Bug fix**: `authorizationUrl = authorizationUrl || null` → `authorizationUrl = initData.authorization_url` (was always null, breaking mobile money redirect)
+
+**`src/components/MentorPortal.tsx`**
+- Removed `authFetch` helper
+- Added `import { supabase }`
+- Added local `invokeMentor(action, body)` helper wrapping `supabase.functions.invoke('mentor-review', ...)`
+- Replaced `fetch('/api/mentor/queue')` → `invokeMentor('my-queue')`
+- Replaced `fetch('/api/mentor/queue/:id/start')` → `invokeMentor('start-review', { request_id })`
+- Replaced `fetch('/api/mentor/queue/:id/submit')` → `invokeMentor('submit-review', { request_id, ... })`
+- Replaced `fetch('/api/notifications?unread=true')` → `supabase.from('notifications').select()`
+- Replaced `fetch('/api/notifications/:id/read')` → `supabase.from('notifications').update({ read: true })`
+
+**`src/components/AdminPortal.tsx`**
+- Added `import { supabase }`
+- Removed `adminFetch` helper (was using `localStorage` `zawadi_admin_token`)
+- Added local `invokeMentor(action, body)` helper
+- Replaced `fetch('/api/admin/mentor-queue')` → `invokeMentor('mentor-queue')`
+- Replaced `fetch('/api/admin/mentor-profiles')` → `invokeMentor('mentor-profiles')`
+- Replaced `fetch('/api/admin/mentor-queue/:id/assign')` → `invokeMentor('assign', { request_id, mentor_email })`
+- Replaced `fetch('/api/admin/mentor-queue/:id/approve')` → `invokeMentor('approve-review', { request_id })`
+- Replaced `fetch('/api/admin/mentor-queue/:id/reject')` → `invokeMentor('reject-review', { request_id, rejection_reason })`
+- Replaced `fetch('/api/admin/stats')` → direct `supabase.from('scholarships|profiles|payments|audit_logs|bot_ingestions').select()` queries
+- Replaced `fetch('/api/admin/users')` → `supabase.from('profiles').select()`
+- Replaced `fetch('/api/admin/users/:email')` PATCH/DELETE → `supabase.from('profiles').update()/.delete()`
+
+**`src/components/admin/BotQueueReview.tsx`**
+- Removed `API_BASE` constant and `getAuthHeaders()` helper
+- Added `import { supabase }`
+- Added local `invokeFn(action, body)` helper wrapping `supabase.functions.invoke('run-pipeline', ...)`
+- Replaced all 5 `fetch()` calls (stats, bot-queue, run, approve, reject) with `invokeFn()`
+
+**`src/components/DocumentVault.tsx`**
+- Removed unused `authFetch` helper (no calls existed, straight dead code)
+
+**`supabase/functions/run-pipeline/index.ts`**
+- **Bug fix**: Renamed `action` to `review_action` in `handleReview` destructuring to avoid naming conflict with the route-level `action` field. Both the route dispatch and the sub-action used the same `action` key, making `handleReview` always receive `action='review'` instead of `'approved'`/`'rejected'`.
+
+### Summary
+- **7 frontend files** touched
+- **1 Edge Function** fixed (`run-pipeline` review action naming conflict)
+- **0 remaining references** to any `/api/` Express endpoint
+- All server-side operations now go through: `process-payment`, `mentor-review`, `run-pipeline`, `admin-settings`, `generate-essay` Edge Functions or direct Supabase queries
+
 ## 2026-06-03
 
 ### Fixed: Profile save - "invalid input syntax for type numeric: ''"

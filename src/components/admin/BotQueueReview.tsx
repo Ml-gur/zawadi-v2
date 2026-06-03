@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Bot, RefreshCw, AlertTriangle, ExternalLink, ThumbsUp, ThumbsDown, CheckCircle, Search, X, Loader2 } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 
 interface BotQueueItem {
   id: string;
@@ -56,12 +57,6 @@ const SPONSOR_TYPES = ['Government', 'Foundation', 'University', 'Corporate', 'U
 const DEGREE_OPTIONS = ['Secondary', 'Undergraduate', 'Masters', 'PhD', 'Postdoctoral', 'Professional', 'Short Course'];
 const FUNDING_OPTIONS = ['Full', 'Partial', 'Tuition Only'];
 
-const API_BASE = '';
-
-function getAuthHeaders(): Record<string, string> {
-  const token = localStorage.getItem('token');
-  return token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
-}
 
 function getDeadlineColor(deadline: string | null): string {
   if (!deadline) return 'text-on-surface-variant';
@@ -100,30 +95,23 @@ export default function BotQueueReview() {
     setTimeout(() => setToast(null), 4000);
   }, []);
 
-  const fetchStats = useCallback(async () => {
-    try {
-      const res = await fetch(`${API_BASE}/api/admin/pipeline/stats`, { headers: getAuthHeaders() });
-      if (res.ok) setStats(await res.json());
-    } catch {}
+  const invokeFn = useCallback(async (action: string, body: any = {}) => {
+    const { data, error } = await supabase.functions.invoke('run-pipeline', { body: { action, ...body } });
+    if (!error) return data;
+    return null;
   }, []);
+
+  const fetchStats = useCallback(async () => {
+    const data = await invokeFn('stats');
+    if (data) setStats(data);
+  }, [invokeFn]);
 
   const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams();
-      if (activeTab === 'pending') {
-        params.set('status', 'pending');
-        params.set('sort', 'confidence_score_desc');
-      } else {
-        params.set('status', 'approved,rejected');
-        params.set('sort', 'created_at_desc');
-      }
-      if (confidenceFilter !== 'all') params.set('confidence_tier', confidenceFilter);
-      if (search) params.set('search', search);
-
-      const res = await fetch(`${API_BASE}/api/admin/bot-queue?${params}`, { headers: getAuthHeaders() });
-      if (res.ok) {
-        const data = await res.json();
+      const statusFilter = activeTab === 'pending' ? 'pending' : 'approved,rejected';
+      const data = await invokeFn('bot-queue', { status: statusFilter });
+      if (data) {
         const list = data.items || [];
         let filtered = scamFilterOnly ? list.filter((i: BotQueueItem) => Array.isArray(i.scam_flags) && i.scam_flags.length > 0) : list;
         if (activeTab === 'pending') setItems(filtered);
@@ -131,19 +119,16 @@ export default function BotQueueReview() {
       }
     } catch {}
     setLoading(false);
-  }, [activeTab, search, confidenceFilter, scamFilterOnly]);
+  }, [activeTab, search, confidenceFilter, scamFilterOnly, invokeFn]);
 
   useEffect(() => { fetchStats(); fetchItems(); }, [fetchStats, fetchItems]);
 
   const handleRunPipeline = async () => {
     setRunningPipeline(true);
     try {
-      const res = await fetch(`${API_BASE}/api/admin/pipeline/run`, { method: 'POST', headers: getAuthHeaders() });
-      if (res.ok) {
-        const summary = await res.json();
-        triggerToast(
-          `Pipeline complete: ${summary.sources_searched} sources, ${summary.pages_crawled} pages, ${summary.scholarships_found} found, ${summary.inserted} inserted in ${summary.duration_seconds}s`,
-        );
+      const data = await invokeFn('run');
+      if (data) {
+        triggerToast(`Pipeline acknowledged. Pending: ${data.pending_count || 0}. ${data.tip || ''}`);
         fetchStats();
         fetchItems();
       } else triggerToast('Pipeline run failed', 'error');
@@ -156,13 +141,8 @@ export default function BotQueueReview() {
   const handleApprove = async (id: string) => {
     const edits = editingFields[id] || {};
     try {
-      const res = await fetch(`${API_BASE}/api/admin/bot-queue/${id}/review`, {
-        method: 'PATCH',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ action: 'approved', edited_scholarship: edits }),
-      });
-      if (res.ok) {
-        const data = await res.json();
+      const data = await invokeFn('review', { ingestion_id: id, review_action: 'approved', edited_scholarship: edits });
+      if (data?.success) {
         const item = items.find(i => i.id === id);
         triggerToast(`"${item?.extracted_data?.name || 'Scholarship'}" added to scholarships pending publish`);
         setItems(prev => prev.filter(i => i.id !== id));
@@ -176,12 +156,8 @@ export default function BotQueueReview() {
   const handleReject = async () => {
     if (!rejectModal) return;
     try {
-      const res = await fetch(`${API_BASE}/api/admin/bot-queue/${rejectModal}/review`, {
-        method: 'PATCH',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ action: 'rejected', review_notes: rejectReason }),
-      });
-      if (res.ok) {
+      const data = await invokeFn('review', { ingestion_id: rejectModal, review_action: 'rejected', review_notes: rejectReason });
+      if (data?.success) {
         triggerToast('Item rejected');
         setItems(prev => prev.filter(i => i.id !== rejectModal));
         fetchStats();

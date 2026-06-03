@@ -13,13 +13,6 @@ interface DocumentVaultProps {
   onRefreshDocuments: () => void;
 }
 
-const authFetch = (url: string, options: RequestInit = {}): Promise<Response> => {
-  const headers = new Headers(options.headers);
-  const token = localStorage.getItem('zawadi_token');
-  if (token) headers.set('Authorization', `Bearer ${token}`);
-  return fetch(url, { ...options, headers });
-};
-
 export default function DocumentVault({
   user,
   documents,

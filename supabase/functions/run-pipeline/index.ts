@@ -169,10 +169,10 @@ async function handleReview(
   adminEmail: string,
   body: any
 ) {
-  const { ingestion_id, action: reviewAction, review_notes, edited_scholarship } = body
+  const { ingestion_id, review_action, review_notes, edited_scholarship } = body
   if (!ingestion_id) return corsResponse({ error: 'ingestion_id required' }, 400)
-  if (!reviewAction || !['approved', 'rejected'].includes(reviewAction)) {
-    return corsResponse({ error: 'action must be "approved" or "rejected"' }, 400)
+  if (!review_action || !['approved', 'rejected'].includes(review_action)) {
+    return corsResponse({ error: 'review_action must be "approved" or "rejected"' }, 400)
   }
 
   // Fetch ingestion
@@ -184,7 +184,7 @@ async function handleReview(
 
   if (fetchError || !ingestion) return corsResponse({ error: 'Ingestion not found' }, 404)
 
-  if (reviewAction === 'rejected') {
+  if (review_action === 'rejected') {
     await supabase.from('bot_ingestions')
       .update({
         status: 'rejected',

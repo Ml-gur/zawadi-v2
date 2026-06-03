@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
+import { supabase } from '../lib/supabase';
 import { Scholarship, BotQueueIngestion, AuditLogItem } from '../types';
 import ConfirmationDialog from './ConfirmationDialog';
 import { 
@@ -92,16 +93,22 @@ export default function AdminPortal({
   const [mentorQueueError, setMentorQueueError] = useState('');
   const [mentorProfiles, setMentorProfiles] = useState<any[]>([]);
 
+  const invokeMentor = async (action: string, body: any = {}) => {
+    const { data, error } = await supabase.functions.invoke('mentor-review', { body: { action, ...body } });
+    if (!error && data?.error) return null;
+    if (error) return null;
+    return data;
+  };
+
   const fetchMentorQueue = async () => {
     setMentorQueueLoading(true);
     setMentorQueueError('');
     try {
-      const res = await adminFetch('/api/admin/mentor-queue');
-      if (res.ok) {
-        setMentorQueueItems(await res.json());
+      const data = await invokeMentor('mentor-queue');
+      if (data) {
+        setMentorQueueItems(data);
       } else {
-        const err = await res.json().catch(() => ({ error: 'Failed to load' }));
-        setMentorQueueError(err.error || 'Failed to load mentor queue');
+        setMentorQueueError('Failed to load mentor queue');
       }
     } catch {
       setMentorQueueError('Network error loading mentor queue');
@@ -111,26 +118,20 @@ export default function AdminPortal({
 
   const fetchMentorProfiles = async () => {
     try {
-      const res = await adminFetch('/api/admin/mentor-profiles');
-      if (res.ok) {
-        setMentorProfiles(await res.json());
-      }
+      const data = await invokeMentor('mentor-profiles');
+      if (data) setMentorProfiles(data);
     } catch {}
   };
 
   const handleAssignMentor = async (requestId: string, mentorEmail: string) => {
     try {
-      const res = await adminFetch(`/api/admin/mentor-queue/${requestId}/assign`, {
-        method: 'PATCH',
-        body: JSON.stringify({ mentor_email: mentorEmail }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: 'Assign failed' }));
-        toast.error(err.error || 'Failed to assign mentor');
-        return;
+      const data = await invokeMentor('assign', { request_id: requestId, mentor_email: mentorEmail });
+      if (data && !data.error) {
+        toast.success('Mentor assigned successfully');
+        fetchMentorQueue();
+      } else {
+        toast.error(data?.error || 'Failed to assign mentor');
       }
-      toast.success('Mentor assigned successfully');
-      fetchMentorQueue();
     } catch {
       toast.error('Network error assigning mentor');
     }
@@ -138,17 +139,13 @@ export default function AdminPortal({
 
   const handleApproveReview = async (requestId: string) => {
     try {
-      const res = await adminFetch(`/api/admin/mentor-queue/${requestId}/approve`, {
-        method: 'PATCH',
-        body: JSON.stringify({ admin_approval_notes: 'Approved by admin' }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: 'Approve failed' }));
-        toast.error(err.error || 'Failed to approve review');
-        return;
+      const data = await invokeMentor('approve-review', { request_id: requestId, admin_approval_notes: 'Approved by admin' });
+      if (data && !data.error) {
+        toast.success('Review approved and delivered to student');
+        fetchMentorQueue();
+      } else {
+        toast.error(data?.error || 'Failed to approve review');
       }
-      toast.success('Review approved and delivered to student');
-      fetchMentorQueue();
     } catch {
       toast.error('Network error approving review');
     }
@@ -156,17 +153,13 @@ export default function AdminPortal({
 
   const handleRejectReview = async (requestId: string, reason: string) => {
     try {
-      const res = await adminFetch(`/api/admin/mentor-queue/${requestId}/reject`, {
-        method: 'PATCH',
-        body: JSON.stringify({ rejection_reason: reason }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ error: 'Reject failed' }));
-        toast.error(err.error || 'Failed to reject review');
-        return;
+      const data = await invokeMentor('reject-review', { request_id: requestId, rejection_reason: reason });
+      if (data && !data.error) {
+        toast.success('Review returned to mentor for revision');
+        fetchMentorQueue();
+      } else {
+        toast.error(data?.error || 'Failed to reject review');
       }
-      toast.success('Review returned to mentor for revision');
-      fetchMentorQueue();
     } catch {
       toast.error('Network error rejecting review');
     }
@@ -205,16 +198,6 @@ export default function AdminPortal({
   // Form states (merged for both Creation and Editing inside beautiful Slide-Over)
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-
-  const adminFetch = (url: string, options: RequestInit = {}): Promise<Response> => {
-    const token = localStorage.getItem('zawadi_admin_token');
-    if (token) {
-      const headers = new Headers(options.headers);
-      headers.set('Authorization', `Bearer ${token}`);
-      return fetch(url, { ...options, headers });
-    }
-    return fetch(url, options);
-  };
 
   const [formName, setFormName] = useState('');
   const [formProvider, setFormProvider] = useState('');
@@ -274,34 +257,57 @@ export default function AdminPortal({
   const fetchStats = async () => {
     setStatsLoading(true);
     try {
-      const res = await adminFetch(`/api/admin/stats`);
-      if (res.ok) {
-        const data = await res.json();
-        setStats({
-          total_listings: data.totalScholarships || 0,
-          published_listings: data.publishedScholarships || 0,
-          draft_listings: data.draftScholarships || 0,
-          pending_crawler_queue: data.pendingBotCount || 0,
-          user_count: data.totalUsers || 0,
-          active_users: data.activeUsers || 0,
-          active_subscriptions: data.activeSubs || 0,
-          total_applications: data.totalApplications || 0,
-          total_documents: data.totalDocuments || 0,
-          total_essays: data.totalEssays || 0,
-          mrr_value: data.mrr || 0,
-          mrr_kes: data.mrrKes || 0,
-          audit_count: (data.auditLogs || 0) + 0,
-          total_payments: data.totalPayments || 0,
-          successful_payments: data.successfulPayments || 0,
-          distribution: data.distribution || { explorer: 0, plus: 0, pro: 0, institutional: 0 },
-          userGrowth: data.userGrowth || [],
-          appStatusBreakdown: data.appStatusBreakdown || {},
-          essayTrend: data.essayTrend || []
-        });
-      }
+      const [
+        { count: totalScholarships },
+        { count: publishedScholarships },
+        { count: pendingBotCount },
+        { count: totalUsers },
+        { count: totalPayments },
+        { count: successfulPayments },
+        { count: auditCount },
+      ] = await Promise.all([
+        supabase.from('scholarships').select('*', { count: 'exact', head: true }),
+        supabase.from('scholarships').select('*', { count: 'exact', head: true }).eq('published', true),
+        supabase.from('bot_ingestions').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('payments').select('*', { count: 'exact', head: true }),
+        supabase.from('payments').select('*', { count: 'exact', head: true }).eq('status', 'success'),
+        supabase.from('audit_logs').select('*', { count: 'exact', head: true }),
+      ]);
+
+      const { data: distribution } = await supabase
+        .from('profiles')
+        .select('plan');
+
+      const planDist = { explorer: 0, plus: 0, pro: 0, institutional: 0 };
+      (distribution || []).forEach((p: any) => {
+        const plan = p.plan || 'explorer';
+        if (planDist.hasOwnProperty(plan)) (planDist as any)[plan]++;
+      });
+
+      setStats({
+        total_listings: totalScholarships || 0,
+        published_listings: publishedScholarships || 0,
+        draft_listings: (totalScholarships || 0) - (publishedScholarships || 0),
+        pending_crawler_queue: pendingBotCount || 0,
+        user_count: totalUsers || 0,
+        active_users: totalUsers || 0,
+        active_subscriptions: successfulPayments || 0,
+        total_applications: 0,
+        total_documents: 0,
+        total_essays: 0,
+        mrr_value: 0,
+        mrr_kes: 0,
+        audit_count: auditCount || 0,
+        total_payments: totalPayments || 0,
+        successful_payments: successfulPayments || 0,
+        distribution: planDist,
+        userGrowth: [],
+        appStatusBreakdown: {},
+        essayTrend: []
+      });
     } catch (e) {
       console.error("Failed to fetch admin stats", e);
-      // Fallback: compute from local props
       const total = scholarships.length;
       const published = scholarships.filter(s => s.published).length;
       setStats(prev => ({
@@ -336,9 +342,11 @@ export default function AdminPortal({
   const fetchUsers = async () => {
     setUsersLoading(true);
     try {
-      const res = await adminFetch(`/api/admin/users`);
-      if (res.ok) {
-        const data = await res.json();
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (!error && data) {
         const mapped = data.map((u: any) => ({
           id: u.email,
           name: u.name || u.email?.split('@')[0] || 'Unknown',
@@ -347,7 +355,7 @@ export default function AdminPortal({
           plan: u.plan || 'explorer',
           status: u.status || 'active',
           role: u.role || 'user',
-          joined: u.joined_at || 'Unknown',
+          joined: u.created_at || 'Unknown',
           activity: '—',
           appCount: 0,
           essayCount: 0,
@@ -381,12 +389,11 @@ export default function AdminPortal({
   // Update Users state via real API
   const handleUpdatePlan = async (userEmail: string, newPlan: string) => {
     try {
-      const res = await adminFetch(`/api/admin/users/${encodeURIComponent(userEmail)}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: newPlan })
-      });
-      if (res.ok) fetchUsers();
+      const { error } = await supabase
+        .from('profiles')
+        .update({ plan: newPlan })
+        .eq('email', userEmail);
+      if (!error) fetchUsers();
     } catch (e) {
       console.error("Failed to update user plan", e);
     }
@@ -397,12 +404,11 @@ export default function AdminPortal({
     if (!target) return;
     const newStatus = target.status === 'active' ? 'suspended' : 'active';
     try {
-      const res = await adminFetch(`/api/admin/users/${encodeURIComponent(userEmail)}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus })
-      });
-      if (res.ok) fetchUsers();
+      const { error } = await supabase
+        .from('profiles')
+        .update({ status: newStatus })
+        .eq('email', userEmail);
+      if (!error) fetchUsers();
     } catch (e) {
       console.error("Failed to toggle user status", e);
     }
@@ -410,12 +416,11 @@ export default function AdminPortal({
 
   const handleDeleteUser = async (userEmail: string) => {
     try {
-      const res = await adminFetch(`/api/admin/users/${encodeURIComponent(userEmail)}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ admin_email: user.email })
-      });
-      if (res.ok) fetchUsers();
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('email', userEmail);
+      if (!error) fetchUsers();
     } catch (e) {
       console.error("Failed to delete user", e);
     }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 
 // Plans matching specification
 export interface PlanTier {
@@ -112,13 +113,6 @@ export default function SubscriptionPlans({ user, onPlanUpdated, onNavigateToTab
   const [cardCvv, setCardCvv] = useState<string>('');
   const [cardName, setCardName] = useState<string>('');
 
-  const authFetch = (url: string, options: RequestInit = {}): Promise<Response> => {
-    const headers = new Headers(options.headers);
-    const token = localStorage.getItem('zawadi_token');
-    if (token) headers.set('Authorization', `Bearer ${token}`);
-    return fetch(url, { ...options, headers });
-  };
-
   const [successAnimation, setSuccessAnimation] = useState<boolean>(false);
   const [infoToast, setInfoToast] = useState<string>('');
 
@@ -178,10 +172,10 @@ export default function SubscriptionPlans({ user, onPlanUpdated, onNavigateToTab
   const isPaymentDetailsComplete = paymentMethod === 'mobile_money' ? isMobilePhoneValid && mobilePhone.trim() !== '' : isCardValid;
 
   // Proper hosted subscription flow:
-  //   1. Call /api/payments/initialize → server creates a trusted payment intent
+  //   1. Call process-payment Edge Function (action: initialize) → creates a trusted payment intent
   //   2. Open popup with access_code (live) or direct reference (sandbox)
   //   3. User pays → callback fires
-  //   4. Call /api/payments/verify → server verifies transaction before activation
+  //   4. Call process-payment Edge Function (action: verify) → server verifies transaction before activation
   const handleInitiatePayment = async () => {
     if (!selectedPlan) return;
     if (!isMobilePhoneValid) {
@@ -202,29 +196,26 @@ export default function SubscriptionPlans({ user, onPlanUpdated, onNavigateToTab
     let trustedAmountKES = amountKES;
     let authorizationUrl: string | null = null;
     try {
-      const initRes = await authFetch('/api/payments/initialize', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const { data: initData, error: initError } = await supabase.functions.invoke('process-payment', {
+        body: {
+          action: 'initialize',
           plan_name: selectedPlan.id,
           plan_code: planCode,
           billing_period: billingCycle,
           payment_method: paymentMethod,
           phone_number: paymentMethod === 'mobile_money' ? mobilePhone : undefined,
           amount: amountKES
-        })
+        }
       });
-      if (!initRes.ok) {
-        const errBody = await initRes.json().catch(() => ({}));
-        triggerToast(errBody.error || 'Payment initialization failed.');
+      if (initError || initData?.error) {
+        triggerToast(initData?.error || initError?.message || 'Payment initialization failed.');
         setIsProcessing(false);
         return;
       }
-      const initData = await initRes.json();
       accessCode = initData.access_code;
       paystackRef = initData.reference;
       trustedAmountKES = initData.amount || amountKES;
-      authorizationUrl = authorizationUrl || null;
+      authorizationUrl = initData.authorization_url;
     } catch (err) {
       console.error(err);
         triggerToast('Could not reach the billing server. Payment initialization failed.');
@@ -247,41 +238,36 @@ export default function SubscriptionPlans({ user, onPlanUpdated, onNavigateToTab
           (window as any).PaystackPop.setup({
             key: publicPaystackKey,
             access_code: accessCode,
-            callback: async (response: any) => {
+              callback: async (response: any) => {
               triggerToast('Transaction completed. Verifying securely...');
-              const verifyRes = await authFetch('/api/payments/verify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
+              const { data: verifyData, error: verifyError } = await supabase.functions.invoke('process-payment', {
+                body: {
+                  action: 'verify',
                   user_email: user?.email,
                   reference: response.reference || paystackRef,
                   plan_name: selectedPlan.id,
                   plan_code: planCode,
                   billing_period: billingCycle,
                   amount: trustedAmountKES
-                })
+                }
               });
-              if (verifyRes.ok) {
-                const body = await verifyRes.json();
+              if (!verifyError && !verifyData?.error && verifyData?.success) {
                 setSuccessAnimation(true);
                 setTimeout(() => {
-                  onPlanUpdated(body.user);
+                  onPlanUpdated(verifyData.user);
                   setShowCheckoutModal(false);
                   setSuccessAnimation(false);
                   setIsProcessing(false);
                 }, 2500);
               } else {
-                const errBody = await verifyRes.json().catch(() => ({}));
-                triggerToast(errBody.error || 'Payment verification failed.');
+                triggerToast(verifyData?.error || verifyError?.message || 'Payment verification failed.');
                 setIsProcessing(false);
               }
             },
             onClose: () => {
               if (paystackRef) {
-                authFetch('/api/payments/abandon', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ reference: paystackRef })
+                supabase.functions.invoke('process-payment', {
+                  body: { action: 'abandon', reference: paystackRef }
                 }).catch(() => undefined);
               }
               triggerToast('Payment closed early or canceled.');
@@ -306,30 +292,27 @@ export default function SubscriptionPlans({ user, onPlanUpdated, onNavigateToTab
     // Sandbox: simulate a payment delay then verify
     setTimeout(async () => {
       try {
-        const verifyRes = await authFetch('/api/payments/verify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
+        const { data: verifyData, error: verifyError } = await supabase.functions.invoke('process-payment', {
+          body: {
+            action: 'verify',
             user_email: user?.email,
             reference: paystackRef || `sandbox_${Date.now()}`,
             plan_name: selectedPlan.id,
             plan_code: planCode,
             billing_period: billingCycle,
             amount: trustedAmountKES
-          })
+          }
         });
-        if (verifyRes.ok) {
-          const body = await verifyRes.json();
+        if (!verifyError && !verifyData?.error && verifyData?.success) {
           setSuccessAnimation(true);
           setTimeout(() => {
-            onPlanUpdated(body.user);
+            onPlanUpdated(verifyData.user);
             setShowCheckoutModal(false);
             setSuccessAnimation(false);
             setIsProcessing(false);
           }, 3000);
         } else {
-          const errBody = await verifyRes.json().catch(() => ({}));
-          triggerToast(errBody.error || 'Sandbox upgrade failed. Check server logs.');
+          triggerToast(verifyData?.error || verifyError?.message || 'Sandbox upgrade failed. Check server logs.');
           setIsProcessing(false);
         }
       } catch (err) {
