@@ -1,7 +1,4 @@
 {
-  "redirects": [
-    { "source": "/(.*)", "destination": "https://www.techsari.online/$1", "permanent": true }
-  ],
   "rewrites": [
     { "source": "/((?!robots\\.txt|sitemap\\.xml|og-image\\.png|icon\\.svg|manifest\\.webmanifest|pwa-icon-192\\.png|pwa-icon-512\\.png|sw\\.js|workbox-.*\\.js|assets/.*).*)", "destination": "/index.html" }
   ],
