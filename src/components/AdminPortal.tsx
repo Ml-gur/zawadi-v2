@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { Scholarship, BotQueueIngestion, AuditLogItem } from '../types';
 import ConfirmationDialog from './ConfirmationDialog';
 import { 
@@ -14,7 +15,7 @@ import {
   Plus, Edit, Trash2, Eye, EyeOff, ClipboardCheck, CheckCircle2, CheckCircle, 
   AlertTriangle, Search, ExternalLink, Filter, X, 
   Globe, BookOpen, Clock, Check, RefreshCw, Layers, Download,
-  Bot, Users, ShieldAlert, BadgeInfo, Brain,
+  Bot, Users, ShieldAlert, BadgeInfo, Brain, MessageSquare,
   HelpCircle, LogOut, ChevronRight
 } from 'lucide-react';
 
@@ -52,7 +53,7 @@ export default function AdminPortal({
 }: AdminPortalProps) {
   
   // Dashboard navigation sub-tabs
-  const [activeAdminSubTab, setActiveAdminSubTab] = useState<'dashboard' | 'scholarships' | 'bot_queue' | 'users' | 'audit_log' | 'ai_config'>('dashboard');
+  const [activeAdminSubTab, setActiveAdminSubTab] = useState<'dashboard' | 'scholarships' | 'bot_queue' | 'mentor_queue' | 'users' | 'audit_log' | 'ai_config'>('dashboard');
   
   const [scholarshipToDelete, setScholarshipToDelete] = useState<string | null>(null);
   const [selectedPreviewSchol, setSelectedPreviewSchol] = useState<Scholarship | null>(null);
@@ -84,6 +85,92 @@ export default function AdminPortal({
     essayTrend: [] as { date: string; essays: number }[]
   });
   const [statsLoading, setStatsLoading] = useState(true);
+
+  // Mentor Queue state
+  const [mentorQueueItems, setMentorQueueItems] = useState<any[]>([]);
+  const [mentorQueueLoading, setMentorQueueLoading] = useState(false);
+  const [mentorQueueError, setMentorQueueError] = useState('');
+  const [mentorProfiles, setMentorProfiles] = useState<any[]>([]);
+
+  const fetchMentorQueue = async () => {
+    setMentorQueueLoading(true);
+    setMentorQueueError('');
+    try {
+      const res = await adminFetch('/api/admin/mentor-queue');
+      if (res.ok) {
+        setMentorQueueItems(await res.json());
+      } else {
+        const err = await res.json().catch(() => ({ error: 'Failed to load' }));
+        setMentorQueueError(err.error || 'Failed to load mentor queue');
+      }
+    } catch {
+      setMentorQueueError('Network error loading mentor queue');
+    }
+    setMentorQueueLoading(false);
+  };
+
+  const fetchMentorProfiles = async () => {
+    try {
+      const res = await adminFetch('/api/admin/mentor-profiles');
+      if (res.ok) {
+        setMentorProfiles(await res.json());
+      }
+    } catch {}
+  };
+
+  const handleAssignMentor = async (requestId: string, mentorEmail: string) => {
+    try {
+      const res = await adminFetch(`/api/admin/mentor-queue/${requestId}/assign`, {
+        method: 'PATCH',
+        body: JSON.stringify({ mentor_email: mentorEmail }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Assign failed' }));
+        toast.error(err.error || 'Failed to assign mentor');
+        return;
+      }
+      toast.success('Mentor assigned successfully');
+      fetchMentorQueue();
+    } catch {
+      toast.error('Network error assigning mentor');
+    }
+  };
+
+  const handleApproveReview = async (requestId: string) => {
+    try {
+      const res = await adminFetch(`/api/admin/mentor-queue/${requestId}/approve`, {
+        method: 'PATCH',
+        body: JSON.stringify({ admin_approval_notes: 'Approved by admin' }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Approve failed' }));
+        toast.error(err.error || 'Failed to approve review');
+        return;
+      }
+      toast.success('Review approved and delivered to student');
+      fetchMentorQueue();
+    } catch {
+      toast.error('Network error approving review');
+    }
+  };
+
+  const handleRejectReview = async (requestId: string, reason: string) => {
+    try {
+      const res = await adminFetch(`/api/admin/mentor-queue/${requestId}/reject`, {
+        method: 'PATCH',
+        body: JSON.stringify({ rejection_reason: reason }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Reject failed' }));
+        toast.error(err.error || 'Failed to reject review');
+        return;
+      }
+      toast.success('Review returned to mentor for revision');
+      fetchMentorQueue();
+    } catch {
+      toast.error('Network error rejecting review');
+    }
+  };
 
   // Search & Filter for Active Scholarships table
   const [searchQuery, setSearchQuery] = useState('');
@@ -232,9 +319,18 @@ export default function AdminPortal({
 
   useEffect(() => {
     fetchStats();
-    const interval = setInterval(fetchStats, 30000);
+    const interval = setInterval(fetchStats, 15000);
     return () => clearInterval(interval);
   }, [scholarships, botQueue, auditLogs, usersList]);
+
+  useEffect(() => {
+    if (activeAdminSubTab === 'mentor_queue') {
+      fetchMentorQueue();
+      fetchMentorProfiles();
+      const mqInterval = setInterval(fetchMentorQueue, 15000);
+      return () => clearInterval(mqInterval);
+    }
+  }, [activeAdminSubTab]);
 
   // Fetch users from server and map to component format
   const fetchUsers = async () => {
@@ -712,7 +808,21 @@ export default function AdminPortal({
               )}
             </button>
 
-            {/* Nav 4: Users registry */}
+            {/* Nav 4: Mentor Queue */}
+            <button 
+              onClick={() => { setActiveAdminSubTab('mentor_queue'); fetchMentorQueue(); }}
+              className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-xl font-bold text-xs tracking-tight transition-all text-left outline-none relative ${activeAdminSubTab === 'mentor_queue' ? 'bg-secondary-container text-on-secondary-container shadow-xs' : 'text-on-surface-variant hover:bg-surface-container hover:text-primary'}`}
+            >
+              <MessageSquare className="w-4 h-4 shrink-0" />
+              Mentor Queue
+              {mentorQueueItems.filter(r => r.status === 'pending' || r.status === 'submitted_by_mentor').length > 0 && (
+                <span className="absolute right-3.5 px-2 py-0.5 rounded-full text-[9px] font-black bg-status-urgent text-white scale-90">
+                  {mentorQueueItems.filter(r => r.status === 'pending' || r.status === 'submitted_by_mentor').length}
+                </span>
+              )}
+            </button>
+
+            {/* Nav 5: Users registry */}
             <button 
               onClick={() => setActiveAdminSubTab('users')}
               className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-xl font-bold text-xs tracking-tight transition-all text-left outline-none ${activeAdminSubTab === 'users' ? 'bg-secondary-container text-on-secondary-container shadow-xs' : 'text-on-surface-variant hover:bg-surface-container hover:text-primary'}`}
@@ -834,6 +944,138 @@ export default function AdminPortal({
 
           {/* Ingestion Bot queue Review tab router */}
           {activeAdminSubTab === 'bot_queue' && <BotQueueReview />}
+
+          {/* Mentor Queue tab router */}
+          {activeAdminSubTab === 'mentor_queue' && (
+            <div className="space-y-4 animate-sweep">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-display font-black text-primary text-sm">Mentor Review Queue</h3>
+                  <p className="text-[10px] text-outline font-semibold mt-0.5">
+                    {mentorQueueItems.filter(r => r.status === 'pending').length} pending · {mentorQueueItems.filter(r => r.status === 'submitted_by_mentor').length} awaiting approval
+                  </p>
+                </div>
+                <button onClick={() => { fetchMentorQueue(); fetchMentorProfiles(); }} className="flex items-center gap-1.5 px-3 py-1.5 bg-surface-bright border border-outline-variant rounded-lg text-[10px] font-bold text-on-surface-variant hover:border-primary transition-colors cursor-pointer">
+                  <RefreshCw className="w-3 h-3" /> Refresh
+                </button>
+              </div>
+
+              {mentorQueueError && (
+                <div className="p-4 bg-status-urgent/5 border border-status-urgent/20 rounded-xl text-xs text-status-urgent font-semibold">
+                  {mentorQueueError}
+                </div>
+              )}
+
+              {mentorQueueLoading ? (
+                <div className="text-center py-12 text-outline text-xs">Loading mentor queue...</div>
+              ) : mentorQueueItems.length === 0 ? (
+                <div className="text-center py-12 text-outline">
+                  <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                  <p className="text-xs font-semibold">No mentor review requests yet.</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {mentorQueueItems.map((item: any) => (
+                    <div key={item.id} className="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-5 shadow-xs">
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                              item.status === 'pending' ? 'bg-status-warning/10 text-status-warning' :
+                              item.status === 'assigned' ? 'bg-primary-fixed text-primary' :
+                              item.status === 'under_review' ? 'bg-status-info/10 text-status-info' :
+                              item.status === 'submitted_by_mentor' ? 'bg-status-success/10 text-status-success' :
+                              'bg-surface-container-highest text-on-surface-variant'
+                            }`}>
+                              {item.status}
+                            </span>
+                            <span className="text-[9px] font-bold text-outline">{item.request_reference}</span>
+                          </div>
+                          <h4 className="font-bold text-xs text-primary">{item.scholarship_name}</h4>
+                          {item.scholarship_provider && (
+                            <p className="text-[10px] text-on-surface-variant">{item.scholarship_provider}</p>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <p className="text-[9px] font-bold text-outline">Deadline</p>
+                          <p className="text-[10px] font-semibold text-on-surface">{new Date(item.response_deadline).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-3 mb-3 text-[10px]">
+                        <div>
+                          <span className="text-outline font-bold">Student</span>
+                          <p className="font-semibold text-on-surface">{item.user_first_name || item.user_email}</p>
+                        </div>
+                        <div>
+                          <span className="text-outline font-bold">Plan</span>
+                          <p className="font-semibold text-on-surface capitalize">{item.user_plan}</p>
+                        </div>
+                        <div>
+                          <span className="text-outline font-bold">Feedback</span>
+                          <p className="font-semibold text-on-surface capitalize">{item.feedback_type || 'basic'}</p>
+                        </div>
+                      </div>
+
+                      {/* Pending — assign to mentor */}
+                      {item.status === 'pending' && (
+                        <div className="flex items-center gap-2 pt-3 border-t border-outline-variant/30">
+                          <select
+                            onChange={(e) => { if (e.target.value) handleAssignMentor(item.id, e.target.value); }}
+                            className="flex-1 p-2 bg-surface border border-outline-variant rounded-lg text-xs font-semibold text-on-surface focus:outline-none focus:border-primary"
+                            defaultValue=""
+                          >
+                            <option value="" disabled>Select a mentor...</option>
+                            {mentorProfiles.filter((m: any) => m.is_active).map((m: any) => (
+                              <option key={m.mentor_email} value={m.mentor_email}>
+                                {m.display_name} ({m.mentor_email})
+                              </option>
+                            ))}
+                            {mentorProfiles.filter((m: any) => m.is_active).length === 0 && (
+                              <option value="" disabled>No active mentors — create one first</option>
+                            )}
+                          </select>
+                        </div>
+                      )}
+
+                      {/* Assigned — show mentor info */}
+                      {item.status === 'assigned' && (
+                        <div className="pt-3 border-t border-outline-variant/30">
+                          <p className="text-[10px] font-semibold text-outline">
+                            Mentor: {item.assigned_mentor_name || item.assigned_mentor_email}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Submitted by mentor — approve/reject */}
+                      {(item.status === 'submitted_by_mentor') && (
+                        <div className="flex items-center gap-2 pt-3 border-t border-outline-variant/30">
+                          <button onClick={() => handleApproveReview(item.id)} className="flex items-center gap-1 px-3 py-1.5 bg-status-success text-white rounded-lg text-[10px] font-bold hover:opacity-90 transition-opacity cursor-pointer">
+                            <CheckCircle className="w-3 h-3" /> Approve & Deliver
+                          </button>
+                          <button onClick={() => {
+                            const reason = prompt('Reason for rejection:');
+                            if (reason) handleRejectReview(item.id, reason);
+                          }} className="flex items-center gap-1 px-3 py-1.5 border border-status-urgent text-status-urgent rounded-lg text-[10px] font-bold hover:bg-status-urgent/5 transition-colors cursor-pointer">
+                            <X className="w-3 h-3" /> Reject
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Delivered */}
+                      {item.status === 'delivered_to_student' && (
+                        <div className="pt-3 border-t border-outline-variant/30">
+                          <span className="text-[10px] font-bold text-status-success flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3" /> Delivered to student
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Audit Logs tab router */}
           {activeAdminSubTab === 'audit_log' && (

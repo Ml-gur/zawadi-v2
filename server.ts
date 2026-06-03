@@ -22,30 +22,101 @@ import {
 } from './src/lib/supabase-server';
 import { validateScholarship } from './src/services/scholarship-validator';
 import { runDiscoveryPipeline, initializePipelineScheduler } from './src/services/scholarship-pipeline';
+import { MENTOR_REVIEW_LIMITS, PLAN_LABELS, PLAN_HIERARCHY } from './src/config/plan-config';
 
 dotenv.config();
 
-// ─── Missing function declarations (runtime-defined helpers) ──────────
-// These are used throughout the file but defined via dynamic references.
-// Declared here so TypeScript type-checks cleanly.
-declare function saveDb(db: any): void;
-declare function sbGetUser(email: string): Promise<any>;
-declare function sbUpsertUser(data: any): Promise<any>;
-declare function sbGetUsers(): Promise<any[]>;
-declare function sbGetDocs(email: string): Promise<any[]>;
-declare function sbInsertDoc(doc: any): Promise<any>;
-declare function sbDeleteDoc(id: string): Promise<void>;
-declare function sbGetApps(email: string): Promise<any[]>;
-declare function sbUpsertApp(app: any): Promise<any>;
-declare function sbDeleteApp(id: string): Promise<void>;
-declare function sbGetScholarshipsList(): Promise<any[]>;
-declare function sbGetScholarshipById(id: string): Promise<any>;
-declare function sbUpsertScholarship(s: any): Promise<any>;
-declare function sbGetEssaysList(email: string): Promise<any[]>;
-declare function sbInsertAudit(log: any): Promise<void>;
-declare function sbGetPayByReference(ref: string): Promise<any>;
-declare function sbUpsertPayRecord(p: any): Promise<any>;
-declare function sbUpdatePayByReference(ref: string, updates: any): Promise<any>;
+// ─── Runtime helpers ──────────────────────────────────────────────────
+function saveDb(db: any) {
+  try { fs.writeFileSync(dbPath, JSON.stringify(db, null, 2)); }
+  catch (e) { console.error('[DB] Failed to save db.json:', e); }
+}
+
+// Supabase helper wrappers for local JSON mode
+const EMPTY_DB = () => ({ scholarships: [], users: [], applications: [], documents: [], essays: [], bot_ingestions: [], payments: [], audit_logs: [], mentor_review_requests: [], mentor_profiles: [], mentor_feedback_ratings: [], notifications: [], contact_submissions: [] });
+
+async function sbGetUser(email: string): Promise<any> {
+  if (!supabaseAdmin) return null;
+  const { data } = await supabaseAdmin.from('users').select('*').eq('email', email).single();
+  return data;
+}
+async function sbUpsertUser(data: any): Promise<any> {
+  if (!supabaseAdmin) return null;
+  const { data: d } = await supabaseAdmin.from('users').upsert(data).select().single();
+  return d;
+}
+async function sbGetUsers(): Promise<any[]> {
+  if (!supabaseAdmin) return [];
+  const { data } = await supabaseAdmin.from('users').select('*');
+  return data || [];
+}
+async function sbGetDocs(email: string): Promise<any[]> {
+  if (!supabaseAdmin) return [];
+  const { data } = await supabaseAdmin.from('documents').select('*').eq('user_email', email);
+  return data || [];
+}
+async function sbInsertDoc(doc: any): Promise<any> {
+  if (!supabaseAdmin) return null;
+  const { data } = await supabaseAdmin.from('documents').insert(doc).select().single();
+  return data;
+}
+async function sbDeleteDoc(id: string): Promise<void> {
+  if (!supabaseAdmin) return;
+  await supabaseAdmin.from('documents').delete().eq('id', id);
+}
+async function sbGetApps(email: string): Promise<any[]> {
+  if (!supabaseAdmin) return [];
+  const { data } = await supabaseAdmin.from('applications').select('*').eq('user_email', email);
+  return data || [];
+}
+async function sbUpsertApp(app: any): Promise<any> {
+  if (!supabaseAdmin) return null;
+  const { data } = await supabaseAdmin.from('applications').upsert(app).select().single();
+  return data;
+}
+async function sbDeleteApp(id: string): Promise<void> {
+  if (!supabaseAdmin) return;
+  await supabaseAdmin.from('applications').delete().eq('id', id);
+}
+async function sbGetScholarshipsList(): Promise<any[]> {
+  if (!supabaseAdmin) return [];
+  const { data } = await supabaseAdmin.from('scholarships').select('*');
+  return data || [];
+}
+async function sbGetScholarshipById(id: string): Promise<any> {
+  if (!supabaseAdmin) return null;
+  const { data } = await supabaseAdmin.from('scholarships').select('*').eq('id', id).single();
+  return data;
+}
+async function sbUpsertScholarship(s: any): Promise<any> {
+  if (!supabaseAdmin) return null;
+  const { data } = await supabaseAdmin.from('scholarships').upsert(s).select().single();
+  return data;
+}
+async function sbGetEssaysList(email: string): Promise<any[]> {
+  if (!supabaseAdmin) return [];
+  const { data } = await supabaseAdmin.from('essays').select('*').eq('user_email', email);
+  return data || [];
+}
+async function sbInsertAudit(log: any): Promise<void> {
+  if (!supabaseAdmin) return;
+  await supabaseAdmin.from('audit_logs').insert(log);
+}
+async function sbGetPayByReference(ref: string): Promise<any> {
+  if (!supabaseAdmin) return null;
+  const { data } = await supabaseAdmin.from('payments').select('*').eq('reference', ref).single();
+  return data;
+}
+async function sbUpsertPayRecord(p: any): Promise<any> {
+  if (!supabaseAdmin) return null;
+  const { data } = await supabaseAdmin.from('payments').upsert(p).select().single();
+  return data;
+}
+async function sbUpdatePayByReference(ref: string, updates: any): Promise<any> {
+  if (!supabaseAdmin) return null;
+  const { data } = await supabaseAdmin.from('payments').update(updates).eq('reference', ref).select().single();
+  return data;
+}
 // JWT secret — must be set in environment, never hardcoded
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
@@ -110,24 +181,23 @@ const dbPath = path.join(process.cwd(), 'src/data/db.json');
 
 function getDb() {
   if (IS_SUPABASE_MODE) {
-    // In Supabase mode the db.json file is a local fallback for when Supabase writes fail
     try {
       const content = fs.readFileSync(dbPath, 'utf8');
       return JSON.parse(content);
-    } catch { /* file may not exist */ }
-    return { scholarships: [], users: [], applications: [], documents: [], essays: [], bot_ingestions: [], payments: [], audit_logs: [], mentor_review_requests: [], mentor_profiles: [], mentor_feedback_ratings: [], notifications: [], contact_submissions: [] };
-  }
-
-  if (new Error().stack?.includes('local-dev')) {
-    return { scholarships: [], users: [], applications: [], documents: [], essays: [], bot_ingestions: [], payments: [], audit_logs: [], mentor_review_requests: [], mentor_profiles: [], mentor_feedback_ratings: [], notifications: [], contact_submissions: [] };
+    } catch { }
+    return EMPTY_DB();
   }
 
   if (!fs.existsSync(dbPath)) {
-    fs.writeFileSync(dbPath, JSON.stringify({ scholarships: [], users: [], applications: [], documents: [], essays: [], bot_ingestions: [], payments: [], audit_logs: [], mentor_review_requests: [], mentor_profiles: [], mentor_feedback_ratings: [], notifications: [], contact_submissions: [] }, null, 2));
-} else {
-  // Clean any leaked admin_email from user records
+    const defaults = EMPTY_DB();
+    fs.writeFileSync(dbPath, JSON.stringify(defaults, null, 2));
+    return defaults;
+  }
+
   try {
-    const db = getDb();
+    const content = fs.readFileSync(dbPath, 'utf8');
+    const db = JSON.parse(content);
+    // Clean any leaked admin fields
     let dirty = false;
     if (db.users) {
       for (const u of db.users) {
@@ -136,7 +206,9 @@ function getDb() {
       }
     }
     if (dirty) saveDb(db);
-  } catch {}
+    return db;
+  } catch {
+    return EMPTY_DB();
   }
 }
 
@@ -1390,730 +1462,706 @@ app.post('/api/essays/voice-profile', verifyAuth, async (req: any, res) => {
 
 // --------------- Mentor Review System (v2 - Full Pipeline) ---------------
 
-import('./src/config/plan-config').then(m => {
-  const MENTOR_REVIEW_LIMITS = m.MENTOR_REVIEW_LIMITS;
-  const PLAN_LABELS = m.PLAN_LABELS;
-  const PLAN_HIERARCHY = m.PLAN_HIERARCHY;
+function getMentorEntitlement(plan: string) {
+  return MENTOR_REVIEW_LIMITS[plan?.toLowerCase()] || MENTOR_REVIEW_LIMITS.explorer;
+}
 
-  // Helper to get plan entitlements
-  function getMentorEntitlement(plan: string) {
-    return MENTOR_REVIEW_LIMITS[plan?.toLowerCase()] || MENTOR_REVIEW_LIMITS.explorer;
-  }
+function countMonthlyReviews(db: any, email: string): number {
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  return (db.mentor_review_requests || []).filter((r: any) =>
+    r.user_email?.toLowerCase() === email?.toLowerCase() &&
+    r.status !== 'cancelled' &&
+    new Date(r.requested_at) >= startOfMonth
+  ).length;
+}
 
-  // Helper: count reviews used this month from local db
-  function countMonthlyReviews(db: any, email: string): number {
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    return (db.mentor_review_requests || []).filter((r: any) =>
-      r.user_email?.toLowerCase() === email?.toLowerCase() &&
-      r.status !== 'cancelled' &&
-      new Date(r.requested_at) >= startOfMonth
-    ).length;
-  }
+// --------------- Student Endpoints ---------------
 
-  // --------------- Student Endpoints ---------------
+// POST /api/essays/request-mentor-review
+app.post('/api/essays/request-mentor-review', verifyAuth, async (req: any, res) => {
+  try {
+    const db = getDb();
+    const email = req.userEmail?.toLowerCase();
+    const user = db.users.find((u: any) => u.email?.toLowerCase() === email);
+    if (!user) return res.status(404).json({ error: 'User not found' });
 
-  // POST /api/essays/request-mentor-review
-  app.post('/api/essays/request-mentor-review', verifyAuth, async (req: any, res) => {
-    try {
-      const db = getDb();
-      const email = req.userEmail?.toLowerCase();
-      const user = db.users.find((u: any) => u.email?.toLowerCase() === email);
-      if (!user) return res.status(404).json({ error: 'User not found' });
+    const plan = user.plan || 'explorer';
+    const entitlement = getMentorEntitlement(plan);
 
-      const plan = user.plan || 'explorer';
-      const entitlement = getMentorEntitlement(plan);
+    let monthlyCount = 0;
+    if (IS_SUPABASE_MODE) {
+      try {
+        const { getMonthlyMentorRequestCount } = await import('./src/lib/supabase-server');
+        monthlyCount = await getMonthlyMentorRequestCount(email);
+      } catch {}
+    } else {
+      monthlyCount = countMonthlyReviews(db, email);
+    }
 
-      // Check monthly limit
-      let monthlyCount = 0;
-      if (IS_SUPABASE_MODE) {
-        try {
-          const { getMonthlyMentorRequestCount } = await import('./src/lib/supabase-server');
-          monthlyCount = await getMonthlyMentorRequestCount(email);
-        } catch {}
-      } else {
-        monthlyCount = countMonthlyReviews(db, email);
-      }
-
-      if (entitlement.reviews_per_month !== null && monthlyCount >= entitlement.reviews_per_month) {
-        const nextMonth = new Date();
-        nextMonth.setMonth(nextMonth.getMonth() + 1);
-        nextMonth.setDate(1);
-        return res.status(403).json({
-          error: `You have used all ${entitlement.reviews_per_month} mentor reviews for this month. Your next review slot opens on ${nextMonth.toISOString().split('T')[0]} or upgrade your plan for more reviews.`
-        });
-      }
-
-      const { essay_id, essay_content, scholarship_name, scholarship_provider, scholarship_deadline, scholarship_host_region, student_notes } = req.body;
-      if (!essay_id || !essay_content || !scholarship_name) {
-        return res.status(400).json({ error: 'essay_id, essay_content, and scholarship_name are required' });
-      }
-
-      const responseDeadline = new Date(Date.now() + entitlement.response_days_guarantee * 24 * 60 * 60 * 1000);
-
-      const payload = {
-        request_reference: '',
-        user_email: email,
-        user_first_name: user.name?.split(' ')[0] || user.name || 'Student',
-        user_country: user.country || 'Not specified',
-        user_plan: plan,
-        essay_id,
-        essay_version: 1,
-        essay_content,
-        scholarship_name,
-        scholarship_provider: scholarship_provider || null,
-        scholarship_deadline: scholarship_deadline || null,
-        scholarship_host_region: scholarship_host_region || null,
-        student_notes: student_notes || null,
-        status: 'pending',
-        priority: entitlement.priority,
-        response_deadline: responseDeadline,
-        feedback_type: entitlement.feedback_type,
-        includes_revised_sections: entitlement.includes_revised_sections,
-        includes_strategy_session: entitlement.includes_strategy_session,
-        requested_at: new Date().toISOString()
-      };
-
-      let saved: any;
-      if (IS_SUPABASE_MODE) {
-        const { insertMentorRequest } = await import('./src/lib/supabase-server');
-        saved = await insertMentorRequest(payload);
-      } else {
-        const requests = db.mentor_review_requests || [];
-        saved = { ...payload, id: 'mrr-l-' + Date.now(), request_reference: 'MRR-LOCAL-' + Date.now() };
-        requests.push(saved);
-        db.mentor_review_requests = requests;
-        saveDb(db);
-      }
-
-      res.json({
-        success: true,
-        request: saved,
-        remaining_this_month: entitlement.reviews_per_month !== null ? entitlement.reviews_per_month - monthlyCount - 1 : null,
-        plan: PLAN_LABELS[plan] || plan,
-        response_deadline: responseDeadline,
-        feedback_type: entitlement.feedback_type,
+    if (entitlement.reviews_per_month !== null && monthlyCount >= entitlement.reviews_per_month) {
+      const nextMonth = new Date();
+      nextMonth.setMonth(nextMonth.getMonth() + 1);
+      nextMonth.setDate(1);
+      return res.status(403).json({
+        error: `You have used all ${entitlement.reviews_per_month} mentor reviews for this month. Your next review slot opens on ${nextMonth.toISOString().split('T')[0]} or upgrade your plan for more reviews.`
       });
-
-      // Create notification for admin
-      const adminEmail = process.env.ADMIN_EMAIL || 'admin@zawadi.app';
-      if (IS_SUPABASE_MODE) {
-        try {
-          const { insertNotification } = await import('./src/lib/supabase-server');
-          await insertNotification({
-            user_email: adminEmail,
-            message: `New mentor review request ${saved.request_reference} for ${scholarship_name}`,
-            type: 'mentor_request',
-            related_id: saved.id,
-          });
-        } catch {}
-      }
-    } catch (err: any) {
-      console.error('Mentor request error:', err);
-      res.status(500).json({ error: err.message || 'Failed to submit mentor review request' });
     }
-  });
 
-  // GET /api/essays/mentor-review-status/:essay_id
-  app.get('/api/essays/mentor-review-status/:essay_id', verifyAuth, async (req: any, res) => {
-    try {
-      const email = req.userEmail?.toLowerCase();
-      const essayId = req.params.essay_id;
-      const db = getDb();
-
-      let requests: any[] = [];
-      if (IS_SUPABASE_MODE) {
-        const { getMentorRequestsForUser } = await import('./src/lib/supabase-server');
-        const all = await getMentorRequestsForUser(email);
-        requests = all.filter((r: any) => r.essay_id === essayId);
-      } else {
-        requests = (db.mentor_review_requests || []).filter((r: any) =>
-          r.user_email?.toLowerCase() === email && r.essay_id === essayId
-        );
-      }
-
-      const sanitized = requests.map((r: any) => ({
-        id: r.id,
-        request_reference: r.request_reference,
-        status: r.status,
-        priority: r.priority,
-        response_deadline: r.response_deadline,
-        assigned_mentor_name: r.status !== 'pending' ? r.assigned_mentor_name : null,
-        feedback_type: r.feedback_type,
-        feedback_overall_assessment: r.status === 'delivered_to_student' ? r.feedback_overall_assessment : null,
-        feedback_opening: r.status === 'delivered_to_student' ? r.feedback_opening : null,
-        feedback_narrative: r.status === 'delivered_to_student' ? r.feedback_narrative : null,
-        feedback_evidence: r.status === 'delivered_to_student' ? r.feedback_evidence : null,
-        feedback_cultural_authenticity: r.status === 'delivered_to_student' ? r.feedback_cultural_authenticity : null,
-        feedback_closing: r.status === 'delivered_to_student' ? r.feedback_closing : null,
-        feedback_general_advice: r.status === 'delivered_to_student' ? r.feedback_general_advice : null,
-        revised_sections: r.status === 'delivered_to_student' ? r.revised_sections : null,
-        mentor_confidence_score: r.status === 'delivered_to_student' ? r.mentor_confidence_score : null,
-        estimated_success_probability: r.status === 'delivered_to_student' ? r.estimated_success_probability : null,
-        student_notes: r.student_notes,
-        requested_at: r.requested_at,
-        delivered_at: r.delivered_at,
-      }));
-
-      res.json(sanitized);
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
+    const { essay_id, essay_content, scholarship_name, scholarship_provider, scholarship_deadline, scholarship_host_region, student_notes } = req.body;
+    if (!essay_id || !essay_content || !scholarship_name) {
+      return res.status(400).json({ error: 'essay_id, essay_content, and scholarship_name are required' });
     }
-  });
 
-  // --------------- Admin Endpoints ---------------
+    const responseDeadline = new Date(Date.now() + entitlement.response_days_guarantee * 24 * 60 * 60 * 1000);
 
-  // GET /api/admin/mentor-queue
-  app.get('/api/admin/mentor-queue', verifySuperAdmin, async (req: any, res) => {
-    try {
-      const db = getDb();
-      let requests: any[] = [];
+    const payload = {
+      request_reference: '',
+      user_email: email,
+      user_first_name: user.name?.split(' ')[0] || user.name || 'Student',
+      user_country: user.country || 'Not specified',
+      user_plan: plan,
+      essay_id,
+      essay_version: 1,
+      essay_content,
+      scholarship_name,
+      scholarship_provider: scholarship_provider || null,
+      scholarship_deadline: scholarship_deadline || null,
+      scholarship_host_region: scholarship_host_region || null,
+      student_notes: student_notes || null,
+      status: 'pending',
+      priority: entitlement.priority,
+      response_deadline: responseDeadline,
+      feedback_type: entitlement.feedback_type,
+      includes_revised_sections: entitlement.includes_revised_sections,
+      includes_strategy_session: entitlement.includes_strategy_session,
+      requested_at: new Date().toISOString()
+    };
 
-      if (IS_SUPABASE_MODE) {
-        const { getMentorRequests } = await import('./src/lib/supabase-server');
-        requests = await getMentorRequests();
-      } else {
-        requests = db.mentor_review_requests || [];
-      }
-
-      if (req.query.status) requests = requests.filter((r: any) => r.status === req.query.status);
-      if (req.query.priority) requests = requests.filter((r: any) => r.priority === req.query.priority);
-      if (req.query.assigned_mentor_email) requests = requests.filter((r: any) => r.assigned_mentor_email === req.query.assigned_mentor_email);
-
-      requests.sort((a: any, b: any) => new Date(a.response_deadline).getTime() - new Date(b.response_deadline).getTime());
-
-      res.json(requests);
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
-    }
-  });
-
-  // PATCH /api/admin/mentor-queue/:id/assign
-  app.patch('/api/admin/mentor-queue/:id/assign', verifySuperAdmin, async (req: any, res) => {
-    try {
-      const { mentor_email } = req.body;
-      if (!mentor_email) return res.status(400).json({ error: 'mentor_email is required' });
-
-      const db = getDb();
-
-      // Get mentor profile
-      let mentorProfile: any = null;
-      if (IS_SUPABASE_MODE) {
-        const { getMentorProfile } = await import('./src/lib/supabase-server');
-        mentorProfile = await getMentorProfile(mentor_email);
-      } else {
-        mentorProfile = (db.mentor_profiles || []).find((m: any) => m.mentor_email === mentor_email);
-      }
-
-      if (!mentorProfile || !mentorProfile.is_active) {
-        return res.status(400).json({ error: 'Mentor not found or inactive' });
-      }
-
-      // Count active assignments
-      let activeCount = 0;
-      if (IS_SUPABASE_MODE) {
-        const { getMentorRequests } = await import('./src/lib/supabase-server');
-        const active = await getMentorRequests('assigned', mentor_email);
-        const reviewing = await getMentorRequests('under_review', mentor_email);
-        activeCount = (active?.length || 0) + (reviewing?.length || 0);
-      } else {
-        activeCount = (db.mentor_review_requests || []).filter((r: any) =>
-          r.assigned_mentor_email === mentor_email &&
-          (r.status === 'assigned' || r.status === 'under_review')
-        ).length;
-      }
-
-      if (activeCount >= (mentorProfile.max_concurrent_reviews || 3)) {
-        return res.status(400).json({ error: `Mentor has reached their maximum of ${mentorProfile.max_concurrent_reviews} concurrent reviews` });
-      }
-
-      const now = new Date().toISOString();
-      const updates = {
-        status: 'assigned',
-        assigned_mentor_email: mentor_email,
-        assigned_mentor_name: mentorProfile.display_name,
-        assigned_at: now,
-      };
-
-      let updated: any;
-      if (IS_SUPABASE_MODE) {
-        const { updateMentorRequest } = await import('./src/lib/supabase-server');
-        updated = await updateMentorRequest(req.params.id, updates);
-      } else {
-        const idx = (db.mentor_review_requests || []).findIndex((r: any) => r.id === req.params.id);
-        if (idx === -1) return res.status(404).json({ error: 'Request not found' });
-        db.mentor_review_requests[idx] = { ...db.mentor_review_requests[idx], ...updates };
-        saveDb(db);
-        updated = db.mentor_review_requests[idx];
-      }
-
-      // Notify mentor
-      if (IS_SUPABASE_MODE) {
-        try {
-          const { insertNotification } = await import('./src/lib/supabase-server');
-          await insertNotification({
-            user_email: mentor_email,
-            message: `You have been assigned a new mentor review: ${updated.request_reference} for ${updated.scholarship_name}`,
-            type: 'new_assignment',
-            related_id: updated.id,
-          });
-        } catch {}
-      }
-
-      res.json(updated);
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
-    }
-  });
-
-  // PATCH /api/admin/mentor-queue/:id/approve
-  app.patch('/api/admin/mentor-queue/:id/approve', verifySuperAdmin, async (req: any, res) => {
-    try {
-      const { admin_approval_notes } = req.body;
-      const db = getDb();
-      const now = new Date().toISOString();
-
-      let request: any;
-      if (IS_SUPABASE_MODE) {
-        const { getMentorRequestById, updateMentorRequest } = await import('./src/lib/supabase-server');
-        request = await getMentorRequestById(req.params.id);
-        if (!request) return res.status(404).json({ error: 'Request not found' });
-        if (request.status !== 'submitted_by_mentor') return res.status(400).json({ error: `Cannot approve request in ${request.status} status` });
-
-        // Verify user_email exists in profiles
-        const { getProfile } = await import('./src/lib/supabase-server');
-        const profile = await getProfile(request.user_email);
-        if (!profile) return res.status(400).json({ error: 'User profile not found' });
-
-        // Verify essay_id belongs to user
-        const { getEssays } = await import('./src/lib/supabase-server');
-        const userEssays = await getEssays(request.user_email);
-        if (!userEssays?.some((e: any) => e.id === request.essay_id)) {
-          return res.status(400).json({ error: 'Essay does not belong to this user' });
-        }
-
-        request = await updateMentorRequest(req.params.id, {
-          status: 'approved_by_admin',
-          admin_approved_by: req.adminEmail,
-          admin_approved_at: now,
-          admin_approval_notes: admin_approval_notes || null,
-        });
-
-        // Deliver immediately
-        request = await updateMentorRequest(req.params.id, {
-          status: 'delivered_to_student',
-          delivered_at: now,
-        });
-
-        // Notify student
-        const { insertNotification } = await import('./src/lib/supabase-server');
-        await insertNotification({
-          user_email: request.user_email,
-          message: `Your mentor review ${request.request_reference} for ${request.scholarship_name} is ready!`,
-          type: 'mentor_feedback_ready',
-          related_id: request.id,
-        });
-
-        // Log to audit
-        const { insertAuditLog } = await import('./src/lib/supabase-server');
-        await insertAuditLog({
-          id: 'audit-' + Date.now(),
-          admin_email: req.adminEmail,
-          action: 'mentor_feedback_approved',
-          target_type: 'mentor_review_request',
-          target_id: request.id,
-          details: `Approved feedback for ${request.user_email} on essay ${request.essay_id} (${request.request_reference})`,
-          created_at: now,
-        });
-      } else {
-        const idx = (db.mentor_review_requests || []).findIndex((r: any) => r.id === req.params.id);
-        if (idx === -1) return res.status(404).json({ error: 'Request not found' });
-        request = db.mentor_review_requests[idx];
-        if (request.status !== 'submitted_by_mentor') return res.status(400).json({ error: `Cannot approve request in ${request.status} status` });
-        request.status = 'approved_by_admin';
-        request.admin_approved_by = req.adminEmail;
-        request.admin_approved_at = now;
-        request.admin_approval_notes = admin_approval_notes || null;
-        request.status = 'delivered_to_student';
-        request.delivered_at = now;
-        db.mentor_review_requests[idx] = request;
-        saveDb(db);
-      }
-
-      res.json(request);
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
-    }
-  });
-
-  // PATCH /api/admin/mentor-queue/:id/reject
-  app.patch('/api/admin/mentor-queue/:id/reject', verifySuperAdmin, async (req: any, res) => {
-    try {
-      const { rejection_reason } = req.body;
-      if (!rejection_reason) return res.status(400).json({ error: 'Rejection reason is required' });
-
-      let request: any;
-      if (IS_SUPABASE_MODE) {
-        const { getMentorRequestById, updateMentorRequest } = await import('./src/lib/supabase-server');
-        request = await getMentorRequestById(req.params.id);
-        if (!request) return res.status(404).json({ error: 'Request not found' });
-        if (request.status !== 'submitted_by_mentor') return res.status(400).json({ error: 'Request must be in submitted_by_mentor status' });
-
-        request = await updateMentorRequest(req.params.id, {
-          status: 'assigned',
-          admin_approval_notes: rejection_reason,
-          admin_rejection_reason: rejection_reason,
-        });
-
-        // Notify mentor
-        const { insertNotification } = await import('./src/lib/supabase-server');
-        await insertNotification({
-          user_email: request.assigned_mentor_email,
-          message: `Your review for ${request.request_reference} was returned by admin: ${rejection_reason}`,
-          type: 'mentor_revision_needed',
-          related_id: request.id,
-        });
-      } else {
-        const db = getDb();
-        const idx = (db.mentor_review_requests || []).findIndex((r: any) => r.id === req.params.id);
-        if (idx === -1) return res.status(404).json({ error: 'Request not found' });
-        request = db.mentor_review_requests[idx];
-        if (request.status !== 'submitted_by_mentor') return res.status(400).json({ error: 'Request must be in submitted_by_mentor status' });
-        request.status = 'assigned';
-        request.admin_approval_notes = rejection_reason;
-        request.admin_rejection_reason = rejection_reason;
-        db.mentor_review_requests[idx] = request;
-        saveDb(db);
-      }
-
-      res.json(request);
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
-    }
-  });
-
-  // --------------- Mentor Endpoints ---------------
-
-  // GET /api/mentor/queue
-  app.get('/api/mentor/queue', verifyAuth, async (req: any, res) => {
-    try {
-      const db = getDb();
-      let requests: any[] = [];
-
-      if (IS_SUPABASE_MODE) {
-        const { getMentorRequests } = await import('./src/lib/supabase-server');
-        const assigned = await getMentorRequests('assigned', req.userEmail);
-        const underReview = await getMentorRequests('under_review', req.userEmail);
-        requests = [...(assigned || []), ...(underReview || [])];
-      } else {
-        requests = (db.mentor_review_requests || []).filter((r: any) =>
-          r.assigned_mentor_email === req.userEmail &&
-          (r.status === 'assigned' || r.status === 'under_review')
-        );
-      }
-
-      const sanitized = requests.map((r: any) => ({
-        id: r.id,
-        request_reference: r.request_reference,
-        user_first_name: r.user_first_name,
-        user_country: r.user_country,
-        user_plan: r.user_plan,
-        essay_content: r.essay_content,
-        scholarship_name: r.scholarship_name,
-        scholarship_provider: r.scholarship_provider,
-        scholarship_deadline: r.scholarship_deadline,
-        scholarship_host_region: r.scholarship_host_region,
-        student_notes: r.student_notes,
-        feedback_type: r.feedback_type,
-        includes_revised_sections: r.includes_revised_sections,
-        response_deadline: r.response_deadline,
-        assigned_at: r.assigned_at,
-        status: r.status,
-        admin_rejection_reason: r.admin_rejection_reason,
-      }));
-
-      res.json(sanitized);
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
-    }
-  });
-
-  // PATCH /api/mentor/queue/:id/start
-  app.patch('/api/mentor/queue/:id/start', verifyAuth, async (req: any, res) => {
-    try {
-      let request: any;
-      if (IS_SUPABASE_MODE) {
-        const { getMentorRequestById, updateMentorRequest } = await import('./src/lib/supabase-server');
-        request = await getMentorRequestById(req.params.id);
-        if (!request) return res.status(404).json({ error: 'Request not found' });
-        if (request.assigned_mentor_email !== req.userEmail) return res.status(403).json({ error: 'Not assigned to you' });
-        if (request.status !== 'assigned') return res.status(400).json({ error: `Cannot start request in ${request.status} status` });
-        request = await updateMentorRequest(req.params.id, { status: 'under_review', mentor_started_review_at: new Date().toISOString() });
-      } else {
-        const db = getDb();
-        const idx = (db.mentor_review_requests || []).findIndex((r: any) => r.id === req.params.id);
-        if (idx === -1) return res.status(404).json({ error: 'Request not found' });
-        request = db.mentor_review_requests[idx];
-        if (request.assigned_mentor_email !== req.userEmail) return res.status(403).json({ error: 'Not assigned to you' });
-        if (request.status !== 'assigned') return res.status(400).json({ error: `Cannot start request in ${request.status} status` });
-        request.status = 'under_review';
-        request.mentor_started_review_at = new Date().toISOString();
-        db.mentor_review_requests[idx] = request;
-        saveDb(db);
-      }
-      res.json(request);
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
-    }
-  });
-
-  // PATCH /api/mentor/queue/:id/submit
-  app.patch('/api/mentor/queue/:id/submit', verifyAuth, async (req: any, res) => {
-    try {
-      let request: any;
-      if (IS_SUPABASE_MODE) {
-        const { getMentorRequestById } = await import('./src/lib/supabase-server');
-        request = await getMentorRequestById(req.params.id);
-      } else {
-        const db = getDb();
-        request = (db.mentor_review_requests || []).find((r: any) => r.id === req.params.id);
-      }
-
-      if (!request) return res.status(404).json({ error: 'Request not found' });
-      if (request.assigned_mentor_email !== req.userEmail) return res.status(403).json({ error: 'Not assigned to you' });
-      if (request.status !== 'under_review') return res.status(400).json({ error: `Cannot submit request in ${request.status} status` });
-
-      const feedbackType = request.feedback_type || 'basic';
-      const { feedback_overall_assessment, feedback_opening, feedback_narrative, feedback_evidence, feedback_cultural_authenticity, feedback_closing, feedback_general_advice, revised_sections, mentor_confidence_score, estimated_success_probability, mentor_private_notes } = req.body;
-
-      // Validate required fields based on feedback_type
-      const missing: string[] = [];
-      if (!feedback_overall_assessment) missing.push('feedback_overall_assessment');
-      if (!feedback_general_advice || feedback_general_advice.trim().length < 100) missing.push('feedback_general_advice (min 100 characters)');
-      if (feedbackType !== 'basic') {
-        if (!feedback_opening || feedback_opening.trim().length < 30) missing.push('feedback_opening (min 30 characters)');
-        if (!feedback_narrative || feedback_narrative.trim().length < 30) missing.push('feedback_narrative (min 30 characters)');
-        if (!feedback_evidence || feedback_evidence.trim().length < 30) missing.push('feedback_evidence (min 30 characters)');
-        if (!feedback_cultural_authenticity || feedback_cultural_authenticity.trim().length < 30) missing.push('feedback_cultural_authenticity (min 30 characters)');
-        if (!feedback_closing || feedback_closing.trim().length < 30) missing.push('feedback_closing (min 30 characters)');
-      }
-      if (feedbackType === 'full' || feedbackType === 'full_plus') {
-        if (!mentor_confidence_score) missing.push('mentor_confidence_score');
-      }
-      if (feedbackType === 'full_plus') {
-        if (!estimated_success_probability) missing.push('estimated_success_probability');
-      }
-      if (missing.length > 0) {
-        return res.status(400).json({ error: `Missing required fields: ${missing.join(', ')}` });
-      }
-
-      const updates: any = {
-        status: 'submitted_by_mentor',
-        mentor_submitted_at: new Date().toISOString(),
-        feedback_overall_assessment,
-        feedback_opening: feedback_opening || null,
-        feedback_narrative: feedback_narrative || null,
-        feedback_evidence: feedback_evidence || null,
-        feedback_cultural_authenticity: feedback_cultural_authenticity || null,
-        feedback_closing: feedback_closing || null,
-        feedback_general_advice,
-        revised_sections: revised_sections || null,
-        mentor_confidence_score: mentor_confidence_score || null,
-        estimated_success_probability: estimated_success_probability || null,
-        mentor_private_notes: mentor_private_notes || null,
-      };
-
-      if (IS_SUPABASE_MODE) {
-        const { updateMentorRequest } = await import('./src/lib/supabase-server');
-        request = await updateMentorRequest(req.params.id, updates);
-      } else {
-        const db = getDb();
-        const idx = (db.mentor_review_requests || []).findIndex((r: any) => r.id === req.params.id);
-        db.mentor_review_requests[idx] = { ...db.mentor_review_requests[idx], ...updates };
-        saveDb(db);
-        request = db.mentor_review_requests[idx];
-      }
-
-      // Notify admin
-      const adminEmail = process.env.ADMIN_EMAIL || 'admin@zawadi.app';
-      if (IS_SUPABASE_MODE) {
-        try {
-          const { insertNotification } = await import('./src/lib/supabase-server');
-          await insertNotification({
-            user_email: adminEmail,
-            message: `Mentor review ${request.request_reference} is ready for admin approval`,
-            type: 'mentor_submitted',
-            related_id: request.id,
-          });
-        } catch {}
-      }
-
-      res.json(request);
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
-    }
-  });
-
-  // --------------- Mentor Feedback Ratings ---------------
-
-  app.post('/api/mentor/feedback-rating/:request_id', verifyAuth, async (req: any, res) => {
-    try {
-      const { request_id } = req.params;
-      const email = req.userEmail?.toLowerCase();
-      const db = getDb();
-
-      let request: any;
-      if (IS_SUPABASE_MODE) {
-        const { getMentorRequestById } = await import('./src/lib/supabase-server');
-        request = await getMentorRequestById(request_id);
-      } else {
-        request = (db.mentor_review_requests || []).find((r: any) => r.id === request_id);
-      }
-
-      if (!request) return res.status(404).json({ error: 'Request not found' });
-      if (request.user_email !== email) return res.status(403).json({ error: 'Not your request' });
-      if (request.status !== 'delivered_to_student') return res.status(400).json({ error: 'Feedback not yet delivered' });
-
-      const { helpfulness_rating, accuracy_rating, clarity_rating, would_recommend, student_comment } = req.body;
-      if (!helpfulness_rating || !accuracy_rating || !clarity_rating) {
-        return res.status(400).json({ error: 'helpfulness_rating, accuracy_rating, and clarity_rating are required' });
-      }
-
-      const ratingPayload: any = {
-        request_id,
-        rated_by_email: email,
-        helpfulness_rating,
-        accuracy_rating,
-        clarity_rating,
-        would_recommend: would_recommend || false,
-        student_comment: student_comment || null,
-      };
-
-      if (IS_SUPABASE_MODE) {
-        const { insertMentorRating, getMentorProfile, upsertMentorProfile } = await import('./src/lib/supabase-server');
-        await insertMentorRating(ratingPayload);
-        // Update mentor's average score
-        if (request.assigned_mentor_email) {
-          const mentorProfile = await getMentorProfile(request.assigned_mentor_email);
-          if (mentorProfile) {
-            const avg = (helpfulness_rating + accuracy_rating + clarity_rating) / 3;
-            const currentTotal = (mentorProfile.average_mentor_score || 0) * (mentorProfile.total_reviews_completed || 0);
-            const newCount = (mentorProfile.total_reviews_completed || 0) + 1;
-            const newAvg = (currentTotal + avg) / newCount;
-            await upsertMentorProfile({
-              mentor_email: request.assigned_mentor_email,
-              total_reviews_completed: newCount,
-              average_mentor_score: Math.round(newAvg * 100) / 100,
-            });
-          }
-        }
-      } else {
-        const ratings = db.mentor_feedback_ratings || [];
-        ratingPayload.id = 'mfr-' + Date.now();
-        ratings.push(ratingPayload);
-        db.mentor_feedback_ratings = ratings;
-        saveDb(db);
-      }
-
-      res.json({ success: true, rating: ratingPayload });
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
-    }
-  });
-
-  // --------------- Mentor Profiles (Admin) ---------------
-
-  app.get('/api/admin/mentor-profiles', verifySuperAdmin, async (req: any, res) => {
-    try {
-      if (IS_SUPABASE_MODE) {
-        const { getMentorProfiles } = await import('./src/lib/supabase-server');
-        const profiles = await getMentorProfiles();
-        return res.json(profiles);
-      }
-      const db = getDb();
-      res.json(db.mentor_profiles || []);
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
-    }
-  });
-
-  app.post('/api/admin/mentor-profiles', verifySuperAdmin, async (req: any, res) => {
-    try {
-      const { display_name, bio, specializations, max_concurrent_reviews } = req.body;
-      if (!display_name) return res.status(400).json({ error: 'display_name is required' });
-
-      const adminEmail = req.adminEmail;
-      const profile = {
-        mentor_email: adminEmail,
-        display_name,
-        bio: bio || '',
-        specializations: specializations || [],
-        max_concurrent_reviews: max_concurrent_reviews || 3,
-      };
-
-      if (IS_SUPABASE_MODE) {
-        const { upsertMentorProfile } = await import('./src/lib/supabase-server');
-        const saved = await upsertMentorProfile(profile);
-        return res.json(saved);
-      }
-      const db = getDb();
-      const profiles = db.mentor_profiles || [];
-      const existing = profiles.findIndex((p: any) => p.mentor_email === adminEmail);
-      if (existing !== -1) profiles[existing] = { ...profiles[existing], ...profile };
-      else profiles.push(profile);
-      db.mentor_profiles = profiles;
+    let saved: any;
+    if (IS_SUPABASE_MODE) {
+      const { insertMentorRequest } = await import('./src/lib/supabase-server');
+      saved = await insertMentorRequest(payload);
+    } else {
+      const requests = db.mentor_review_requests || [];
+      saved = { ...payload, id: 'mrr-l-' + Date.now(), request_reference: 'MRR-LOCAL-' + Date.now() };
+      requests.push(saved);
+      db.mentor_review_requests = requests;
       saveDb(db);
-      res.json(profile);
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
     }
-  });
 
-  // --------------- Notifications ---------------
+    res.json({
+      success: true,
+      request: saved,
+      remaining_this_month: entitlement.reviews_per_month !== null ? entitlement.reviews_per_month - monthlyCount - 1 : null,
+      plan: PLAN_LABELS[plan] || plan,
+      response_deadline: responseDeadline,
+      feedback_type: entitlement.feedback_type,
+    });
 
-  app.get('/api/notifications', verifyAuth, async (req: any, res) => {
-    try {
-      const email = req.userEmail?.toLowerCase();
-      const unreadOnly = req.query.unread === 'true';
-
-      if (IS_SUPABASE_MODE) {
-        const { getNotifications } = await import('./src/lib/supabase-server');
-        const list = await getNotifications(email, unreadOnly);
-        return res.json(list);
-      }
-      const db = getDb();
-      let list = db.notifications || [];
-      list = list.filter((n: any) => n.user_email === email);
-      if (unreadOnly) list = list.filter((n: any) => !n.is_read);
-      list.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-      res.json(list);
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@zawadi.app';
+    if (IS_SUPABASE_MODE) {
+      try {
+        const { insertNotification } = await import('./src/lib/supabase-server');
+        await insertNotification({
+          user_email: adminEmail,
+          message: `New mentor review request ${saved.request_reference} for ${scholarship_name}`,
+          type: 'mentor_request',
+          related_id: saved.id,
+        });
+      } catch {}
     }
-  });
-
-  app.patch('/api/notifications/:id/read', verifyAuth, async (req: any, res) => {
-    try {
-      if (IS_SUPABASE_MODE) {
-        const { markNotificationRead } = await import('./src/lib/supabase-server');
-        await markNotificationRead(req.params.id);
-        return res.json({ success: true });
-      }
-      const db = getDb();
-      const idx = (db.notifications || []).findIndex((n: any) => n.id === req.params.id);
-      if (idx !== -1) {
-        db.notifications[idx].is_read = true;
-        saveDb(db);
-      }
-      res.json({ success: true });
-    } catch (err: any) {
-      res.status(500).json({ error: err.message });
-    }
-  });
+  } catch (err: any) {
+    console.error('Mentor request error:', err);
+    res.status(500).json({ error: err.message || 'Failed to submit mentor review request' });
+  }
 });
 
-const PLAN_HIERARCHY: Record<string, number> = { explorer: 0, plus: 1, pro: 2, institutional: 3 };
-// (Above is used by subscription code; MENTOR_REVIEW_LIMITS from plan-config is used by mentor pipeline)
+// GET /api/essays/mentor-review-status/:essay_id
+app.get('/api/essays/mentor-review-status/:essay_id', verifyAuth, async (req: any, res) => {
+  try {
+    const email = req.userEmail?.toLowerCase();
+    const essayId = req.params.essay_id;
+    const db = getDb();
+
+    let requests: any[] = [];
+    if (IS_SUPABASE_MODE) {
+      const { getMentorRequestsForUser } = await import('./src/lib/supabase-server');
+      const all = await getMentorRequestsForUser(email);
+      requests = all.filter((r: any) => r.essay_id === essayId);
+    } else {
+      requests = (db.mentor_review_requests || []).filter((r: any) =>
+        r.user_email?.toLowerCase() === email && r.essay_id === essayId
+      );
+    }
+
+    const sanitized = requests.map((r: any) => ({
+      id: r.id,
+      request_reference: r.request_reference,
+      status: r.status,
+      priority: r.priority,
+      response_deadline: r.response_deadline,
+      assigned_mentor_name: r.status !== 'pending' ? r.assigned_mentor_name : null,
+      feedback_type: r.feedback_type,
+      feedback_overall_assessment: r.status === 'delivered_to_student' ? r.feedback_overall_assessment : null,
+      feedback_opening: r.status === 'delivered_to_student' ? r.feedback_opening : null,
+      feedback_narrative: r.status === 'delivered_to_student' ? r.feedback_narrative : null,
+      feedback_evidence: r.status === 'delivered_to_student' ? r.feedback_evidence : null,
+      feedback_cultural_authenticity: r.status === 'delivered_to_student' ? r.feedback_cultural_authenticity : null,
+      feedback_closing: r.status === 'delivered_to_student' ? r.feedback_closing : null,
+      feedback_general_advice: r.status === 'delivered_to_student' ? r.feedback_general_advice : null,
+      revised_sections: r.status === 'delivered_to_student' ? r.revised_sections : null,
+      mentor_confidence_score: r.status === 'delivered_to_student' ? r.mentor_confidence_score : null,
+      estimated_success_probability: r.status === 'delivered_to_student' ? r.estimated_success_probability : null,
+      student_notes: r.student_notes,
+      requested_at: r.requested_at,
+      delivered_at: r.delivered_at,
+    }));
+
+    res.json(sanitized);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --------------- Admin Endpoints ---------------
+
+// GET /api/admin/mentor-queue
+app.get('/api/admin/mentor-queue', verifySuperAdmin, async (req: any, res) => {
+  try {
+    const db = getDb();
+    let requests: any[] = [];
+
+    if (IS_SUPABASE_MODE) {
+      const { getMentorRequests } = await import('./src/lib/supabase-server');
+      requests = await getMentorRequests();
+    } else {
+      requests = db.mentor_review_requests || [];
+    }
+
+    if (req.query.status) requests = requests.filter((r: any) => r.status === req.query.status);
+    if (req.query.priority) requests = requests.filter((r: any) => r.priority === req.query.priority);
+    if (req.query.assigned_mentor_email) requests = requests.filter((r: any) => r.assigned_mentor_email === req.query.assigned_mentor_email);
+
+    requests.sort((a: any, b: any) => new Date(a.response_deadline).getTime() - new Date(b.response_deadline).getTime());
+
+    res.json(requests);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PATCH /api/admin/mentor-queue/:id/assign
+app.patch('/api/admin/mentor-queue/:id/assign', verifySuperAdmin, async (req: any, res) => {
+  try {
+    const { mentor_email } = req.body;
+    if (!mentor_email) return res.status(400).json({ error: 'mentor_email is required' });
+
+    const db = getDb();
+
+    let mentorProfile: any = null;
+    if (IS_SUPABASE_MODE) {
+      const { getMentorProfile } = await import('./src/lib/supabase-server');
+      mentorProfile = await getMentorProfile(mentor_email);
+    } else {
+      mentorProfile = (db.mentor_profiles || []).find((m: any) => m.mentor_email === mentor_email);
+    }
+
+    if (!mentorProfile || !mentorProfile.is_active) {
+      return res.status(400).json({ error: 'Mentor not found or inactive' });
+    }
+
+    let activeCount = 0;
+    if (IS_SUPABASE_MODE) {
+      const { getMentorRequests } = await import('./src/lib/supabase-server');
+      const active = await getMentorRequests('assigned', mentor_email);
+      const reviewing = await getMentorRequests('under_review', mentor_email);
+      activeCount = (active?.length || 0) + (reviewing?.length || 0);
+    } else {
+      activeCount = (db.mentor_review_requests || []).filter((r: any) =>
+        r.assigned_mentor_email === mentor_email &&
+        (r.status === 'assigned' || r.status === 'under_review')
+      ).length;
+    }
+
+    if (activeCount >= (mentorProfile.max_concurrent_reviews || 3)) {
+      return res.status(400).json({ error: `Mentor has reached their maximum of ${mentorProfile.max_concurrent_reviews} concurrent reviews` });
+    }
+
+    const now = new Date().toISOString();
+    const updates = {
+      status: 'assigned',
+      assigned_mentor_email: mentor_email,
+      assigned_mentor_name: mentorProfile.display_name,
+      assigned_at: now,
+    };
+
+    let updated: any;
+    if (IS_SUPABASE_MODE) {
+      const { updateMentorRequest } = await import('./src/lib/supabase-server');
+      updated = await updateMentorRequest(req.params.id, updates);
+    } else {
+      const idx = (db.mentor_review_requests || []).findIndex((r: any) => r.id === req.params.id);
+      if (idx === -1) return res.status(404).json({ error: 'Request not found' });
+      db.mentor_review_requests[idx] = { ...db.mentor_review_requests[idx], ...updates };
+      saveDb(db);
+      updated = db.mentor_review_requests[idx];
+    }
+
+    if (IS_SUPABASE_MODE) {
+      try {
+        const { insertNotification } = await import('./src/lib/supabase-server');
+        await insertNotification({
+          user_email: mentor_email,
+          message: `You have been assigned a new mentor review: ${updated.request_reference} for ${updated.scholarship_name}`,
+          type: 'new_assignment',
+          related_id: updated.id,
+        });
+      } catch {}
+    }
+
+    res.json(updated);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PATCH /api/admin/mentor-queue/:id/approve
+app.patch('/api/admin/mentor-queue/:id/approve', verifySuperAdmin, async (req: any, res) => {
+  try {
+    const { admin_approval_notes } = req.body;
+    const db = getDb();
+    const now = new Date().toISOString();
+
+    let request: any;
+    if (IS_SUPABASE_MODE) {
+      const { getMentorRequestById, updateMentorRequest } = await import('./src/lib/supabase-server');
+      request = await getMentorRequestById(req.params.id);
+      if (!request) return res.status(404).json({ error: 'Request not found' });
+      if (request.status !== 'submitted_by_mentor') return res.status(400).json({ error: `Cannot approve request in ${request.status} status` });
+
+      const { getProfile } = await import('./src/lib/supabase-server');
+      const profile = await getProfile(request.user_email);
+      if (!profile) return res.status(400).json({ error: 'User profile not found' });
+
+      const { getEssays } = await import('./src/lib/supabase-server');
+      const userEssays = await getEssays(request.user_email);
+      if (!userEssays?.some((e: any) => e.id === request.essay_id)) {
+        return res.status(400).json({ error: 'Essay does not belong to this user' });
+      }
+
+      request = await updateMentorRequest(req.params.id, {
+        status: 'approved_by_admin',
+        admin_approved_by: req.adminEmail,
+        admin_approved_at: now,
+        admin_approval_notes: admin_approval_notes || null,
+      });
+
+      request = await updateMentorRequest(req.params.id, {
+        status: 'delivered_to_student',
+        delivered_at: now,
+      });
+
+      const { insertNotification } = await import('./src/lib/supabase-server');
+      await insertNotification({
+        user_email: request.user_email,
+        message: `Your mentor review ${request.request_reference} for ${request.scholarship_name} is ready!`,
+        type: 'mentor_feedback_ready',
+        related_id: request.id,
+      });
+
+      const { insertAuditLog } = await import('./src/lib/supabase-server');
+      await insertAuditLog({
+        id: 'audit-' + Date.now(),
+        admin_email: req.adminEmail,
+        action: 'mentor_feedback_approved',
+        target_type: 'mentor_review_request',
+        target_id: request.id,
+        details: `Approved feedback for ${request.user_email} on essay ${request.essay_id} (${request.request_reference})`,
+        created_at: now,
+      });
+    } else {
+      const idx = (db.mentor_review_requests || []).findIndex((r: any) => r.id === req.params.id);
+      if (idx === -1) return res.status(404).json({ error: 'Request not found' });
+      request = db.mentor_review_requests[idx];
+      if (request.status !== 'submitted_by_mentor') return res.status(400).json({ error: `Cannot approve request in ${request.status} status` });
+      request.status = 'approved_by_admin';
+      request.admin_approved_by = req.adminEmail;
+      request.admin_approved_at = now;
+      request.admin_approval_notes = admin_approval_notes || null;
+      request.status = 'delivered_to_student';
+      request.delivered_at = now;
+      db.mentor_review_requests[idx] = request;
+      saveDb(db);
+    }
+
+    res.json(request);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PATCH /api/admin/mentor-queue/:id/reject
+app.patch('/api/admin/mentor-queue/:id/reject', verifySuperAdmin, async (req: any, res) => {
+  try {
+    const { rejection_reason } = req.body;
+    if (!rejection_reason) return res.status(400).json({ error: 'Rejection reason is required' });
+
+    let request: any;
+    if (IS_SUPABASE_MODE) {
+      const { getMentorRequestById, updateMentorRequest } = await import('./src/lib/supabase-server');
+      request = await getMentorRequestById(req.params.id);
+      if (!request) return res.status(404).json({ error: 'Request not found' });
+      if (request.status !== 'submitted_by_mentor') return res.status(400).json({ error: 'Request must be in submitted_by_mentor status' });
+
+      request = await updateMentorRequest(req.params.id, {
+        status: 'assigned',
+        admin_approval_notes: rejection_reason,
+        admin_rejection_reason: rejection_reason,
+      });
+
+      const { insertNotification } = await import('./src/lib/supabase-server');
+      await insertNotification({
+        user_email: request.assigned_mentor_email,
+        message: `Your review for ${request.request_reference} was returned by admin: ${rejection_reason}`,
+        type: 'mentor_revision_needed',
+        related_id: request.id,
+      });
+    } else {
+      const db = getDb();
+      const idx = (db.mentor_review_requests || []).findIndex((r: any) => r.id === req.params.id);
+      if (idx === -1) return res.status(404).json({ error: 'Request not found' });
+      request = db.mentor_review_requests[idx];
+      if (request.status !== 'submitted_by_mentor') return res.status(400).json({ error: 'Request must be in submitted_by_mentor status' });
+      request.status = 'assigned';
+      request.admin_approval_notes = rejection_reason;
+      request.admin_rejection_reason = rejection_reason;
+      db.mentor_review_requests[idx] = request;
+      saveDb(db);
+    }
+
+    res.json(request);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --------------- Mentor Endpoints ---------------
+
+// GET /api/mentor/queue
+app.get('/api/mentor/queue', verifyAuth, async (req: any, res) => {
+  try {
+    const db = getDb();
+    let requests: any[] = [];
+
+    if (IS_SUPABASE_MODE) {
+      const { getMentorRequests } = await import('./src/lib/supabase-server');
+      const assigned = await getMentorRequests('assigned', req.userEmail);
+      const underReview = await getMentorRequests('under_review', req.userEmail);
+      requests = [...(assigned || []), ...(underReview || [])];
+    } else {
+      requests = (db.mentor_review_requests || []).filter((r: any) =>
+        r.assigned_mentor_email === req.userEmail &&
+        (r.status === 'assigned' || r.status === 'under_review')
+      );
+    }
+
+    const sanitized = requests.map((r: any) => ({
+      id: r.id,
+      request_reference: r.request_reference,
+      user_first_name: r.user_first_name,
+      user_country: r.user_country,
+      user_plan: r.user_plan,
+      essay_content: r.essay_content,
+      scholarship_name: r.scholarship_name,
+      scholarship_provider: r.scholarship_provider,
+      scholarship_deadline: r.scholarship_deadline,
+      scholarship_host_region: r.scholarship_host_region,
+      student_notes: r.student_notes,
+      feedback_type: r.feedback_type,
+      includes_revised_sections: r.includes_revised_sections,
+      response_deadline: r.response_deadline,
+      assigned_at: r.assigned_at,
+      status: r.status,
+      admin_rejection_reason: r.admin_rejection_reason,
+    }));
+
+    res.json(sanitized);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PATCH /api/mentor/queue/:id/start
+app.patch('/api/mentor/queue/:id/start', verifyAuth, async (req: any, res) => {
+  try {
+    let request: any;
+    if (IS_SUPABASE_MODE) {
+      const { getMentorRequestById, updateMentorRequest } = await import('./src/lib/supabase-server');
+      request = await getMentorRequestById(req.params.id);
+      if (!request) return res.status(404).json({ error: 'Request not found' });
+      if (request.assigned_mentor_email !== req.userEmail) return res.status(403).json({ error: 'Not assigned to you' });
+      if (request.status !== 'assigned') return res.status(400).json({ error: `Cannot start request in ${request.status} status` });
+      request = await updateMentorRequest(req.params.id, { status: 'under_review', mentor_started_review_at: new Date().toISOString() });
+    } else {
+      const db = getDb();
+      const idx = (db.mentor_review_requests || []).findIndex((r: any) => r.id === req.params.id);
+      if (idx === -1) return res.status(404).json({ error: 'Request not found' });
+      request = db.mentor_review_requests[idx];
+      if (request.assigned_mentor_email !== req.userEmail) return res.status(403).json({ error: 'Not assigned to you' });
+      if (request.status !== 'assigned') return res.status(400).json({ error: `Cannot start request in ${request.status} status` });
+      request.status = 'under_review';
+      request.mentor_started_review_at = new Date().toISOString();
+      db.mentor_review_requests[idx] = request;
+      saveDb(db);
+    }
+    res.json(request);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PATCH /api/mentor/queue/:id/submit
+app.patch('/api/mentor/queue/:id/submit', verifyAuth, async (req: any, res) => {
+  try {
+    let request: any;
+    if (IS_SUPABASE_MODE) {
+      const { getMentorRequestById } = await import('./src/lib/supabase-server');
+      request = await getMentorRequestById(req.params.id);
+    } else {
+      const db = getDb();
+      request = (db.mentor_review_requests || []).find((r: any) => r.id === req.params.id);
+    }
+
+    if (!request) return res.status(404).json({ error: 'Request not found' });
+    if (request.assigned_mentor_email !== req.userEmail) return res.status(403).json({ error: 'Not assigned to you' });
+    if (request.status !== 'under_review') return res.status(400).json({ error: `Cannot submit request in ${request.status} status` });
+
+    const feedbackType = request.feedback_type || 'basic';
+    const { feedback_overall_assessment, feedback_opening, feedback_narrative, feedback_evidence, feedback_cultural_authenticity, feedback_closing, feedback_general_advice, revised_sections, mentor_confidence_score, estimated_success_probability, mentor_private_notes } = req.body;
+
+    const missing: string[] = [];
+    if (!feedback_overall_assessment) missing.push('feedback_overall_assessment');
+    if (!feedback_general_advice || feedback_general_advice.trim().length < 100) missing.push('feedback_general_advice (min 100 characters)');
+    if (feedbackType !== 'basic') {
+      if (!feedback_opening || feedback_opening.trim().length < 30) missing.push('feedback_opening (min 30 characters)');
+      if (!feedback_narrative || feedback_narrative.trim().length < 30) missing.push('feedback_narrative (min 30 characters)');
+      if (!feedback_evidence || feedback_evidence.trim().length < 30) missing.push('feedback_evidence (min 30 characters)');
+      if (!feedback_cultural_authenticity || feedback_cultural_authenticity.trim().length < 30) missing.push('feedback_cultural_authenticity (min 30 characters)');
+      if (!feedback_closing || feedback_closing.trim().length < 30) missing.push('feedback_closing (min 30 characters)');
+    }
+    if (feedbackType === 'full' || feedbackType === 'full_plus') {
+      if (!mentor_confidence_score) missing.push('mentor_confidence_score');
+    }
+    if (feedbackType === 'full_plus') {
+      if (!estimated_success_probability) missing.push('estimated_success_probability');
+    }
+    if (missing.length > 0) {
+      return res.status(400).json({ error: `Missing required fields: ${missing.join(', ')}` });
+    }
+
+    const updates: any = {
+      status: 'submitted_by_mentor',
+      mentor_submitted_at: new Date().toISOString(),
+      feedback_overall_assessment,
+      feedback_opening: feedback_opening || null,
+      feedback_narrative: feedback_narrative || null,
+      feedback_evidence: feedback_evidence || null,
+      feedback_cultural_authenticity: feedback_cultural_authenticity || null,
+      feedback_closing: feedback_closing || null,
+      feedback_general_advice,
+      revised_sections: revised_sections || null,
+      mentor_confidence_score: mentor_confidence_score || null,
+      estimated_success_probability: estimated_success_probability || null,
+      mentor_private_notes: mentor_private_notes || null,
+    };
+
+    if (IS_SUPABASE_MODE) {
+      const { updateMentorRequest } = await import('./src/lib/supabase-server');
+      request = await updateMentorRequest(req.params.id, updates);
+    } else {
+      const db = getDb();
+      const idx = (db.mentor_review_requests || []).findIndex((r: any) => r.id === req.params.id);
+      db.mentor_review_requests[idx] = { ...db.mentor_review_requests[idx], ...updates };
+      saveDb(db);
+      request = db.mentor_review_requests[idx];
+    }
+
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@zawadi.app';
+    if (IS_SUPABASE_MODE) {
+      try {
+        const { insertNotification } = await import('./src/lib/supabase-server');
+        await insertNotification({
+          user_email: adminEmail,
+          message: `Mentor review ${request.request_reference} is ready for admin approval`,
+          type: 'mentor_submitted',
+          related_id: request.id,
+        });
+      } catch {}
+    }
+
+    res.json(request);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --------------- Mentor Feedback Ratings ---------------
+
+app.post('/api/mentor/feedback-rating/:request_id', verifyAuth, async (req: any, res) => {
+  try {
+    const { request_id } = req.params;
+    const email = req.userEmail?.toLowerCase();
+    const db = getDb();
+
+    let request: any;
+    if (IS_SUPABASE_MODE) {
+      const { getMentorRequestById } = await import('./src/lib/supabase-server');
+      request = await getMentorRequestById(request_id);
+    } else {
+      request = (db.mentor_review_requests || []).find((r: any) => r.id === request_id);
+    }
+
+    if (!request) return res.status(404).json({ error: 'Request not found' });
+    if (request.user_email !== email) return res.status(403).json({ error: 'Not your request' });
+    if (request.status !== 'delivered_to_student') return res.status(400).json({ error: 'Feedback not yet delivered' });
+
+    const { helpfulness_rating, accuracy_rating, clarity_rating, would_recommend, student_comment } = req.body;
+    if (!helpfulness_rating || !accuracy_rating || !clarity_rating) {
+      return res.status(400).json({ error: 'helpfulness_rating, accuracy_rating, and clarity_rating are required' });
+    }
+
+    const ratingPayload: any = {
+      request_id,
+      rated_by_email: email,
+      helpfulness_rating,
+      accuracy_rating,
+      clarity_rating,
+      would_recommend: would_recommend || false,
+      student_comment: student_comment || null,
+    };
+
+    if (IS_SUPABASE_MODE) {
+      const { insertMentorRating, getMentorProfile, upsertMentorProfile } = await import('./src/lib/supabase-server');
+      await insertMentorRating(ratingPayload);
+      if (request.assigned_mentor_email) {
+        const mentorProfile = await getMentorProfile(request.assigned_mentor_email);
+        if (mentorProfile) {
+          const avg = (helpfulness_rating + accuracy_rating + clarity_rating) / 3;
+          const currentTotal = (mentorProfile.average_mentor_score || 0) * (mentorProfile.total_reviews_completed || 0);
+          const newCount = (mentorProfile.total_reviews_completed || 0) + 1;
+          const newAvg = (currentTotal + avg) / newCount;
+          await upsertMentorProfile({
+            mentor_email: request.assigned_mentor_email,
+            total_reviews_completed: newCount,
+            average_mentor_score: Math.round(newAvg * 100) / 100,
+          });
+        }
+      }
+    } else {
+      const ratings = db.mentor_feedback_ratings || [];
+      ratingPayload.id = 'mfr-' + Date.now();
+      ratings.push(ratingPayload);
+      db.mentor_feedback_ratings = ratings;
+      saveDb(db);
+    }
+
+    res.json({ success: true, rating: ratingPayload });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --------------- Mentor Profiles (Admin) ---------------
+
+app.get('/api/admin/mentor-profiles', verifySuperAdmin, async (req: any, res) => {
+  try {
+    if (IS_SUPABASE_MODE) {
+      const { getMentorProfiles } = await import('./src/lib/supabase-server');
+      const profiles = await getMentorProfiles();
+      return res.json(profiles);
+    }
+    const db = getDb();
+    res.json(db.mentor_profiles || []);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/admin/mentor-profiles', verifySuperAdmin, async (req: any, res) => {
+  try {
+    const { display_name, bio, specializations, max_concurrent_reviews } = req.body;
+    if (!display_name) return res.status(400).json({ error: 'display_name is required' });
+
+    const adminEmail = req.adminEmail;
+    const profile = {
+      mentor_email: adminEmail,
+      display_name,
+      bio: bio || '',
+      specializations: specializations || [],
+      max_concurrent_reviews: max_concurrent_reviews || 3,
+    };
+
+    if (IS_SUPABASE_MODE) {
+      const { upsertMentorProfile } = await import('./src/lib/supabase-server');
+      const saved = await upsertMentorProfile(profile);
+      return res.json(saved);
+    }
+    const db = getDb();
+    const profiles = db.mentor_profiles || [];
+    const existing = profiles.findIndex((p: any) => p.mentor_email === adminEmail);
+    if (existing !== -1) profiles[existing] = { ...profiles[existing], ...profile };
+    else profiles.push(profile);
+    db.mentor_profiles = profiles;
+    saveDb(db);
+    res.json(profile);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// --------------- Notifications ---------------
+
+app.get('/api/notifications', verifyAuth, async (req: any, res) => {
+  try {
+    const email = req.userEmail?.toLowerCase();
+    const unreadOnly = req.query.unread === 'true';
+
+    if (IS_SUPABASE_MODE) {
+      const { getNotifications } = await import('./src/lib/supabase-server');
+      const list = await getNotifications(email, unreadOnly);
+      return res.json(list);
+    }
+    const db = getDb();
+    let list = db.notifications || [];
+    list = list.filter((n: any) => n.user_email === email);
+    if (unreadOnly) list = list.filter((n: any) => !n.is_read);
+    list.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    res.json(list);
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.patch('/api/notifications/:id/read', verifyAuth, async (req: any, res) => {
+  try {
+    if (IS_SUPABASE_MODE) {
+      const { markNotificationRead } = await import('./src/lib/supabase-server');
+      await markNotificationRead(req.params.id);
+      return res.json({ success: true });
+    }
+    const db = getDb();
+    const idx = (db.notifications || []).findIndex((n: any) => n.id === req.params.id);
+    if (idx !== -1) {
+      db.notifications[idx].is_read = true;
+      saveDb(db);
+    }
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 const PLAN_CATALOG: Record<string, {
   name: string;
   monthly: { amount: number; planCode: string };
@@ -3047,87 +3095,143 @@ app.delete('/api/admin/users/:email', verifySuperAdmin, async (req: any, res) =>
   res.json({ success: true });
 });
 
-app.get('/api/admin/stats', verifySuperAdmin, (req: any, res) => {
-  const db = getDb();
-  const totalScholarships = db.scholarships?.length || 0;
-  const publishedScholarships = (db.scholarships || []).filter((s: any) => s.published).length;
-  const draftScholarships = totalScholarships - publishedScholarships;
-  const allUsers = db.users || [];
-  const allPayments = db.payments || [];
-  const successfulPayments = allPayments.filter((p: any) => p.status === 'success');
-  const plusUsers = allUsers.filter((u: any) => u.plan === 'plus').length;
-  const proUsers = allUsers.filter((u: any) => u.plan === 'pro').length;
-  const institutionalUsers = allUsers.filter((u: any) => u.plan === 'institutional').length;
-  const activeUsers = allUsers.filter((u: any) => u.status === 'active').length;
-
-  // MRR = sum of monthly USD prices for all users on paid plans
-  const MRR_PRICING: Record<string, number> = { explorer: 0, plus: 6, pro: 12, institutional: 0 };
-  const mrr = allUsers.reduce((sum, u: any) => sum + (MRR_PRICING[u.plan] || 0), 0);
-  const mrrKes = mrr * 130;
-
-  const pendingBotCount = (db.bot_ingestions || db.bot_queue || []).filter((b: any) => b.status === 'pending').length;
-  const totalApplications = db.applications?.length || 0;
-  const totalDocuments = db.documents?.length || 0;
-  const totalEssays = db.essays?.length || 0;
-  const totalPayments = allPayments.length;
-  const auditCount = db.audit_logs?.length || 0;
-
-  // Monthly user growth
+app.get('/api/admin/stats', verifySuperAdmin, async (req: any, res) => {
+  let totalScholarships = 0, publishedScholarships = 0, draftScholarships = 0;
+  let totalUsers = 0, activeUsers = 0, activeSubs = 0;
+  let totalApplications = 0, totalDocuments = 0, totalEssays = 0;
+  let totalPayments = 0, successfulPayments = 0, pendingBotCount = 0, auditCount = 0;
+  let mrr = 0, mrrKes = 0;
+  const distribution = { explorer: 0, plus: 0, pro: 0, institutional: 0 };
   const userGrowth: { month: string; users: number }[] = [];
-  const monthMap = new Map<string, number>();
-  for (const u of allUsers) {
-    const m = (u.joined_at || '').substring(0, 7);
-    if (m) monthMap.set(m, (monthMap.get(m) || 0) + 1);
-  }
-  for (const [month, count] of monthMap) {
-    userGrowth.push({ month, users: count });
-  }
-  userGrowth.sort((a, b) => a.month.localeCompare(b.month));
-
-  // Application status breakdown
   const appStatusBreakdown: Record<string, number> = {};
-  for (const a of (db.applications || [])) {
-    const status = a.status || 'Unknown';
-    appStatusBreakdown[status] = (appStatusBreakdown[status] || 0) + 1;
+  const essayTrend: { date: string; essays: number }[] = [];
+  const MRR_PRICING: Record<string, number> = { explorer: 0, plus: 6, pro: 12, institutional: 0 };
+
+  if (IS_SUPABASE_MODE && supabaseAdmin) {
+    try {
+      const [{ count: sCount }, { data: sData }, { count: uCount }, { data: uData },
+        { count: dCount }, { data: dData }, { count: eCount }, { data: eData },
+        { count: pCount }, { data: pData }, { count: bCount },
+        { count: aCount }] = await Promise.all([
+        supabaseAdmin.from('scholarships').select('*', { count: 'exact', head: true }),
+        supabaseAdmin.from('scholarships').select('published'),
+        supabaseAdmin.from('users').select('*', { count: 'exact', head: true }),
+        supabaseAdmin.from('users').select('plan, status, joined_at'),
+        supabaseAdmin.from('applications').select('*', { count: 'exact', head: true }),
+        supabaseAdmin.from('applications').select('status'),
+        supabaseAdmin.from('essays').select('*', { count: 'exact', head: true }),
+        supabaseAdmin.from('essays').select('created_at'),
+        supabaseAdmin.from('payments').select('*', { count: 'exact', head: true }),
+        supabaseAdmin.from('payments').select('status'),
+        supabaseAdmin.from('bot_ingestions').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabaseAdmin.from('audit_logs').select('*', { count: 'exact', head: true }),
+      ]);
+
+      totalScholarships = sCount || 0;
+      publishedScholarships = (sData || []).filter((s: any) => s.published).length;
+      draftScholarships = totalScholarships - publishedScholarships;
+      totalUsers = uCount || 0;
+      totalApplications = dCount || 0;
+      totalDocuments = (await supabaseAdmin.from('documents').select('*', { count: 'exact', head: true })).count || 0;
+      totalEssays = eCount || 0;
+      totalPayments = pCount || 0;
+      pendingBotCount = bCount || 0;
+      auditCount = aCount || 0;
+
+      const uList = uData || [];
+      activeUsers = uList.filter((u: any) => u.status === 'active').length;
+      for (const u of uList) {
+        distribution[u.plan as keyof typeof distribution] = (distribution[u.plan as keyof typeof distribution] || 0) + 1;
+        const m = (u.joined_at || '').substring(0, 7);
+        if (m) {
+          const existing = userGrowth.find(g => g.month === m);
+          if (existing) existing.users++;
+          else userGrowth.push({ month: m, users: 1 });
+        }
+      }
+      userGrowth.sort((a, b) => a.month.localeCompare(b.month));
+
+      const pList = pData || [];
+      successfulPayments = pList.filter((p: any) => p.status === 'success').length;
+      activeSubs = successfulPayments;
+
+      for (const a of (dData || [])) {
+        const status = a.status || 'Unknown';
+        appStatusBreakdown[status] = (appStatusBreakdown[status] || 0) + 1;
+      }
+
+      const eList = eData || [];
+      const essayDayMap = new Map<string, number>();
+      for (const e of eList) {
+        const d = (e.created_at || '').substring(0, 10);
+        if (d) essayDayMap.set(d, (essayDayMap.get(d) || 0) + 1);
+      }
+      for (const [date, count] of essayDayMap) {
+        essayTrend.push({ date, essays: count });
+      }
+      essayTrend.sort((a, b) => a.date.localeCompare(b.date));
+
+      mrr = uList.reduce((sum: number, u: any) => sum + (MRR_PRICING[u.plan] || 0), 0);
+      mrrKes = mrr * 130;
+    } catch (supaErr) {
+      console.error('[STATS] Supabase query failed, falling back to local:', supaErr);
+      // Fall through to local fallback
+    }
   }
 
-  // Essay trend
-  const essayTrend: { date: string; essays: number }[] = [];
-  const essayDayMap = new Map<string, number>();
-  for (const e of (db.essays || [])) {
-    const d = (e.created_at || '').substring(0, 10);
-    if (d) essayDayMap.set(d, (essayDayMap.get(d) || 0) + 1);
+  if (!IS_SUPABASE_MODE || supabaseAdmin === null) {
+    const db = getDb();
+    const allUsers = db.users || [];
+    const allPayments = db.payments || [];
+
+    totalScholarships = db.scholarships?.length || 0;
+    publishedScholarships = (db.scholarships || []).filter((s: any) => s.published).length;
+    draftScholarships = totalScholarships - publishedScholarships;
+    totalUsers = allUsers.length;
+    activeUsers = allUsers.filter((u: any) => u.status === 'active').length;
+    activeSubs = allPayments.filter((p: any) => p.status === 'success').length;
+    totalApplications = db.applications?.length || 0;
+    totalDocuments = db.documents?.length || 0;
+    totalEssays = db.essays?.length || 0;
+    totalPayments = allPayments.length;
+    pendingBotCount = (db.bot_ingestions || db.bot_queue || []).filter((b: any) => b.status === 'pending').length;
+    auditCount = db.audit_logs?.length || 0;
+
+    for (const u of allUsers) {
+      distribution[u.plan as keyof typeof distribution] = (distribution[u.plan as keyof typeof distribution] || 0) + 1;
+      const m = (u.joined_at || '').substring(0, 7);
+      if (m) {
+        const existing = userGrowth.find(g => g.month === m);
+        if (existing) existing.users++;
+        else userGrowth.push({ month: m, users: 1 });
+      }
+    }
+    userGrowth.sort((a, b) => a.month.localeCompare(b.month));
+
+    for (const a of (db.applications || [])) {
+      const status = a.status || 'Unknown';
+      appStatusBreakdown[status] = (appStatusBreakdown[status] || 0) + 1;
+    }
+
+    const essayDayMap = new Map<string, number>();
+    for (const e of (db.essays || [])) {
+      const d = (e.created_at || '').substring(0, 10);
+      if (d) essayDayMap.set(d, (essayDayMap.get(d) || 0) + 1);
+    }
+    for (const [date, count] of essayDayMap) {
+      essayTrend.push({ date, essays: count });
+    }
+    essayTrend.sort((a, b) => a.date.localeCompare(b.date));
+
+    mrr = allUsers.reduce((sum: number, u: any) => sum + (MRR_PRICING[u.plan] || 0), 0);
+    mrrKes = mrr * 130;
   }
-  for (const [date, count] of essayDayMap) {
-    essayTrend.push({ date, essays: count });
-  }
-  essayTrend.sort((a, b) => a.date.localeCompare(b.date));
 
   res.json({
-    totalScholarships,
-    publishedScholarships,
-    draftScholarships,
-    pendingBotCount,
-    totalUsers: allUsers.length,
-    activeUsers,
-    activeSubs: successfulPayments.length,
-    totalApplications,
-    totalDocuments,
-    totalEssays,
-    mrr,
-    mrrKes,
-    auditCount,
-    totalPayments,
-    successfulPayments: successfulPayments.length,
-    distribution: {
-      explorer: allUsers.filter((u: any) => u.plan === 'explorer').length,
-      plus: plusUsers,
-      pro: proUsers,
-      institutional: institutionalUsers,
-    },
-    userGrowth,
-    appStatusBreakdown,
-    essayTrend,
+    totalScholarships, publishedScholarships, draftScholarships, pendingBotCount,
+    totalUsers, activeUsers, activeSubs, totalApplications, totalDocuments, totalEssays,
+    mrr, mrrKes, auditCount, totalPayments, successfulPayments,
+    distribution, userGrowth, appStatusBreakdown, essayTrend,
   });
 });
 

@@ -103,7 +103,7 @@ export default function EssayGenerator({
       if (collectingStep === 'scholarship') {
         setCollected(prev => ({ ...prev, scholarshipName: msg }));
         setCollectingStep('essay_type');
-        addMessage('ai', `Great choice! **${msg}** is a fantastic opportunity.\n\nWhat type of essay are you writing? (e.g., Personal Statement, Statement of Purpose, Motivation Letter, Study Plan, Leadership Essay)`);
+        addMessage('ai', `Great choice! **${msg}** is fantastic.\n\nWhat type of essay are you writing? (e.g., Personal Statement, Statement of Purpose, Motivation Letter, Study Plan, Leadership Essay)`);
         return;
       }
       if (collectingStep === 'essay_type') {
@@ -118,9 +118,68 @@ export default function EssayGenerator({
         await generateDraft();
         return;
       }
-    } else if (convStage === 'collecting_feedback') {
-      setCollected(prev => ({ ...prev, notes: prev.notes + '\n' + msg }));
-      await generateCritique();
+    } else if (convStage === 'draft_ready') {
+      const wantsCritique = /yes|critique|review|improve/i.test(msg);
+      if (wantsCritique) {
+        await generateCritique();
+      } else {
+        // Skip critique, go straight to polish
+        await generatePolish();
+      }
+    } else if (convStage === 'critique_ready') {
+      const wantsPolish = /polish|yes|improve|refine|apply/i.test(msg);
+      if (wantsPolish) {
+        await generatePolish();
+      } else {
+        const finalProduct = draftContent;
+        setPolishedContent(finalProduct);
+        setStage('ready_polish');
+        setConvStage('polish_ready');
+        addMessage('ai', `Your essay is ready! You can **copy it**, **save to vault**, or **send for mentor review**.\n\nWhat would you like to do?`);
+      }
+    } else if (convStage === 'polish_ready') {
+      const wantsNew = /new|restart|start/i.test(msg);
+      const wantsSave = /save|vault/i.test(msg);
+      const wantsMentor = /mentor|review|feedback/i.test(msg);
+      if (wantsNew) {
+        handleRestart();
+      } else if (wantsSave) {
+        handleSaveToVault();
+      } else if (wantsMentor) {
+        handleSendToMentor();
+      } else {
+        addMessage('ai', 'You can choose: **Start a new essay**, **Save to vault**, or **Send for mentor review**.');
+      }
+    }
+  };
+
+  const handleSendToMentor = async () => {
+    const finalProduct = polishedContent || draftContent;
+    if (!finalProduct || !currentEssayId) {
+      toast.error('No essay to send for review');
+      return;
+    }
+    try {
+      const token = localStorage.getItem('zawadi_token');
+      const res = await fetch('/api/essays/request-mentor-review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({
+          essay_id: currentEssayId,
+          essay_content: finalProduct,
+          scholarship_name: collected.scholarshipName,
+          student_notes: collected.notes,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: 'Request failed' }));
+        toast.error(err.error || 'Failed to send for mentor review');
+        return;
+      }
+      toast.success('Essay sent for mentor review! You\'ll be notified when feedback is ready.');
+      addMessage('ai', `✅ Your essay has been submitted for **mentor review**! An admin will assign a mentor who will review and provide feedback.\n\nWhat would you like to do next?`);
+    } catch {
+      toast.error('Network error. Please try again.');
     }
   };
 
@@ -168,8 +227,9 @@ export default function EssayGenerator({
   };
 
   const generatePolish = async () => {
-    if (!currentEssayId || !draftContent) return;
-    const textToPolish = critiqueContent || draftContent;
+    if (!currentEssayId) return;
+    const textToPolish = polishedContent || critiqueContent || draftContent;
+    if (!textToPolish) return;
     setConvStage('generating_polish');
     setStage('polishing');
     addMessage('ai', 'Polishing your essay for maximum impact...');
@@ -179,7 +239,7 @@ export default function EssayGenerator({
       streamText(res.content, 10, () => {
         setStage('ready_polish');
         setConvStage('polish_ready');
-        addMessage('ai', `Your polished essay is ready! You can **copy it to clipboard** or **save it to your Document Vault**.\n\nWhat would you like to work on next?`);
+        addMessage('ai', `Your polished essay is ready! You can **copy it**, **save it to your Document Vault**, or **send it for a mentor review** to get expert feedback.\n\nWhat would you like to do next?`);
       });
     } catch (e: any) {
       toast.error(e.message || 'Polish failed');
@@ -232,7 +292,7 @@ export default function EssayGenerator({
       return ['Polish it', 'I\'ll make changes myself'];
     }
     if (convStage === 'polish_ready') {
-      return ['Start a new essay', 'Save to vault'];
+      return ['Send for mentor review', 'Save to vault', 'Start a new essay'];
     }
     return [];
   };
@@ -442,6 +502,12 @@ export default function EssayGenerator({
                 <button onClick={handleSaveToVault} className="p-1.5 bg-secondary-container border border-secondary/30 text-on-secondary-container hover:bg-secondary-fixed rounded-lg transition-all cursor-pointer" title="Save to vault">
                   <span className="material-symbols-outlined text-sm">folder_zip</span>
                 </button>
+                {stage === 'ready_polish' && (
+                  <button onClick={handleSendToMentor} className="p-1.5 bg-primary border border-primary/30 text-on-primary hover:bg-primary-fixed hover:text-on-primary-fixed rounded-lg transition-all cursor-pointer flex items-center gap-1" title="Send for mentor review">
+                    <span className="material-symbols-outlined text-sm">rate_review</span>
+                    <span className="text-[10px] font-bold hidden sm:inline">Mentor Review</span>
+                  </button>
+                )}
               </>
             )}
             {stage !== 'idle' && (
