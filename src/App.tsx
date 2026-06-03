@@ -7,7 +7,6 @@ import toast, { Toaster } from 'react-hot-toast';
 import { AFRICAN_COUNTRIES } from './config/matching-config';
 import { supabase } from './lib/supabase';
 import { computeScholarshipMatch } from './lib/matching-engine';
-import { analyzeDocument } from './services/document-intelligence';
 import { analyzeWritingVoice, generateStyleSummary } from './services/essay-voice-learner';
 import {
   getPublishedScholarships,
@@ -384,6 +383,7 @@ export default function App() {
           try {
             const arrayBuf = await file.arrayBuffer();
             const buffer = new Uint8Array(arrayBuf);
+            const { analyzeDocument } = await import('./services/document-intelligence');
             const { result, analyzed } = await analyzeDocument(
               buffer as any,
               docType,
