@@ -1,0 +1,6 @@
+{
+  "name": "Techsari Zawadi",
+  "description": "AI-Powered Scholarship Platform for African Students",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

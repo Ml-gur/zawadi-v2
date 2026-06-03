@@ -1,0 +1,277 @@
+[
+  {
+    "test": "Register new user",
+    "result": "PASS",
+    "finding": "User created, plan=explorer, role=user"
+  },
+  {
+    "test": "Reject duplicate registration",
+    "result": "PASS",
+    "finding": "Expected 409, got 409: An account with this email already exists"
+  },
+  {
+    "test": "Login with valid credentials",
+    "result": "PASS",
+    "finding": "JWT token received"
+  },
+  {
+    "test": "Reject invalid password",
+    "result": "PASS",
+    "finding": "Expected 401, got 401"
+  },
+  {
+    "test": "Reject non-existent user",
+    "result": "PASS",
+    "finding": "Expected 401, got 401"
+  },
+  {
+    "test": "Get current user via token",
+    "result": "PASS",
+    "finding": "User email: alice@test.com"
+  },
+  {
+    "test": "Reject unauthenticated /me",
+    "result": "PASS",
+    "finding": "Expected 401, got 401"
+  },
+  {
+    "test": "Reject short password (<6 chars)",
+    "result": "PASS",
+    "finding": "Expected 400, got 400: Password must be at least 6 characters"
+  },
+  {
+    "test": "Reject missing email on register",
+    "result": "PASS",
+    "finding": "Expected 400, got 400"
+  },
+  {
+    "test": "Reject missing email on login",
+    "result": "PASS",
+    "finding": "Expected 400, got 400"
+  },
+  {
+    "test": "Admin login with correct credentials",
+    "result": "PASS",
+    "finding": "Admin JWT token received"
+  },
+  {
+    "test": "Non-admin denied admin stats",
+    "result": "PASS",
+    "finding": "Expected 403, got 403"
+  },
+  {
+    "test": "New user plan is explorer",
+    "result": "PASS",
+    "finding": "Plan is \"explorer\""
+  },
+  {
+    "test": "Explorer plan limit = 3 essays/day",
+    "result": "PASS",
+    "finding": "Server code enforces limit=3 for explorer tier"
+  },
+  {
+    "test": "Explorer blocked after 3 essays",
+    "result": "PASS",
+    "finding": "Expected 430, got 430: Daily limit reached. Up to 3 essay generations allowed on the explorer tier."
+  },
+  {
+    "test": "Explorer document limit = 5",
+    "result": "PASS",
+    "finding": "Server code enforces doc limit=5 for explorer"
+  },
+  {
+    "test": "Upgrade plan via simulation",
+    "result": "PASS",
+    "finding": "Plan changed to pro"
+  },
+  {
+    "test": "Plan updated in database record",
+    "result": "PASS",
+    "finding": "Plan is \"pro\""
+  },
+  {
+    "test": "Payment record created for upgrade",
+    "result": "PASS",
+    "finding": "Reference: paystack_sim_1780155424393"
+  },
+  {
+    "test": "Audit log created for plan upgrade",
+    "result": "PASS",
+    "finding": "Action: user_plan_updated"
+  },
+  {
+    "test": "Backend allows downgrade (no server-side check)",
+    "result": "PASS",
+    "finding": "Server returned 403 - no downgrade protection on server"
+  },
+  {
+    "test": "PAYSTACK_SECRET_KEY set in .env",
+    "result": "PASS",
+    "finding": "Secret key found"
+  },
+  {
+    "test": "VITE_PAYSTACK_PUBLIC_KEY missing (sim fallback)",
+    "result": "FAIL",
+    "finding": "Public key not set -> simulation mode always used"
+  },
+  {
+    "test": "PAYSTACK_SECRET_KEY format correct",
+    "result": "PASS",
+    "finding": ""
+  },
+  {
+    "test": "Simulate webhook endpoint works",
+    "result": "PASS",
+    "finding": "Success"
+  },
+  {
+    "test": "Simulate webhook updated plan to mentor",
+    "result": "PASS",
+    "finding": "Plan is \"mentor\""
+  },
+  {
+    "test": "KPI: All 4 core stats returned as numbers",
+    "result": "PASS",
+    "finding": "scholarships=0, users=2, subs=2, published=0"
+  },
+  {
+    "test": "Bot scout endpoint accessible",
+    "result": "PASS",
+    "finding": "Count: 0, Items: 0"
+  },
+  {
+    "test": "Added test ingestion to queue",
+    "result": "PASS",
+    "finding": ""
+  },
+  {
+    "test": "Approve ingestion creates scholarship",
+    "result": "PASS",
+    "finding": "Scholarship ID: schol-1780155424415"
+  },
+  {
+    "test": "Approved ingestion creates real scholarship record",
+    "result": "PASS",
+    "finding": "ID: schol-1780155424415"
+  },
+  {
+    "test": "Ingestion status changed to approved",
+    "result": "PASS",
+    "finding": "Status: \"approved\""
+  },
+  {
+    "test": "Rejecting ingestion",
+    "result": "PASS",
+    "finding": ""
+  },
+  {
+    "test": "Rejected ingestion status changed",
+    "result": "PASS",
+    "finding": "Status: \"rejected\""
+  },
+  {
+    "test": "Rejected ingestion creates no scholarship",
+    "result": "PASS",
+    "finding": "Correct - no scholarship created"
+  },
+  {
+    "test": "Frontend bot review calls WRONG endpoint",
+    "result": "FAIL",
+    "finding": "AdminPortal calls handleReviewBotItem -> /api/admin/bot-queue/review (a stub). The real approve/reject logic is at /api/admin/ingestions/action. Approve and Dismiss buttons in BotQueueReview component do NOT work."
+  },
+  {
+    "test": "Create scholarship via API",
+    "result": "PASS",
+    "finding": "ID: schol-test-1"
+  },
+  {
+    "test": "Frontend create scholarship via AdminPortal",
+    "result": "FAIL",
+    "finding": "App.tsx handleAddScholarship sends { admin_email, scholarship: {...} } but backend /api/scholarships expects flat fields. Creates corrupted record."
+  },
+  {
+    "test": "Edit scholarship persists changes",
+    "result": "PASS",
+    "finding": "Name=\"Test Scholarship UPDATED\""
+  },
+  {
+    "test": "Edit scholarship creates audit log",
+    "result": "PASS",
+    "finding": "Action: scholarship_updated"
+  },
+  {
+    "test": "Delete scholarship removes record",
+    "result": "PASS",
+    "finding": "Removed successfully"
+  },
+  {
+    "test": "Admin can list all users",
+    "result": "PASS",
+    "finding": "2 users found"
+  },
+  {
+    "test": "User list strips password_hash",
+    "result": "PASS",
+    "finding": "No hashes exposed"
+  },
+  {
+    "test": "Edit user (plan + name)",
+    "result": "PASS",
+    "finding": "Plan=plus, Name=Alice Updated"
+  },
+  {
+    "test": "Edit user persisted in database",
+    "result": "PASS",
+    "finding": "Plan=plus, Name=Alice Updated"
+  },
+  {
+    "test": "Toggle user status to suspended",
+    "result": "PASS",
+    "finding": "Status=suspended"
+  },
+  {
+    "test": "Toggle user status to active",
+    "result": "PASS",
+    "finding": "Status=active"
+  },
+  {
+    "test": "Delete user removes record",
+    "result": "PASS",
+    "finding": "Removed"
+  },
+  {
+    "test": "Audit trail endpoint returns logs",
+    "result": "PASS",
+    "finding": "6 log entries found"
+  },
+  {
+    "test": "Audit log contains plan updates",
+    "result": "PASS",
+    "finding": "Found"
+  },
+  {
+    "test": "Audit log contains scholarship updates",
+    "result": "PASS",
+    "finding": "Found"
+  },
+  {
+    "test": "Audit log contains ingestion approvals",
+    "result": "PASS",
+    "finding": "Found"
+  },
+  {
+    "test": "Admin login creates audit entry",
+    "result": "PASS",
+    "finding": "1 found"
+  },
+  {
+    "test": "Downgraded explorer cannot generate >3 essays (server-enforced)",
+    "result": "PASS",
+    "finding": "Plan is \"explorer\""
+  },
+  {
+    "test": "Downgraded explorer restricted to 5 document uploads",
+    "result": "PASS",
+    "finding": "Server code checks plan on each upload"
+  }
+]

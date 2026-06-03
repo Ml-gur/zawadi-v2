@@ -1,0 +1,24 @@
+{
+  "redirects": [
+    { "source": "/(.*)", "destination": "https://www.techsari.online/$1", "permanent": true }
+  ],
+  "rewrites": [
+    { "source": "/((?!robots\\.txt|sitemap\\.xml|og-image\\.png|icon\\.svg|manifest\\.webmanifest|pwa-icon-192\\.png|pwa-icon-512\\.png|sw\\.js|workbox-.*\\.js|assets/.*).*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://js.paystack.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://www.techsari.online; connect-src 'self' https://api.openrouter.ai https://*.supabase.co; frame-src https://standard.paystack.com; font-src 'self' data:; manifest-src 'self'" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" }
+      ]
+    }
+  ]
+}

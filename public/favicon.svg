@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="80" fill="#001736"/>
+  <text x="256" y="300" font-family="serif" font-size="280" font-weight="bold" fill="#6cf8bb" text-anchor="middle">Z</text>
+  <circle cx="380" cy="140" r="60" fill="#f59e0b"/>
+  <text x="380" y="162" font-family="sans-serif" font-size="60" font-weight="bold" fill="#001736" text-anchor="middle">✦</text>
+</svg>

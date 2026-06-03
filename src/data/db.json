@@ -1,0 +1,3494 @@
+{
+  "scholarships": [
+    {
+      "id": "schol-1",
+      "name": "Mastercard Foundation Scholars Program",
+      "provider": "Mastercard Foundation",
+      "host": "University of Oxford",
+      "country": [
+        "Pan-African",
+        "Kenya",
+        "Nigeria",
+        "Ghana",
+        "South Africa",
+        "Rwanda",
+        "Uganda",
+        "Ethiopia"
+      ],
+      "degree_levels": [
+        "Masters",
+        "Postgrad"
+      ],
+      "fields_of_study": [
+        "Computer Science",
+        "Engineering",
+        "Business",
+        "Public Health",
+        "Environmental Science"
+      ],
+      "required_documents": [
+        "CV / Resume",
+        "Academic Transcript",
+        "Motivation Letter",
+        "Passport / ID",
+        "Reference Letter"
+      ],
+      "funding_type": "Full",
+      "apply_url": "https://www.ox.ac.uk/apply",
+      "source_url": "https://mastercardfdn.org/",
+      "verified_at": "2026-05-26",
+      "published": false,
+      "no_ielts": false,
+      "host_region": "East Africa hubs",
+      "host_country": [
+        "ethiopia",
+        "uganda"
+      ],
+      "iso2": [
+        "NG",
+        "GH",
+        "SN",
+        "KE",
+        "UG",
+        "ET",
+        "ZA",
+        "RW"
+      ],
+      "host_institution": "University of Oxford",
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "quality_score": null,
+      "scam_flags": [],
+      "admin_email": "admin@zawadi.app"
+    },
+    {
+      "id": "schol-2",
+      "name": "Chevening Scholarships",
+      "provider": "UK Government",
+      "host": "UK Universities",
+      "country": [
+        "Global",
+        "Kenya",
+        "Nigeria",
+        "Ghana",
+        "South Africa",
+        "Uganda",
+        "Ethiopia",
+        "Egypt",
+        "Tanzania"
+      ],
+      "degree_levels": [
+        "Masters"
+      ],
+      "fields": [
+        "Engineering",
+        "Business",
+        "Public Health",
+        "Law",
+        "International Relations",
+        "Computer Science"
+      ],
+      "funding_type": "Full",
+      "amount": "Full tuition + living allowance + flights",
+      "deadline": "2026-11-07",
+      "description": "UK Government global scholarship program.",
+      "eligibility": "Citizen of Chevening-eligible country, 2+ years work experience.",
+      "required_documents": [
+        "CV / Resume",
+        "Academic Transcript",
+        "Motivation Letter",
+        "Reference Letter"
+      ],
+      "apply_url": "https://www.chevening.org/apply",
+      "source_url": "https://www.chevening.org/",
+      "published": true,
+      "verified_at": "2026-05-25",
+      "view_count": 89,
+      "host_region": "United Kingdom and Ireland",
+      "host_country": [
+        "united kingdom"
+      ],
+      "iso2": "GB"
+    },
+    {
+      "id": "4bcfdda1d1ca",
+      "name": "Stipendium Hungaricum",
+      "provider": "Government of Hungary / Tempus Public Foundation",
+      "host": "Hungary",
+      "host_institution": "28 Hungarian partner universities",
+      "description": "Applications for the 2025-2026 cycle are now closed. This scholarship typically opens again around November. Watch for the 2027/28 intake next cycle.",
+      "eligibility": "All African countries via bilateral agreements",
+      "amount": "Full tuition + HUF 43,700-140,000/month + accommodation + medical insurance",
+      "deadline": "2026-01-15",
+      "apply_url": "https://stipendiumhungaricum.hu/",
+      "source_url": "https://stipendiumhungaricum.hu/",
+      "degree_levels": [
+        "Undergraduate",
+        "Masters",
+        "PhD"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": true,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "Central and Eastern Europe",
+      "host_country": null,
+      "iso2": "HU",
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "government",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Archived",
+      "view_count": 0,
+      "archived": true
+    },
+    {
+      "id": "32a172af3515",
+      "name": "Eiffel Excellence Scholarship",
+      "provider": "French Ministry for Europe and Foreign Affairs / Campus France",
+      "host": "France",
+      "host_institution": "French higher education institutions",
+      "description": "Applications for the 2025-2026 cycle are now closed. This scholarship typically opens again around October. Check the official website for the next cycle opening date.",
+      "eligibility": "All African countries. Masters: age ≤25, PhD: age ≤30",
+      "amount": "EUR 1,181/month (masters) or EUR 1,700/month (PhD) + travel + insurance",
+      "deadline": "2026-01-08",
+      "apply_url": "https://www.campusfrance.org/en/france-excellence-eiffel-scholarship-program",
+      "source_url": "https://www.campusfrance.org/en/france-excellence-eiffel-scholarship-program",
+      "degree_levels": [
+        "Masters",
+        "PhD"
+      ],
+      "fields": [
+        "Engineering",
+        "STEM",
+        "Science"
+      ],
+      "fields_of_study": [
+        "Engineering",
+        "STEM",
+        "Science"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": 25,
+      "age_limit_phd": 30,
+      "host_region": "Western Europe",
+      "host_country": null,
+      "iso2": "FR",
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "government",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Archived",
+      "view_count": 0,
+      "archived": true
+    },
+    {
+      "id": "3d88c1b05078",
+      "name": "Türkiye Burslari (Turkey Scholarships)",
+      "provider": "Government of Turkey / YTB",
+      "host": "Turkey",
+      "host_institution": "100+ Turkish universities",
+      "description": "Applications for the 2025-2026 cycle are now closed. This scholarship typically opens again around October. Next cycle expected ~Jan 2027 for 2027 intake.",
+      "eligibility": "All African countries. UG: under 21, Masters: under 30, PhD: under 35",
+      "amount": "Full tuition + TRY 1,600-3,000/month + return flight + health insurance + accommodation + 1-year Turkish language",
+      "deadline": "2026-02-25",
+      "apply_url": "https://turkiyeburslari.gov.tr/",
+      "source_url": "https://turkiyeburslari.gov.tr/",
+      "degree_levels": [
+        "Undergraduate",
+        "Masters",
+        "PhD"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": true,
+      "work_experience_required": null,
+      "age_limit_masters": 30,
+      "age_limit_phd": 35,
+      "host_region": "Middle East and Gulf states",
+      "host_country": null,
+      "iso2": "TR",
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "government",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Archived",
+      "view_count": 0,
+      "archived": true
+    },
+    {
+      "id": "b7a3b38cb08e",
+      "name": "Swedish Institute Scholarships for Global Professionals",
+      "provider": "Swedish Institute",
+      "host": "Sweden",
+      "host_institution": "Various Swedish universities",
+      "description": "Applications for the 2025-2026 cycle are now closed. This scholarship typically opens again around October. Next cycle expected ~Feb 2027 for 2027/28 intake.",
+      "eligibility": "All African countries. Requires 3,000 hours work experience (~1.5 years full-time)",
+      "amount": "Full tuition + SEK 12,000/month + SEK 15,000 travel + insurance",
+      "deadline": "2026-02-25",
+      "apply_url": "https://si.se/en/apply/scholarships/swedish-institute-scholarships-for-global-professionals/",
+      "source_url": "https://si.se/en/apply/scholarships/swedish-institute-scholarships-for-global-professionals/",
+      "degree_levels": [
+        "Masters"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": true,
+      "work_experience_required": 1.5,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "Nordic countries",
+      "host_country": null,
+      "iso2": "SE",
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "government",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Archived",
+      "view_count": 0,
+      "archived": true
+    },
+    {
+      "id": "ceacdaa2295e",
+      "name": "VLIR-UOS ICP Connect Scholarships",
+      "provider": "VLIR-UOS (Flemish Interuniversity Council)",
+      "host": "Belgium",
+      "host_institution": "Flemish universities in Belgium",
+      "description": "Applications for the 2025-2026 cycle are now closed. This scholarship typically opens again around September. Next cycle expected ~Feb 2027 for 2027 intake.",
+      "eligibility": "19 Sub-Saharan countries including Kenya. Age under 40",
+      "amount": "Full tuition + EUR 1,170/month + travel + accommodation + insurance",
+      "deadline": "2026-02-28",
+      "apply_url": "https://www.vliruos.be/en/icp-connect-scholarships",
+      "source_url": "https://www.vliruos.be/en/icp-connect-scholarships",
+      "degree_levels": [
+        "Masters"
+      ],
+      "fields": [
+        "Engineering",
+        "Environmental Science",
+        "Development Studies"
+      ],
+      "fields_of_study": [
+        "Engineering",
+        "Environmental Science",
+        "Development Studies"
+      ],
+      "countries": [
+        "Kenya",
+        "Ethiopia",
+        "Ghana",
+        "Nigeria",
+        "South Africa",
+        "Uganda",
+        "Tanzania",
+        "Rwanda",
+        "Mozambique",
+        "Zambia",
+        "Zimbabwe",
+        "Malawi",
+        "Botswana",
+        "Namibia",
+        "Lesotho",
+        "Eswatini",
+        "Sierra Leone",
+        "Senegal",
+        "Benin"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": 40,
+      "age_limit_phd": null,
+      "host_region": "Western Europe",
+      "host_country": null,
+      "iso2": "BE",
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "government",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Archived",
+      "view_count": 0,
+      "archived": true
+    },
+    {
+      "id": "7abec8428057",
+      "name": "Tony Elumelu Foundation Entrepreneurship Programme",
+      "provider": "Tony Elumelu Foundation",
+      "host": "Online (TEFConnect platform)",
+      "host_institution": null,
+      "description": "Applications for the 2026 cycle are now closed. This programme typically opens again around January. Check the website for the next cycle.",
+      "eligibility": "All 54 African countries. Must have a business idea",
+      "amount": "USD 5,000 seed capital (non-refundable) + 12-week training + mentoring",
+      "deadline": "2026-03-01",
+      "apply_url": "https://www.tonyelumelufoundation.org/",
+      "source_url": "https://www.tonyelumelufoundation.org/",
+      "degree_levels": [
+        "Professional"
+      ],
+      "fields": [
+        "Entrepreneurship",
+        "Business"
+      ],
+      "fields_of_study": [
+        "Entrepreneurship",
+        "Business"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "Intra-African",
+      "host_country": null,
+      "iso2": null,
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "foundation",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Archived",
+      "view_count": 0,
+      "archived": true
+    },
+    {
+      "id": "624b49294b5b",
+      "name": "Government of Ireland International Education Scholarships",
+      "provider": "Government of Ireland / HEA",
+      "host": "Ireland",
+      "host_institution": "Irish universities",
+      "description": "Applications for the 2025-2026 cycle are now closed. This scholarship typically opens again around October. Next cycle expected ~Jan 2027 for 2027/28 intake.",
+      "eligibility": "All African countries. IELTS 6.5 required",
+      "amount": "Full tuition waiver + EUR 10,000 stipend (one year)",
+      "deadline": "2026-03-12",
+      "apply_url": "https://hea.ie/funding-governance-performance/funding/international-government-of-ireland-international-education-scholarships/",
+      "source_url": "https://hea.ie/funding-governance-performance/funding/international-government-of-ireland-international-education-scholarships/",
+      "degree_levels": [
+        "Undergraduate",
+        "Masters",
+        "PhD"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "United Kingdom and Ireland",
+      "host_country": null,
+      "iso2": "IE",
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "government",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Archived",
+      "view_count": 0,
+      "archived": true
+    },
+    {
+      "id": "4eea9c4b8021",
+      "name": "Italian Government Scholarships (MAECI)",
+      "provider": "Italian Ministry of Foreign Affairs (MAECI)",
+      "host": "Italy",
+      "host_institution": "Italian universities",
+      "description": "Applications for the 2025-2026 cycle are now closed. This scholarship typically opens again around November. Next cycle expected ~Mar 2027 for 2027/28 intake.",
+      "eligibility": "All African countries. Masters: under 28, PhD: under 30",
+      "amount": "Monthly allowance + tuition waiver + health insurance",
+      "deadline": "2026-03-26",
+      "apply_url": "https://studyinitaly.esteri.it/en/call-for-procedures",
+      "source_url": "https://studyinitaly.esteri.it/en/call-for-procedures",
+      "degree_levels": [
+        "Masters",
+        "PhD"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": 28,
+      "age_limit_phd": 30,
+      "host_region": "Western Europe",
+      "host_country": null,
+      "iso2": "IT",
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "government",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Archived",
+      "view_count": 0,
+      "archived": true
+    },
+    {
+      "id": "36d67d15d9a7",
+      "name": "Commonwealth Distance Learning Scholarships",
+      "provider": "Commonwealth Scholarship Commission (UK)",
+      "host": "United Kingdom (online/distance)",
+      "host_institution": null,
+      "description": "Applications for the 2026/27 cycle are now closed. This scholarship typically opens again around September. Next cycle expected ~Mar 2027 for 2027/28 intake.",
+      "eligibility": "Commonwealth citizens. 2:1 degree, IELTS, Commonwealth citizenship",
+      "amount": "Full tuition fees fully covered (studied online from home country)",
+      "deadline": "2026-03-31",
+      "apply_url": "https://cscuk.fcdo.gov.uk/scholarships/commonwealth-distance-learning-scholarships/",
+      "source_url": "https://cscuk.fcdo.gov.uk/scholarships/commonwealth-distance-learning-scholarships/",
+      "degree_levels": [
+        "Masters"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "Botswana",
+        "Cameroon",
+        "Eswatini",
+        "Gabon",
+        "Gambia",
+        "Ghana",
+        "Kenya",
+        "Lesotho",
+        "Malawi",
+        "Mauritius",
+        "Mozambique",
+        "Namibia",
+        "Nigeria",
+        "Rwanda",
+        "Seychelles",
+        "Sierra Leone",
+        "South Africa",
+        "Tanzania",
+        "Togo",
+        "Uganda",
+        "Zambia"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "United Kingdom and Ireland",
+      "host_country": null,
+      "iso2": "GB",
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "government",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Archived",
+      "view_count": 0,
+      "archived": true
+    },
+    {
+      "id": "3fb9ec38974b",
+      "name": "Romania Government Scholarship",
+      "provider": "Romanian Ministry of Foreign Affairs",
+      "host": "Romania",
+      "host_institution": "Romanian public universities",
+      "description": "Applications for the 2025-2026 cycle are now closed. This scholarship typically opens again around December. Next cycle expected ~Dec 2026 for 2027/28 intake.",
+      "eligibility": "All African countries. UG/Masters: under 35, PhD: under 45",
+      "amount": "Tuition waiver + EUR 85-115/month stipend",
+      "deadline": "2026-03-31",
+      "apply_url": "https://scholarships.studyinromania.gov.ro/",
+      "source_url": "https://scholarships.studyinromania.gov.ro/",
+      "degree_levels": [
+        "Undergraduate",
+        "Masters",
+        "PhD"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Partial",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": 35,
+      "age_limit_phd": 45,
+      "host_region": "Central and Eastern Europe",
+      "host_country": null,
+      "iso2": "RO",
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "government",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Archived",
+      "view_count": 0,
+      "archived": true
+    },
+    {
+      "id": "18be69868585",
+      "name": "DAAD In-Country/In-Region Scholarships",
+      "provider": "DAAD",
+      "host": "Selected African universities",
+      "host_institution": "Selected African universities",
+      "description": "Applications for the 2026 cycle are now closed. This scholarship typically opens again around June. Next cycle expected ~Apr 2027 for 2027 intake.",
+      "eligibility": "All Sub-Saharan African countries. Must study within Africa",
+      "amount": "Full tuition + monthly stipend + research allowance + insurance",
+      "deadline": "2026-04-29",
+      "apply_url": "https://www.daad.de/en/in-country-in-region-scholarships/",
+      "source_url": "https://www.daad.de/en/in-country-in-region-scholarships/",
+      "degree_levels": [
+        "Masters",
+        "PhD"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "All Sub-Saharan African countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "Intra-African",
+      "host_country": null,
+      "iso2": null,
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "government",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Archived",
+      "view_count": 0,
+      "archived": true
+    },
+    {
+      "id": "d1e9fc6053db",
+      "name": "Australia Awards Scholarships",
+      "provider": "Australian Government DFAT",
+      "host": "Australia",
+      "host_institution": "Various Australian universities",
+      "description": "Applications for the 2027 intake are now closed. This scholarship typically opens again around August. Next cycle expected ~Apr 2027 for 2028 intake.",
+      "eligibility": "35+ African countries including Kenya. IELTS 6.5 required",
+      "amount": "Full tuition + AUD ~25,000-30,000/year living + return airfare + OSHC",
+      "deadline": "2026-04-30",
+      "apply_url": "https://www.dfat.gov.au/people-to-people/australia-awards/australia-awards-scholarships",
+      "source_url": "https://www.dfat.gov.au/people-to-people/australia-awards/australia-awards-scholarships",
+      "degree_levels": [
+        "Masters",
+        "PhD"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "Kenya",
+        "Ghana",
+        "Nigeria",
+        "South Africa",
+        "Tanzania",
+        "Uganda",
+        "Ethiopia",
+        "Botswana",
+        "Malawi",
+        "Zambia",
+        "Zimbabwe",
+        "Mozambique",
+        "Madagascar",
+        "Senegal",
+        "Côte d'Ivoire",
+        "Benin",
+        "Burkina Faso",
+        "Cameroon",
+        "Chad",
+        "Congo",
+        "DRC",
+        "Eritrea",
+        "Eswatini",
+        "Gabon",
+        "Gambia",
+        "Guinea",
+        "Lesotho",
+        "Liberia",
+        "Mali",
+        "Mauritania",
+        "Mauritius",
+        "Namibia",
+        "Niger",
+        "Rwanda",
+        "Sierra Leone",
+        "Somalia",
+        "South Sudan",
+        "Sudan",
+        "Togo"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "Australia and New Zealand",
+      "host_country": null,
+      "iso2": "AU",
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "government",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Archived",
+      "view_count": 0,
+      "archived": true
+    },
+    {
+      "id": "c5a18bc60a08",
+      "name": "Joint Japan/World Bank Graduate Scholarship (JJ/WBGSP)",
+      "provider": "World Bank / Government of Japan",
+      "host": "44 programs at 24 universities worldwide",
+      "host_institution": null,
+      "description": "Window 2 for 2026 is now closed. This scholarship runs 2 windows per year — Window 1 typically opens ~Jan. Check for the 2027 cycle.",
+      "eligibility": "All African countries. 3 years development-related work experience. IELTS required",
+      "amount": "Full tuition + monthly stipend + airfare + insurance + book allowance",
+      "deadline": "2026-05-29",
+      "apply_url": "https://www.worldbank.org/en/programs/scholarships/jj-wbgsp",
+      "source_url": "https://www.worldbank.org/en/programs/scholarships/jj-wbgsp",
+      "degree_levels": [
+        "Masters"
+      ],
+      "fields": [
+        "Economics",
+        "Engineering",
+        "Public Health",
+        "Agriculture",
+        "Development Studies"
+      ],
+      "fields_of_study": [
+        "Economics",
+        "Engineering",
+        "Public Health",
+        "Agriculture",
+        "Development Studies"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": 3,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": null,
+      "host_country": null,
+      "iso2": null,
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "international_organization",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Archived",
+      "view_count": 0,
+      "archived": true
+    },
+    {
+      "id": "9d57cbea1fd7",
+      "name": "Poland NAWA Government Scholarship (Banach / My First Choice)",
+      "provider": "Polish National Agency for Academic Exchange (NAWA)",
+      "host": "Poland",
+      "host_institution": "Polish universities",
+      "description": "Applications for the 2026/27 cycle are now closed. This scholarship typically opens again around January. Next cycle expected ~May 2027 for 2027/28 intake.",
+      "eligibility": "All African countries. Age under 35",
+      "amount": "Full tuition waiver + PLN 1,700-2,500/month (NOTE: non-EUR)",
+      "deadline": "2026-05-29",
+      "apply_url": "https://nawa.gov.pl/en/nawa/news/poland-my-first-choice-nawa-2026",
+      "source_url": "https://nawa.gov.pl/en/nawa/news/poland-my-first-choice-nawa-2026",
+      "degree_levels": [
+        "Masters",
+        "PhD"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": 35,
+      "age_limit_phd": 35,
+      "host_region": "Central and Eastern Europe",
+      "host_country": null,
+      "iso2": "PL",
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "government",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Archived",
+      "view_count": 0,
+      "archived": true
+    },
+    {
+      "id": "d9e5c200e7df",
+      "name": "UNESCO Co-sponsored Fellowships",
+      "provider": "UNESCO",
+      "host": "Varies by fellowship",
+      "host_institution": null,
+      "description": "Applications for the previous cycle are closed. Next cycle typically opens mid-year. Check the website for updates.",
+      "eligibility": "All African countries",
+      "amount": "Varies by specific fellowship",
+      "deadline": "2025-12-31",
+      "apply_url": "https://www.unesco.org/en/fellowships",
+      "source_url": "https://www.unesco.org/en/fellowships",
+      "degree_levels": [
+        "Masters",
+        "PhD",
+        "Postdoctoral"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Partial",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": null,
+      "host_country": null,
+      "iso2": null,
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "international_organization",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Archived",
+      "view_count": 0,
+      "archived": true
+    },
+    {
+      "id": "dbcc47e9e381",
+      "name": "Queen Elizabeth Commonwealth Scholarships (QECS)",
+      "provider": "Association of Commonwealth Universities (ACU)",
+      "host": "Universities in low/middle-income Commonwealth countries",
+      "host_institution": null,
+      "description": "Applications close tomorrow! For masters study in Commonwealth countries.",
+      "eligibility": "Commonwealth African countries. IELTS required",
+      "amount": "Full tuition + living expenses + return flights + research grant",
+      "deadline": "2026-06-03",
+      "apply_url": "https://www.acu.ac.uk/funding-opportunities/for-students/scholarships/queen-elizabeth-commonwealth-scholarships/",
+      "source_url": "https://www.acu.ac.uk/funding-opportunities/for-students/scholarships/queen-elizabeth-commonwealth-scholarships/",
+      "degree_levels": [
+        "Masters"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "Botswana",
+        "Cameroon",
+        "Eswatini",
+        "Gabon",
+        "Gambia",
+        "Ghana",
+        "Kenya",
+        "Lesotho",
+        "Malawi",
+        "Mauritius",
+        "Mozambique",
+        "Namibia",
+        "Nigeria",
+        "Rwanda",
+        "Seychelles",
+        "Sierra Leone",
+        "South Africa",
+        "Tanzania",
+        "Togo",
+        "Uganda",
+        "Zambia"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "Commonwealth Africa",
+      "host_country": null,
+      "iso2": null,
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "foundation",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Urgent",
+      "view_count": 0
+    },
+    {
+      "id": "67faa6cebe23",
+      "name": "Japanese Government MEXT Scholarship (Embassy Recommendation)",
+      "provider": "MEXT Japan",
+      "host": "Japan",
+      "host_institution": "Japanese universities",
+      "description": "Varies by embassy. For research students typically Jan-May 2027. Apply through local Japanese embassy.",
+      "eligibility": "All African countries. UG: 17-24, Graduate: under 35. No IELTS required",
+      "amount": "Full tuition + JPY 117,000-143,000/month + airfare + arrival allowance",
+      "deadline": "TBA",
+      "apply_url": "https://www.studyinjapan.go.jp/en/",
+      "source_url": "https://www.studyinjapan.go.jp/en/",
+      "degree_levels": [
+        "Undergraduate",
+        "Masters",
+        "PhD"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": true,
+      "work_experience_required": null,
+      "age_limit_masters": 35,
+      "age_limit_phd": 35,
+      "host_region": "Japan and South Korea",
+      "host_country": null,
+      "iso2": "JP",
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "government",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "6cf2686d61a1",
+      "name": "DAAD EPOS (Development-Related Postgraduate Courses)",
+      "provider": "DAAD / German Federal Ministry for Economic Cooperation (BMZ)",
+      "host": "Germany",
+      "host_institution": "Various German universities",
+      "description": "For development-related postgraduate courses in Germany.",
+      "eligibility": "All African countries. Bachelor's + 2 years professional experience",
+      "amount": "EUR 934/month stipend + health insurance + travel allowance + study allowance",
+      "deadline": "2026-07-31",
+      "apply_url": "https://www.daad.de/en/study-and-research-in-germany/scholarships/development-related-postgraduate-courses-epos/",
+      "source_url": "https://www.daad.de/en/study-and-research-in-germany/scholarships/development-related-postgraduate-courses-epos/",
+      "degree_levels": [
+        "Masters"
+      ],
+      "fields": [
+        "Engineering",
+        "Data Science",
+        "Environmental Science",
+        "Public Health",
+        "Development Studies"
+      ],
+      "fields_of_study": [
+        "Engineering",
+        "Data Science",
+        "Environmental Science",
+        "Public Health",
+        "Development Studies"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": 2,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "Germany, Austria, Switzerland",
+      "host_country": null,
+      "iso2": "DE",
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "government",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "f5ede95cb26a",
+      "name": "Rhodes Scholarship (Southern Africa)",
+      "provider": "Rhodes Trust, Oxford University",
+      "host": "United Kingdom",
+      "host_institution": "University of Oxford",
+      "description": "Prestigious scholarship at the University of Oxford.",
+      "eligibility": "Botswana, Lesotho, Malawi, Namibia, South Africa, Eswatini. Age under 24 by Oct 1, 2027",
+      "amount": "All fees + GBP ~18,180/year stipend + return airfare",
+      "deadline": "2026-08-03",
+      "apply_url": "https://www.rhodeshouse.ox.ac.uk/scholarships/applications/",
+      "source_url": "https://www.rhodeshouse.ox.ac.uk/scholarships/applications/",
+      "degree_levels": [
+        "Masters",
+        "PhD"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "Botswana",
+        "Lesotho",
+        "Malawi",
+        "Namibia",
+        "South Africa",
+        "Eswatini"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": 24,
+      "age_limit_phd": null,
+      "host_region": "United Kingdom and Ireland",
+      "host_country": null,
+      "iso2": "GB",
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "foundation",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "ce4d9562a99f",
+      "name": "Rhodes Scholarship (West Africa)",
+      "provider": "Rhodes Trust, Oxford University",
+      "host": "United Kingdom",
+      "host_institution": "University of Oxford",
+      "description": "Prestigious scholarship at the University of Oxford.",
+      "eligibility": "Benin, Burkina Faso, Cape Verde, Côte d'Ivoire, Gambia, Ghana, Guinea, Guinea-Bissau, Liberia, Mali, Mauritania, Niger, Nigeria, Senegal, Sierra Leone, Togo. Age under 24 by Oct 1, 2027",
+      "amount": "All fees + GBP ~18,180/year stipend + return airfare",
+      "deadline": "2026-08-27",
+      "apply_url": "https://www.rhodeshouse.ox.ac.uk/scholarships/applications/",
+      "source_url": "https://www.rhodeshouse.ox.ac.uk/scholarships/applications/",
+      "degree_levels": [
+        "Masters",
+        "PhD"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "Benin",
+        "Burkina Faso",
+        "Cape Verde",
+        "Côte d'Ivoire",
+        "Gambia",
+        "Ghana",
+        "Guinea",
+        "Guinea-Bissau",
+        "Liberia",
+        "Mali",
+        "Mauritania",
+        "Niger",
+        "Nigeria",
+        "Senegal",
+        "Sierra Leone",
+        "Togo"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": 24,
+      "age_limit_phd": null,
+      "host_region": "United Kingdom and Ireland",
+      "host_country": null,
+      "iso2": "GB",
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "foundation",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "d215af6a9262",
+      "name": "Rhodes Scholarship (East Africa)",
+      "provider": "Rhodes Trust, Oxford University",
+      "host": "United Kingdom",
+      "host_institution": "University of Oxford",
+      "description": "Prestigious scholarship at the University of Oxford for East African students.",
+      "eligibility": "Burundi, Kenya, Rwanda, Tanzania, Uganda. Age under 24 by Oct 1, 2027",
+      "amount": "All fees + GBP ~18,180/year stipend + return airfare",
+      "deadline": "2026-08-27",
+      "apply_url": "https://www.rhodeshouse.ox.ac.uk/scholarships/applications/",
+      "source_url": "https://www.rhodeshouse.ox.ac.uk/scholarships/applications/",
+      "degree_levels": [
+        "Masters",
+        "PhD"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "Burundi",
+        "Kenya",
+        "Rwanda",
+        "Tanzania",
+        "Uganda"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": 24,
+      "age_limit_phd": null,
+      "host_region": "United Kingdom and Ireland",
+      "host_country": null,
+      "iso2": "GB",
+      "published": true,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "foundation",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "6b7bee48e8f2",
+      "name": "Swiss Government Excellence Scholarships 2027-2028",
+      "provider": "Swiss Confederation / SERI",
+      "host": "Switzerland",
+      "host_institution": "Swiss universities, ETH Zurich, EPFL",
+      "description": "For research and study at top Swiss institutions.",
+      "eligibility": "183 countries including all African nations. Born after Dec 31, 1990. Academic host letter from Swiss professor required",
+      "amount": "CHF 1,920-3,500/month + tuition + insurance + travel",
+      "deadline": "TBA",
+      "apply_url": "https://www.sbfi.admin.ch/en/swiss-government-excellence-scholarships",
+      "source_url": "https://www.sbfi.admin.ch/en/swiss-government-excellence-scholarships",
+      "degree_levels": [
+        "Masters",
+        "PhD",
+        "Postdoctoral"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "Germany, Austria, Switzerland",
+      "host_country": null,
+      "iso2": "CH",
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "government",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "92b9b8fbf125",
+      "name": "Erasmus Mundus Joint Master Degrees (EMJMD)",
+      "provider": "European Commission / EACEA",
+      "host": "Consortia of European universities",
+      "host_institution": null,
+      "description": "Study at multiple European universities with full funding for non-EU Africans.",
+      "eligibility": "All African countries. IELTS varies by program",
+      "amount": "Full tuition + EUR 1,000-1,400/month + travel (Category A for non-EU Africans)",
+      "deadline": "TBA",
+      "apply_url": "https://erasmus-plus.ec.europa.eu/opportunities/individuals/students/erasmus-mundus-joint-masters",
+      "source_url": "https://erasmus-plus.ec.europa.eu/opportunities/individuals/students/erasmus-mundus-joint-masters",
+      "degree_levels": [
+        "Masters"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "Rest of Europe",
+      "host_country": null,
+      "iso2": null,
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "government",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "6f64f7c982eb",
+      "name": "Global Korea Scholarship (GKS)",
+      "provider": "NIIED / Ministry of Education, South Korea",
+      "host": "South Korea",
+      "host_institution": "Various Korean universities",
+      "description": "South Korean government scholarship with Korean language training included.",
+      "eligibility": "All African countries. UG: under 25, Graduate: under 40. No IELTS required",
+      "amount": "Full tuition + KRW 900,000/month + airfare + insurance + 1-year Korean language",
+      "deadline": "TBA",
+      "apply_url": "https://www.studyinkorea.go.kr/",
+      "source_url": "https://www.studyinkorea.go.kr/",
+      "degree_levels": [
+        "Undergraduate",
+        "Masters",
+        "PhD"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": true,
+      "work_experience_required": null,
+      "age_limit_masters": 40,
+      "age_limit_phd": 40,
+      "host_region": "Japan and South Korea",
+      "host_country": null,
+      "iso2": "KR",
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "government",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "514094e61d2f",
+      "name": "Chinese Government Scholarship (CSC)",
+      "provider": "China Scholarship Council",
+      "host": "China",
+      "host_institution": "280+ Chinese universities",
+      "description": "Full scholarship for study in China with Chinese or English language tracks.",
+      "eligibility": "All African countries. UG: under 25, Masters: under 35, PhD: under 40. IELTS waiver for Chinese language track",
+      "amount": "Full tuition + accommodation + CNY 2,500-3,500/month + medical insurance",
+      "deadline": "TBA",
+      "apply_url": "https://www.csc.edu.cn/",
+      "source_url": "https://www.csc.edu.cn/",
+      "degree_levels": [
+        "Undergraduate",
+        "Masters",
+        "PhD"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": true,
+      "work_experience_required": null,
+      "age_limit_masters": 35,
+      "age_limit_phd": 40,
+      "host_region": "China and East Asia",
+      "host_country": null,
+      "iso2": "CN",
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "government",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "e617357ff7c9",
+      "name": "Carnegie Mellon University Africa Mastercard Foundation Scholars",
+      "provider": "Carnegie Mellon University Africa / Mastercard Foundation",
+      "host": "Rwanda",
+      "host_institution": "CMU Africa, Kigali, Rwanda",
+      "description": "MS programs at CMU Africa including MS in Engineering Artificial Intelligence (MSEAI).",
+      "eligibility": "Sub-Saharan African countries",
+      "amount": "Full tuition + accommodation + living stipend + travel + laptop + insurance",
+      "deadline": "2027-01-15",
+      "apply_url": "https://www.cmu.edu/africa/admission/apply.html",
+      "source_url": "https://www.cmu.edu/africa/admission/apply.html",
+      "degree_levels": [
+        "Masters"
+      ],
+      "fields": [
+        "Computer Science",
+        "Engineering",
+        "Artificial Intelligence",
+        "Information Technology"
+      ],
+      "fields_of_study": [
+        "Computer Science",
+        "Engineering",
+        "Artificial Intelligence",
+        "Information Technology"
+      ],
+      "countries": [
+        "Sub-Saharan African countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "Intra-African",
+      "host_country": null,
+      "iso2": "RW",
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "foundation",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "36162d640e43",
+      "name": "Aga Khan Foundation International Scholarship Programme",
+      "provider": "Aga Khan Foundation / AKDN",
+      "host": "Any recognized university worldwide",
+      "host_institution": null,
+      "description": "⚠️ 50% GRANT + 50% LOAN — Half the scholarship is a repayable loan at 5% interest, starting 6 months after graduation. Critical for students to understand before applying.",
+      "eligibility": "Kenya, Tanzania, Uganda, Madagascar, Mozambique ONLY. Age under 30. IELTS required",
+      "amount": "50% grant + 50% loan (5% interest) — tuition + living expenses",
+      "deadline": "TBA",
+      "apply_url": "https://the.akdn/en/what-we-do/developing-human-capacity/education/international-scholarships",
+      "source_url": "https://the.akdn/en/what-we-do/developing-human-capacity/education/international-scholarships",
+      "degree_levels": [
+        "Masters"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "Kenya",
+        "Tanzania",
+        "Uganda",
+        "Madagascar",
+        "Mozambique"
+      ],
+      "funding_type": "Partial",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": 30,
+      "age_limit_phd": null,
+      "host_region": null,
+      "host_country": null,
+      "iso2": null,
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "foundation",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "486f79c087dd",
+      "name": "Mo Ibrahim Foundation Scholarship at SOAS",
+      "provider": "Mo Ibrahim Foundation",
+      "host": "United Kingdom",
+      "host_institution": "SOAS University of London",
+      "description": "Full scholarship for African students at SOAS University of London.",
+      "eligibility": "All African countries",
+      "amount": "Full tuition + living stipend",
+      "deadline": "TBA",
+      "apply_url": "https://www.soas.ac.uk/",
+      "source_url": "https://www.soas.ac.uk/",
+      "degree_levels": [
+        "Masters"
+      ],
+      "fields": [
+        "International Relations",
+        "Development Studies",
+        "Economics",
+        "Political Science"
+      ],
+      "fields_of_study": [
+        "International Relations",
+        "Development Studies",
+        "Economics",
+        "Political Science"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "United Kingdom and Ireland",
+      "host_country": null,
+      "iso2": "GB",
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "foundation",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "6663c51b1df4",
+      "name": "AfDB Japan Africa Dream Scholarship (JADS)",
+      "provider": "African Development Bank / Government of Japan",
+      "host": "Japan",
+      "host_institution": "Universities in Japan",
+      "description": "Joint AfDB-Japan scholarship for masters study in Japan.",
+      "eligibility": "All African countries (AfDB member states). 1 year professional experience. IELTS 6.0 required. Age under 35",
+      "amount": "Full tuition + JPY 144,000/month + round-trip airfare + insurance + book allowance",
+      "deadline": "TBA",
+      "apply_url": "https://www.afdb.org/en/about-us/careers/japan-africa-dream-scholarship-jads-program",
+      "source_url": "https://www.afdb.org/en/about-us/careers/japan-africa-dream-scholarship-jads-program",
+      "degree_levels": [
+        "Masters"
+      ],
+      "fields": [
+        "Engineering",
+        "Agriculture",
+        "Public Health",
+        "Environmental Science",
+        "Economics"
+      ],
+      "fields_of_study": [
+        "Engineering",
+        "Agriculture",
+        "Public Health",
+        "Environmental Science",
+        "Economics"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": 1,
+      "age_limit_masters": 35,
+      "age_limit_phd": null,
+      "host_region": "Japan and South Korea",
+      "host_country": null,
+      "iso2": "JP",
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "international_organization",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "7989e2d94b4a",
+      "name": "UNHCR DAFI Tertiary Scholarship Programme",
+      "provider": "UNHCR / Federal Government of Germany",
+      "host": "Universities in asylum/host countries or countries of origin",
+      "host_institution": null,
+      "description": "Tertiary education for documented refugees. Rolling applications through local UNHCR offices.",
+      "eligibility": "Documented refugees and returnees only from all African countries",
+      "amount": "Full tuition + study materials + food + transport + accommodation",
+      "deadline": "Rolling",
+      "apply_url": "https://www.unhcr.org/what-we-do/build-better-futures/education/higher-education-and-skills/dafi-tertiary-scholarship-0",
+      "source_url": "https://www.unhcr.org/what-we-do/build-better-futures/education/higher-education-and-skills/dafi-tertiary-scholarship-0",
+      "degree_levels": [
+        "Undergraduate"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "Intra-African",
+      "host_country": null,
+      "iso2": null,
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "international_organization",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Rolling",
+      "view_count": 0
+    },
+    {
+      "id": "65eb27b23c58",
+      "name": "Heinrich Böll Foundation Scholarships",
+      "provider": "Heinrich Böll Foundation",
+      "host": "Germany",
+      "host_institution": "German universities",
+      "description": "Political party-affiliated foundation (German Green Party). Students should be aware of specific ideological alignment requirements.",
+      "eligibility": "All African countries. Must demonstrate social/political engagement aligned with Green/Progressive values",
+      "amount": "EUR 649-1,200/month (no tuition in Germany) + insurance supplement",
+      "deadline": "Rolling",
+      "apply_url": "https://www.boell.de/en/foundation/application",
+      "source_url": "https://www.boell.de/en/foundation/application",
+      "degree_levels": [
+        "Undergraduate",
+        "Masters",
+        "PhD"
+      ],
+      "fields": [
+        "Environmental Science",
+        "Political Science",
+        "International Relations",
+        "Sustainability"
+      ],
+      "fields_of_study": [
+        "Environmental Science",
+        "Political Science",
+        "International Relations",
+        "Sustainability"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Partial",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "Germany, Austria, Switzerland",
+      "host_country": null,
+      "iso2": "DE",
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "foundation",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Rolling",
+      "view_count": 0
+    },
+    {
+      "id": "810fe449ded6",
+      "name": "Friedrich Ebert Foundation (FES) Scholarship",
+      "provider": "Friedrich Ebert Stiftung",
+      "host": "Germany",
+      "host_institution": "German universities",
+      "description": "Political party-affiliated foundation (German SPD). German language B2 level required.",
+      "eligibility": "All African countries. Social democratic values, German language B2. Age under 30",
+      "amount": "EUR 930/month + EUR 300 study allowance + health insurance",
+      "deadline": "Rolling",
+      "apply_url": "https://www.fes.de/studienfoerderung/international",
+      "source_url": "https://www.fes.de/studienfoerderung/international",
+      "degree_levels": [
+        "Masters",
+        "PhD"
+      ],
+      "fields": [
+        "Political Science",
+        "International Relations",
+        "Economics",
+        "Social Sciences"
+      ],
+      "fields_of_study": [
+        "Political Science",
+        "International Relations",
+        "Economics",
+        "Social Sciences"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Partial",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": 30,
+      "age_limit_phd": 30,
+      "host_region": "Germany, Austria, Switzerland",
+      "host_country": null,
+      "iso2": "DE",
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "foundation",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Rolling",
+      "view_count": 0
+    },
+    {
+      "id": "3f4af5597975",
+      "name": "Generation Google Scholarship",
+      "provider": "Google",
+      "host": "Any university (home institution)",
+      "host_institution": null,
+      "description": "For students pursuing computer science and technology degrees.",
+      "eligibility": "All African countries. Studying Computer Science, Computer Engineering, or related Technology fields",
+      "amount": "EUR 7,000 (one-time) + Google Scholars' Retreat",
+      "deadline": "TBA",
+      "apply_url": "https://www.google.com/about/careers/applications/buildyourfuture/scholarships/",
+      "source_url": "https://www.google.com/about/careers/applications/buildyourfuture/scholarships/",
+      "degree_levels": [
+        "Undergraduate",
+        "Masters"
+      ],
+      "fields": [
+        "Computer Science",
+        "Computer Engineering",
+        "Technology"
+      ],
+      "fields_of_study": [
+        "Computer Science",
+        "Computer Engineering",
+        "Technology"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Partial",
+      "required_documents": [],
+      "no_ielts": true,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "Intra-African",
+      "host_country": null,
+      "iso2": null,
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "corporate",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "1def3d442b0e",
+      "name": "Austria OeAD Ernst Mach Grant (Worldwide)",
+      "provider": "Austrian Agency for Education and Internationalisation (OeAD)",
+      "host": "Austria",
+      "host_institution": "Austrian universities",
+      "description": "Research grant for study and research in Austria. Invitation from Austrian host institution required.",
+      "eligibility": "All African countries. Invitation letter from Austrian host institution required",
+      "amount": "EUR 1,050-1,150/month + travel",
+      "deadline": "Rolling",
+      "apply_url": "https://oead.at/en/studieren-forschen-lehren/coming-to-austria-programme-overview/grants-and-scholarships",
+      "source_url": "https://oead.at/en/studieren-forschen-lehren/coming-to-austria-programme-overview/grants-and-scholarships",
+      "degree_levels": [
+        "Masters",
+        "PhD",
+        "Postdoctoral"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Partial",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "Germany, Austria, Switzerland",
+      "host_country": null,
+      "iso2": "AT",
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "government",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Rolling",
+      "view_count": 0
+    },
+    {
+      "id": "d4c5dabf9a36",
+      "name": "Finland EDUFI Fellowship",
+      "provider": "Finnish National Agency for Education (EDUFI)",
+      "host": "Finland",
+      "host_institution": "Finnish universities",
+      "description": "Research grant for doctoral and postdoctoral studies in Finland. Invitation from Finnish university required.",
+      "eligibility": "All African countries. Invited by Finnish university",
+      "amount": "EUR 1,500-1,900/month research grant",
+      "deadline": "Rolling",
+      "apply_url": "https://www.oph.fi/en/internationalisation/edufi-fellowship",
+      "source_url": "https://www.oph.fi/en/internationalisation/edufi-fellowship",
+      "degree_levels": [
+        "PhD",
+        "Postdoctoral"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Partial",
+      "required_documents": [],
+      "no_ielts": true,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "Nordic countries",
+      "host_country": null,
+      "iso2": "FI",
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "government",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Rolling",
+      "view_count": 0
+    },
+    {
+      "id": "1f05cac2a962",
+      "name": "Czech Republic Government Scholarships",
+      "provider": "Government of the Czech Republic / Ministry of Education",
+      "host": "Czech Republic",
+      "host_institution": "Czech public universities",
+      "description": "Government scholarship for developing countries with Czech language prep included.",
+      "eligibility": "Kenya. Masters: under 30, PhD: under 35",
+      "amount": "Full tuition + CZK 14,000-18,000/month + accommodation + Czech language prep",
+      "deadline": "TBA",
+      "apply_url": "https://msmt.gov.cz/eu-and-international-affairs/government-scholarships-developing-countries",
+      "source_url": "https://msmt.gov.cz/eu-and-international-affairs/government-scholarships-developing-countries",
+      "degree_levels": [
+        "Undergraduate",
+        "Masters",
+        "PhD"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "Kenya"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": 30,
+      "age_limit_phd": 35,
+      "host_region": "Central and Eastern Europe",
+      "host_country": null,
+      "iso2": "CZ",
+      "published": true,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "government",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "a812259f1dc4",
+      "name": "ARES International Training Scholarships",
+      "provider": "ARES / Belgian Development Cooperation",
+      "host": "Belgium",
+      "host_institution": "Belgian universities",
+      "description": "For masters study in Belgium with full funding.",
+      "eligibility": "Kenya and 19 Sub-Saharan countries. 2 years work experience. Age under 40",
+      "amount": "Travel + tuition + EUR 1,170/month + accommodation + insurance",
+      "deadline": "TBA",
+      "apply_url": "https://ares-ac.be/fr/cooperation-au-developpement/bourses",
+      "source_url": "https://ares-ac.be/fr/cooperation-au-developpement/bourses",
+      "degree_levels": [
+        "Masters"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "Kenya",
+        "Benin",
+        "Burkina Faso",
+        "Burundi",
+        "Cameroon",
+        "Côte d'Ivoire",
+        "DRC",
+        "Ethiopia",
+        "Ghana",
+        "Guinea",
+        "Madagascar",
+        "Mali",
+        "Morocco",
+        "Niger",
+        "Nigeria",
+        "Rwanda",
+        "Senegal",
+        "Tanzania",
+        "Togo",
+        "Uganda"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": 2,
+      "age_limit_masters": 40,
+      "age_limit_phd": null,
+      "host_region": "Western Europe",
+      "host_country": null,
+      "iso2": "BE",
+      "published": false,
+      "verified_at": null,
+      "verified_by": null,
+      "sponsor_type": "government",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "d9bf297d9dca",
+      "name": "DAAD Helmut-Schmidt-Programme (Public Policy & Good Governance)",
+      "provider": "DAAD / German Federal Ministry for Economic Cooperation (BMZ)",
+      "host": "Germany",
+      "host_institution": "Various German universities",
+      "description": "Masters programme in public policy and good governance at German universities for future leaders.",
+      "eligibility": "All African countries. Bachelor's + relevant professional experience in public sector",
+      "amount": "EUR 934/month + health insurance + travel allowance + study allowance",
+      "deadline": "2026-07-31",
+      "apply_url": "https://www.daad.de/en/study-and-research-in-germany/scholarships/helmut-schmidt-programme/",
+      "source_url": "https://www.daad.de/en/study-and-research-in-germany/scholarships/helmut-schmidt-programme/",
+      "degree_levels": [
+        "Masters"
+      ],
+      "fields": [
+        "Public Policy",
+        "Political Science",
+        "Economics",
+        "Law",
+        "Public Administration",
+        "Governance"
+      ],
+      "fields_of_study": [
+        "Public Policy",
+        "Political Science",
+        "Economics",
+        "Law",
+        "Public Administration",
+        "Governance"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "Germany, Austria, Switzerland",
+      "host_country": null,
+      "iso2": "DE",
+      "published": false,
+      "sponsor_type": "government",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "95f8cdb3abc4",
+      "name": "Schwarzman Scholars Program 2027-2028",
+      "provider": "Schwarzman Scholars / Tsinghua University",
+      "host": "China",
+      "host_institution": "Tsinghua University, Beijing",
+      "description": "Fully-funded one-year masters in China Studies at Tsinghua University for future global leaders.",
+      "eligibility": "All African countries. Age 18-28. IELTS/TOEFL required",
+      "amount": "Full tuition + accommodation + CNY 4,000/month stipend + airfare + travel + laptop",
+      "deadline": "2026-09-09",
+      "apply_url": "https://www.schwarzmanscholars.org/admissions/application-instructions/",
+      "source_url": "https://www.schwarzmanscholars.org/admissions/application-instructions/",
+      "degree_levels": [
+        "Masters"
+      ],
+      "fields": [
+        "China Studies",
+        "International Relations",
+        "Economics",
+        "Political Science",
+        "Business"
+      ],
+      "fields_of_study": [
+        "China Studies",
+        "International Relations",
+        "Economics",
+        "Political Science",
+        "Business"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": 28,
+      "age_limit_phd": null,
+      "host_region": "China and East Asia",
+      "host_country": null,
+      "iso2": "CN",
+      "published": false,
+      "sponsor_type": "foundation",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "b86bf9e264ac",
+      "name": "Melbourne Graduate Research Scholarships 2027",
+      "provider": "University of Melbourne",
+      "host": "Australia",
+      "host_institution": "University of Melbourne",
+      "description": "Graduate research scholarship at Australia's top-ranked university.",
+      "eligibility": "All African countries. IELTS required",
+      "amount": "Full tuition + AUD ~35,000/year living allowance + relocation grant + OSHC",
+      "deadline": "2026-10-31",
+      "apply_url": "https://study.unimelb.edu.au/study-with-us/graduate-research",
+      "source_url": "https://study.unimelb.edu.au/study-with-us/graduate-research",
+      "degree_levels": [
+        "Masters",
+        "PhD"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "Australia and New Zealand",
+      "host_country": null,
+      "iso2": "AU",
+      "published": false,
+      "sponsor_type": "university",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "5f78ade2889a",
+      "name": "University of Edinburgh Mastercard Foundation On-Campus Postgraduate Scholarships",
+      "provider": "University of Edinburgh / Mastercard Foundation",
+      "host": "United Kingdom",
+      "host_institution": "University of Edinburgh",
+      "description": "Mastercard Foundation scholarship for postgraduate study at the University of Edinburgh with Climate Leadership Programme.",
+      "eligibility": "Sub-Saharan African countries. Strong academic record and leadership potential",
+      "amount": "Full tuition + living costs + travel + study materials + Climate Leadership Programme",
+      "deadline": "TBA",
+      "apply_url": "https://registryservices.ed.ac.uk/student-funding/postgraduate/the-mastercard-foundation-scholars",
+      "source_url": "https://registryservices.ed.ac.uk/student-funding/postgraduate/the-mastercard-foundation-scholars",
+      "degree_levels": [
+        "Masters"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "Sub-Saharan African countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "United Kingdom and Ireland",
+      "host_country": null,
+      "iso2": "GB",
+      "published": false,
+      "sponsor_type": "foundation",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "23807d35aa7d",
+      "name": "GREAT Scholarships (British Council / UK Universities)",
+      "provider": "British Council / GREAT Britain Campaign",
+      "host": "United Kingdom",
+      "host_institution": "60+ UK universities",
+      "description": "Partial tuition fee scholarship for masters study in the UK, supported by the British Council.",
+      "eligibility": "Limited African countries (Nigeria, Ghana, Kenya, Egypt, South Africa, others vary). IELTS required",
+      "amount": "GBP 10,000 towards tuition fees",
+      "deadline": "TBA",
+      "apply_url": "https://study-uk.britishcouncil.org/scholarships-funding/great-scholarships",
+      "source_url": "https://study-uk.britishcouncil.org/scholarships-funding/great-scholarships",
+      "degree_levels": [
+        "Masters"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "Nigeria",
+        "Ghana",
+        "Kenya",
+        "South Africa",
+        "Egypt"
+      ],
+      "funding_type": "Partial",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "United Kingdom and Ireland",
+      "host_country": null,
+      "iso2": "GB",
+      "published": false,
+      "sponsor_type": "government",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "3a919cf94d63",
+      "name": "Wellcome Early-Career Awards",
+      "provider": "Wellcome Trust",
+      "host": "Any eligible research institution",
+      "host_institution": null,
+      "description": "Research funding for early-career researchers in health-related fields. Salary + research expenses for 5-8 years.",
+      "eligibility": "All African countries",
+      "amount": "Salary + research expenses up to GBP 800,000 over 5-8 years",
+      "deadline": "Rolling",
+      "apply_url": "https://wellcome.org/research-funding/schemes/wellcome-early-career-awards",
+      "source_url": "https://wellcome.org/research-funding/schemes/wellcome-early-career-awards",
+      "degree_levels": [
+        "PhD",
+        "Postdoctoral"
+      ],
+      "fields": [
+        "Health Sciences",
+        "Biomedical Science",
+        "Public Health",
+        "Medical Research"
+      ],
+      "fields_of_study": [
+        "Health Sciences",
+        "Biomedical Science",
+        "Public Health",
+        "Medical Research"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": null,
+      "host_country": null,
+      "iso2": null,
+      "published": false,
+      "sponsor_type": "foundation",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Rolling",
+      "view_count": 0
+    },
+    {
+      "id": "5b69d4261b8f",
+      "name": "Wellcome Career Development Awards",
+      "provider": "Wellcome Trust",
+      "host": "Any eligible research institution",
+      "host_institution": null,
+      "description": "Research funding for mid-career researchers. Salary + research expenses for 5-8 years.",
+      "eligibility": "All African countries",
+      "amount": "Salary + research expenses up to GBP 1.5M over 5-8 years",
+      "deadline": "Rolling",
+      "apply_url": "https://wellcome.org/research-funding/schemes/wellcome-career-development-awards",
+      "source_url": "https://wellcome.org/research-funding/schemes/wellcome-career-development-awards",
+      "degree_levels": [
+        "Postdoctoral"
+      ],
+      "fields": [
+        "Health Sciences",
+        "Biomedical Science",
+        "Public Health",
+        "Medical Research"
+      ],
+      "fields_of_study": [
+        "Health Sciences",
+        "Biomedical Science",
+        "Public Health",
+        "Medical Research"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": null,
+      "host_country": null,
+      "iso2": null,
+      "published": false,
+      "sponsor_type": "foundation",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Rolling",
+      "view_count": 0
+    },
+    {
+      "id": "0577fe8f0577",
+      "name": "Yenching Academy of Peking University 2027",
+      "provider": "Peking University",
+      "host": "China",
+      "host_institution": "Peking University, Beijing",
+      "description": "Fully-funded interdisciplinary masters in China Studies at Peking University.",
+      "eligibility": "All African countries. Age under 28. IELTS/TOEFL required",
+      "amount": "Full tuition + accommodation + CNY 3,000/month stipend + airfare + field study",
+      "deadline": "TBA",
+      "apply_url": "https://yenchingacademy.pku.edu.cn/",
+      "source_url": "https://yenchingacademy.pku.edu.cn/",
+      "degree_levels": [
+        "Masters"
+      ],
+      "fields": [
+        "China Studies",
+        "International Relations",
+        "Economics",
+        "History",
+        "Law",
+        "Sociology"
+      ],
+      "fields_of_study": [
+        "China Studies",
+        "International Relations",
+        "Economics",
+        "History",
+        "Law",
+        "Sociology"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": 28,
+      "age_limit_phd": null,
+      "host_region": "China and East Asia",
+      "host_country": null,
+      "iso2": "CN",
+      "published": false,
+      "sponsor_type": "university",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "705453cff9b2",
+      "name": "Chulabhorn Graduate Institute (CGI) Scholarship, Thailand",
+      "provider": "Chulabhorn Graduate Institute, Thailand",
+      "host": "Thailand",
+      "host_institution": "CGI, Bangkok",
+      "description": "Fully-funded masters in biological and chemical sciences at CGI Thailand.",
+      "eligibility": "All African countries. Age under 32. Background in sciences",
+      "amount": "Full tuition + stipend + accommodation + travel + research support",
+      "deadline": "TBA",
+      "apply_url": "https://www.chulabornresearchcenter.net/",
+      "source_url": "https://www.chulabornresearchcenter.net/",
+      "degree_levels": [
+        "Masters"
+      ],
+      "fields": [
+        "Biological Sciences",
+        "Chemical Sciences",
+        "Environmental Toxicology",
+        "Pharmacology"
+      ],
+      "fields_of_study": [
+        "Biological Sciences",
+        "Chemical Sciences",
+        "Environmental Toxicology",
+        "Pharmacology"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": 32,
+      "age_limit_phd": null,
+      "host_region": "Japan and South Korea",
+      "host_country": null,
+      "iso2": null,
+      "published": false,
+      "sponsor_type": "university",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "60c9500aa866",
+      "name": "SHE-CREEDS Intra-Africa Academic Mobility Scholarships",
+      "provider": "European Union / SHE-CREEDS Consortium",
+      "host": "Participating universities across Africa",
+      "host_institution": null,
+      "description": "Intra-Africa mobility scholarship for masters and PhD in climate, energy and digital innovation.",
+      "eligibility": "Sub-Saharan African countries",
+      "amount": "Full tuition + travel + living allowance + insurance",
+      "deadline": "TBA",
+      "apply_url": "https://opportunitiesforyouth.org/2026/06/01/she-creeds-intra-africa-academic-mobility-scholarships-2026/",
+      "source_url": "https://opportunitiesforyouth.org/2026/06/01/she-creeds-intra-africa-academic-mobility-scholarships-2026/",
+      "degree_levels": [
+        "Masters",
+        "PhD"
+      ],
+      "fields": [
+        "Climate Science",
+        "Environmental Science",
+        "Energy Engineering",
+        "Digital Innovation",
+        "Agriculture"
+      ],
+      "fields_of_study": [
+        "Climate Science",
+        "Environmental Science",
+        "Energy Engineering",
+        "Digital Innovation",
+        "Agriculture"
+      ],
+      "countries": [
+        "Sub-Saharan African countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "Intra-African",
+      "host_country": null,
+      "iso2": null,
+      "published": false,
+      "sponsor_type": "government",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "05b3e75f34b6",
+      "name": "Learn Africa Postgraduate Scholarship for African Women",
+      "provider": "Women for Africa Foundation",
+      "host": "Spain",
+      "host_institution": "Spanish universities",
+      "description": "Scholarship for African women to pursue postgraduate studies at Spanish universities with leadership training.",
+      "eligibility": "African women only. All African countries",
+      "amount": "Full/Partial tuition + living expenses + leadership training",
+      "deadline": "TBA",
+      "apply_url": "https://www.afterschoolafrica.com/82205/learn-africa-postgraduate-scholarship/",
+      "source_url": "https://www.afterschoolafrica.com/82205/learn-africa-postgraduate-scholarship/",
+      "degree_levels": [
+        "Masters",
+        "PhD"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "Western Europe",
+      "host_country": null,
+      "iso2": "ES",
+      "published": false,
+      "sponsor_type": "foundation",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "b722a373eb1d",
+      "name": "Ford Foundation International Fellowships",
+      "provider": "Ford Foundation",
+      "host": "Any university (USA-based program)",
+      "host_institution": null,
+      "description": "Full fellowship for graduate study with focus on social justice and community development.",
+      "eligibility": "All African countries. Demonstrated commitment to social justice",
+      "amount": "Full tuition + living stipend + travel + research support",
+      "deadline": "2026-11-15",
+      "apply_url": "https://www.fordfoundation.org/work/investing-in-individuals/",
+      "source_url": "https://www.fordfoundation.org/work/investing-in-individuals/",
+      "degree_levels": [
+        "Masters",
+        "PhD"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "North America",
+      "host_country": null,
+      "iso2": "US",
+      "published": false,
+      "sponsor_type": "foundation",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "4c622dfe40ea",
+      "name": "Ford Global Fellowship 2027",
+      "provider": "Ford Foundation",
+      "host": "Non-residential (global network)",
+      "host_institution": null,
+      "description": "Professional fellowship for social justice leaders. USD 50M initiative over 10 years.",
+      "eligibility": "All African countries. Demonstrated leadership in advancing solutions to end inequality",
+      "amount": "Resources, network access, support for social justice leaders",
+      "deadline": "2026-07-10",
+      "apply_url": "https://www.fordfoundation.org/work/investing-in-individuals/the-ford-global-fellowship/",
+      "source_url": "https://www.fordfoundation.org/work/investing-in-individuals/the-ford-global-fellowship/",
+      "degree_levels": [
+        "Professional"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": null,
+      "host_country": null,
+      "iso2": null,
+      "published": false,
+      "sponsor_type": "foundation",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "634f20bd12f1",
+      "name": "Saudi Government Scholarships 2027",
+      "provider": "Government of Saudi Arabia / Ministry of Education",
+      "host": "Saudi Arabia",
+      "host_institution": "27+ Saudi public universities",
+      "description": "Saudi government scholarship for undergraduate and graduate study in Saudi Arabia.",
+      "eligibility": "All African countries",
+      "amount": "Full tuition + monthly stipend + airfare + health insurance + accommodation",
+      "deadline": "TBA",
+      "apply_url": "https://studyinsaudi.moe.gov.sa/",
+      "source_url": "https://studyinsaudi.moe.gov.sa/",
+      "degree_levels": [
+        "Undergraduate",
+        "Masters",
+        "PhD"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "Middle East and Gulf states",
+      "host_country": null,
+      "iso2": "SA",
+      "published": false,
+      "sponsor_type": "government",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "b13ce06db11b",
+      "name": "Pierre Elliott Trudeau Foundation Doctoral Scholarships",
+      "provider": "Pierre Elliott Trudeau Foundation",
+      "host": "Canada",
+      "host_institution": "Canadian universities",
+      "description": "Doctoral scholarship for research in humanities and social sciences in Canada.",
+      "eligibility": "All African countries. PhD in humanities or social sciences",
+      "amount": "CAD 40,000/year stipend + CAD 20,000/year research allowance for 3 years",
+      "deadline": "TBA",
+      "apply_url": "https://www.trudeaufoundation.ca/en/programs/doctoral-scholarships",
+      "source_url": "https://www.trudeaufoundation.ca/en/programs/doctoral-scholarships",
+      "degree_levels": [
+        "PhD"
+      ],
+      "fields": [
+        "Humanities",
+        "Social Sciences",
+        "Human Rights",
+        "Political Science",
+        "Law"
+      ],
+      "fields_of_study": [
+        "Humanities",
+        "Social Sciences",
+        "Human Rights",
+        "Political Science",
+        "Law"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "North America",
+      "host_country": null,
+      "iso2": "CA",
+      "published": false,
+      "sponsor_type": "foundation",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "09eb24aec35e",
+      "name": "Open Society Fellowship",
+      "provider": "Open Society Foundations",
+      "host": "Non-residential (global)",
+      "host_institution": null,
+      "description": "Fellowship for projects advancing human rights, governance, and public health.",
+      "eligibility": "All African countries",
+      "amount": "Stipend + project support",
+      "deadline": "TBA",
+      "apply_url": "https://www.opensocietyfoundations.org/grants/open-society-fellowship",
+      "source_url": "https://www.opensocietyfoundations.org/grants/open-society-fellowship",
+      "degree_levels": [
+        "Professional"
+      ],
+      "fields": [
+        "Human Rights",
+        "Governance",
+        "Public Health",
+        "Education",
+        "Media"
+      ],
+      "fields_of_study": [
+        "Human Rights",
+        "Governance",
+        "Public Health",
+        "Education",
+        "Media"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": null,
+      "host_country": null,
+      "iso2": null,
+      "published": false,
+      "sponsor_type": "foundation",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "1963dbacb8ef",
+      "name": "University of Bristol Think Big Scholarships 2027",
+      "provider": "University of Bristol",
+      "host": "United Kingdom",
+      "host_institution": "University of Bristol",
+      "description": "Partial tuition fee scholarship for undergraduate and masters students at the University of Bristol.",
+      "eligibility": "All African countries. IELTS required",
+      "amount": "Up to GBP 26,000 towards tuition fees",
+      "deadline": "TBA",
+      "apply_url": "https://www.bristol.ac.uk/students/support/finances/scholarships/think-big-scholarships/",
+      "source_url": "https://www.bristol.ac.uk/students/support/finances/scholarships/think-big-scholarships/",
+      "degree_levels": [
+        "Undergraduate",
+        "Masters"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Partial",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "United Kingdom and Ireland",
+      "host_country": null,
+      "iso2": "GB",
+      "published": false,
+      "sponsor_type": "university",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "04b0665a7cc9",
+      "name": "African STARS Fellowship Programme",
+      "provider": "Mastercard Foundation / Stellenbosch University / Institut Pasteur de Dakar",
+      "host": "South Africa, Senegal",
+      "host_institution": "Stellenbosch University / Institut Pasteur de Dakar",
+      "description": "MSc and fellowship in bioinformatics, infectious diseases and pathogen genomics.",
+      "eligibility": "Sub-Saharan African countries",
+      "amount": "Full tuition + living + travel + research support",
+      "deadline": "TBA",
+      "apply_url": "https://www.starsfellows.africa/",
+      "source_url": "https://www.starsfellows.africa/",
+      "degree_levels": [
+        "Masters"
+      ],
+      "fields": [
+        "Bioinformatics",
+        "Infectious Diseases",
+        "Pathogen Genomics",
+        "Diagnostics",
+        "Vaccine Development"
+      ],
+      "fields_of_study": [
+        "Bioinformatics",
+        "Infectious Diseases",
+        "Pathogen Genomics",
+        "Diagnostics",
+        "Vaccine Development"
+      ],
+      "countries": [
+        "Sub-Saharan African countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "Intra-African",
+      "host_country": null,
+      "iso2": null,
+      "published": false,
+      "sponsor_type": "foundation",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "4e1bdf9bd96e",
+      "name": "Fulbright Foreign Student Program 2027-2028",
+      "provider": "US Department of State / Fulbright Commission",
+      "host": "United States",
+      "host_institution": "US universities",
+      "description": "Flagship US government international exchange program for graduate study.",
+      "eligibility": "All African countries. TOEFL iBT 80+. Strong academic record",
+      "amount": "Full tuition + living stipend + airfare + health insurance",
+      "deadline": "TBA",
+      "apply_url": "https://foreign.fulbrightonline.org/about/foreign-student-program",
+      "source_url": "https://foreign.fulbrightonline.org/about/foreign-student-program",
+      "degree_levels": [
+        "Masters",
+        "PhD"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "North America",
+      "host_country": null,
+      "iso2": "US",
+      "published": false,
+      "sponsor_type": "government",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "a89ac325c5f5",
+      "name": "Eric Bleumink Fellowship (University of Groningen)",
+      "provider": "University of Groningen / Eric Bleumink Fund",
+      "host": "Netherlands",
+      "host_institution": "University of Groningen",
+      "description": "Full fellowship for masters study at the University of Groningen, Netherlands.",
+      "eligibility": "Developing countries including all African nations",
+      "amount": "Full tuition + living expenses + travel + insurance",
+      "deadline": "2026-12-01",
+      "apply_url": "https://www.rug.nl/education/scholarships/eric-bleumink-fellowship?lang=en",
+      "source_url": "https://www.rug.nl/education/scholarships/eric-bleumink-fellowship?lang=en",
+      "degree_levels": [
+        "Masters"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "Rest of Europe",
+      "host_country": null,
+      "iso2": "NL",
+      "published": false,
+      "sponsor_type": "university",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    },
+    {
+      "id": "1afc786b6061",
+      "name": "Gates Cambridge Scholarships 2027/28",
+      "provider": "Gates Cambridge Trust / University of Cambridge",
+      "host": "United Kingdom",
+      "host_institution": "University of Cambridge",
+      "description": "Prestigious full scholarship for graduate study at the University of Cambridge.",
+      "eligibility": "All African countries. Outstanding academic record and leadership potential",
+      "amount": "Full tuition + GBP ~18,000/year stipend + airfare + visa + dependants' allowance",
+      "deadline": "TBA",
+      "apply_url": "https://www.gatescambridge.org/apply/",
+      "source_url": "https://www.gatescambridge.org/apply/",
+      "degree_levels": [
+        "Masters",
+        "PhD"
+      ],
+      "fields": [
+        "All fields"
+      ],
+      "fields_of_study": [
+        "All fields"
+      ],
+      "countries": [
+        "All African Countries"
+      ],
+      "funding_type": "Full",
+      "required_documents": [],
+      "no_ielts": null,
+      "work_experience_required": null,
+      "age_limit_masters": null,
+      "age_limit_phd": null,
+      "host_region": "United Kingdom and Ireland",
+      "host_country": null,
+      "iso2": "GB",
+      "published": false,
+      "sponsor_type": "foundation",
+      "pipeline_source": "manual_import",
+      "quality_score": null,
+      "scam_flags": [],
+      "urgency": "Normal",
+      "view_count": 0
+    }
+  ],
+  "users": [
+    {
+      "email": "admin@zawadi.app",
+      "name": "Samuel Karanja",
+      "country": "Kenya",
+      "degree_level": "PhD",
+      "field_of_study": "Data Science",
+      "destination_openness": "anywhere",
+      "native_language": "English",
+      "plan": "mentor",
+      "role": "super_admin",
+      "status": "active",
+      "confirmed_fields": [],
+      "joined_at": "2023-01-01",
+      "password_hash": "$2b$12$Bm7ZLt9GYt6kzQtv6UH4kOs7OTgnCCMM26PWbbGfGJsPc/55f0Y.6"
+    },
+    {
+      "native_language": "English",
+      "email": "karsamanja@gmail.com",
+      "name": "Samuel Karanja",
+      "country": "Kenya",
+      "plan": "explorer",
+      "joined_at": "2026-05-31",
+      "role": "user",
+      "status": "active",
+      "confirmed_fields": [
+        "date_of_birth",
+        "country",
+        "degree_level",
+        "field_of_study",
+        "gpa",
+        "gpa_system",
+        "target_fields",
+        "degree_class",
+        "english_test_type",
+        "english_score",
+        "destination_openness",
+        "has_research",
+        "has_leadership",
+        "work_experience_years",
+        "name",
+        "gender",
+        "country_income_group",
+        "is_rural_origin",
+        "institution",
+        "destination_regions",
+        "include_fully_funded_anywhere",
+        "native_language",
+        "french_level",
+        "arabic_level",
+        "portuguese_level",
+        "publications",
+        "has_community_service",
+        "is_first_generation",
+        "financial_need_level"
+      ],
+      "password_hash": "$2b$10$5xqAuz9T66FHQxyHm/1lMeZh/1fzj4D8UAesz5oSnr3hHPi8Ty42W",
+      "date_of_birth": "1999-09-13",
+      "degree_level": "Bachelors",
+      "field_of_study": "Computer Science",
+      "gpa": 3,
+      "gpa_system": "us4",
+      "target_fields": [],
+      "degree_class": "first",
+      "english_test_type": "None",
+      "english_score": "",
+      "destination_openness": "anywhere",
+      "destination_regions": [],
+      "include_fully_funded_anywhere": true,
+      "has_research": false,
+      "has_leadership": false,
+      "work_experience_years": 0,
+      "updated_at": "2026-06-02T04:12:14.577Z",
+      "gender": "Male",
+      "country_income_group": "Developing",
+      "is_rural_origin": false,
+      "institution": "",
+      "french_level": "A1",
+      "arabic_level": "A1",
+      "portuguese_level": "A1",
+      "publications": 0,
+      "has_community_service": false,
+      "is_first_generation": false,
+      "financial_need_level": "medium"
+    },
+    {
+      "email": "audit-explorer@test.com",
+      "plan": "explorer"
+    },
+    {
+      "email": "ai.ml27808@gmail.com",
+      "plan": "explorer",
+      "name": "Samuel Karanja",
+      "country": "Kenya",
+      "date_of_birth": "1999-09-13",
+      "gender": "Male",
+      "is_rural_origin": false,
+      "degree_level": "Bachelors",
+      "gpa_system": "us4",
+      "gpa": 3,
+      "degree_class": "first",
+      "institution": "",
+      "field_of_study": "Computer Science",
+      "target_fields": [],
+      "destination_openness": "anywhere",
+      "destination_regions": [],
+      "include_fully_funded_anywhere": true,
+      "native_language": "English",
+      "english_test_type": "None",
+      "english_score": null,
+      "french_level": "A1",
+      "arabic_level": "A1",
+      "portuguese_level": "A1",
+      "work_experience_years": 2,
+      "has_research": true,
+      "publications": 0,
+      "has_leadership": false,
+      "has_community_service": false,
+      "is_first_generation": false,
+      "financial_need_level": "medium",
+      "confirmed_fields": [
+        "name",
+        "country",
+        "date_of_birth",
+        "gender",
+        "is_rural_origin",
+        "degree_level",
+        "gpa_system",
+        "gpa",
+        "degree_class",
+        "institution",
+        "field_of_study",
+        "target_fields",
+        "destination_openness",
+        "destination_regions",
+        "include_fully_funded_anywhere",
+        "native_language",
+        "english_test_type",
+        "english_score",
+        "french_level",
+        "arabic_level",
+        "portuguese_level",
+        "work_experience_years",
+        "has_research",
+        "publications",
+        "has_leadership",
+        "has_community_service",
+        "is_first_generation",
+        "financial_need_level"
+      ],
+      "updated_at": "2026-06-03T05:40:08.069Z"
+    }
+  ],
+  "applications": [
+    {
+      "id": "app-1780212942653",
+      "user_email": "karsamanja@gmail.com",
+      "scholarship_id": "schol-1",
+      "status": "Drafting",
+      "priority": "High",
+      "notes": "Auto-saved from listings list",
+      "updated_at": "2026-05-31"
+    }
+  ],
+  "documents": [
+    {
+      "id": "doc-1780212953721",
+      "user_email": "karsamanja@gmail.com",
+      "name": "samuel Karanja Muriithi - Unofficial Transcripts - May 30, 2026.pdf",
+      "type": "Academic Transcript",
+      "size": "108 KB",
+      "file_path": "1780212953717-430583738-samuel Karanja Muriithi - Unofficial Transcripts - May 30, 2026.pdf",
+      "uploaded_at": "2026-05-31"
+    },
+    {
+      "id": "doc-1780212972780",
+      "user_email": "karsamanja@gmail.com",
+      "name": "samuel Karanja - Resume.pdf",
+      "type": "CV / Resume",
+      "size": "50 KB",
+      "file_path": "1780212972778-890469694-samuel Karanja - Resume.pdf",
+      "uploaded_at": "2026-05-31"
+    },
+    {
+      "id": "doc-1780212987402",
+      "user_email": "karsamanja@gmail.com",
+      "name": "Samuel-Karanja-AIBM-Essay.pdf",
+      "type": "Statement of Purpose",
+      "size": "113 KB",
+      "file_path": "1780212987398-939771830-Samuel-Karanja-AIBM-Essay.pdf",
+      "uploaded_at": "2026-05-31"
+    },
+    {
+      "id": "doc-1780213007293",
+      "user_email": "karsamanja@gmail.com",
+      "name": "Verification Letter - MSc in Financial Engineering - 2026-05-26_05-30-32.pdf",
+      "type": "Reference Letter",
+      "size": "110 KB",
+      "file_path": "1780213007291-350120460-Verification Letter - MSc in Financial Engineering - 2026-05-26_05-30-32.pdf",
+      "uploaded_at": "2026-05-31"
+    },
+    {
+      "id": "doc-1780213028635",
+      "user_email": "karsamanja@gmail.com",
+      "name": "passport.jpeg",
+      "type": "Passport / ID",
+      "size": "145 KB",
+      "file_path": "1780213028632-582772402-passport.jpeg",
+      "uploaded_at": "2026-05-31"
+    }
+  ],
+  "essays": [
+    {
+      "id": "ess-1780464916876",
+      "user_email": "ai.ml27808@gmail.com",
+      "scholarship_name": "Czech Republic Government Scholarships",
+      "essay_type": "Personal Statement",
+      "prompt": "Personal Statement",
+      "stage": "draft",
+      "created_at": "2026-06-03",
+      "draft": "Statement of Purpose — Czech Republic Government Scholarships\n\nGrowing up in Kenya, I have always been driven by a desire to create meaningful change within my community and beyond. My journey in your field began with a curiosity that has since matured into a focused commitment to addressing real-world challenges.\n\nBackground & Motivation: Personal Statement\n\nGoals & Vision: your career goals\n\nWhy This Scholarship: The Czech Republic Government Scholarships represents a unique opportunity to gain world-class training and bring that knowledge back to where it is needed most.\n\nSincerely, Applicant",
+      "critique": "",
+      "final": ""
+    },
+    {
+      "id": "ess-1780465965852",
+      "user_email": "ai.ml27808@gmail.com",
+      "scholarship_name": "Rhodes Scholarship (East Africa)",
+      "essay_type": "Statement of Purpose",
+      "prompt": "Write a personal essay",
+      "stage": "draft",
+      "created_at": "2026-06-03",
+      "draft": "Statement of Purpose — Rhodes Scholarship (East Africa)\n\nGrowing up in Kenya, I have always been driven by a desire to create meaningful change within my community and beyond. My journey in Computer Science began with a curiosity that has since matured into a focused commitment to addressing real-world challenges.\n\nBackground & Motivation: your unique background\n\nGoals & Vision: your career goals\n\nWhy This Scholarship: The Rhodes Scholarship (East Africa) represents a unique opportunity to gain world-class training and bring that knowledge back to where it is needed most.\n\nSincerely, Samuel Karanja",
+      "critique": "",
+      "final": ""
+    }
+  ],
+  "bot_ingestions": [],
+  "payments": [
+    {
+      "user_email": "ai.ml27808@gmail.com",
+      "paystack_reference": "n4xzhqw6up",
+      "paystack_subscription_code": "PLN_byk050d878lu61e",
+      "amount": 3770,
+      "currency": "KES",
+      "plan": "mentor",
+      "billing_period": "monthly",
+      "status": "abandoned",
+      "authorization_url": "https://checkout.paystack.com/f2cu40ui3dk23dw",
+      "id": "pay-n4xzhqw6up",
+      "created_at": "2026-06-02T18:16:00.052Z",
+      "updated_at": "2026-06-02T18:16:03.449Z",
+      "failure_reason": "Paystack transaction status: abandoned",
+      "webhook_event_id": "",
+      "paid_at": ""
+    },
+    {
+      "user_email": "ai.ml27808@gmail.com",
+      "paystack_reference": "d9n5hafacm",
+      "paystack_subscription_code": "PLN_byk050d878lu61e",
+      "amount": 3770,
+      "currency": "KES",
+      "plan": "mentor",
+      "billing_period": "monthly",
+      "status": "abandoned",
+      "authorization_url": "https://checkout.paystack.com/neo739nmor5er31",
+      "id": "pay-d9n5hafacm",
+      "created_at": "2026-06-02T18:16:06.639Z",
+      "updated_at": "2026-06-02T18:16:10.004Z",
+      "failure_reason": "Paystack transaction status: abandoned",
+      "webhook_event_id": "",
+      "paid_at": ""
+    },
+    {
+      "user_email": "ai.ml27808@gmail.com",
+      "paystack_reference": "glb8qnneph",
+      "paystack_subscription_code": "PLN_byk050d878lu61e",
+      "amount": 3770,
+      "currency": "KES",
+      "plan": "mentor",
+      "billing_period": "monthly",
+      "status": "abandoned",
+      "authorization_url": "https://checkout.paystack.com/2icpcbpohk9ku6c",
+      "id": "pay-glb8qnneph",
+      "created_at": "2026-06-02T18:55:30.020Z",
+      "updated_at": "2026-06-02T18:55:33.546Z",
+      "failure_reason": "Paystack transaction status: abandoned",
+      "webhook_event_id": "",
+      "paid_at": ""
+    },
+    {
+      "user_email": "ai.ml27808@gmail.com",
+      "paystack_reference": "hjsk44nfkt",
+      "paystack_subscription_code": "PLN_byk050d878lu61e",
+      "amount": 3770,
+      "currency": "KES",
+      "plan": "mentor",
+      "billing_period": "monthly",
+      "status": "abandoned",
+      "authorization_url": "https://checkout.paystack.com/d0404avkjfqgmmw",
+      "id": "pay-hjsk44nfkt",
+      "created_at": "2026-06-02T18:56:28.926Z",
+      "updated_at": "2026-06-02T18:56:32.316Z",
+      "failure_reason": "Paystack transaction status: abandoned",
+      "webhook_event_id": "",
+      "paid_at": ""
+    },
+    {
+      "user_email": "ai.ml27808@gmail.com",
+      "paystack_reference": "uk9kd9vf0c",
+      "paystack_subscription_code": "PLN_byk050d878lu61e",
+      "amount": 3770,
+      "currency": "KES",
+      "plan": "mentor",
+      "billing_period": "monthly",
+      "status": "abandoned",
+      "authorization_url": "https://checkout.paystack.com/6ftx0qchbbc5jun",
+      "id": "pay-uk9kd9vf0c",
+      "created_at": "2026-06-02T18:56:36.111Z",
+      "updated_at": "2026-06-02T18:56:39.470Z",
+      "failure_reason": "Paystack transaction status: abandoned",
+      "webhook_event_id": "",
+      "paid_at": ""
+    },
+    {
+      "user_email": "ai.ml27808@gmail.com",
+      "paystack_reference": "znnm4u4pux",
+      "paystack_subscription_code": "PLN_unw5dchqqxx8h81",
+      "amount": 650,
+      "currency": "KES",
+      "plan": "plus",
+      "billing_period": "monthly",
+      "status": "abandoned",
+      "authorization_url": "https://checkout.paystack.com/3q4hkswxaupzrys",
+      "id": "pay-znnm4u4pux",
+      "created_at": "2026-06-03T05:18:09.038Z",
+      "updated_at": "2026-06-03T05:18:12.387Z",
+      "failure_reason": "Paystack transaction status: abandoned",
+      "webhook_event_id": "",
+      "paid_at": ""
+    },
+    {
+      "user_email": "ai.ml27808@gmail.com",
+      "paystack_reference": "co9yrp8fo4",
+      "paystack_subscription_code": "PLN_unw5dchqqxx8h81",
+      "amount": 650,
+      "currency": "KES",
+      "plan": "plus",
+      "billing_period": "monthly",
+      "status": "abandoned",
+      "authorization_url": "https://checkout.paystack.com/yrp14khd7fj4nyb",
+      "id": "pay-co9yrp8fo4",
+      "created_at": "2026-06-03T05:18:51.641Z",
+      "updated_at": "2026-06-03T05:18:55.000Z",
+      "failure_reason": "Paystack transaction status: abandoned",
+      "webhook_event_id": "",
+      "paid_at": ""
+    },
+    {
+      "user_email": "ai.ml27808@gmail.com",
+      "paystack_reference": "761o3qy719",
+      "paystack_subscription_code": "PLN_unw5dchqqxx8h81",
+      "amount": 650,
+      "currency": "KES",
+      "plan": "plus",
+      "billing_period": "monthly",
+      "status": "abandoned",
+      "authorization_url": "https://checkout.paystack.com/oxnemuimjccm0f5",
+      "id": "pay-761o3qy719",
+      "created_at": "2026-06-03T05:19:03.169Z",
+      "updated_at": "2026-06-03T05:19:06.586Z",
+      "failure_reason": "Paystack transaction status: abandoned",
+      "webhook_event_id": "",
+      "paid_at": ""
+    },
+    {
+      "user_email": "ai.ml27808@gmail.com",
+      "paystack_reference": "0056ooknyk",
+      "paystack_subscription_code": "PLN_unw5dchqqxx8h81",
+      "amount": 650,
+      "currency": "KES",
+      "plan": "plus",
+      "billing_period": "monthly",
+      "status": "abandoned",
+      "authorization_url": "https://checkout.paystack.com/qyj9zmuh5n2mypx",
+      "id": "pay-0056ooknyk",
+      "created_at": "2026-06-03T05:19:56.120Z",
+      "updated_at": "2026-06-03T05:19:59.461Z",
+      "failure_reason": "Paystack transaction status: abandoned",
+      "webhook_event_id": "",
+      "paid_at": ""
+    },
+    {
+      "user_email": "ai.ml27808@gmail.com",
+      "paystack_reference": "2qdmjyhn0i",
+      "paystack_subscription_code": "PLN_unw5dchqqxx8h81",
+      "amount": 650,
+      "currency": "KES",
+      "plan": "plus",
+      "billing_period": "monthly",
+      "status": "abandoned",
+      "authorization_url": "https://checkout.paystack.com/ad6hn9alfvr712s",
+      "id": "pay-2qdmjyhn0i",
+      "created_at": "2026-06-03T05:20:20.055Z",
+      "updated_at": "2026-06-03T05:20:23.434Z",
+      "failure_reason": "Paystack transaction status: abandoned",
+      "webhook_event_id": "",
+      "paid_at": ""
+    },
+    {
+      "user_email": "ai.ml27808@gmail.com",
+      "paystack_reference": "sk8kltr3el",
+      "paystack_subscription_code": "PLN_unw5dchqqxx8h81",
+      "amount": 650,
+      "currency": "KES",
+      "plan": "plus",
+      "billing_period": "monthly",
+      "status": "abandoned",
+      "authorization_url": "https://checkout.paystack.com/ud6gsj9t37h1rqu",
+      "id": "pay-sk8kltr3el",
+      "created_at": "2026-06-03T05:21:11.978Z",
+      "updated_at": "2026-06-03T05:21:15.338Z",
+      "failure_reason": "Paystack transaction status: abandoned",
+      "webhook_event_id": "",
+      "paid_at": ""
+    },
+    {
+      "user_email": "ai.ml27808@gmail.com",
+      "paystack_reference": "nup20citn0",
+      "paystack_subscription_code": "PLN_unw5dchqqxx8h81",
+      "amount": 650,
+      "currency": "KES",
+      "plan": "plus",
+      "billing_period": "monthly",
+      "status": "abandoned",
+      "authorization_url": "https://checkout.paystack.com/ote7bi9u3qofzr8",
+      "id": "pay-nup20citn0",
+      "created_at": "2026-06-03T05:23:59.399Z",
+      "updated_at": "2026-06-03T05:24:02.747Z",
+      "failure_reason": "Paystack transaction status: abandoned",
+      "webhook_event_id": "",
+      "paid_at": ""
+    },
+    {
+      "user_email": "ai.ml27808@gmail.com",
+      "paystack_reference": "5w4gdin4c8",
+      "paystack_subscription_code": "PLN_unw5dchqqxx8h81",
+      "amount": 650,
+      "currency": "KES",
+      "plan": "plus",
+      "billing_period": "monthly",
+      "status": "abandoned",
+      "authorization_url": "https://checkout.paystack.com/on63bx9kfv664os",
+      "id": "pay-5w4gdin4c8",
+      "created_at": "2026-06-03T05:24:10.627Z",
+      "updated_at": "2026-06-03T05:24:13.955Z",
+      "failure_reason": "Paystack transaction status: abandoned",
+      "webhook_event_id": "",
+      "paid_at": ""
+    },
+    {
+      "user_email": "ai.ml27808@gmail.com",
+      "paystack_reference": "17wdx4rys6",
+      "paystack_subscription_code": "PLN_unw5dchqqxx8h81",
+      "amount": 650,
+      "currency": "KES",
+      "plan": "plus",
+      "billing_period": "monthly",
+      "status": "abandoned",
+      "authorization_url": "https://checkout.paystack.com/q1hzkh7j66i4l3l",
+      "id": "pay-17wdx4rys6",
+      "created_at": "2026-06-03T05:25:29.951Z",
+      "updated_at": "2026-06-03T05:25:33.369Z",
+      "failure_reason": "Paystack transaction status: abandoned",
+      "webhook_event_id": "",
+      "paid_at": ""
+    }
+  ],
+  "audit_logs": [
+    {
+      "id": "audit-1780212768754",
+      "admin_email": "karsamanja@gmail.com",
+      "action": "failed_login",
+      "target_type": "auth",
+      "target_id": "karsamanja@gmail.com",
+      "details": "Failed admin login attempt for karsamanja@gmail.com from ::1 — user not found",
+      "ip_address": "::1",
+      "created_at": "2026-05-31T07:32:48.754Z"
+    },
+    {
+      "id": "audit-1780212839769",
+      "admin_email": "admin@zawadi.app",
+      "action": "admin_login",
+      "target_type": "auth",
+      "target_id": "admin@zawadi.app",
+      "details": "Admin login from admin@zawadi.app",
+      "ip_address": "::1",
+      "created_at": "2026-05-31T07:33:59.769Z"
+    },
+    {
+      "id": "audit-1780375720398",
+      "admin_email": "admin@zawadi.app",
+      "action": "admin_login",
+      "target_type": "auth",
+      "target_id": "admin@zawadi.app",
+      "details": "Admin login from admin@zawadi.app",
+      "ip_address": "::1",
+      "created_at": "2026-06-02T04:48:40.398Z"
+    },
+    {
+      "id": "audit-1780375756544",
+      "admin_email": "admin@zawadi.app",
+      "action": "scholarship_updated",
+      "target_type": "scholarship",
+      "target_id": "schol-1",
+      "details": "Updated scholarship \"Mastercard Foundation Scholars Program\" by admin@zawadi.app",
+      "ip_address": "::1",
+      "created_at": "2026-06-02T04:49:16.544Z"
+    },
+    {
+      "id": "audit-1780375796249",
+      "admin_email": "admin@zawadi.app",
+      "action": "failed_login",
+      "target_type": "auth",
+      "target_id": "admin@zawadi.app",
+      "details": "Failed admin login attempt for admin@zawadi.app from ::1 — wrong password",
+      "ip_address": "::1",
+      "created_at": "2026-06-02T04:49:56.249Z"
+    },
+    {
+      "id": "audit-1780375852533",
+      "admin_email": "admin@zawadi.app",
+      "action": "failed_login",
+      "target_type": "auth",
+      "target_id": "admin@zawadi.app",
+      "details": "Failed admin login attempt for admin@zawadi.app from ::1 — wrong password",
+      "ip_address": "::1",
+      "created_at": "2026-06-02T04:50:52.533Z"
+    },
+    {
+      "id": "audit-1780375872313",
+      "admin_email": "admin@zawadi.app",
+      "action": "failed_login",
+      "target_type": "auth",
+      "target_id": "admin@zawadi.app",
+      "details": "Failed admin login attempt for admin@zawadi.app from ::1 — wrong password",
+      "ip_address": "::1",
+      "created_at": "2026-06-02T04:51:12.313Z"
+    },
+    {
+      "id": "audit-1780375933694",
+      "admin_email": "admin@zawadi.app",
+      "action": "failed_login",
+      "target_type": "auth",
+      "target_id": "admin@zawadi.app",
+      "details": "Failed admin login attempt for admin@zawadi.app from ::1 — wrong password",
+      "ip_address": "::1",
+      "created_at": "2026-06-02T04:52:13.694Z"
+    },
+    {
+      "id": "audit-1780395751104",
+      "admin_email": "admin@zawadi.app",
+      "action": "scholarship_published",
+      "target_type": "scholarship",
+      "target_id": "d215af6a9262",
+      "details": "Published scholarship \"Rhodes Scholarship (East Africa)\" by admin@zawadi.app",
+      "ip_address": "::1",
+      "created_at": "2026-06-02T10:22:31.104Z"
+    },
+    {
+      "id": "audit-1780395757771",
+      "admin_email": "admin@zawadi.app",
+      "action": "scholarship_published",
+      "target_type": "scholarship",
+      "target_id": "1f05cac2a962",
+      "details": "Published scholarship \"Czech Republic Government Scholarships\" by admin@zawadi.app",
+      "ip_address": "::1",
+      "created_at": "2026-06-02T10:22:37.771Z"
+    }
+  ]
+}
