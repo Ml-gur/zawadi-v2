@@ -25,6 +25,44 @@
 - **Fix**: `src/App.tsx:374` — Now includes `mime_type: file.type` in document insert payload.
 - **Fix**: `src/lib/supabase.ts:81-82` — Added `mime_type` and `ai_extraction_result` to `Document` type.
 
+### Fixed: OCR / Document Intelligence broken in browser (Node.js APIs in client bundle)
+
+- **Root cause**: `text-extractor.ts` used Node.js-only modules (`sharp`, `fs`, `path`, `os`, `pdf2pic`, `pdf-parse`) that cannot run in the browser. The dynamic import workaround hid the crash but document analysis silently failed for all file types.
+- **Fix**: Rewrote `src/services/text-extractor.ts` to use browser-compatible libraries:
+  - `pdfjs-dist` for PDF text extraction and page rendering (replaces `pdf-parse` + `pdf2pic`)
+  - `tesseract.js` directly on `Blob` objects for image OCR (removes `sharp` preprocessing)
+  - `mammoth` kept for DOCX (browser-compatible)
+  - Removed all Node.js-only imports: `sharp`, `fs`, `path`, `os`, `pdf-parse`, `pdf2pic`
+- Build no longer has "Module has been externalized for browser compatibility" warnings.
+
+### Fixed: Vercel deployment config (404 on API routes)
+
+- **Root cause**: `vercel.json` still referenced deleted `server.ts` which no longer exists (removed in Express→Supabase migration commit `f608941`).
+- **Fix**: `vercel.json` now only has the `@vercel/static-build` build with SPA fallback routing.
+
+### Added: File download from Document Vault
+
+- **Fix**: Students can now download uploaded files from Supabase Storage.
+- `src/lib/supabase-queries.ts` — Added `getDocumentDownloadUrl()` and existing `downloadDocument()` now used by the UI.
+- `src/components/DocumentVault.tsx` — Added download button on each document card.
+
+### Added: Richer profile enrichment from document extraction
+
+- **Fix**: `src/services/document-intelligence.ts` — `buildProfileEnrichment()` now maps 8+ extracted fields:
+  - `doc_institution_extracted`, `doc_field_of_study_extracted`, `doc_degree_level_extracted`
+  - `doc_skills_extracted`, `doc_languages_extracted`, `doc_honors_extracted`
+  - `doc_extraction_method`, `doc_extraction_confidence`
+  - Previously only 5 fields were mapped (GPA, research, publications, work years, leadership).
+- **Fix**: `src/App.tsx` — After document analysis, profile enrichment updates the user profile:
+  - GPA updates if extracted value is higher
+  - Institution, field of study, degree level fill in if currently empty
+- `supabase/migrations/004_storage_and_fixes.sql` — Added new columns to `profiles` table for extracted fields.
+
+### Added: Document-grounded essay generation
+
+- The `generate-essay` Edge Function already supported `document_ids` and loaded `ai_extraction_result` from documents to ground the essay. The system prompt now includes: "Ground all claims in the document-based evidence provided — never fabricate GPA, institutions, degrees, or other factual details."
+- The critique stage cross-references essay claims against uploaded documents.
+
 ### To apply database fixes
 
 Run `supabase/migrations/004_storage_and_fixes.sql` in your Supabase SQL Editor.

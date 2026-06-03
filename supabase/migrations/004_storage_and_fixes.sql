@@ -43,3 +43,18 @@ ALTER TABLE documents ADD COLUMN IF NOT EXISTS mime_type TEXT;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS destination_openness TEXT;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS destination_regions JSONB DEFAULT '[]'::jsonb;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS include_fully_funded_anywhere BOOLEAN DEFAULT true;
+
+-- 6. Add document-enrichment columns for richer profile mapping
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS doc_institution_extracted TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS doc_field_of_study_extracted TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS doc_degree_level_extracted TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS doc_skills_extracted JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS doc_languages_extracted JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS doc_honors_extracted TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS doc_extraction_method TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS doc_extraction_confidence NUMERIC(3,0);
+
+-- 7. Add analysis_status and last_analyzed_at to documents if missing
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS analysis_status TEXT DEFAULT 'pending';
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS last_analyzed_at TIMESTAMPTZ;
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS analysis_error TEXT;

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { DocumentVaultItem } from '../types';
 import ConfirmationDialog from './ConfirmationDialog';
+import { downloadDocument } from '../lib/supabase-queries';
+import toast from 'react-hot-toast';
 
 interface DocumentVaultProps {
   user: any;
@@ -205,13 +207,36 @@ export default function DocumentVault({
                 </span>
               </div>
               
-              {/* Trash removal */}
-              <button 
-                onClick={() => setDocToDelete(doc.id)}
-                className="text-on-surface-variant hover:text-status-urgent transition-colors p-1 rounded-full hover:bg-surface-container-high cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-[18px]">delete</span>
-              </button>
+              <div className="flex items-center gap-1">
+                {doc.file_path && (
+                  <button
+                    onClick={async () => {
+                      try {
+                        const { data, error } = await downloadDocument(doc.file_path!);
+                        if (error) throw error;
+                        const url = URL.createObjectURL(data);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = doc.name;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                      } catch {
+                        toast.error('Could not download file');
+                      }
+                    }}
+                    className="text-on-surface-variant hover:text-primary transition-colors p-1 rounded-full hover:bg-surface-container-high cursor-pointer"
+                    title="Download file"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">download</span>
+                  </button>
+                )}
+                <button 
+                  onClick={() => setDocToDelete(doc.id)}
+                  className="text-on-surface-variant hover:text-status-urgent transition-colors p-1 rounded-full hover:bg-surface-container-high cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[18px]">delete</span>
+                </button>
+              </div>
             </div>
 
             <h4 className="font-bold text-sm text-on-surface mb-2 truncate" title={doc.name}>{doc.name}</h4>

@@ -93,7 +93,7 @@ async function extractWithAI(systemPrompt: string, textContent: string): Promise
 }
 
 export async function analyzeDocument(
-  fileBuffer: Buffer,
+  fileBuffer: Buffer | Uint8Array | ArrayBuffer,
   docType: string,
   _userEmail: string,
   userPlan: string = 'explorer',
@@ -146,20 +146,38 @@ export interface ProfileEnrichment {
   doc_publication_count_extracted?: number | null;
   doc_work_years_extracted?: number | null;
   doc_has_leadership_extracted?: boolean;
+  doc_institution_extracted?: string | null;
+  doc_field_of_study_extracted?: string | null;
+  doc_degree_level_extracted?: string | null;
+  doc_skills_extracted?: string[];
+  doc_languages_extracted?: string[];
+  doc_honors_extracted?: string | null;
   doc_reference_sentiment?: string | null;
   doc_certificate_type?: string | null;
+  doc_extraction_method?: string;
+  doc_extraction_confidence?: number;
 }
 
 export function buildProfileEnrichment(
   result: TranscriptData | CVData | EssaySampleData | ReferenceLetterData | CertificateData | null,
-  docType: string
+  docType: string,
+  extraction?: ExtractionMetadata
 ): ProfileEnrichment {
   const enrichment: ProfileEnrichment = {};
   const normalizedType = docType.toLowerCase();
 
+  if (extraction) {
+    enrichment.doc_extraction_method = extraction.method;
+    enrichment.doc_extraction_confidence = extraction.confidence;
+  }
+
   if (result && (normalizedType.includes('transcript'))) {
     const t = result as TranscriptData;
     enrichment.doc_gpa_normalised_extracted = t.gpa;
+    enrichment.doc_institution_extracted = t.institution_name;
+    enrichment.doc_field_of_study_extracted = t.field_of_study;
+    enrichment.doc_degree_level_extracted = t.degree_level;
+    enrichment.doc_honors_extracted = t.honors;
   }
 
   if (result && (normalizedType.includes('cv') || normalizedType.includes('resume'))) {
@@ -168,16 +186,23 @@ export function buildProfileEnrichment(
     enrichment.doc_has_research_extracted = (c.publications_count ?? 0) > 0;
     enrichment.doc_publication_count_extracted = c.publications_count;
     enrichment.doc_has_leadership_extracted = c.leadership_roles.length > 0;
+    enrichment.doc_skills_extracted = c.skills;
+    enrichment.doc_languages_extracted = c.languages;
+    enrichment.doc_field_of_study_extracted = c.primary_field;
   }
 
   if (result && (normalizedType.includes('reference letter') || normalizedType.includes('recommendation'))) {
     const r = result as ReferenceLetterData;
     enrichment.doc_reference_sentiment = r.sentiment;
+    if (r.key_strengths?.length) {
+      enrichment.doc_skills_extracted = r.key_strengths;
+    }
   }
 
   if (result && (normalizedType.includes('certificate') || normalizedType.includes('award') || normalizedType.includes('diploma'))) {
     const c = result as CertificateData;
     enrichment.doc_certificate_type = c.certificate_name;
+    enrichment.doc_institution_extracted = c.institution_name;
   }
 
   return enrichment;

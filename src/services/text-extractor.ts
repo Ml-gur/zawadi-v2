@@ -1,8 +1,4 @@
 import { createWorker } from 'tesseract.js';
-import * as path from 'path';
-import * as os from 'os';
-import * as fs from 'fs';
-import sharp from 'sharp';
 
 export interface ExtractionResult {
   text: string;
@@ -11,8 +7,32 @@ export interface ExtractionResult {
   warning?: string;
 }
 
+async function pdfToImages(file: File): Promise<Blob[]> {
+  const pdfjsLib = await import('pdfjs-dist');
+  pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+    'pdfjs-dist/build/pdf.worker.min.mjs',
+    import.meta.url
+  ).toString();
+
+  const arrayBuf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuf }).promise;
+  const pages: Blob[] = [];
+
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const viewport = page.getViewport({ scale: 2 });
+    const canvas = new OffscreenCanvas(viewport.width, viewport.height);
+    const ctx = canvas.getContext('2d')!;
+    await page.render({ canvasContext: ctx, viewport }).promise;
+    const blob = await canvas.convertToBlob({ type: 'image/png' });
+    pages.push(blob);
+  }
+
+  return pages;
+}
+
 export async function extractTextFromBuffer(
-  buffer: Buffer,
+  buffer: Buffer | Uint8Array | ArrayBuffer,
   mimetype: string,
   filename: string
 ): Promise<ExtractionResult> {
@@ -26,49 +46,46 @@ export async function extractTextFromBuffer(
   }
 
   if (lowerMime === 'application/pdf') {
-    const pdfParse = await import('pdf-parse');
-    const data = await pdfParse.default(buffer);
+    const file = new File([buffer], filename, { type: mimetype });
+    const pdfjsLib = await import('pdfjs-dist');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+      'pdfjs-dist/build/pdf.worker.min.mjs',
+      import.meta.url
+    ).toString();
 
-    if (data.text.trim().length > 150) {
-      return { text: data.text, method: 'pdf-text' };
+    const arrayBuf = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuf }).promise;
+
+    const firstPage = await pdf.getPage(1);
+    const viewport = firstPage.getViewport({ scale: 1 });
+    const textContent = await firstPage.getTextContent();
+    const rawText = textContent.items.map((item: any) => item.str).join(' ');
+
+    if (rawText.trim().length > 150) {
+      let fullText = rawText;
+      for (let i = 2; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const tc = await page.getTextContent();
+        fullText += '\n' + tc.items.map((item: any) => item.str).join(' ');
+      }
+      return { text: fullText, method: 'pdf-text' };
     }
 
-    const tmpDir = os.tmpdir();
-    const pdfId = `ocr-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const pdfPath = path.join(tmpDir, `${pdfId}.pdf`);
-    fs.writeFileSync(pdfPath, buffer);
-
-    const { fromPath } = await import('pdf2pic');
-    const convert = fromPath(pdfPath, {
-      format: 'png',
-      width: 1600,
-      height: 2400,
-      density: 300,
-      savePath: tmpDir,
-      saveFilename: pdfId,
-    });
-
+    const pages = await pdfToImages(file);
     const worker = await createWorker('eng');
     let ocrText = '';
     let totalConfidence = 0;
     let pageCount = 0;
 
     try {
-      const pages = await convert.bulk(-1);
-
-      for (const page of pages) {
-        const pagePath = path.join(tmpDir, `${pdfId}.${page}.png`);
-        if (fs.existsSync(pagePath)) {
-          const { data: pageResult } = await worker.recognize(pagePath);
-          ocrText += pageResult.text + '\n';
-          totalConfidence += pageResult.confidence;
-          pageCount++;
-          try { fs.unlinkSync(pagePath); } catch {}
-        }
+      for (const pageBlob of pages) {
+        const { data: pageResult } = await worker.recognize(pageBlob);
+        ocrText += pageResult.text + '\n';
+        totalConfidence += pageResult.confidence;
+        pageCount++;
       }
     } finally {
       await worker.terminate();
-      try { fs.unlinkSync(pdfPath); } catch {}
     }
 
     const avgConfidence = pageCount > 0 ? Math.round(totalConfidence / pageCount) : 0;
@@ -78,26 +95,20 @@ export async function extractTextFromBuffer(
       text: trimmed,
       method: 'pdf-ocr',
       confidence: avgConfidence,
-      ...(avgConfidence < 60 ? { warning: 'Low OCR confidence. Student may need to re-upload a clearer scan.' } : {}),
+      ...(avgConfidence < 60 ? { warning: 'Low OCR confidence. Re-upload a clearer scan.' } : {}),
     };
   }
 
   if (lowerMime.startsWith('image/')) {
-    const processed = await sharp(buffer)
-      .grayscale()
-      .normalize()
-      .sharpen()
-      .toFormat('png')
-      .toBuffer();
-
+    const blob = new Blob([buffer], { type: mimetype });
     const worker = await createWorker('eng');
     try {
-      const { data } = await worker.recognize(processed);
+      const { data } = await worker.recognize(blob);
       return {
         text: data.text,
         method: 'image-ocr',
         confidence: Math.round(data.confidence),
-        ...(data.confidence < 60 ? { warning: 'Low OCR confidence. Student may need to re-upload a clearer scan.' } : {}),
+        ...(data.confidence < 60 ? { warning: 'Low OCR confidence. Re-upload a clearer scan.' } : {}),
       };
     } finally {
       await worker.terminate();

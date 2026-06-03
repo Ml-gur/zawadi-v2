@@ -118,6 +118,11 @@ export async function downloadDocument(storagePath: string) {
   return supabase.storage.from('scholarship-docs').download(storagePath);
 }
 
+export async function getDocumentDownloadUrl(storagePath: string) {
+  const { data } = supabase.storage.from('scholarship-docs').getPublicUrl(storagePath);
+  return data?.publicUrl || null;
+}
+
 // ─── Essays ───
 export async function getUserEssays(userEmail: string) {
   return supabase

@@ -384,22 +384,60 @@ export default function App() {
           try {
             const arrayBuf = await file.arrayBuffer();
             const buffer = new Uint8Array(arrayBuf);
-            const { analyzeDocument } = await import('./services/document-intelligence');
-            const { result, analyzed } = await analyzeDocument(
-              buffer as any,
+            const { analyzeDocument, buildProfileEnrichment } = await import('./services/document-intelligence');
+            const { result, analyzed, extraction } = await analyzeDocument(
+              buffer,
               docType,
               user.email,
               user.plan || 'explorer',
               file.type,
               file.name
             );
+            const payload: any = {};
             if (analyzed && result) {
-              const { error: updateErr } = await supabase
-                .from('documents')
-                .update({ ai_extraction_result: JSON.stringify(result) })
-                .eq('id', insertedDoc.id);
-              if (!updateErr) {
-                handleRefreshDocuments();
+              payload.ai_extraction_result = JSON.stringify({ data: result, extraction });
+            }
+            if (extraction) {
+              payload.analysis_status = analyzed ? 'completed' : 'failed';
+              payload.last_analyzed_at = new Date().toISOString();
+            }
+            if (Object.keys(payload).length > 0) {
+              await supabase.from('documents').update(payload).eq('id', insertedDoc.id);
+              handleRefreshDocuments();
+            }
+            // Enrich user profile with extracted fields
+            if (analyzed && result && user.email) {
+              const enrichment = buildProfileEnrichment(result, docType, extraction);
+              const profileUpdate: any = {};
+              for (const [key, val] of Object.entries(enrichment)) {
+                if (val !== null && val !== undefined) {
+                  profileUpdate[key] = val;
+                }
+              }
+              if (Object.keys(profileUpdate).length > 0) {
+                const { data: currentProfile } = await supabase
+                  .from('profiles')
+                  .select('*')
+                  .eq('email', user.email)
+                  .single();
+                if (currentProfile) {
+                  if (profileUpdate.doc_gpa_normalised_extracted) {
+                    const current = currentProfile.gpa ? parseFloat(currentProfile.gpa) : null;
+                    if (!current || profileUpdate.doc_gpa_normalised_extracted > current) {
+                      profileUpdate.gpa = profileUpdate.doc_gpa_normalised_extracted;
+                    }
+                  }
+                  if (profileUpdate.doc_institution_extracted && !currentProfile.institution) {
+                    profileUpdate.institution = profileUpdate.doc_institution_extracted;
+                  }
+                  if (profileUpdate.doc_field_of_study_extracted && !currentProfile.field_of_study) {
+                    profileUpdate.field_of_study = profileUpdate.doc_field_of_study_extracted;
+                  }
+                  if (profileUpdate.doc_degree_level_extracted && !currentProfile.degree_level) {
+                    profileUpdate.degree_level = profileUpdate.doc_degree_level_extracted;
+                  }
+                  await supabase.from('profiles').update(profileUpdate).eq('email', user.email);
+                }
               }
             }
           } catch (err) {

@@ -24,6 +24,7 @@
     "openai": "^6.41.0",
     "pdf-parse": "^1.1.1",
     "pdf2pic": "^3.2.0",
+    "pdfjs-dist": "^6.0.227",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
     "react-helmet-async": "^3.0.0",
