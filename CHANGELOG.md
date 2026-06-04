@@ -453,3 +453,36 @@ const application = { user_email: user.email, scholarship_id: scholarshipId, sta
 **Verified**: Node.js test with Supabase JS client confirms upsert now succeeds — status changes from "Saved" → "Interview" → etc. all work.
 
 **Note**: This bug affected ALL application status changes from the Scholarships page dropdown, priority buttons, and notes textarea, since they all route through `handleTrackScholarship` → `upsertApplication`.
+
+## 2026-06-04 — Scholarship Pipeline Import (32 New Scholarships)
+
+### Added: 32 Scholarships from Discovery Scan 2026-06-04
+
+**Source**: Deep research scan across 150+ sources, 280+ pages crawled. Cross-referenced against previous 52-scholarship scan (no duplicates).
+
+**Migration**: `supabase/migrations/010_insert_discovery_scan_scholarships.sql`
+
+**Categories imported**:
+- **11 LIVE** (schol-8 to schol-18) — Future deadlines for students to apply
+- **16 ARCHIVED** (schol-19 to schol-34) — Past deadlines, recurring annually
+- **4 TBA** (schol-35 to schol-38) — Not yet announced for next cycle
+- **1 Status change** (schol-39) — QECS moved from LIVE to ARCHIVED
+
+**Key LIVE scholarships added**:
+| ID | Scholarship | Deadline |
+|----|------------|----------|
+| schol-8 | Makerere University Mastercard Foundation | Jun 5, 2026 🔴 |
+| schol-9 | ICMM Young Leaders Scholarship | Jun 7, 2026 |
+| schol-10 | MASS African Design Centre Fellowship | Jun 14, 2026 |
+| schol-11 | Spaces of Culture 2026 | Jun 21, 2026 |
+| schol-12 | WISE Prize for Education 2026-27 | Jun 27, 2026 |
+| schol-13 | UP Mastercard Foundation Scholars | Sep 30, 2026 |
+| schol-14 | KAS International Scholarship | Jul 15, 2026 |
+| schol-15 | HPI Research School Fellowships at UCT | Aug 15, 2026 |
+| schol-16 | Hokkaido University MEXT (Oct 2027) | Mar 31, 2027 |
+| schol-17 | University of Tokyo MEXT 2027 | Oct 31, 2026 |
+| schol-18 | AYFN Japan Culture Camp 2026 | Jul 15, 2026 |
+
+**All 32 new scholarships start unpublished** — admin can publish/unpublish via the admin panel. The `scholarships_update_admin` RLS policy (from migration 009) enables admin to toggle `published` on any scholarship.
+
+**Verified**: Admin publish/unpublish tested on `schol-9` (ICMM) — toggle succeeded both directions.
