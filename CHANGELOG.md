@@ -2,6 +2,15 @@
 
 ## 2026-06-04 (continued — Admin Setup & Root-Cause Fix)
 
+### Fixed: Essay Generation AI Provider & Client-Side Crash
+
+**`supabase/functions/generate-essay/index.ts`**
+- **Provider selection logic fixed**: Previously, if `ai_config.provider` was set (e.g., `gemini`) but no key for that provider existed, the function would fail to generate AI content even when another provider's key (e.g., DeepSeek) was configured. Now provider selection verifies the key exists before choosing; falls back through DeepSeek → OpenAI → Gemini automatically.
+- **`ai_config` database row updated**: Provider changed from `gemini` (no key) to `deepseek` (key available via secret `DEEPSEEK_API_KEY`). Real AI generation now works end-to-end.
+
+**`src/services/ai-provider.ts`**
+- **`process.env` crash fixed**: In the browser (Vite), `process.env` is undefined, causing `getDefaultConfig()` to throw `ReferenceError`. Added guard `typeof process !== 'undefined'` before accessing `process.env`.
+
 ### Root-Cause Fix: Auth User Creation Broken
 
 **Database schema (`supabase/migrations/007_fix_profiles_id_and_trigger.sql`)**

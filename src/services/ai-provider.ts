@@ -27,11 +27,12 @@ export interface AiProviderResult {
 let cachedConfig: AiProviderConfig | null = null;
 
 export function getDefaultConfig(): AiProviderConfig {
+  const env = typeof process !== 'undefined' ? process.env : {} as Record<string, string | undefined>
   return {
-    provider: (process.env.AI_PROVIDER as AiProvider) || 'gemini',
-    openaiKey: process.env.OPENAI_API_KEY || '',
-    deepseekKey: process.env.DEEPSEEK_API_KEY || '',
-    geminiKey: process.env.GOOGLE_API_KEY || '',
+    provider: (env.AI_PROVIDER as AiProvider) || 'gemini',
+    openaiKey: env.OPENAI_API_KEY || '',
+    deepseekKey: env.DEEPSEEK_API_KEY || '',
+    geminiKey: env.GOOGLE_API_KEY || '',
   };
 }
 
