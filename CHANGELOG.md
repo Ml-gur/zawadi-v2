@@ -393,3 +393,38 @@ Run `supabase/migrations/004_storage_and_fixes.sql` in your Supabase SQL Editor.
 - CV/Resume type: ✅ Returns work experience, skills, leadership roles, languages, field of study
 - Academic Transcript: ✅ Returns institution, degree level, field, GPA, graduation year, honors
 - All enrichment fields map correctly to profile columns
+
+## 2026-06-04 — Scholarship Publish/Unpublish & Admin RLS Fix
+
+### Fixed: Admin Cannot Change Scholarship Published Status
+
+**Root cause**: The `scholarships` table had RLS (Row-Level Security) enabled but only ONE policy existed — `scholarships_select_all` (allows SELECT for all users). There were NO INSERT, UPDATE, or DELETE policies. Every admin operation went through the Supabase JS client with the anon key + user JWT, and RLS blocked all writes silently.
+
+Affected operations:
+- **Publish/Unpublish**: `togglePublishScholarship()` → `supabase.from('scholarships').update({ published })` — blocked by missing UPDATE policy
+- **Create/Edit scholarships**: `upsertScholarship()` → `supabase.from('scholarships').upsert()` — blocked by missing INSERT policy
+- **Delete scholarships**: `deleteScholarship()` / `bulkDeleteScholarships()` — blocked by missing DELETE policy
+
+**Fix**: Added three RLS policies to the `scholarships` table:
+
+| Policy | Command | Condition |
+|--------|---------|-----------|
+| `scholarships_insert_admin` | INSERT | User's profile has `role IN ('super_admin', 'admin')` |
+| `scholarships_update_admin` | UPDATE | User's profile has `role IN ('super_admin', 'admin')` |
+| `scholarships_delete_admin` | DELETE | User's profile has `role IN ('super_admin', 'admin')` |
+
+Each policy uses: `EXISTS (SELECT 1 FROM profiles WHERE email = (auth.jwt() ->> 'email') AND role IN ('super_admin', 'admin'))`
+
+**SQL migration**: `supabase/migrations/009_fix_scholarships_rls_policies.sql`
+
+**Verified**:
+- Published/unpublished a scholarship 3 times in sequence via REST API (PATCH with anon key + user JWT) — all toggles succeeded
+- Confirmed `published` field toggles correctly in the database each time
+- Admin user (`admin@zawadi.app`) password set to `Admin@212` for testing
+- Test user (`writingdebugger@gmail.com`) promoted to `admin` role for testing
+
+### Verified: Student Application Status Change Still Works
+
+- Changed application status from "Drafting" → "Saved" via REST API PATCH — confirmed update reflected in DB
+- Created new application via upsert (no `id` provided) — `gen_random_uuid()` auto-generated the ID, `on_conflict=user_email,scholarship_id` correctly matched the existing row
+- Applications table had all 4 RLS policies (SELECT, INSERT, UPDATE, DELETE) already in place — no changes needed
