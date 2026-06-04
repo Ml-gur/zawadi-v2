@@ -179,3 +179,45 @@
 ### To apply database fixes
 
 Run `supabase/migrations/004_storage_and_fixes.sql` in your Supabase SQL Editor.
+
+## 2026-06-04 (Live System Audit)
+
+### Fixed: Vercel SPA routing (404 on all client-side routes)
+- **vercel.json**: Added proper route ordering — static assets first (`/assets/*`, `/sw.js`, `/pwa-icon-*`), then `/[^.]+` SPA fallback to `/dist/index.html`, then catch-all `/(.*)` to `/dist/$1`.
+- **Impact**: Routes like `/about`, `/faq`, `/how-it-works`, `/privacy`, `/terms`, `/dashboard`, `/scholarships` were returning HTTP 404 when accessed directly.
+- **NOTE**: Requires manual Vercel redeploy to take effect. See below.
+
+### Added: Automated audit script (Playwright)
+- `audit_script.mjs` — Headless Chromium script running 38 automated tests across sections A, B, C, H, K, N.
+- `AUDIT_RESULTS_AUTOMATED.md` — Saved results from the Playwright run.
+- `audit.har` — Network request log (HAR format) for security analysis.
+
+### Playwright Audit Key Findings
+**22 PASS / 8 FAIL / 8 PARTIAL** (of 38 automated tests)
+
+**Confirmed working:**
+- Login flow (correct + wrong password + non-existent email all work correctly)
+- Rate limiting present (no different message on 6th attempt but no crash)
+- No Lorem ipsum, no raw icon text, no exposed secrets in page source
+- No algorithmic language in profile UI
+- 6 homepage sections detected
+- No $29 Mentor plan exists (only 3 plans)
+- HTTPS redirect works
+- Admin login page loads
+
+**Confirmed failures (all same root cause — SPA routing):**
+- A16-A21: `/about`, `/faq`, `/how-it-works`, `/privacy`, `/terms` all return 404
+- A25, A26: `/dashboard`, `/admin` not redirected (also return 404 since no SPA fallback)
+- H1: `/plans` page returns 404
+
+**Partial (need manual verification):**
+- RLS and JWT expiry tests — Supabase client not exposed on `window`
+- Network Authorization header check — needs HAR file analysis
+- Footer links — SPA renders footer client-side, not in initial HTML
+
+### ACTION REQUIRED: Trigger Vercel redeploy
+1. Go to https://vercel.com/ → your project → Deployments
+2. Find the latest deployment (commit `fde3dac`)
+3. Click the three dots → Redeploy
+4. OR run: `npx vercel --prod` (requires Vercel login)
+5. After redeploy, SPA routes will work correctly
