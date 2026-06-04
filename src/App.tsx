@@ -83,6 +83,7 @@ export default function App() {
   const [botQueue, setBotQueue] = useState<BotQueueIngestion[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLogItem[]>([]);
 
+  const [authLoading, setAuthLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const [profileReady, setProfileReady] = useState(false);
@@ -153,9 +154,7 @@ export default function App() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        // Store token for backward compat
         localStorage.setItem('zawadi_token', session.access_token);
-        // Fetch the user profile from Supabase
         supabase.from('profiles').select('*').eq('id', session.user.id).single().then(({ data: profile, error }) => {
           if (!error && profile) {
             setUser(profile as UserProfile);
@@ -163,7 +162,6 @@ export default function App() {
               localStorage.setItem('zawadi_admin_token', session.access_token);
             }
           } else {
-            // Fallback: construct basic user from session
             setUser({
               email: session.user.email!,
               name: session.user.user_metadata?.name || '',
@@ -174,12 +172,14 @@ export default function App() {
           }
         }).catch(() => {
           localStorage.removeItem('zawadi_token');
-        });
+        }).finally(() => setAuthLoading(false));
       } else {
         localStorage.removeItem('zawadi_token');
+        setAuthLoading(false);
       }
     }).catch(() => {
       localStorage.removeItem('zawadi_token');
+      setAuthLoading(false);
     });
   }, []);
 
@@ -616,6 +616,15 @@ export default function App() {
 
   const isActive = (path: string) => location.pathname === path;
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4">
+        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+        <p className="text-xs text-on-surface-variant font-medium">Loading...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-transparent text-on-surface font-sans min-h-screen flex flex-col">
 
@@ -734,19 +743,13 @@ export default function App() {
               <Route path="/reset-password" element={<Suspense fallback={null}><ResetPassword onBackToLogin={() => { setShowAuth(false); navigate('/'); }} /></Suspense>} />
               <Route path="/admin/login" element={<Suspense fallback={null}><AdminLoginPage /></Suspense>} />
               <Route path="/admin" element={
-                (() => {
-                  const adminToken = localStorage.getItem('zawadi_admin_token');
-                  if (!user) {
-                    // Still loading session; check if admin token exists as fallback
-                    if (adminToken) return <div className="py-24 text-center text-xs text-on-surface-variant">Loading...</div>;
-                    return <Navigate to="/admin/login" replace />;
-                  }
-                  if (user.role !== 'super_admin') {
-                    localStorage.removeItem('zawadi_admin_token');
-                    return <Navigate to="/admin/login" replace />;
-                  }
-                  return <Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading admin...</div>}><AdminPortal user={user} scholarships={scholarships} botQueue={botQueue} auditLogs={auditLogs} onAddScholarship={handleAddScholarship} onRemoveScholarship={handleRemoveScholarship} onBulkRemoveScholarships={handleBulkRemoveScholarships} onTogglePublish={handleTogglePublish} onTriggerScrapeCampaign={handleTriggerScrapeCampaign} onReviewBotItem={handleReviewBotItem} /></Suspense>;
-                })()
+                !user
+                  ? <Navigate to="/admin/login" replace />
+                  : user.role !== 'super_admin'
+                    ? <Navigate to="/admin/login" replace />
+                    : <Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading admin...</div>}>
+                        <AdminPortal user={user} scholarships={scholarships} botQueue={botQueue} auditLogs={auditLogs} onAddScholarship={handleAddScholarship} onRemoveScholarship={handleRemoveScholarship} onBulkRemoveScholarships={handleBulkRemoveScholarships} onTogglePublish={handleTogglePublish} onTriggerScrapeCampaign={handleTriggerScrapeCampaign} onReviewBotItem={handleReviewBotItem} />
+                      </Suspense>
               } />
 
               {user ? (

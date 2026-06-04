@@ -215,6 +215,23 @@ Run `supabase/migrations/004_storage_and_fixes.sql` in your Supabase SQL Editor.
 - Network Authorization header check — needs HAR file analysis
 - Footer links — SPA renders footer client-side, not in initial HTML
 
+## 2026-06-04 — Critical Issue Fixes: Auth Guard + Admin Setup Secret
+
+### Auth Guard: /admin and /dashboard no longer accessible without login
+**Root cause**: No `authLoading` state blocked route rendering before Supabase session restoration completed. The initial render had `user = null`, and React Router processed routes before the session check finished, causing a race condition where protected routes briefly appeared accessible.
+
+**Fix** (`src/App.tsx`):
+- Added `const [authLoading, setAuthLoading] = useState(true)` — blocks all route rendering until session init completes
+- Added `.finally(() => setAuthLoading(false))` to the `supabase.auth.getSession()` promise chain
+- Added full-screen loading spinner when `authLoading` is true, preventing any flash of unauthenticated content
+- Simplified `/admin` route guard — replaced fragile IIFE with clean ternary chain: `!user → redirect | role !== super_admin → redirect | render AdminPortal`
+
+### Admin Setup Secret applied
+- `SETUP_ADMIN_SECRET=zawadi-setup-2026-xk9m` provided by user
+- Deployed `setup-admin` Edge Function expects this value in `x-setup-secret` header
+- To complete admin setup: `curl -X POST https://dgiqyvnpmeiomvfauetw.supabase.co/functions/v1/setup-admin -H "x-setup-secret: zawadi-setup-2026-xk9m" -H "Content-Type: application/json" -d '{"email":"admin@zawadi.app","password":"<YOUR_ADMIN_PASSWORD>"}'`
+- **Note**: Set env var via Supabase Dashboard → Edge Functions → Environment Variables
+
 ## 2026-06-04 — 5 Production Bug Fixes
 
 ### Bug 1: Account creation auto-login fails
