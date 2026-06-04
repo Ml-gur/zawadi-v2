@@ -32,12 +32,10 @@ serve(async (req: Request) => {
       })
     }
 
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    )
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const supabase = createClient(supabaseUrl, serviceKey)
 
-    // Check if auth user already exists
     const { data: existingUsers } = await supabase.auth.admin.listUsers()
     const existing = existingUsers?.users?.find(u => u.email === email)
     if (existing) {
@@ -47,14 +45,12 @@ serve(async (req: Request) => {
       })
     }
 
-    // Fetch old profile data before it's overwritten by the trigger
     const { data: oldProfile } = await supabase
       .from('profiles')
       .select('*')
       .eq('email', email)
       .maybeSingle()
 
-    // Create auth user — trigger will create a new profile row
     const { data: newUser, error: createErr } = await supabase.auth.admin.createUser({
       email,
       password,
@@ -74,7 +70,6 @@ serve(async (req: Request) => {
 
     const newUserId = newUser.user.id
 
-    // Update the new profile with old profile data and super_admin role
     const profileUpdate: Record<string, unknown> = {}
     if (oldProfile) {
       const copyFields = ['name', 'country', 'plan', 'gpa', 'field_of_study', 'degree_level', 'institution', 'date_of_birth', 'phone', 'gender', 'native_language', 'financial_need', 'has_research', 'has_leadership', 'work_experience_years', 'publications', 'destination_openness', 'english_test_type', 'essays_written', 'voice_profile', 'essay_style_notes', 'confirmed_fields']
@@ -96,7 +91,6 @@ serve(async (req: Request) => {
       console.error('[setup-admin] Failed to update profile:', updateErr.message)
     }
 
-    // Delete the old profile row if it had a different id
     if (oldProfile && oldProfile.id !== newUserId) {
       await supabase.from('profiles').delete().eq('id', oldProfile.id)
     }
@@ -109,10 +103,7 @@ serve(async (req: Request) => {
   } catch (err: any) {
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
     })
   }
 })
