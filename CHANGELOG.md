@@ -428,3 +428,28 @@ Each policy uses: `EXISTS (SELECT 1 FROM profiles WHERE email = (auth.jwt() ->> 
 - Changed application status from "Drafting" → "Saved" via REST API PATCH — confirmed update reflected in DB
 - Created new application via upsert (no `id` provided) — `gen_random_uuid()` auto-generated the ID, `on_conflict=user_email,scholarship_id` correctly matched the existing row
 - Applications table had all 4 RLS policies (SELECT, INSERT, UPDATE, DELETE) already in place — no changes needed
+
+### Fixed: Application Status Dropdown Silently Failing (Supabase JS Client Column Validation)
+
+**Root cause**: The `handleTrackScholarship` function in `src/App.tsx` built the upsert object with an extra `email` field that doesn't exist in the `applications` table:
+
+```ts
+// BROKEN: { email: user.email, user_email: user.email, ... }
+//        ^^^^^  This column doesn't exist in the applications table
+```
+
+While raw REST API calls (PostgREST) silently ignore unknown columns, the Supabase JS client's `.upsert()` validates all fields against the schema cache and returns error `PGRST204: Could not find the 'email' column of 'applications'`. The error was caught by the outer try/catch and logged to console, but the state was never updated and no user-facing feedback was shown. All status changes silently failed.
+
+**Fix**: Removed the `email` field from the upsert payload. Only `user_email` (which maps to the actual DB column) is sent.
+
+**`src/App.tsx`** (line 342):
+```ts
+// BEFORE
+const application = { email: user.email, user_email: user.email, scholarship_id: scholarshipId, status, notes, priority };
+// AFTER
+const application = { user_email: user.email, scholarship_id: scholarshipId, status, notes, priority };
+```
+
+**Verified**: Node.js test with Supabase JS client confirms upsert now succeeds — status changes from "Saved" → "Interview" → etc. all work.
+
+**Note**: This bug affected ALL application status changes from the Scholarships page dropdown, priority buttons, and notes textarea, since they all route through `handleTrackScholarship` → `upsertApplication`.

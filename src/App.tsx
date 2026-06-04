@@ -339,7 +339,7 @@ export default function App() {
   const handleTrackScholarship = async (scholarshipId: string, status: string, notes = '', priority = 'Normal') => {
     if (!user) return;
     try {
-      const application = { email: user.email, user_email: user.email, scholarship_id: scholarshipId, status, notes, priority };
+      const application = { user_email: user.email, scholarship_id: scholarshipId, status, notes, priority };
       const { data, error } = await upsertApplication(application);
       if (!error && data) {
         setApplications(prev => {
