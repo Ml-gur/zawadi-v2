@@ -11,6 +11,38 @@
   ],
   "routes": [
     {
+      "src": "/assets/(.*)",
+      "dest": "/dist/assets/$1"
+    },
+    {
+      "src": "/sw.js",
+      "dest": "/dist/sw.js"
+    },
+    {
+      "src": "/workbox-(.*)",
+      "dest": "/dist/workbox-$1"
+    },
+    {
+      "src": "/registerSW.js",
+      "dest": "/dist/registerSW.js"
+    },
+    {
+      "src": "/manifest.webmanifest",
+      "dest": "/dist/manifest.webmanifest"
+    },
+    {
+      "src": "/pwa-icon-(.*)",
+      "dest": "/dist/pwa-icon-$1"
+    },
+    {
+      "src": "/og-image.png",
+      "dest": "/dist/og-image.png"
+    },
+    {
+      "src": "/[^.]+",
+      "dest": "/dist/index.html"
+    },
+    {
       "src": "/(.*)",
       "dest": "/dist/$1"
     }
