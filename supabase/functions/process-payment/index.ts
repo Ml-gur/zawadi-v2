@@ -191,7 +191,8 @@ async function handleInitialize(
       }
 
       if (paymentMethod === 'mobile_money' && phoneNumber) {
-        paystackPayload.channels = ['mobile_money', 'ussd']
+        // Don't restrict channels — let Paystack show all available options (mobile_money, card, etc.)
+        // The mobile_money field hints Paystack to prefer M-Pesa for this number
         paystackPayload.mobile_money = { phone: phoneNumber, provider: 'mpesa' }
       }
 

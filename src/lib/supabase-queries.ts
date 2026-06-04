@@ -74,7 +74,7 @@ export async function getUserApplications(userEmail: string) {
 }
 
 export async function upsertApplication(application: any) {
-  return supabase.from('applications').upsert(application).select().single();
+  return supabase.from('applications').upsert(application, { onConflict: 'user_email, scholarship_id' }).select().single();
 }
 
 export async function deleteApplication(id: string) {

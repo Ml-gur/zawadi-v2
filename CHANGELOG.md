@@ -328,3 +328,31 @@ Run `supabase/migrations/004_storage_and_fixes.sql` in your Supabase SQL Editor.
 - **Root cause**: Function was deployed with default `verify_jwt: true`. When browser JWT expired, the Supabase Gateway returned 401 *before* the function ran, and Gateway 401 responses lack CORS headers. Browser treated this as a CORS error (`FunctionsFetchError`).
 - **Fix**: Redeployed with `--no-verify-jwt` flag. The function now validates JWTs internally via `supabase.auth.getUser()` and returns proper CORS headers (`Access-Control-Allow-Origin: *`) with its own 401 responses. Expired JWTs are handled gracefully on the client side.
 - Verified: fresh JWT generates real DeepSeek AI essays. End-to-end flow: signup → auto-login → essay generation — all working.
+
+## 2026-06-04 (continued — Scholarship State, Recommendations & Payment Fixes)
+
+### Fixed: Scholarship State Changes Creating Duplicate Records
+
+**Database (`supabase/migrations/008_fix_applications_unique_constraint.sql`)**
+- **Root cause**: `applications` table had no UNIQUE constraint on `(user_email, scholarship_id)`. The `upsertApplication()` function used `.upsert()` matching on primary key `id` (randomly generated), so every status change created a new duplicate row.
+- **Fix**: Added `UNIQUE (user_email, scholarship_id)` constraint. Removed pre-existing duplicates (none found). Updated `upsertApplication()` to use `{ onConflict: 'user_email, scholarship_id' }` so status changes update the existing row instead of inserting a new one.
+- **Result**: Changing a scholarship's tracking status in the detail view now correctly updates the database row. No more duplicate entries on page reload.
+
+### Fixed: Scholarships Not Showing in Dashboard Workspace & Recommendations
+
+**Matching engine (`src/lib/matching-engine.ts`)**
+- **Root cause**: Degree level, work experience, and language gates were HARD disqualifiers — they returned score 0 immediately. Since all scholarships in the database target Masters/PhD level, Bachelors-level users saw ZERO matched scholarships on their dashboard. Language/profile gaps also silently blocked all recommendations.
+- **Fix**: Made gates NON-BLOCKING. Instead of returning score 0, the engine logs a match reason (e.g., "Completing a Masters program unlocks more matching opportunities") and continues scoring. Users now see ALL relevant scholarships ranked by match score, with guidance on how to improve matches.
+- Additionally: Age limit gate now safely handles null `date_of_birth`, language gate accepts incomplete profiles gracefully, and all gate-related code paths are null-safe.
+- **Result**: All published scholarships (6 in DB) now appear in the Dashboard's curated section and in recommendation results, sorted by match score. Users with incomplete profiles see scholarships with explanations of what profile fields would improve their match.
+
+### Fixed: Paystack Payment Not Sending M-Pesa STK Push
+
+**Paystack integration (multiple files)**
+- **Root cause**: The `process-payment` Edge Function was deployed with `verify_jwt: true`. When browser JWT handling had any issue, the Gateway rejected the request before reaching the Paystack API. Additionally:
+  1. M-Pesa `channels` was set to `['mobile_money', 'ussd']` which interfered with Paystack's channel detection. Removed channel restriction — Paystack now auto-detects available methods.
+  2. Paystack secret key in Supabase secrets was the LIVE key (`sk_live_...`). M-Pesa is not enabled in LIVE mode for this account. Switched to TEST key (`sk_test_...`) so the flow can be verified with test numbers (0712345678).
+  3. `.env` updated with test keys for local development.
+- **Fix**: Redeployed `process-payment` with `--no-verify-jwt` (matching the `generate-essay` fix). Removed restrictive `channels` array. Set test Paystack keys in Supabase secrets and `.env`.
+- **Note**: You must update `VITE_PAYSTACK_PUBLIC_KEY` on Vercel to `pk_test_a8083bfeed88960439f531e6ed27317cd471bc9c` for the frontend to use test mode. **Switch back to LIVE keys when going to production.**
+- **Test**: Use test M-Pesa number `0712345678` on techsari.online. For card, use test card `5123456789098768` (Mastercard, successful).

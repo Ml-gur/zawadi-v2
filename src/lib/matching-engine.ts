@@ -696,20 +696,13 @@ export function computeScholarshipMatch(
     };
   }
 
-  // 2. GATE G2: Minimum Work Experience
+  // 2. GATE G2: Minimum Work Experience — not hard-disqualifying
   if (schol.work_experience_required) {
     const userWorkYrs = parseFloat(user.work_experience_years || '');
     if (isNaN(userWorkYrs)) {
       matchReasons.push(`Set your work experience in your profile to verify the ${schol.work_experience_required}-year minimum for this scholarship`);
     } else if (userWorkYrs < schol.work_experience_required) {
-      disqualifyingReasons.push(`Requires ${schol.work_experience_required}+ years of work experience (you have ${userWorkYrs})`);
-      return {
-        score: 0,
-        reasons: [],
-        disqualifying_reasons: disqualifyingReasons,
-        is_eligible: false,
-        breakdown: { country: 100, degree: 0, field: 0, gpa: 0, languages: 0, experience: 0, destination: 0, documents: 0, no_ielts: 0 }
-      };
+      matchReasons.push(`Requires ${schol.work_experience_required}+ years of work experience (you have ${userWorkYrs})`);
     }
   }
 
@@ -739,30 +732,18 @@ export function computeScholarshipMatch(
   } else {
     const g2 = checkDegreeLevel(userDegreeLevel, eligibleDegreeLevels);
     if (!g2.pass) {
-      disqualifyingReasons.push(g2.note);
-      return {
-        score: 0,
-        reasons: [],
-        disqualifying_reasons: disqualifyingReasons,
-        is_eligible: false,
-        breakdown: { country: 100, degree: 0, field: 0, gpa: 0, languages: 0, experience: 0, destination: 0, documents: 0, no_ielts: 0 }
-      };
+      // Don't hard-disqualify — let the scholarship show with a reduced score
+      // so users can see opportunities they could grow into
+      matchReasons.push(`${g2.note} — completing a ${eligibleDegreeLevels.join('/')} program unlocks more matching opportunities`);
     }
   }
 
-  // 3. GATE G5: Language Proficiency — skip if user hasn't set English test
+  // 3. GATE G5: Language Proficiency — not hard-disqualifying
   const hasLangProfile = !!(user.english_test_type || user.english_score || user.french_level || user.arabic_level);
   if (hasLangProfile) {
     const g5 = checkLanguageGate(user, schol);
     if (!g5.pass) {
-      disqualifyingReasons.push(g5.note);
-      return {
-        score: 0,
-        reasons: [],
-        disqualifying_reasons: disqualifyingReasons,
-        is_eligible: false,
-        breakdown: { country: 100, degree: 100, field: 0, gpa: 0, languages: 0, experience: 0, destination: 0, documents: 0, no_ielts: 0 }
-      };
+      matchReasons.push(`${g5.note} — update your language profile to improve your match score`);
     }
   }
 
