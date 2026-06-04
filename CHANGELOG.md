@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-06-04 (continued — Admin Setup & Root-Cause Fix)
+
+### Root-Cause Fix: Auth User Creation Broken
+
+**Database schema (`supabase/migrations/007_fix_profiles_id_and_trigger.sql`)**
+- **Missing `id` column in `profiles` table**: The `id UUID PRIMARY KEY` column defined in `001_initial_schema.sql` did not exist in the live `profiles` table (only `email` was the PK). This caused the `on_auth_user_created` trigger to fail on `INSERT INTO profiles (id, ...)` because the column was absent.
+- **Trigger rewritten with UPSERT**: Changed from plain `INSERT` to `INSERT ... ON CONFLICT (email) DO UPDATE`. This prevents auth user creation from failing when a profile row already exists for the same email (e.g., admin pre-seeded via SQL). Updated trigger preserves existing profile data when re-linking a new auth user.
+- **Admin user created & verified**: `admin@zawadi.app` auth user created via direct auth admin API (trigger temporarily disabled). Profile linked (`id`, `auth_user_id` match auth user UUID) with `role='super_admin'`. Login verified working end-to-end.
+- **Public sign-up confirmed working**: Trigger correctly creates explorer profiles for new user registrations.
+
+**`supabase/functions/setup-admin/index.ts`**
+- Simplified: removed `exec_sql` RPC calls (no longer needed now that trigger handles conflicts gracefully). Function uses standard `auth.admin.createUser()` and profile update.
+
 ## 2026-06-04 (continued — Security & Audit Remediation)
 
 ### Critical Security Fixes
