@@ -356,3 +356,40 @@ Run `supabase/migrations/004_storage_and_fixes.sql` in your Supabase SQL Editor.
 - **Fix**: Redeployed `process-payment` with `--no-verify-jwt` (matching the `generate-essay` fix). Removed restrictive `channels` array. Set test Paystack keys in Supabase secrets and `.env`.
 - **Note**: You must update `VITE_PAYSTACK_PUBLIC_KEY` on Vercel to `pk_test_a8083bfeed88960439f531e6ed27317cd471bc9c` for the frontend to use test mode. **Switch back to LIVE keys when going to production.**
 - **Test**: Use test M-Pesa number `0712345678` on techsari.online. For card, use test card `5123456789098768` (Mastercard, successful).
+
+## 2026-06-04 — Document AI Extraction Pipeline Fix
+
+### Fixed: Document AI Extraction Never Runs (All Documents Show "Failed" or "Pending")
+
+**Root cause**: Document AI analysis ran **client-side** via `analyzeDocument()` → `extractWithAI()` → `generateContent()`. The `hasAnyKey()` function in `src/services/ai-provider.ts` returned `false` because no AI API keys (`VITE_DEEPSEEK_API_KEY`, etc.) were exposed to the browser — Vite only exposes `VITE_*` prefixed env vars. Every analysis silently returned null → `analysis_status: 'failed'`.
+
+**Fix**: Created a Supabase Edge Function (`supabase/functions/document-analysis/index.ts`) that receives extracted text + document metadata from the client, calls DeepSeek AI server-side (where `DEEPSEEK_API_KEY` secret is available), and updates the `documents` table + enriches the user profile.
+
+**Architecture change**:
+- **New file**: `supabase/functions/document-analysis/index.ts`
+  - Supports `action: 'analyze'` — accepts `{ documentId, docType, textContent }`, calls DeepSeek with appropriate prompt based on doc type, stores `ai_extraction_result` (JSONB), sets `analysis_status: 'completed'`, enriches user profile with extracted fields (GPA, institution, degree, field of study, work experience, skills, languages, leadership, etc.)
+  - Supports `action: 'status'` — returns document analysis statuses for the user
+  - Deployed with `--no-verify-jwt`
+
+- **Updated**: `src/App.tsx` — `handleUploadDocument()` fire-and-forget block:
+  - Replaced local `analyzeDocument()` + `buildProfileEnrichment()` with new pipeline:
+    1. Extract text from file buffer using `extractTextFromBuffer` (client-side PDF parsing works)
+    2. Call Edge Function `document-analysis` with extracted text
+    3. Edge Function handles AI analysis + DB updates + profile enrichment
+  - Added `handleReanalyzeDocument()` for re-analyzing existing documents (downloads file from Storage, extracts text, calls Edge Function)
+
+- **Updated**: `src/services/document-intelligence.ts`:
+  - Removed `!isBasic` gate on CV/Resume analysis (line 125) — CV analysis now works for all plan tiers since AI runs server-side
+
+- **Updated**: `src/components/DocumentVault.tsx`:
+  - Shows analysis status badges: "Failed" (red), "Pending" (amber), "Analyzed" (green), "AI Extracted" (primary)
+  - Added "Re-analyze" button for documents with `failed` or `pending` status
+  - Added `onReanalyzeDocument` prop
+
+- **Updated**: `src/types.ts` — `DocumentVaultItem` interface now includes `analysis_status`, `last_analyzed_at`, `analysis_error` fields
+
+**Verified working**:
+- Essay type (Motivation Letter): ✅ Returns tone, complexity, themes, vocabulary level, excerpt
+- CV/Resume type: ✅ Returns work experience, skills, leadership roles, languages, field of study
+- Academic Transcript: ✅ Returns institution, degree level, field, GPA, graduation year, honors
+- All enrichment fields map correctly to profile columns

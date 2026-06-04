@@ -381,69 +381,42 @@ export default function App() {
       if (data) {
         const insertedDoc = data as DocumentVaultItem;
         setDocuments(prev => [...prev, insertedDoc]);
-        // Fire-and-forget AI document analysis
+        // Fire-and-forget AI document analysis via Edge Function
         (async () => {
           try {
             const arrayBuf = await file.arrayBuffer();
             const buffer = new Uint8Array(arrayBuf);
-            const { analyzeDocument, buildProfileEnrichment } = await import('./services/document-intelligence');
-            const { result, analyzed, extraction } = await analyzeDocument(
-              buffer,
-              docType,
-              user.email,
-              user.plan || 'explorer',
-              file.type,
-              file.name
-            );
-            const payload: any = {};
-            if (analyzed && result) {
-              payload.ai_extraction_result = JSON.stringify({ data: result, extraction });
-            }
-            if (extraction) {
-              payload.analysis_status = analyzed ? 'completed' : 'failed';
-              payload.last_analyzed_at = new Date().toISOString();
-            }
-            if (Object.keys(payload).length > 0) {
-              await supabase.from('documents').update(payload).eq('id', insertedDoc.id);
-              handleRefreshDocuments();
-            }
-            // Enrich user profile with extracted fields
-            if (analyzed && result && user.email) {
-              const enrichment = buildProfileEnrichment(result, docType, extraction);
-              const profileUpdate: any = {};
-              for (const [key, val] of Object.entries(enrichment)) {
-                if (val !== null && val !== undefined) {
-                  profileUpdate[key] = val;
-                }
-              }
-              if (Object.keys(profileUpdate).length > 0) {
-                const { data: currentProfile } = await supabase
-                  .from('profiles')
-                  .select('*')
-                  .eq('email', user.email)
-                  .single();
-                if (currentProfile) {
-                  if (profileUpdate.doc_gpa_normalised_extracted) {
-                    const current = currentProfile.gpa ? parseFloat(currentProfile.gpa) : null;
-                    if (!current || profileUpdate.doc_gpa_normalised_extracted > current) {
-                      profileUpdate.gpa = profileUpdate.doc_gpa_normalised_extracted;
-                    }
-                  }
-                  if (profileUpdate.doc_institution_extracted && !currentProfile.institution) {
-                    profileUpdate.institution = profileUpdate.doc_institution_extracted;
-                  }
-                  if (profileUpdate.doc_field_of_study_extracted && !currentProfile.field_of_study) {
-                    profileUpdate.field_of_study = profileUpdate.doc_field_of_study_extracted;
-                  }
-                  if (profileUpdate.doc_degree_level_extracted && !currentProfile.degree_level) {
-                    profileUpdate.degree_level = profileUpdate.doc_degree_level_extracted;
-                  }
-                  await supabase.from('profiles').update(profileUpdate).eq('email', user.email);
-                }
+            const { extractTextFromBuffer } = await import('./services/text-extractor');
+            const { text: textContent, method, warning } = await extractTextFromBuffer(buffer, file.type, file.name);
+            const trimmed = textContent?.trim() || '';
+            if (trimmed.length < 50) {
+              await supabase.from('documents').update({
+                analysis_status: 'failed',
+                analysis_error: `Could not extract sufficient text (${trimmed.length} chars). Try a clearer scan.`,
+                last_analyzed_at: new Date().toISOString(),
+              }).eq('id', insertedDoc.id);
+            } else {
+              const { data: analysisResult, error: analysisError } = await supabase.functions.invoke('document-analysis', {
+                body: { action: 'analyze', documentId: insertedDoc.id, docType, textContent: trimmed },
+              });
+              if (analysisError || !analysisResult?.success) {
+                await supabase.from('documents').update({
+                  analysis_status: 'failed',
+                  analysis_error: analysisError?.message || analysisResult?.error || 'AI analysis failed',
+                  last_analyzed_at: new Date().toISOString(),
+                }).eq('id', insertedDoc.id);
               }
             }
+            handleRefreshDocuments();
           } catch (err) {
             console.error("AI document analysis failed", err);
+            try {
+              await supabase.from('documents').update({
+                analysis_status: 'failed',
+                analysis_error: err instanceof Error ? err.message : 'Unknown error',
+                last_analyzed_at: new Date().toISOString(),
+              }).eq('id', insertedDoc.id);
+            } catch {}
           }
         })();
       }
@@ -490,6 +463,42 @@ export default function App() {
     } catch (err: any) {
       toast.error(err.message || 'Failed to save profile');
       throw err;
+    }
+  };
+
+  const handleReanalyzeDocument = async (doc: DocumentVaultItem) => {
+    if (!user) return;
+    try {
+      const { data: fileData, error: dlError } = await supabase.storage
+        .from('scholarship-docs')
+        .download(doc.file_path!);
+      if (dlError || !fileData) throw new Error(dlError?.message || 'Could not download file');
+      const arrayBuf = await fileData.arrayBuffer();
+      const buffer = new Uint8Array(arrayBuf);
+      const { extractTextFromBuffer } = await import('./services/text-extractor');
+      const { text: textContent } = await extractTextFromBuffer(buffer, doc.mime_type || 'application/pdf', doc.name);
+      const trimmed = textContent?.trim() || '';
+      if (trimmed.length < 50) {
+        await supabase.from('documents').update({
+          analysis_status: 'failed',
+          analysis_error: 'Could not extract sufficient text for analysis',
+          last_analyzed_at: new Date().toISOString(),
+        }).eq('id', doc.id);
+        toast.error('Could not extract enough text from this document');
+      } else {
+        const { data: analysisResult, error: analysisError } = await supabase.functions.invoke('document-analysis', {
+          body: { action: 'analyze', documentId: doc.id, docType: doc.type, textContent: trimmed },
+        });
+        if (analysisError || !analysisResult?.success) {
+          toast.error(analysisError?.message || analysisResult?.error || 'Re-analysis failed');
+        } else {
+          toast.success('Document analyzed successfully!');
+        }
+      }
+      handleRefreshDocuments();
+    } catch (err: any) {
+      console.error("Re-analysis failed", err);
+      toast.error(err?.message || 'Re-analysis failed');
     }
   };
 
@@ -767,7 +776,7 @@ export default function App() {
                     )
                   } />
                   <Route path="/scholarships" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading scholarships...</div>}><Scholarships user={user} scholarships={scholarships} applications={applications} documents={documents} onTrackScholarship={handleTrackScholarship} onUploadMetadata={handleUploadDocument} onNavigateToTab={handleNavigateToTab} /></Suspense>} />
-                  <Route path="/vault" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading vault...</div>}><DocumentVault user={user} documents={documents} onUploadDocument={handleUploadDocument} onRemoveDoc={handleRemoveDoc} onNavigateToTab={handleNavigateToTab} onRefreshDocuments={handleRefreshDocuments} /></Suspense>} />
+                  <Route path="/vault" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading vault...</div>}><DocumentVault user={user} documents={documents} onUploadDocument={handleUploadDocument} onRemoveDoc={handleRemoveDoc} onReanalyzeDocument={handleReanalyzeDocument} onNavigateToTab={handleNavigateToTab} onRefreshDocuments={handleRefreshDocuments} /></Suspense>} />
                   <Route path="/essays" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading essay studio...</div>}><EssayGenerator user={user} essays={essays} scholarships={scholarships} documents={documents} onGenerateEssay={handleGenerateEssay} onNavigateToTab={handleNavigateToTab} onUploadMetadata={handleUploadDocument} /></Suspense>} />
                   <Route path="/profile" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading profile...</div>}><StudentProfile user={user} onUpdateProfile={handleUpdateProfile} onNavigateToTab={handleNavigateToTab} /></Suspense>} />
                   <Route path="/applications" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading tracker...</div>}><ApplicationTracker scholarships={scholarships} applications={applications} onTrackScholarship={handleTrackScholarship} onRemoveTrack={handleRemoveTrack} onNavigateToTab={handleNavigateToTab} /></Suspense>} />

@@ -122,7 +122,7 @@ export async function analyzeDocument(
     return { result: result as EssaySampleData | null, analyzed: !!result, extraction: extractionMeta };
   }
 
-  if (!isBasic && (normalizedType.includes('cv') || normalizedType.includes('resume'))) {
+  if (normalizedType.includes('cv') || normalizedType.includes('resume')) {
     const result = await extractWithAI(CV_PROMPT, textContent);
     return { result: result as CVData | null, analyzed: !!result, extraction: extractionMeta };
   }

@@ -106,6 +106,9 @@ export interface DocumentVaultItem {
   mime_type?: string;
   uploaded_at: string;
   ai_extraction_result?: string | null;
+  analysis_status?: string | null;
+  last_analyzed_at?: string | null;
+  analysis_error?: string | null;
 }
 
 export interface EssayStudioGeneration {

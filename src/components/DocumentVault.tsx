@@ -9,6 +9,7 @@ interface DocumentVaultProps {
   documents: DocumentVaultItem[];
   onUploadDocument: (file: File, docType: string) => void;
   onRemoveDoc: (id: string) => void;
+  onReanalyzeDocument?: (doc: DocumentVaultItem) => Promise<void>;
   onNavigateToTab: (tab: string) => void;
   onRefreshDocuments: () => void;
 }
@@ -18,6 +19,7 @@ export default function DocumentVault({
   documents,
   onUploadDocument,
   onRemoveDoc,
+  onReanalyzeDocument,
   onNavigateToTab,
   onRefreshDocuments
 }: DocumentVaultProps) {
@@ -239,7 +241,7 @@ export default function DocumentVault({
 
             <h4 className="font-bold text-sm text-on-surface mb-2 truncate" title={doc.name}>{doc.name}</h4>
             
-            <div className="flex items-center gap-2 mt-1 mb-2">
+            <div className="flex items-center gap-2 mt-1 mb-2 flex-wrap">
               {doc.ai_extraction_result ? (
                 <button
                   onClick={() => {
@@ -251,8 +253,45 @@ export default function DocumentVault({
                   <span className="material-symbols-outlined text-[10px]">auto_awesome</span>
                   AI Extracted
                 </button>
-              ) : (
-                <span className="text-[9px] text-outline font-semibold opacity-50">No AI extraction</span>
+              ) : null}
+              {doc.analysis_status === 'failed' && (
+                <span className="inline-flex items-center gap-1 bg-status-urgent/10 text-status-urgent text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-status-urgent/20">
+                  <span className="material-symbols-outlined text-[10px]">error_outline</span>
+                  Failed
+                </span>
+              )}
+              {doc.analysis_status === 'pending' && (
+                <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-700 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-amber-200">
+                  <span className="material-symbols-outlined text-[10px]">pending</span>
+                  Pending
+                </span>
+              )}
+              {doc.analysis_status === 'completed' && !doc.ai_extraction_result && (
+                <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-green-200">
+                  <span className="material-symbols-outlined text-[10px]">check_circle</span>
+                  Analyzed
+                </span>
+              )}
+              {(doc.analysis_status === 'failed' || doc.analysis_status === 'pending') && onReanalyzeDocument && (
+                <button
+                  onClick={async () => {
+                    setAiExtracting(doc.id);
+                    try {
+                      await onReanalyzeDocument(doc);
+                    } finally {
+                      setAiExtracting(null);
+                    }
+                  }}
+                  disabled={aiExtracting === doc.id}
+                  className="inline-flex items-center gap-1 bg-surface-container-high text-on-surface-variant text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-outline-variant/40 cursor-pointer hover:bg-primary-fixed/20 hover:text-primary transition-colors disabled:opacity-50"
+                >
+                  {aiExtracting === doc.id ? (
+                    <span className="inline-block w-2.5 h-2.5 border-2 border-on-surface-variant border-t-transparent rounded-full animate-spin"></span>
+                  ) : (
+                    <span className="material-symbols-outlined text-[10px]">refresh</span>
+                  )}
+                  {aiExtracting === doc.id ? 'Analyzing...' : 'Re-analyze'}
+                </button>
               )}
             </div>
 
