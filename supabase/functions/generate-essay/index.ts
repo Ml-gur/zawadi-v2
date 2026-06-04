@@ -50,7 +50,7 @@ async function callAiProvider(
     if (provider === 'deepseek') {
       const apiKey = cfg?.deepseek_key || Deno.env.get('DEEPSEEK_API_KEY') || ''
       if (!apiKey) throw new Error('No DeepSeek API key configured')
-      const model = modelOverride || cfg?.ai_model || 'deepseek-v4-flash'
+      const model = modelOverride || cfg?.ai_model || 'deepseek-chat'
       const body: Record<string, unknown> = {
         model,
         messages: [
@@ -404,15 +404,15 @@ ESSAY TO POLISH: ${baseText}`
 
   // ── Save essay to database ──
   let savedId = 'ess-' + Date.now()
-  if (stage === 'draft' || stage === 'polish') {
+  if (stage === 'draft' || stage === 'critique' || stage === 'polish') {
     const { data: existing } = await supabase
       .from('essays')
       .select('*')
       .eq('user_email', userEmail)
-      .eq('scholarship_name', scholarship_name)
+      .eq('scholarship_name', scholarship_name || '')
       .maybeSingle()
 
-    const payload: any = {
+    const payload: Record<string, unknown> = {
       user_email: userEmail,
       scholarship_name: scholarship_name || 'General Scholarship',
       essay_type: essay_type || 'Personal Statement',
@@ -422,22 +422,20 @@ ESSAY TO POLISH: ${baseText}`
     }
 
     if (existing) {
-      const updates: any = { stage }
-      if (stage === 'draft') {
-        updates.draft = generatedText
-      } else {
-        updates.final = generatedText
-      }
-      await supabase.from('essays').update(updates).eq('id', existing.id)
+      const updates: Record<string, unknown> = { stage }
+      if (stage === 'draft') updates.draft = generatedText
+      else if (stage === 'critique') updates.critique = generatedText
+      else updates.final = generatedText
+      const { error: updateErr } = await supabase.from('essays').update(updates).eq('id', existing.id)
+      if (updateErr) console.error('[generate-essay] Failed to update essay:', updateErr.message)
       savedId = existing.id
     } else {
       payload.id = savedId
-      if (stage === 'draft') {
-        payload.draft = generatedText
-      } else {
-        payload.final = generatedText
-      }
-      await supabase.from('essays').insert(payload)
+      if (stage === 'draft') payload.draft = generatedText
+      else if (stage === 'critique') payload.critique = generatedText
+      else payload.final = generatedText
+      const { error: insertErr } = await supabase.from('essays').insert(payload)
+      if (insertErr) console.error('[generate-essay] Failed to insert essay:', insertErr.message)
     }
   }
 

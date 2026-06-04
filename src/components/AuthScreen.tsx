@@ -74,11 +74,14 @@ export default function AuthScreen({ onLoginSuccess, countries }: AuthScreenProp
           } else if (signInErr?.message?.includes('Email not confirmed')) {
             setErrorMsg('Account created! Please check your email for a confirmation link.');
           } else {
-            // Account exists — try to sign in anyway
+            // Account exists — try to sign in after brief delay
             setErrorMsg('Account created! Signing you in automatically...');
+            await new Promise(r => setTimeout(r, 1500));
             const retrySignIn = await supabase.auth.signInWithPassword({ email, password });
             if (retrySignIn.data?.session) {
               await onLoginSuccess(email, retrySignIn.data.session.access_token);
+              setLoading(false);
+              return;
             }
           }
         }

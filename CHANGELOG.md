@@ -215,6 +215,58 @@ Run `supabase/migrations/004_storage_and_fixes.sql` in your Supabase SQL Editor.
 - Network Authorization header check — needs HAR file analysis
 - Footer links — SPA renders footer client-side, not in initial HTML
 
+## 2026-06-04 — 5 Production Bug Fixes
+
+### Bug 1: Account creation auto-login fails
+**Root cause**: `supabase/config.toml` had `enable_confirmations = true`, which meant after `supabase.auth.signUp()`, no session was returned. The auto-login fallback (`signInWithPassword`) failed because unconfirmed emails can't sign in. Manual login also failed for the same reason.
+
+**Fix** (`supabase/config.toml:226`):
+- `enable_confirmations` changed from `true` → `false`
+- Users are now auto-confirmed on signup, so both auto-login and manual login work immediately
+- Added 1.5s delay before auto-login retry for reliability
+
+### Bug 2: Onboarding Guide not reflecting saved profile fields
+**Root cause**: The `confirmed_fields` array on the profile object was never written to the DB. The Dashboard (`Dashboard.tsx:51`) reads `user.confirmed_fields` to determine which onboarding guide fields are complete, but `handleUpdateProfile` in `App.tsx` never set this field.
+
+**Fix** (`src/App.tsx:465-486`):
+- After saving profile fields, compute which non-null keys were just submitted
+- Merge them with existing `confirmed_fields` from user state
+- Include merged `confirmed_fields` in the upsert payload
+- Also updates `confirmed_fields` on voice profile saves (line 529)
+
+### Bug 3: Document upload null id constraint
+**Root cause**: `documents` table (`001_initial_schema.sql:80`) has `id TEXT PRIMARY KEY`, but `handleUploadDocument` (`App.tsx:369`) created the `doc` object without an `id` field. Postgres rejects the NULL primary key.
+
+**Fix**:
+- Added `id: crypto.randomUUID()` to the doc object in `handleUploadDocument` (`App.tsx:370`)
+- Created `supabase/migrations/006_document_id_default.sql` that adds `DEFAULT gen_random_uuid()::text` as a DB-level safety net
+
+### Bug 4: Admin login fails
+**Root cause**: The admin user (`admin@zawadi.app`) exists in the `profiles` table (from the old Express JWT era) but has no corresponding entry in `supabase.auth.users`. Since the platform migrated from Express JWT to native Supabase Auth, admin login via `supabase.auth.signInWithPassword()` fails with "Invalid login credentials" because no auth user exists.
+
+**Fix**:
+- Created `supabase/functions/setup-admin/index.ts` — a new Edge Function that creates the admin auth user using `supabase.auth.admin.createUser()`
+- The function:
+  - Authenticates via `x-setup-secret` header (requires `SETUP_ADMIN_SECRET` env var)
+  - Checks if auth user already exists (returns 409 if so)
+  - Creates auth user with `email_confirm: true`
+  - Copies old profile data (name, role, plan, etc.) to the new profile
+  - Sets `role = 'super_admin'` on the new profile
+  - Deletes the old profile row
+- Deployed and ACTIVE on Supabase
+- **Manual step**: Set `SETUP_ADMIN_SECRET` in Supabase Dashboard → Edge Functions env vars, then call the function
+
+### Bug 5: Essay generation Edge Function error
+**Root cause**: The `generate-essay` Edge Function was deployed and ACTIVE but used an invalid DeepSeek model name (`deepseek-v4-flash` instead of `deepseek-chat`), causing the AI provider call to fail. Additionally, critique-stage essays were incorrectly saved to the `final` field instead of `critique`.
+
+**Fix** (`supabase/functions/generate-essay/index.ts`):
+- Default model changed from `deepseek-v4-flash` → `deepseek-chat` (valid DeepSeek API model, line 53)
+- Critique stage now saves to `critique` field instead of `final`
+- Added error logging for essay insert/update failures
+- Essay selection now handles empty `scholarship_name`
+- All stages (draft, critique, polish) properly save to the database (previously only draft/polish were saved)
+- Deployed as version 2, ACTIVE
+
 ### ACTION REQUIRED: Trigger Vercel redeploy
 1. Go to https://vercel.com/ → your project → Deployments
 2. Find the latest deployment (commit `fde3dac`)

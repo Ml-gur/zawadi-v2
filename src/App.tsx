@@ -367,6 +367,7 @@ export default function App() {
     try {
       const { storagePath } = await uploadDocumentToStorage(user.email, file, docType);
       const doc = {
+        id: crypto.randomUUID(),
         user_email: user.email,
         name: file.name,
         type: docType,
@@ -472,6 +473,13 @@ export default function App() {
           sanitized[key] = null;
         }
       }
+      // Track which fields the user has explicitly confirmed for the Onboarding Guide
+      const existingConfirmed: string[] = user.confirmed_fields || [];
+      const newConfirmed: string[] = Object.keys(sanitized).filter(
+        k => sanitized[k] !== null && sanitized[k] !== undefined && sanitized[k] !== ''
+      );
+      const mergedConfirmed = [...new Set([...existingConfirmed, ...newConfirmed])];
+      sanitized.confirmed_fields = mergedConfirmed;
       const { data, error } = await upsertProfile({ email: user.email, ...sanitized });
       if (error) throw new Error(error.message || `Server error`);
       if (data) {
