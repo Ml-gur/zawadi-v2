@@ -48,6 +48,7 @@ export function normaliseGrade(
   system: GpaSystem | string,
   classRaw: string | null = null
 ): number | null {
+  if (raw !== null && isNaN(raw)) return null;
   if (system === 'british') {
     return classRaw ? BRITISH_NORM[classRaw] ?? null : null;
   }
@@ -379,8 +380,9 @@ export function scoreAcademicField(
 }
 
 export function scoreAcademicAchievement(user: any, schol: any): number {
+  const userGpaRaw = user.gpa != null ? parseFloat(user.gpa) : null;
   const normBase = normaliseGrade(
-    user.gpa !== undefined ? parseFloat(user.gpa) : null,
+    userGpaRaw !== null && !isNaN(userGpaRaw) ? userGpaRaw : null,
     user.gpa_system || 'us4',
     user.degree_class || null
   );
@@ -670,6 +672,10 @@ export function computeScholarshipMatch(
   const eligibleCountries = schol.countries || schol.country || ['ALL'];
   const eligibleDegreeLevels = schol.degree_levels || [];
   const eligibleFields = schol.fields_of_study || schol.fields || [];
+
+  // Profile Completeness Gate — skip scoring if user has no profile data
+  const hasBasicProfile = !!(user.country || user.field_of_study || user.gpa || user.degree_level);
+  if (!hasBasicProfile) return null;
 
   // Compute user age from date_of_birth if available
   let userAge: number | null = null;

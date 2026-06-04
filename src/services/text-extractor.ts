@@ -1,34 +1,20 @@
-import { createWorker } from 'tesseract.js';
-
 export interface ExtractionResult {
   text: string;
-  method: 'pdf-text' | 'pdf-ocr' | 'image-ocr' | 'docx';
-  confidence?: number;
+  method: 'pdf-text' | 'docx';
   warning?: string;
 }
 
-async function pdfToImages(file: File): Promise<Blob[]> {
-  const pdfjsLib = await import('pdfjs-dist');
-  pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-    'pdfjs-dist/build/pdf.worker.min.mjs',
-    import.meta.url
-  ).toString();
-
-  const arrayBuf = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuf }).promise;
-  const pages: Blob[] = [];
-
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const viewport = page.getViewport({ scale: 2 });
-    const canvas = new OffscreenCanvas(viewport.width, viewport.height);
-    const ctx = canvas.getContext('2d')!;
-    await page.render({ canvasContext: ctx, viewport }).promise;
-    const blob = await canvas.convertToBlob({ type: 'image/png' });
-    pages.push(blob);
-  }
-
-  return pages;
+function cleanText(raw: string): string {
+  return raw
+    .replace(/\r\n/g, '\n')
+    .replace(/\t/g, ' ')
+    .replace(/\n{4,}/g, '\n\n\n')
+    .replace(/[ \t]{3,}/g, ' ')
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '')
+    .split('\n')
+    .map(l => l.trim())
+    .join('\n')
+    .trim();
 }
 
 export async function extractTextFromBuffer(
@@ -42,78 +28,64 @@ export async function extractTextFromBuffer(
   if (lowerMime.includes('wordprocessingml') || lowerName.endsWith('.docx')) {
     const mammoth = await import('mammoth');
     const result = await mammoth.extractRawText({ buffer });
-    return { text: result.value, method: 'docx' };
+    return { text: cleanText(result.value), method: 'docx' };
   }
 
-  if (lowerMime === 'application/pdf') {
-    const file = new File([buffer], filename, { type: mimetype });
+  if (lowerMime === 'application/pdf' || lowerName.endsWith('.pdf')) {
     const pdfjsLib = await import('pdfjs-dist');
     pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
       'pdfjs-dist/build/pdf.worker.min.mjs',
       import.meta.url
     ).toString();
 
-    const arrayBuf = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuf }).promise;
+    const arrayBuf = buffer instanceof ArrayBuffer ? buffer : (buffer as Uint8Array).buffer;
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuf.slice(0) }).promise;
 
-    const firstPage = await pdf.getPage(1);
-    const viewport = firstPage.getViewport({ scale: 1 });
-    const textContent = await firstPage.getTextContent();
-    const rawText = textContent.items.map((item: any) => item.str).join(' ');
+    let extractedPages: string[] = [];
 
-    if (rawText.trim().length > 150) {
-      let fullText = rawText;
-      for (let i = 2; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const tc = await page.getTextContent();
-        fullText += '\n' + tc.items.map((item: any) => item.str).join(' ');
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const tc = await page.getTextContent();
+
+      const items = tc.items
+        .map((item: any) => item.str)
+        .filter(Boolean);
+
+      const pageText = items.join(' ');
+
+      if (pageText.trim().length > 10) {
+        extractedPages.push(pageText.trim());
       }
-      return { text: fullText, method: 'pdf-text' };
+
+      if (pdf.numPages === 1 && pageText.trim().length <= 50) {
+        const viewport = page.getViewport({ scale: 2 });
+        const canvas = new OffscreenCanvas(viewport.width, viewport.height);
+        const ctx = canvas.getContext('2d')!;
+        await page.render({ canvasContext: ctx, viewport }).promise;
+        const blob = await canvas.convertToBlob({ type: 'image/png' });
+        const warnMsg = 'This PDF appears to be a scanned image. Only text-based PDFs are supported for extraction.';
+        return { text: cleanText(pageText), method: 'pdf-text', warning: warnMsg };
+      }
     }
 
-    const pages = await pdfToImages(file);
-    const worker = await createWorker('eng');
-    let ocrText = '';
-    let totalConfidence = 0;
-    let pageCount = 0;
+    const fullText = extractedPages.join('\n');
 
-    try {
-      for (const pageBlob of pages) {
-        const { data: pageResult } = await worker.recognize(pageBlob);
-        ocrText += pageResult.text + '\n';
-        totalConfidence += pageResult.confidence;
-        pageCount++;
-      }
-    } finally {
-      await worker.terminate();
-    }
-
-    const avgConfidence = pageCount > 0 ? Math.round(totalConfidence / pageCount) : 0;
-    const trimmed = ocrText.trim();
-
-    return {
-      text: trimmed,
-      method: 'pdf-ocr',
-      confidence: avgConfidence,
-      ...(avgConfidence < 60 ? { warning: 'Low OCR confidence. Re-upload a clearer scan.' } : {}),
-    };
-  }
-
-  if (lowerMime.startsWith('image/')) {
-    const blob = new Blob([buffer], { type: mimetype });
-    const worker = await createWorker('eng');
-    try {
-      const { data } = await worker.recognize(blob);
+    if (fullText.trim().length < 50) {
       return {
-        text: data.text,
-        method: 'image-ocr',
-        confidence: Math.round(data.confidence),
-        ...(data.confidence < 60 ? { warning: 'Low OCR confidence. Re-upload a clearer scan.' } : {}),
+        text: cleanText(fullText),
+        method: 'pdf-text',
+        warning: 'Could not extract meaningful text. This may be a scanned document.'
       };
-    } finally {
-      await worker.terminate();
     }
+
+    return { text: cleanText(fullText), method: 'pdf-text' };
   }
 
-  throw new Error('Unsupported file type: ' + mimetype);
+  if (lowerMime.startsWith('image/') || lowerName.match(/\.(png|jpg|jpeg|gif|bmp|tiff|webp)$/i)) {
+    throw new Error(
+      'Image-based documents cannot be processed directly. Please upload a PDF or DOCX version of this document.'
+    );
+  }
+
+  throw new Error('Unsupported file type: ' + mimetype + '. Supported formats: PDF, DOCX.');
 }

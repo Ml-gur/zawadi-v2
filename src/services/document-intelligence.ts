@@ -62,7 +62,6 @@ export type ExtractionResult = TranscriptData | CVData | EssaySampleData | Refer
 
 export interface ExtractionMetadata {
   method: string;
-  confidence?: number;
   warning?: string;
 }
 
@@ -108,7 +107,6 @@ export async function analyzeDocument(
 
   const extractionMeta: ExtractionMetadata = {
     method: extractionResult.method,
-    confidence: extractionResult.confidence,
     warning: extractionResult.warning,
   };
 
@@ -155,7 +153,6 @@ export interface ProfileEnrichment {
   doc_reference_sentiment?: string | null;
   doc_certificate_type?: string | null;
   doc_extraction_method?: string;
-  doc_extraction_confidence?: number;
 }
 
 export function buildProfileEnrichment(
@@ -168,7 +165,6 @@ export function buildProfileEnrichment(
 
   if (extraction) {
     enrichment.doc_extraction_method = extraction.method;
-    enrichment.doc_extraction_confidence = extraction.confidence;
   }
 
   if (result && (normalizedType.includes('transcript'))) {

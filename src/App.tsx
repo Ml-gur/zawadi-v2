@@ -381,42 +381,41 @@ export default function App() {
       if (data) {
         const insertedDoc = data as DocumentVaultItem;
         setDocuments(prev => [...prev, insertedDoc]);
-        // Fire-and-forget AI document analysis via Edge Function
+        // Fire-and-forget AI document analysis via Edge Function + client fallback
         (async () => {
           try {
             const arrayBuf = await file.arrayBuffer();
             const buffer = new Uint8Array(arrayBuf);
             const { extractTextFromBuffer } = await import('./services/text-extractor');
-            const { text: textContent, method, warning } = await extractTextFromBuffer(buffer, file.type, file.name);
-            const trimmed = textContent?.trim() || '';
+            const extraction = await extractTextFromBuffer(buffer, file.type, file.name);
+            const trimmed = extraction.text?.trim() || '';
             if (trimmed.length < 50) {
               await supabase.from('documents').update({
                 analysis_status: 'failed',
-                analysis_error: `Could not extract sufficient text (${trimmed.length} chars). Try a clearer scan.`,
+                analysis_error: extraction.warning || `Could not extract sufficient text (${trimmed.length} chars). Try uploading a text-based PDF or DOCX.`,
                 last_analyzed_at: new Date().toISOString(),
               }).eq('id', insertedDoc.id);
             } else {
-              const { data: analysisResult, error: analysisError } = await supabase.functions.invoke('document-analysis', {
-                body: { action: 'analyze', documentId: insertedDoc.id, docType, textContent: trimmed },
-              });
-              if (analysisError || !analysisResult?.success) {
-                await supabase.from('documents').update({
-                  analysis_status: 'failed',
-                  analysis_error: analysisError?.message || analysisResult?.error || 'AI analysis failed',
-                  last_analyzed_at: new Date().toISOString(),
-                }).eq('id', insertedDoc.id);
-              }
+              const success = await invokeDocAnalysis(insertedDoc.id, docType, trimmed, user.email);
+              await supabase.from('documents').update({
+                analysis_status: success ? 'completed' : 'pending',
+                analysis_error: success ? null : 'Analysis will retry automatically.',
+                last_analyzed_at: new Date().toISOString(),
+              }).eq('id', insertedDoc.id);
             }
             handleRefreshDocuments();
           } catch (err) {
             console.error("AI document analysis failed", err);
-            try {
-              await supabase.from('documents').update({
-                analysis_status: 'failed',
-                analysis_error: err instanceof Error ? err.message : 'Unknown error',
-                last_analyzed_at: new Date().toISOString(),
-              }).eq('id', insertedDoc.id);
-            } catch {}
+            const errMsg = err instanceof Error ? err.message : 'Unknown error';
+            if (!errMsg.includes('Unsupported file type')) {
+              try {
+                await supabase.from('documents').update({
+                  analysis_status: 'pending',
+                  analysis_error: 'Analysis service unavailable. Document saved successfully.',
+                  last_analyzed_at: new Date().toISOString(),
+                }).eq('id', insertedDoc.id);
+              } catch {}
+            }
           }
         })();
       }
@@ -466,6 +465,39 @@ export default function App() {
     }
   };
 
+  async function invokeDocAnalysis(documentId: string, docType: string, textContent: string, userEmail: string): Promise<boolean> {
+    const fnUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/document-analysis`;
+
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const { data: session } = await supabase.auth.getSession();
+        const token = session?.session?.access_token;
+        const res = await fetch(fnUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token || import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+          },
+          body: JSON.stringify({ action: 'analyze', documentId, docType, textContent }),
+          signal: AbortSignal.timeout(25000),
+        });
+        if (!res.ok) {
+          const errBody = await res.json().catch(() => ({}));
+          console.error(`[invokeDocAnalysis] HTTP ${res.status}:`, errBody);
+          if (res.status === 401) return false;
+          continue;
+        }
+        const result = await res.json();
+        return result?.success === true;
+      } catch (err) {
+        console.error(`[invokeDocAnalysis] attempt ${attempt + 1} failed:`, err);
+        if (attempt === 0) await new Promise(r => setTimeout(r, 2000));
+      }
+    }
+    return false;
+  }
+
   const handleReanalyzeDocument = async (doc: DocumentVaultItem) => {
     if (!user) return;
     try {
@@ -476,7 +508,8 @@ export default function App() {
       const arrayBuf = await fileData.arrayBuffer();
       const buffer = new Uint8Array(arrayBuf);
       const { extractTextFromBuffer } = await import('./services/text-extractor');
-      const { text: textContent } = await extractTextFromBuffer(buffer, doc.mime_type || 'application/pdf', doc.name);
+      const extraction = await extractTextFromBuffer(buffer, doc.mime_type || 'application/pdf', doc.name);
+      const textContent = extraction.text;
       const trimmed = textContent?.trim() || '';
       if (trimmed.length < 50) {
         await supabase.from('documents').update({
@@ -486,11 +519,9 @@ export default function App() {
         }).eq('id', doc.id);
         toast.error('Could not extract enough text from this document');
       } else {
-        const { data: analysisResult, error: analysisError } = await supabase.functions.invoke('document-analysis', {
-          body: { action: 'analyze', documentId: doc.id, docType: doc.type, textContent: trimmed },
-        });
-        if (analysisError || !analysisResult?.success) {
-          toast.error(analysisError?.message || analysisResult?.error || 'Re-analysis failed');
+        const success = await invokeDocAnalysis(doc.id, doc.type, trimmed, user.email);
+        if (!success) {
+          toast.error('Document analysis service is temporarily unavailable. The document will be retried automatically.');
         } else {
           toast.success('Document analyzed successfully!');
         }

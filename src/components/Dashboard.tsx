@@ -321,34 +321,48 @@ export default function Dashboard({
             <span className="text-[10px] text-on-surface-variant font-semibold bg-surface-container px-2 py-1 rounded">Action Required</span>
           </div>
 
-          <div className="divide-y divide-outline-variant/30 overflow-y-auto max-h-[140px] pr-1">
+          <div className="divide-y divide-outline-variant/30 overflow-y-auto max-h-[200px] pr-1">
             {(() => {
-              const trackedIds = applications.filter(a => a.status && a.status !== 'not_started').map(a => a.scholarship_id);
               const sorted = scholarships
-                .filter(s => trackedIds.includes(s.id) && s.deadline && !s.deadline.toLowerCase().includes('varies') && !s.deadline.toLowerCase().includes('annual'))
-                .sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime())
-                .slice(0, 5);
+                .filter(s => s.deadline && !s.deadline.toLowerCase().includes('varies') && !s.deadline.toLowerCase().includes('annual'))
+                .map(s => ({ ...s, _daysLeft: Math.ceil((new Date(s.deadline).getTime() - Date.now()) / (1000*60*60*24)) }))
+                .filter(s => s._daysLeft > 0 && s._daysLeft <= 60)
+                .sort((a, b) => a._daysLeft - b._daysLeft)
+                .slice(0, 8);
               if (sorted.length === 0) {
                 return (
                   <div className="text-center py-8 text-on-surface-variant text-xs">
-                    No tracked scholarships with approaching deadlines.
+                    No scholarships with approaching deadlines at the moment.
                   </div>
                 );
               }
               return sorted.map(s => {
                 const app = applications.find(a => a.scholarship_id === s.id);
-                const appStatus = app && app.status !== 'not_started' ? app.status : 'Not Started';
-                const daysLeft = Math.ceil((new Date(s.deadline).getTime() - Date.now()) / (1000*60*60*24));
-                const isUrgent = daysLeft <= 30;
+                const appStatus = app && app.status !== 'not_started' ? app.status : null;
+                const isUrgent = s._daysLeft <= 30;
                 return (
-                  <div key={s.id} className="py-2.5 flex justify-between items-center bg-surface-container-lowest/45 px-3 rounded-lg border border-outline-variant/20 mb-2">
-                    <div>
-                      <h5 className="text-xs font-bold text-primary">{s.name}</h5>
-                      <span className={`text-[9px] font-bold uppercase ${isUrgent ? 'text-status-urgent' : 'text-status-warning'}`}>Status: {appStatus}</span>
+                  <div
+                    key={s.id}
+                    onClick={() => onViewScholarship(s)}
+                    className="py-2.5 flex justify-between items-center bg-surface-container-lowest/45 px-3 rounded-lg border border-outline-variant/20 mb-2 cursor-pointer hover:bg-surface-container-lowest transition-colors"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        {isUrgent && <span className="w-2 h-2 rounded-full bg-status-urgent shrink-0 animate-pulse" />}
+                        <h5 className="text-xs font-bold text-primary truncate">{s.name}</h5>
+                      </div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className={`text-[9px] font-bold uppercase ${isUrgent ? 'text-status-urgent' : 'text-status-warning'}`}>
+                          {s._daysLeft}d left
+                        </span>
+                        {appStatus && (
+                          <span className="text-[9px] text-on-surface-variant">• {appStatus}</span>
+                        )}
+                      </div>
                     </div>
-                    <div className="text-right">
+                    <div className="text-right shrink-0 ml-3">
                       <span className={`text-xs font-black ${isUrgent ? 'text-status-urgent' : 'text-status-warning'}`}>{s.deadline}</span>
-                      <p className="text-[9px] text-on-surface-variant uppercase tracking-wider">{s.provider}</p>
+                      <p className="text-[9px] text-on-surface-variant uppercase tracking-wider truncate max-w-[120px]">{s.provider}</p>
                     </div>
                   </div>
                 );
@@ -380,21 +394,23 @@ export default function Dashboard({
         </div>
 
         {matchedScholarships.length === 0 && (
-          <div className="col-span-full text-center py-12 bg-surface-container-lowest rounded-3xl border border-outline-variant/30">
+          <div className="text-center py-12 bg-surface-container-lowest rounded-3xl border border-outline-variant/30">
             <span className="material-symbols-outlined text-4xl text-outline-variant mb-3">search</span>
             <p className="text-sm text-on-surface-variant font-medium">
-              {confirmed.length === 0
-                ? 'Complete your profile to see your scholarship matches.'
-                : 'No matches found yet. Try adjusting your profile details.'}
+              Complete your academic profile to unlock personalized scholarship matches.
             </p>
             <button onClick={() => onNavigateToTab('profile')} className="mt-4 px-6 py-2.5 bg-primary text-on-primary text-xs font-bold rounded-xl hover:bg-primary-container transition-colors cursor-pointer">
-              {confirmed.length === 0 ? 'Complete Profile' : 'Adjust Profile'}
+              Complete Profile
             </button>
           </div>
         )}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {matchedScholarships.map((s) => {
             const score = s.match ? s.match.score : 0;
+            const topReason = s.match?.reasons?.[0] || `${score}% compatibility based on your profile`;
+            const isNearDeadline = s.deadline && !s.deadline.toLowerCase().includes('varies') && !s.deadline.toLowerCase().includes('annual')
+              ? Math.ceil((new Date(s.deadline).getTime() - Date.now()) / (1000*60*60*24)) <= 30
+              : false;
             return (
               <div 
                 key={s.id}
@@ -406,13 +422,20 @@ export default function Dashboard({
                     <span className="bg-secondary-container/80 text-on-secondary-container border border-secondary/20 font-label-sm text-[10px] px-3 py-1 rounded-full uppercase tracking-wider font-extrabold shadow-sm backdrop-blur-md flex items-center gap-1">
                       <span className="material-symbols-outlined text-[12px]">star</span> {score}% Match
                     </span>
-                    <span className="text-[11px] font-bold text-status-warning uppercase bg-status-warning/10 border border-status-warning/20 px-2 py-1 rounded">
-                      Active
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      {isNearDeadline && (
+                        <span className="text-[9px] font-bold text-status-urgent uppercase bg-status-urgent/10 border border-status-urgent/20 px-2 py-0.5 rounded flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-status-urgent animate-pulse" /> Urgent
+                        </span>
+                      )}
+                      <span className="text-[11px] font-bold text-status-success uppercase bg-status-success/10 border border-status-success/20 px-2 py-1 rounded">
+                        Active
+                      </span>
+                    </div>
                   </div>
                   <h4 className="font-display text-lg font-black text-primary mb-1 group-hover:text-secondary transition-colors truncate">{s.name}</h4>
                   <p className="text-xs text-on-surface-variant mb-4 font-bold">{s.provider} • {s.host}</p>
-                  <div className="flex flex-wrap gap-2 mb-6">
+                  <div className="flex flex-wrap gap-2 mb-4">
                     <span className="bg-surface-container-lowest text-on-surface-variant text-[11px] px-2.5 py-1 rounded-lg border border-outline-variant/30 flex items-center gap-1 font-semibold">
                       <span className="material-symbols-outlined text-[14px]">public</span> {s.country?.[0] || 'Global'}
                     </span>
@@ -420,6 +443,7 @@ export default function Dashboard({
                       <span className="material-symbols-outlined text-[14px]">payments</span> {s.funding_type} Funding
                     </span>
                   </div>
+                  <p className="text-[10px] text-secondary font-semibold italic leading-tight">"{topReason}"</p>
                 </div>
                 <button 
                   onClick={() => onViewScholarship(s)}

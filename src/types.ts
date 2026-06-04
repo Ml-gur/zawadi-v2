@@ -4,6 +4,7 @@ export interface MatchScore {
   disqualifying_reasons: string[];
   is_eligible: boolean;
   no_ielts_benefit?: boolean;
+  needs_profile?: boolean;
   breakdown: {
     country: number;
     degree: number;
