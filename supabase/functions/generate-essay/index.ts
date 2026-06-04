@@ -1,8 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { GoogleGenAI } from 'https://esm.sh/@google/genai'
 
-// ─── AI Config types ──────────────────────────────────────────────
 interface AiConfigRow {
   provider?: string
   openai_key?: string | null
@@ -30,10 +28,37 @@ async function fetchAiConfig(supabase: ReturnType<typeof createClient>): Promise
   }
 }
 
-/**
- * Multi-provider AI call. Routes to DeepSeek, OpenAI, or Gemini based on config.
- * Falls back to Gemini if the configured provider fails.
- */
+async function callDeepSeek(
+  apiKey: string,
+  systemInstruction: string,
+  userPrompt: string,
+  temperature: number,
+  maxOutputTokens: number,
+  model: string,
+): Promise<string> {
+  const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify({
+      model,
+      messages: [
+        { role: 'system', content: systemInstruction },
+        { role: 'user', content: userPrompt },
+      ],
+      temperature,
+      max_tokens: maxOutputTokens,
+    }),
+  })
+  if (!res.ok) {
+    const errText = await res.text()
+    throw new Error(`DeepSeek API error ${res.status}: ${errText}`)
+  }
+  const json = await res.json()
+  const text = json?.choices?.[0]?.message?.content || ''
+  if (text) return text
+  throw new Error('DeepSeek returned empty response')
+}
+
 async function callAiProvider(
   cfg: AiConfigRow | null,
   systemInstruction: string,
@@ -42,10 +67,10 @@ async function callAiProvider(
   maxOutputTokens: number,
   modelOverride?: string,
 ): Promise<string> {
-  // Resolve provider: prefer configured, but verify key exists
   const hasDeepSeek = !!(cfg?.deepseek_key || Deno.env.get('DEEPSEEK_API_KEY'))
   const hasOpenAI = !!(cfg?.openai_key || Deno.env.get('OPENAI_API_KEY'))
   const hasGemini = !!(cfg?.gemini_key || Deno.env.get('GOOGLE_API_KEY'))
+
   const configured = cfg?.provider
   const provider = configured && (
     (configured === 'deepseek' && hasDeepSeek) ||
@@ -53,42 +78,24 @@ async function callAiProvider(
     (configured === 'gemini' && hasGemini)
   ) ? configured : hasDeepSeek ? 'deepseek' : hasOpenAI ? 'openai' : 'gemini'
 
-  // Try the resolved provider first
-  try {
-    if (provider === 'deepseek') {
-      const apiKey = cfg?.deepseek_key || Deno.env.get('DEEPSEEK_API_KEY') || ''
-      if (!apiKey) throw new Error('No DeepSeek API key configured')
-      const model = modelOverride || cfg?.ai_model || 'deepseek-chat'
-      const body: Record<string, unknown> = {
-        model,
-        messages: [
-          ...(systemInstruction ? [{ role: 'system', content: systemInstruction }] : []),
-          { role: 'user', content: userPrompt },
-        ],
-        temperature,
-        max_tokens: maxOutputTokens,
-      }
-      if (model === 'deepseek-v4-pro') {
-        body.thinking = { type: 'enabled' }
-      }
-      const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-        body: JSON.stringify(body),
-      })
-      if (!res.ok) {
-        const errText = await res.text()
-        throw new Error(`DeepSeek API error ${res.status}: ${errText}`)
-      }
-      const json = await res.json()
-      const text = json?.choices?.[0]?.message?.content || ''
-      if (text) return text
-      throw new Error('DeepSeek returned empty response')
-    }
+  const lastErr: string[] = []
 
-    if (provider === 'openai') {
-      const apiKey = cfg?.openai_key || Deno.env.get('OPENAI_API_KEY') || ''
-      if (!apiKey) throw new Error('No OpenAI API key configured')
+  async function tryDeepSeek(): Promise<string | null> {
+    const apiKey = cfg?.deepseek_key || Deno.env.get('DEEPSEEK_API_KEY') || ''
+    if (!apiKey) return null
+    try {
+      const model = modelOverride || cfg?.ai_model || 'deepseek-v4-flash'
+      return await callDeepSeek(apiKey, systemInstruction, userPrompt, temperature, maxOutputTokens, model)
+    } catch (e: any) {
+      lastErr.push(`deepseek: ${e.message}`)
+      return null
+    }
+  }
+
+  async function tryOpenAI(): Promise<string | null> {
+    const apiKey = cfg?.openai_key || Deno.env.get('OPENAI_API_KEY') || ''
+    if (!apiKey) return null
+    try {
       const model = modelOverride || cfg?.ai_model || 'gpt-4o'
       const res = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
@@ -110,58 +117,46 @@ async function callAiProvider(
       const json = await res.json()
       const text = json?.choices?.[0]?.message?.content || ''
       if (text) return text
-      throw new Error('OpenAI returned empty response')
+    } catch (e: any) {
+      lastErr.push(`openai: ${e.message}`)
     }
-
-    // Gemini (default)
-    const geminiKey = cfg?.gemini_key || Deno.env.get('GOOGLE_API_KEY') || ''
-    if (!geminiKey) throw new Error('No Gemini API key configured')
-    const genAI = new GoogleGenAI({ apiKey: geminiKey })
-    const model = modelOverride || cfg?.ai_model || 'gemini-2.5-flash'
-    const result = await genAI.models.generateContent({
-      model,
-      contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-      config: {
-        systemInstruction,
-        temperature,
-        maxOutputTokens,
-      },
-    })
-    const text = result?.candidates?.[0]?.content?.parts?.[0]?.text || ''
-    if (text) return text
-    throw new Error('Gemini returned empty response')
-  } catch (primaryErr: any) {
-    console.error(`[generate-essay] Provider "${provider}" failed:`, primaryErr.message)
-
-    // Fallback to Gemini if primary wasn't already Gemini
-    if (provider !== 'gemini') {
-      console.log('[generate-essay] Falling back to Gemini...')
-      try {
-        const geminiKey = cfg?.gemini_key || Deno.env.get('GOOGLE_API_KEY') || ''
-        if (!geminiKey) throw new Error('No Gemini API key for fallback')
-        const genAI = new GoogleGenAI({ apiKey: geminiKey })
-        const model = modelOverride || cfg?.ai_model || 'gemini-2.5-flash'
-        const result = await genAI.models.generateContent({
-          model,
-          contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
-          config: {
-            systemInstruction,
-            temperature,
-            maxOutputTokens,
-          },
-        })
-        const text = result?.candidates?.[0]?.content?.parts?.[0]?.text || ''
-        if (text) return text
-      } catch (fallbackErr: any) {
-        console.error('[generate-essay] Gemini fallback also failed:', fallbackErr.message)
-      }
-    }
-
-    throw primaryErr
+    return null
   }
+
+  async function tryGemini(): Promise<string | null> {
+    const geminiKey = cfg?.gemini_key || Deno.env.get('GOOGLE_API_KEY') || ''
+    if (!geminiKey) return null
+    try {
+      const { GoogleGenAI } = await import('https://esm.sh/@google/genai')
+      const genAI = new GoogleGenAI({ apiKey: geminiKey })
+      const model = modelOverride || cfg?.ai_model || 'gemini-2.5-flash'
+      const result = await genAI.models.generateContent({
+        model,
+        contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
+        config: { systemInstruction, temperature, maxOutputTokens },
+      })
+      const text = result?.candidates?.[0]?.content?.parts?.[0]?.text || ''
+      if (text) return text
+    } catch (e: any) {
+      lastErr.push(`gemini: ${e.message}`)
+    }
+    return null
+  }
+
+  // Try providers in preference order
+  const attempts: (() => Promise<string | null>)[] = []
+  if (provider === 'deepseek') attempts.push(tryDeepSeek, tryOpenAI, tryGemini)
+  else if (provider === 'openai') attempts.push(tryOpenAI, tryDeepSeek, tryGemini)
+  else attempts.push(tryGemini, tryDeepSeek, tryOpenAI)
+
+  for (const attempt of attempts) {
+    const result = await attempt()
+    if (result) return result
+  }
+
+  throw new Error(`All AI providers failed: ${lastErr.join('; ')}`)
 }
 
-// ─── CORS helpers ─────────────────────────────────────────────────
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
@@ -175,7 +170,6 @@ function corsResponse(body: unknown, status = 200) {
   })
 }
 
-// ─── Plan rate limits ─────────────────────────────────────────────
 const PLAN_LIMITS: Record<string, number> = {
   explorer: 3,
   plus: 10,
@@ -190,15 +184,12 @@ const PLAN_LABELS: Record<string, string> = {
   institutional: 'Zawadi Institutional',
 }
 
-// ─── Main serve handler ───────────────────────────────────────────
 serve(async (req: Request) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    // ── Auth via Bearer token ──
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) return corsResponse({ error: 'Authentication required' }, 401)
 
@@ -215,7 +206,6 @@ serve(async (req: Request) => {
     const body = await req.json()
     const action = body.action || 'generate'
 
-    // ── Route based on action ──
     if (action === 'generate') {
       return handleGenerateEssay(supabase, userEmail, body)
     }
@@ -230,7 +220,6 @@ serve(async (req: Request) => {
   }
 })
 
-// ─── Essay Generation ─────────────────────────────────────────────
 async function handleGenerateEssay(
   supabase: ReturnType<typeof createClient>,
   userEmail: string,
@@ -241,7 +230,6 @@ async function handleGenerateEssay(
     notes, word_count, document_ids, provider: reqProvider
   } = body
 
-  // ── Fetch user profile & check rate limits ──
   const { data: profile, error: profileErr } = await supabase
     .from('profiles')
     .select('*')
@@ -253,7 +241,6 @@ async function handleGenerateEssay(
   const plan = profile.plan || 'explorer'
   const limit = PLAN_LIMITS[plan] ?? 3
 
-  // Count essays generated today
   const todayStart = new Date().toISOString().split('T')[0]
   const { count: genCount, error: countErr } = await supabase
     .from('essays')
@@ -274,7 +261,6 @@ async function handleGenerateEssay(
     }, 430)
   }
 
-  // ── Load document grounding context ──
   let documentContext = ''
   if (document_ids && Array.isArray(document_ids) && document_ids.length > 0) {
     const docContexts: string[] = []
@@ -308,7 +294,6 @@ async function handleGenerateEssay(
     }
   }
 
-  // ── Build prompt and call AI provider (multi-provider) ──
   const userCountry = profile.country || 'your country'
   const userField = profile.field_of_study || 'your field'
   const userDegree = profile.degree_level || 'graduate'
@@ -318,11 +303,9 @@ async function handleGenerateEssay(
   const hasLeadership = profile.has_leadership
   const workYrs = profile.work_experience_years
 
-  // Fetch AI config from database
   const aiConfig = await fetchAiConfig(supabase)
   let generatedText = ''
 
-  // Resolve AI parameters — prefer DB config, fall back to stage defaults
   let systemInstruction = ''
   let userPrompt = ''
   let temperature = 0.8
@@ -378,7 +361,6 @@ ESSAY TO POLISH: ${baseText}`
     maxOutputTokens = aiConfig?.ai_max_tokens_essay ?? 1500
   }
 
-  // Use the request-level provider override if provided
   const effectiveModel = reqProvider || undefined
 
   try {
@@ -394,7 +376,6 @@ ESSAY TO POLISH: ${baseText}`
     console.error('AI generation failed:', err.message)
   }
 
-  // ── Fallback template ──
   if (!generatedText) {
     const sentences = (prompt || notes || '').split(/[.!?\n]+/).filter((s: string) => s.trim().length > 10)
     const userBackground = sentences.length > 0 ? sentences.slice(0, 2).join('. ') : 'your unique background'
@@ -410,7 +391,6 @@ ESSAY TO POLISH: ${baseText}`
     }
   }
 
-  // ── Save essay to database ──
   let savedId = 'ess-' + Date.now()
   if (stage === 'draft' || stage === 'critique' || stage === 'polish') {
     const { data: existing } = await supabase
@@ -457,7 +437,6 @@ ESSAY TO POLISH: ${baseText}`
   })
 }
 
-// ─── Match Rationale ──────────────────────────────────────────────
 async function handleMatchRationale(
   supabase: ReturnType<typeof createClient>,
   userEmail: string,
@@ -466,7 +445,6 @@ async function handleMatchRationale(
   const { scholarship_id } = body
   if (!scholarship_id) return corsResponse({ error: 'scholarship_id required' }, 400)
 
-  // Fetch user profile
   const { data: user } = await supabase
     .from('profiles')
     .select('*')
@@ -475,7 +453,6 @@ async function handleMatchRationale(
 
   if (!user) return corsResponse({ error: 'User not found' }, 404)
 
-  // Fetch scholarship
   const { data: schol } = await supabase
     .from('scholarships')
     .select('*')
@@ -484,7 +461,6 @@ async function handleMatchRationale(
 
   if (!schol) return corsResponse({ error: 'Scholarship not found' }, 404)
 
-  // Build match summary (simplified — full engine runs client-side or in separate service)
   const matchFields: string[] = []
   if (schol.countries && Array.isArray(schol.countries)) {
     const userCountry = user.country?.toLowerCase()
@@ -502,7 +478,6 @@ async function handleMatchRationale(
   const matchScore = matchFields.length > 0 ? Math.min(40 + matchFields.length * 20, 90) : 20
   const isEligible = matchFields.length >= 2
 
-  // Call AI for rationale (multi-provider)
   const aiConfig = await fetchAiConfig(supabase)
   let rationale: any = { summary: 'AI rationale unavailable — no AI provider configured.' }
 

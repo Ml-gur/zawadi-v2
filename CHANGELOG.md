@@ -312,3 +312,19 @@ Run `supabase/migrations/004_storage_and_fixes.sql` in your Supabase SQL Editor.
 3. Click the three dots → Redeploy
 4. OR run: `npx vercel --prod` (requires Vercel login)
 5. After redeploy, SPA routes will work correctly
+
+## 2026-06-04 (continued — Auth Email Confirmation & Edge Function JWT Fix)
+
+### Fixed: Email Confirmation Blocking User Login
+
+**Supabase Auth Config (Management API)**
+- **Root cause**: `mailer_autoconfirm: false` and `mailer_allow_unverified_email_sign_ins: false` on hosted project prevented new users from logging in. No SMTP configured, so confirmation emails were never sent — users were stuck unconfirmed and unable to sign in.
+- **Fix**: `PATCH /v1/projects/{ref}/config/auth` with `{"mailer_autoconfirm": true}` — new users are now auto-confirmed on signup. No email needed.
+- Verified: signup returns `email_confirmed_at` immediately, user can log in with password.
+
+### Fixed: Edge Function CORS Error on JWT Expiry
+
+**`generate-essay` deployment**
+- **Root cause**: Function was deployed with default `verify_jwt: true`. When browser JWT expired, the Supabase Gateway returned 401 *before* the function ran, and Gateway 401 responses lack CORS headers. Browser treated this as a CORS error (`FunctionsFetchError`).
+- **Fix**: Redeployed with `--no-verify-jwt` flag. The function now validates JWTs internally via `supabase.auth.getUser()` and returns proper CORS headers (`Access-Control-Allow-Origin: *`) with its own 401 responses. Expired JWTs are handled gracefully on the client side.
+- Verified: fresh JWT generates real DeepSeek AI essays. End-to-end flow: signup → auto-login → essay generation — all working.
