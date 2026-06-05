@@ -387,7 +387,12 @@ export function scoreAcademicAchievement(user: any, schol: any): number {
     user.degree_class || null
   );
 
-  const userNorm = user.doc_gpa_normalised_extracted !== undefined ? user.doc_gpa_normalised_extracted : normBase;
+  const userConfirmed = user.doc_gpa_user_confirmed;
+  const userNorm = userConfirmed !== undefined && userConfirmed !== null
+    ? userConfirmed
+    : user.doc_gpa_normalised_extracted !== undefined
+    ? user.doc_gpa_normalised_extracted
+    : normBase;
   const minNorm  = schol.min_gpa_normalised !== undefined ? schol.min_gpa_normalised : null;
 
   if (userNorm === null && minNorm === null) return 0.60;

@@ -1,5 +1,78 @@
 # Changelog
 
+## 2026-06-05 — Document Analysis Overhaul & AGENT.md
+
+### Improved: Document Analysis Edge Function (Complete Rewrite)
+
+**`supabase/functions/document-analysis/index.ts`** — 418 → 815 lines
+
+**GPA pattern matching now handles all 10 African grading systems:**
+- `us4` (US 4.0), `ngcgpa` (Nigerian 5.0), `pct_100` (percentages)
+- `british` (First Class, 2:1, 2:2, Third Class, Pass)
+- `mention_fr` (Très Bien, Bien, Assez Bien, Passable — French Africa)
+- `belgian_20` (DR Congo 20-point scale), `luso_20` (Portuguese Africa 20-point "valores")
+- `spanish_10` (Equatorial Guinea), `za_pct` (South African percentage markers)
+- `arabic` pattern support for Arabic-script degree terms
+
+**Degree patterns expanded from 4 to 12** — added LLB, BEd, BBA, BArch, BFA, BNurs, BPharm, MEd, MFA, MPH, MPA, MSci, MRes, LLM, MD, DVM, JD, PGDip, PGCert, plus French (Licence, Master 1/2, Doctorat, Magistère), Portuguese (Licenciatura, Mestrado, Doutoramento), and Arabic degree terms.
+
+**New extraction fields:**
+- `student_name` — extracted from transcript headers
+- `date_of_birth` — for age limit gate checking
+- `matric_number` — student registration ID
+- `gpa_classification` — "First Class", "Très Bien", etc.
+- `email` / `phone` — contact extraction from all document types
+- `education_history[]` — structured entries from CV education sections
+- `leadership_roles[]` — leadership detection from CVs
+
+**Other improvements:**
+- Text preprocessing: Unicode normalization, whitespace cleaning before matching
+- Institution scan: searches first 2000 chars with English, French, Portuguese patterns
+- Field detection: English + French + Portuguese field keywords
+- Skills extraction: 1500-char capture window, pipe/bullet separator support, deduplication
+- Work experience: handles "present", "current", "now", "date" variants, 1980+ start years
+- **8-second AbortController timeout** on DeepSeek fetch — prevents function hanging when DeepSeek credits are exhausted
+- Graceful degradation: if DeepSeek times out or fails, returns pure pattern-matching results
+
+### Changed: Client-Side Pattern Extractor (`src/services/pdf-pattern-extractor.ts`)
+- Separated regex extraction from the monolithic `document-intelligence.ts` into its own module
+- Mirrors the same comprehensive pattern improvements from the Edge Function
+- Exports `PatternExtractionResult` interface and `extractFromPDFText()` function
+
+### Changed: Client-Side Document Intelligence (`src/services/document-intelligence.ts`)
+- Rewrote from pure AI-based extraction to pattern-first + AI fallback (matching the Edge Function)
+- Added `extractRemainingFieldsWithAI()` — only calls AI for fields with confidence < 0.7
+- Added `TranscriptData.gpa_system` field
+- Changed `gpa_scale` from `number` to `string` to support "4.0", "5.0", "British", "French", etc.
+- CV analysis now uses pattern extraction instead of AI prompt
+- Profile enrichment builder handles new document types properly
+
+### Changed: Document Vault UI (`src/components/DocumentVault.tsx`)
+- **Extraction method badges**: shows P (pattern), AI, or H (hybrid) per document
+- **AI extraction confirmation form**: students can confirm/correct extracted values (institution, degree, field, GPA, scale, system, year)
+- **Manual entry fallback**: for unreadable/scanned documents, inline form to enter details manually
+- **User email prop** passed for confirmation form submission
+- Upload handler now shows extraction badges immediately
+
+### Changed: Matching Engine GPA Priority (`src/lib/matching-engine.ts`)
+- Fixed GPA priority chain: `doc_gpa_user_confirmed` (student confirmed) > `doc_gpa_normalised_extracted` (AI extracted) > profile-entered GPA
+- Previously only checked extracted GPA, ignoring user confirmations
+
+### New: Types (`src/types.ts`)
+- Added `DocumentVaultItem.extraction_method` and `user_confirmed` fields
+- Added `ExtractionConfirmationData` interface for the confirmation form
+
+### New: AGENT.md (448 lines)
+- Comprehensive single source of truth covering all 17 sections
+- Project overview, tech stack, architecture, database schema
+- Environment variables with rotated credentials alert
+- AI integration, matching engine, plan config, mentor pipeline
+- Known issues (9 tracked), dev setup, deployment, testing status
+- AI agent instructions with golden rules
+
+### Added: Deployment Note
+- `AUDIT_REPORT.md` updated to include `document-analysis` in the deploy commands list
+
 ## 2026-06-04 (continued — Admin Setup & Root-Cause Fix)
 
 ### Fixed: Essay Generation AI Provider & Client-Side Crash

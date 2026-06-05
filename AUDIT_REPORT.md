@@ -27,6 +27,7 @@
 cd C:\Users\samka\Downloads\techsari-zawadi (1)
 npx supabase functions deploy generate-essay
 npx supabase functions deploy process-payment
+npx supabase functions deploy document-analysis
 npx supabase functions deploy run-pipeline
 npx supabase functions deploy mentor-review
 npx supabase functions deploy admin-settings

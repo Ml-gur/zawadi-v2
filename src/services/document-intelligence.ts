@@ -1,22 +1,14 @@
-import { generateContent, getProviderConfig, hasAnyKey } from './ai-provider';
+import { generateContent, hasAnyKey } from './ai-provider';
 import { extractTextFromBuffer } from './text-extractor';
-
-const TRANSCRIPT_PROMPT = `You are a document analysis specialist. Extract structured academic data from this transcript text. Return ONLY valid JSON with these fields: institution_name as string or null, degree_level as "Undergraduate" or "Masters" or "PhD" or null, field_of_study as string or null, gpa as number or null, gpa_scale as 4.0 or 5.0 or 100 or null, graduation_year as integer or null, honors as string or null. Never guess. Return null for any field not clearly visible. No markdown, no code fences, just JSON.`;
-
-const CV_PROMPT = `Extract structured professional data from this CV text. Return ONLY valid JSON with: work_experience_years as integer or null, primary_field as string or null, skills as string array, leadership_roles as string array, publications_count as integer or null, languages as string array. No markdown, no code fences, just JSON.`;
-
-const ESSAY_PROMPT = `Analyze this personal statement or essay as a writing sample. Return ONLY valid JSON with: approximate_word_count as integer, tone as "formal" or "conversational" or "mixed", sentence_complexity as "simple" or "moderate" or "complex", key_themes as string array of up to 5 themes, vocabulary_level as "basic" or "intermediate" or "advanced", writing_sample_excerpt as the most distinctive 100 word excerpt. No markdown, no code fences, just JSON.`;
-
-const REFERENCE_LETTER_PROMPT = `Analyze this reference / recommendation letter. Return ONLY valid JSON with: relationship as string (e.g. "professor", "employer", "mentor"), sentiment as "strongly_positive" or "positive" or "neutral" or "mixed", key_strengths as string array of up to 6 qualities mentioned, acquaintance_duration_years as number or null, recommender_title as string or null, contains_qualifiers as boolean (does it include any hedging or weak praise). No markdown, no code fences, just JSON.`;
-
-const CERTIFICATE_PROMPT = `Extract structured data from this certificate or award document. Return ONLY valid JSON with: institution_name as string or null, certificate_name as string or null, issue_date as string or null, expiry_date as string or null, grade as string or null, is_academic as boolean, is_professional as boolean. No markdown, no code fences, just JSON.`;
+import { extractFromPDFText, type PatternExtractionResult } from './pdf-pattern-extractor';
 
 export interface TranscriptData {
   institution_name: string | null;
   degree_level: 'Undergraduate' | 'Masters' | 'PhD' | null;
   field_of_study: string | null;
   gpa: number | null;
-  gpa_scale: number | null;
+  gpa_scale: string | null;
+  gpa_system: string | null;
   graduation_year: number | null;
   honors: string | null;
 }
@@ -73,21 +65,68 @@ function tryParseJson(text: string): any | null {
   return null;
 }
 
-async function extractWithAI(systemPrompt: string, textContent: string): Promise<any | null> {
-  if (!hasAnyKey()) return null;
+export async function extractRemainingFieldsWithAI(
+  rawText: string,
+  patternResult: PatternExtractionResult
+): Promise<Partial<PatternExtractionResult>> {
+  if (!hasAnyKey()) return {};
+
+  const missingFields: string[] = [];
+  if (!patternResult.institution_name || patternResult.confidence.institution_name < 0.7) {
+    missingFields.push('institution_name: the full official name of the educational institution');
+  }
+  if (!patternResult.gpa || patternResult.confidence.gpa < 0.7) {
+    missingFields.push('gpa: the overall grade point average or final grade as a number');
+    missingFields.push('gpa_scale: the scale used such as 4.0 or 5.0 or 100 or First Class');
+    missingFields.push('gpa_system: the grading system such as us4, ngcgpa, pct_100, british');
+  }
+  if (!patternResult.field_of_study || patternResult.confidence.field_of_study < 0.7) {
+    missingFields.push('field_of_study: the academic programme or major subject studied');
+  }
+  if (!patternResult.graduation_year || patternResult.confidence.graduation_year < 0.7) {
+    missingFields.push('graduation_year: the year the degree was awarded or expected');
+  }
+  if (!patternResult.degree_level || patternResult.confidence.degree_level < 0.7) {
+    missingFields.push('degree_level: Bachelors, Masters, PhD, or Diploma');
+  }
+
+  if (missingFields.length === 0) return {};
+
+  const keys = missingFields.map(f => f.split(':')[0]);
+  const prompt = `Extract only these specific fields from the academic transcript text below.
+Return a JSON object with only these keys: ${keys.join(', ')}.
+Return null for any field you cannot find with certainty. Never guess.
+
+Fields needed:
+${missingFields.join('\n')}
+
+Transcript text (first 2000 characters):
+${rawText.substring(0, 2000)}
+
+Return only valid JSON. No explanation.`;
+
   try {
-    const result = await generateContent({
-      systemInstruction: systemPrompt,
-      prompt: `DOCUMENT TEXT:\n\n${textContent.substring(0, 15000)}\n\n---\n\nExtract the requested information as JSON from the document above.`,
+    const response = await generateContent({
+      systemInstruction: 'You are a document data extractor. Return only the requested JSON fields. Never hallucinate values.',
+      prompt,
       temperature: 0.1,
-      maxOutputTokens: 2048,
+      maxOutputTokens: 1024,
     });
-    if (result?.text) {
-      return tryParseJson(result.text);
+
+    if (!response?.text) return {};
+    const parsed = tryParseJson(response.text);
+    if (!parsed) return {};
+
+    const result: Partial<PatternExtractionResult> = {};
+    for (const key of keys) {
+      const typedKey = key as keyof PatternExtractionResult;
+      if (parsed[key] !== undefined && parsed[key] !== null) {
+        (result as any)[typedKey] = parsed[key];
+      }
     }
-    return null;
+    return result;
   } catch {
-    return null;
+    return {};
   }
 }
 
@@ -99,7 +138,6 @@ export async function analyzeDocument(
   mimetype: string = 'application/octet-stream',
   filename: string = 'document'
 ): Promise<{ result: TranscriptData | CVData | EssaySampleData | ReferenceLetterData | CertificateData | null; analyzed: boolean; extraction?: ExtractionMetadata }> {
-  const isBasic = userPlan === 'explorer';
   const normalizedType = docType.toLowerCase();
 
   const extractionResult = await extractTextFromBuffer(fileBuffer, mimetype, filename);
@@ -110,29 +148,50 @@ export async function analyzeDocument(
     warning: extractionResult.warning,
   };
 
-  if (normalizedType.includes('transcript')) {
-    const result = await extractWithAI(TRANSCRIPT_PROMPT, textContent);
-    return { result: result as TranscriptData | null, analyzed: !!result, extraction: extractionMeta };
+  if (textContent.trim().length < 50) {
+    return { result: null, analyzed: false, extraction: { ...extractionMeta, warning: extractionResult.warning || 'Insufficient text extracted' } };
   }
 
-  if (normalizedType.includes('personal statement') || normalizedType.includes('motivation') || normalizedType.includes('statement of purpose') || normalizedType.includes('essay')) {
-    const result = await extractWithAI(ESSAY_PROMPT, textContent);
-    return { result: result as EssaySampleData | null, analyzed: !!result, extraction: extractionMeta };
+  if (normalizedType.includes('transcript')) {
+    const patternResult = extractFromPDFText(textContent, docType);
+    const merged = { ...patternResult };
+
+    if (patternResult.extraction_method !== 'pattern') {
+      const aiFields = await extractRemainingFieldsWithAI(textContent, patternResult);
+      Object.assign(merged, aiFields);
+      merged.extraction_method = patternResult.extraction_method === 'ai' ? 'ai' : 'hybrid';
+    }
+
+    return {
+      result: {
+        institution_name: merged.institution_name,
+        degree_level: merged.degree_level as 'Undergraduate' | 'Masters' | 'PhD' | null,
+        field_of_study: merged.field_of_study,
+        gpa: merged.gpa,
+        gpa_scale: merged.gpa_scale,
+        gpa_system: merged.gpa_system,
+        graduation_year: merged.graduation_year,
+        honors: null,
+      } as TranscriptData,
+      analyzed: true,
+      extraction: { ...extractionMeta, method: merged.extraction_method },
+    };
   }
 
   if (normalizedType.includes('cv') || normalizedType.includes('resume')) {
-    const result = await extractWithAI(CV_PROMPT, textContent);
-    return { result: result as CVData | null, analyzed: !!result, extraction: extractionMeta };
-  }
-
-  if (normalizedType.includes('reference letter') || normalizedType.includes('recommendation')) {
-    const result = await extractWithAI(REFERENCE_LETTER_PROMPT, textContent);
-    return { result: result as ReferenceLetterData | null, analyzed: !!result, extraction: extractionMeta };
-  }
-
-  if (normalizedType.includes('certificate') || normalizedType.includes('award') || normalizedType.includes('diploma')) {
-    const result = await extractWithAI(CERTIFICATE_PROMPT, textContent);
-    return { result: result as CertificateData | null, analyzed: !!result, extraction: extractionMeta };
+    const patternResult = extractFromPDFText(textContent, docType);
+    return {
+      result: {
+        work_experience_years: patternResult.work_experience_years,
+        primary_field: null,
+        skills: patternResult.skills,
+        leadership_roles: [],
+        publications_count: null,
+        languages: [],
+      } as CVData,
+      analyzed: true,
+      extraction: { ...extractionMeta, method: 'pattern' },
+    };
   }
 
   return { result: null, analyzed: false, extraction: extractionMeta };
@@ -167,7 +226,7 @@ export function buildProfileEnrichment(
     enrichment.doc_extraction_method = extraction.method;
   }
 
-  if (result && (normalizedType.includes('transcript'))) {
+  if (result && normalizedType.includes('transcript')) {
     const t = result as TranscriptData;
     enrichment.doc_gpa_normalised_extracted = t.gpa;
     enrichment.doc_institution_extracted = t.institution_name;

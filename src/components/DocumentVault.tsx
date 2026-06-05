@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { DocumentVaultItem } from '../types';
+import { DocumentVaultItem, ExtractionConfirmationData } from '../types';
 import ConfirmationDialog from './ConfirmationDialog';
 import { downloadDocument } from '../lib/supabase-queries';
+import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
 
 interface DocumentVaultProps {
@@ -12,6 +13,7 @@ interface DocumentVaultProps {
   onReanalyzeDocument?: (doc: DocumentVaultItem) => Promise<void>;
   onNavigateToTab: (tab: string) => void;
   onRefreshDocuments: () => void;
+  userEmail?: string;
 }
 
 export default function DocumentVault({
@@ -21,7 +23,8 @@ export default function DocumentVault({
   onRemoveDoc,
   onReanalyzeDocument,
   onNavigateToTab,
-  onRefreshDocuments
+  onRefreshDocuments,
+  userEmail
 }: DocumentVaultProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [docType, setDocType] = useState('Academic Transcript');
@@ -32,16 +35,23 @@ export default function DocumentVault({
   const [aiExtractionData, setAiExtractionData] = useState<any>(null);
   const [aiExtracting, setAiExtracting] = useState<string | null>(null);
   const [refreshSpin, setRefreshSpin] = useState(false);
+  const [confirmDoc, setConfirmDoc] = useState<DocumentVaultItem | null>(null);
+  const [confirmData, setConfirmData] = useState<ExtractionConfirmationData | null>(null);
+  const [savingConfirm, setSavingConfirm] = useState(false);
+  const [manualEntryDoc, setManualEntryDoc] = useState<DocumentVaultItem | null>(null);
+  const [manualForm, setManualForm] = useState<ExtractionConfirmationData>({
+    institution_name: null, degree_level: null, field_of_study: null,
+    gpa: null, gpa_scale: null, gpa_system: null,
+    graduation_year: null, work_experience_years: null, skills: [],
+  });
 
   const docTypes = [
     "CV / Resume", "Academic Transcript", "Motivation Letter", "Statement of Purpose",
     "Reference Letter", "Passport / ID", "Financial Evidence", "Admission Letter", "Other"
   ];
 
-  // Derive limitations based on payment plans allocation matrix
   const userPlan = (user?.plan || 'explorer').toLowerCase();
   const limit = userPlan === 'plus' ? 50 : userPlan === 'pro' || userPlan === 'institutional' ? 9999 : 15;
-
   const currentCount = documents.length;
   const isFull = currentCount >= limit;
 
@@ -75,7 +85,6 @@ export default function DocumentVault({
     try {
       await onUploadDocument(selectedFile, docType);
       setSelectedFile(null);
-      // Auto-refresh after 2s to pick up AI extraction results
       setTimeout(() => onRefreshDocuments(), 2000);
     } catch (err: any) {
       setErrorMsg(err?.message || 'Upload failed');
@@ -91,9 +100,137 @@ export default function DocumentVault({
     return 'article';
   };
 
+  const getExtractionBadge = (doc: DocumentVaultItem) => {
+    const method = doc.extraction_method;
+    if (!method || doc.analysis_status !== 'completed') return null;
+
+    const badges: Record<string, { label: string; cls: string; tip: string }> = {
+      pattern: { label: 'P', cls: 'bg-green-100 text-green-700 border-green-200', tip: 'Extracted by pattern matching — no AI used' },
+      ai: { label: 'AI', cls: 'bg-purple-100 text-purple-700 border-purple-200', tip: 'Extracted by DeepSeek AI' },
+      hybrid: { label: 'H', cls: 'bg-amber-100 text-amber-700 border-amber-200', tip: 'Hybrid — pattern matching with AI fallback' },
+    };
+
+    const b = badges[method] || badges.hybrid;
+    return (
+      <span title={b.tip} className={`inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full border ${b.cls}`}>
+        {b.label}
+      </span>
+    );
+  };
+
+  const parseExtraction = (doc: DocumentVaultItem): ExtractionConfirmationData | null => {
+    if (!doc.ai_extraction_result) return null;
+    try {
+      const parsed = typeof doc.ai_extraction_result === 'string'
+        ? JSON.parse(doc.ai_extraction_result)
+        : doc.ai_extraction_result;
+      return {
+        institution_name: parsed.institution_name ?? parsed.data?.institution_name ?? null,
+        degree_level: parsed.degree_level ?? parsed.data?.degree_level ?? null,
+        field_of_study: parsed.field_of_study ?? parsed.data?.field_of_study ?? null,
+        gpa: parsed.gpa ?? parsed.data?.gpa ?? null,
+        gpa_scale: parsed.gpa_scale ?? parsed.data?.gpa_scale ?? null,
+        gpa_system: parsed.gpa_system ?? parsed.data?.gpa_system ?? null,
+        graduation_year: parsed.graduation_year ?? parsed.data?.graduation_year ?? null,
+        work_experience_years: parsed.work_experience_years ?? parsed.data?.work_experience_years ?? null,
+        skills: parsed.skills ?? parsed.data?.skills ?? [],
+      };
+    } catch { return null; }
+  };
+
+  const openConfirmation = (doc: DocumentVaultItem) => {
+    const data = parseExtraction(doc);
+    if (data) {
+      setConfirmDoc(doc);
+      setConfirmData(data);
+    }
+  };
+
+  const handleSaveConfirmation = async () => {
+    if (!confirmDoc || !confirmData) return;
+    setSavingConfirm(true);
+    try {
+      const { error } = await supabase
+        .from('documents')
+        .update({ user_confirmed: true })
+        .eq('id', confirmDoc.id);
+      if (error) throw error;
+
+      if (userEmail) {
+        const profileUpdate: Record<string, any> = {};
+        if (confirmData.gpa) profileUpdate.gpa = confirmData.gpa;
+        if (confirmData.institution_name) profileUpdate.institution = confirmData.institution_name;
+        if (confirmData.field_of_study) profileUpdate.field_of_study = confirmData.field_of_study;
+        if (confirmData.degree_level) profileUpdate.degree_level = confirmData.degree_level;
+        if (confirmData.graduation_year) profileUpdate.graduation_year = confirmData.graduation_year;
+        if (confirmData.work_experience_years) profileUpdate.work_experience_years = confirmData.work_experience_years;
+        profileUpdate.doc_gpa_user_confirmed = confirmData.gpa;
+
+        if (Object.keys(profileUpdate).length > 0) {
+          await supabase.from('profiles').update(profileUpdate).eq('email', userEmail);
+        }
+      }
+
+      toast.success('Details confirmed and saved to your profile!');
+      setConfirmDoc(null);
+      setConfirmData(null);
+      onRefreshDocuments();
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to save confirmation');
+    } finally {
+      setSavingConfirm(false);
+    }
+  };
+
+  const handleManualSave = async () => {
+    if (!manualEntryDoc) return;
+    setSavingConfirm(true);
+    try {
+      const { error } = await supabase
+        .from('documents')
+        .update({
+          ai_extraction_result: manualForm,
+          analysis_status: 'completed',
+          extraction_method: 'manual',
+          user_confirmed: true,
+        })
+        .eq('id', manualEntryDoc.id);
+      if (error) throw error;
+
+      if (userEmail) {
+        const profileUpdate: Record<string, any> = {};
+        if (manualForm.gpa) profileUpdate.gpa = manualForm.gpa;
+        if (manualForm.institution_name) profileUpdate.institution = manualForm.institution_name;
+        if (manualForm.field_of_study) profileUpdate.field_of_study = manualForm.field_of_study;
+        if (manualForm.degree_level) profileUpdate.degree_level = manualForm.degree_level;
+        if (manualForm.work_experience_years) profileUpdate.work_experience_years = manualForm.work_experience_years;
+        profileUpdate.doc_gpa_user_confirmed = manualForm.gpa;
+
+        if (Object.keys(profileUpdate).length > 0) {
+          await supabase.from('profiles').update(profileUpdate).eq('email', userEmail);
+        }
+      }
+
+      toast.success('Details saved to your profile!');
+      setManualEntryDoc(null);
+      onRefreshDocuments();
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to save');
+    } finally {
+      setSavingConfirm(false);
+    }
+  };
+
+  const confidenceIcon = (val: any, conf?: number) => {
+    if (conf === undefined) return null;
+    if (conf >= 0.85) return <span title="High confidence" className="text-green-600 text-xs">&#10003;</span>;
+    if (conf >= 0.7) return <span title="Medium confidence — verify" className="text-amber-500 text-xs">&#9679;</span>;
+    return <span title="Low confidence — please verify" className="text-red-500 text-xs">&#9671;</span>;
+  };
+
   return (
     <div className="space-y-6 animate-sweep">
-      
+
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -112,7 +249,6 @@ export default function DocumentVault({
           <span className={`material-symbols-outlined text-sm ${refreshSpin ? 'animate-spin' : ''}`}>refresh</span>
         </button>
 
-        {/* Limit Tracker */}
         <div className="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/60 w-full md:w-72 shadow-sm shrink-0">
           <div className="flex justify-between items-center mb-2 text-xs">
             <span className="font-semibold text-on-surface-variant">Storage Slots</span>
@@ -121,16 +257,16 @@ export default function DocumentVault({
             </span>
           </div>
           <div className="w-full bg-surface-container-high rounded-full h-1.5 mb-2 overflow-hidden">
-            <div 
-              className={`h-full bg-primary rounded-full transition-all`} 
+            <div
+              className={`h-full bg-primary rounded-full transition-all`}
               style={{ width: `${Math.min(100, (currentCount / limit) * 100)}%` }}
             ></div>
           </div>
           <div className="flex justify-between items-center text-[10px] font-bold text-secondary mt-1 px-1">
             <span>Tier: {userPlan.toUpperCase()}</span>
             {userPlan === 'explorer' && (
-              <button 
-                onClick={() => onNavigateToTab('billing')} 
+              <button
+                onClick={() => onNavigateToTab('billing')}
                 className="text-amber-500 hover:underline flex items-center gap-0.5 cursor-pointer"
               >
                 Upgrade <span className="material-symbols-outlined text-[10px]">arrow_forward</span>
@@ -154,7 +290,7 @@ export default function DocumentVault({
         </div>
         <h3 className="font-display text-lg font-bold text-on-surface mb-2">Load Credentials</h3>
         <p className="text-xs text-on-surface-variant mb-6 max-w-sm">Connect a virtual transcript, personal CV, or scanned ID to matching checklists.</p>
-        
+
         <form onSubmit={handleUpload} className="w-full max-w-lg flex flex-col md:flex-row gap-3 items-center justify-center">
           <label className="w-full md:flex-1 cursor-pointer">
             <span className={`block p-2.5 bg-surface border border-outline-variant/60 rounded-lg text-xs ${selectedFile ? 'text-on-surface font-bold' : 'text-outline'}`}>
@@ -167,8 +303,8 @@ export default function DocumentVault({
               className="hidden"
             />
           </label>
-          
-          <select 
+
+          <select
             value={docType}
             onChange={(e) => setDocType(e.target.value)}
             className="w-full md:w-auto p-2.5 bg-surface border border-outline-variant/60 rounded-lg text-xs text-on-surface focus:outline-none focus:border-primary cursor-pointer"
@@ -178,7 +314,7 @@ export default function DocumentVault({
             ))}
           </select>
 
-          <button 
+          <button
             type="submit"
             disabled={uploading}
             className="w-full md:w-auto bg-primary text-on-primary font-bold text-xs py-2.5 px-6 rounded-lg hover:bg-primary-container transition-colors shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap flex items-center gap-2"
@@ -196,7 +332,7 @@ export default function DocumentVault({
       {/* Vault Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {documents.map((doc) => (
-          <div 
+          <div
             key={doc.id}
             className="bg-surface-container-lowest border border-outline-variant/40 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow relative group"
           >
@@ -206,7 +342,7 @@ export default function DocumentVault({
                   {getDocIcon(doc.type)}
                 </span>
               </div>
-              
+
               <div className="flex items-center gap-1">
                 {doc.file_path && (
                   <button
@@ -230,7 +366,7 @@ export default function DocumentVault({
                     <span className="material-symbols-outlined text-[18px]">download</span>
                   </button>
                 )}
-                <button 
+                <button
                   onClick={() => setDocToDelete(doc.id)}
                   className="text-on-surface-variant hover:text-status-urgent transition-colors p-1 rounded-full hover:bg-surface-container-high cursor-pointer"
                 >
@@ -240,20 +376,23 @@ export default function DocumentVault({
             </div>
 
             <h4 className="font-bold text-sm text-on-surface mb-2 truncate" title={doc.name}>{doc.name}</h4>
-            
+
             <div className="flex items-center gap-2 mt-1 mb-2 flex-wrap">
-              {doc.ai_extraction_result ? (
-                <button
-                  onClick={() => {
-                    setAiExtractionDoc(doc);
-                    try { setAiExtractionData(JSON.parse(doc.ai_extraction_result)); } catch { setAiExtractionData(null); }
-                  }}
-                  className="inline-flex items-center gap-1 bg-primary-fixed/20 text-primary text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-primary/20 cursor-pointer hover:bg-primary-fixed/40 transition-colors"
-                >
-                  <span className="material-symbols-outlined text-[10px]">auto_awesome</span>
-                  AI Extracted
-                </button>
-              ) : null}
+              {doc.ai_extraction_result && doc.analysis_status === 'completed' && (
+                <>
+                  {getExtractionBadge(doc)}
+                  <button
+                    onClick={() => openConfirmation(doc)}
+                    className="inline-flex items-center gap-1 bg-primary-fixed/20 text-primary text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-primary/20 cursor-pointer hover:bg-primary-fixed/40 transition-colors"
+                    title={doc.user_confirmed ? 'Confirmed by you' : 'Review & confirm extracted data'}
+                  >
+                    <span className="material-symbols-outlined text-[10px]">
+                      {doc.user_confirmed ? 'verified' : 'rate_review'}
+                    </span>
+                    {doc.user_confirmed ? 'Confirmed' : 'Review'}
+                  </button>
+                </>
+              )}
               {doc.analysis_status === 'failed' && (
                 <span className="inline-flex items-center gap-1 bg-status-urgent/10 text-status-urgent text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-status-urgent/20">
                   <span className="material-symbols-outlined text-[10px]">error_outline</span>
@@ -272,7 +411,23 @@ export default function DocumentVault({
                   Analyzed
                 </span>
               )}
-              {(doc.analysis_status === 'failed' || doc.analysis_status === 'pending') && onReanalyzeDocument && (
+              {(doc.analysis_status === 'unreadable' || doc.analysis_status === 'failed' || doc.analysis_status === null) && (
+                <button
+                  onClick={() => {
+                    setManualForm({
+                      institution_name: null, degree_level: null, field_of_study: null,
+                      gpa: null, gpa_scale: null, gpa_system: null,
+                      graduation_year: null, work_experience_years: null, skills: [],
+                    });
+                    setManualEntryDoc(doc);
+                  }}
+                  className="inline-flex items-center gap-1 bg-surface-container-high text-on-surface-variant text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-outline-variant/40 cursor-pointer hover:bg-primary-fixed/20 hover:text-primary transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[10px]">edit_note</span>
+                  Enter manually
+                </button>
+              )}
+              {(doc.analysis_status === 'pending') && onReanalyzeDocument && (
                 <button
                   onClick={async () => {
                     setAiExtracting(doc.id);
@@ -316,31 +471,127 @@ export default function DocumentVault({
         )}
       </div>
 
-      {/* AI Extraction Modal */}
-      {aiExtractionDoc && aiExtractionData && (
+      {/* Confirmation Modal */}
+      {confirmDoc && confirmData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-sweep">
           <div className="bg-surface-container-lowest rounded-2xl shadow-2xl border border-outline-variant w-full max-w-lg max-h-[80vh] flex flex-col">
             <div className="p-5 border-b border-outline-variant/30 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary text-lg">auto_awesome</span>
-                <h3 className="font-display font-black text-primary text-sm">AI Document Analysis</h3>
+                <span className="material-symbols-outlined text-primary text-lg">verified</span>
+                <h3 className="font-display font-black text-primary text-sm">Confirm Extracted Details</h3>
               </div>
-              <button onClick={() => setAiExtractionDoc(null)} className="p-1 hover:bg-surface-container rounded cursor-pointer">
+              <button onClick={() => { setConfirmDoc(null); setConfirmData(null); }} className="p-1 hover:bg-surface-container rounded cursor-pointer">
                 <span className="material-symbols-outlined text-lg">close</span>
               </button>
             </div>
             <div className="flex-1 overflow-y-auto p-5 space-y-3">
-              <p className="text-xs font-bold text-on-surface-variant">{aiExtractionDoc.name}</p>
-              <div className="bg-surface rounded-xl p-4 space-y-2 text-xs">
-                {Object.entries(aiExtractionData).map(([key, val]) => (
-                  <div key={key} className="flex justify-between">
-                    <span className="text-on-surface-variant font-medium capitalize">{key.replace(/_/g, ' ')}</span>
-                    <span className="text-on-surface font-bold text-right max-w-[60%]">
-                      {Array.isArray(val) ? val.join(', ') || '—' : String(val ?? '—')}
-                    </span>
-                  </div>
-                ))}
+              <p className="text-xs text-on-surface-variant mb-2">Review the extracted information below. Fields with high confidence are pre-verified. Correct any errors before saving.</p>
+              <div className="bg-surface rounded-xl p-4 space-y-3 text-xs">
+                {Object.entries(confirmData).map(([key, val]) => {
+                  if (key === 'skills') return null;
+                  const displayVal = val ?? '—';
+                  return (
+                    <div key={key} className="flex items-center justify-between gap-2">
+                      <span className="text-on-surface-variant font-medium capitalize min-w-[120px]">{key.replace(/_/g, ' ')}</span>
+                      <div className="flex items-center gap-2 flex-1 justify-end">
+                        <input
+                          type={key === 'gpa' || key === 'work_experience_years' || key === 'graduation_year' ? 'number' : 'text'}
+                          value={displayVal === '—' ? '' : String(displayVal)}
+                          onChange={(e) => {
+                            const newData = { ...confirmData };
+                            const numVal = e.target.value ? (key === 'gpa' || key === 'work_experience_years' ? parseFloat(e.target.value) : key === 'graduation_year' ? parseInt(e.target.value) : e.target.value) : null;
+                            (newData as any)[key] = numVal;
+                            setConfirmData(newData);
+                          }}
+                          className="w-full max-w-[160px] p-1.5 bg-surface-container-high border border-outline-variant/40 rounded text-right text-on-surface font-bold"
+                          step={key === 'gpa' ? '0.01' : '1'}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
+              <p className="text-[10px] text-on-surface-variant italic">Your confirmed details will update your profile and improve scholarship matching.</p>
+            </div>
+            <div className="p-4 border-t border-outline-variant/30 flex justify-end gap-3">
+              <button
+                onClick={() => { setConfirmDoc(null); setConfirmData(null); }}
+                className="text-xs font-bold text-on-surface-variant px-4 py-2 rounded-lg hover:bg-surface-container cursor-pointer"
+              >
+                Skip for Now
+              </button>
+              <button
+                onClick={handleSaveConfirmation}
+                disabled={savingConfirm}
+                className="bg-primary text-on-primary font-bold text-xs px-6 py-2 rounded-lg hover:bg-primary-container transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-2"
+              >
+                {savingConfirm ? (
+                  <><span className="inline-block w-3 h-3 border-2 border-on-primary border-t-transparent rounded-full animate-spin"></span>Saving...</>
+                ) : 'Save Confirmed Details'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Manual Entry Modal for unreadable/failed docs */}
+      {manualEntryDoc && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-sweep">
+          <div className="bg-surface-container-lowest rounded-2xl shadow-2xl border border-outline-variant w-full max-w-lg max-h-[80vh] flex flex-col">
+            <div className="p-5 border-b border-outline-variant/30 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary text-lg">edit_note</span>
+                <h3 className="font-display font-black text-primary text-sm">Enter Details Manually</h3>
+              </div>
+              <button onClick={() => setManualEntryDoc(null)} className="p-1 hover:bg-surface-container rounded cursor-pointer">
+                <span className="material-symbols-outlined text-lg">close</span>
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-5 space-y-3">
+              <p className="text-xs text-status-urgent mb-2 flex items-center gap-1">
+                <span className="material-symbols-outlined text-sm">info</span>
+                We could not read the text from your document. This may happen if the file is password-protected or uses an unusual format. Your document is safely stored. Please fill in your details below.
+              </p>
+              <div className="bg-surface rounded-xl p-4 space-y-3 text-xs">
+                {Object.entries(manualForm).map(([key, val]) => {
+                  if (key === 'skills') return null;
+                  const displayVal = val ?? '';
+                  return (
+                    <div key={key} className="flex items-center justify-between gap-2">
+                      <span className="text-on-surface-variant font-medium capitalize min-w-[120px]">{key.replace(/_/g, ' ')}</span>
+                      <input
+                        type={key === 'gpa' || key === 'work_experience_years' ? 'number' : key === 'graduation_year' ? 'number' : 'text'}
+                        value={String(displayVal)}
+                        onChange={(e) => {
+                          const newForm = { ...manualForm };
+                          const raw = e.target.value;
+                          (newForm as any)[key] = key === 'gpa' ? (raw ? parseFloat(raw) : null) : key === 'work_experience_years' ? (raw ? parseFloat(raw) : null) : key === 'graduation_year' ? (raw ? parseInt(raw) : null) : raw || null;
+                          setManualForm(newForm);
+                        }}
+                        className="w-full max-w-[160px] p-1.5 bg-surface-container-high border border-outline-variant/40 rounded text-right text-on-surface font-bold"
+                        step={key === 'gpa' ? '0.01' : '1'}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="p-4 border-t border-outline-variant/30 flex justify-end gap-3">
+              <button
+                onClick={() => setManualEntryDoc(null)}
+                className="text-xs font-bold text-on-surface-variant px-4 py-2 rounded-lg hover:bg-surface-container cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleManualSave}
+                disabled={savingConfirm}
+                className="bg-primary text-on-primary font-bold text-xs px-6 py-2 rounded-lg hover:bg-primary-container transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-2"
+              >
+                {savingConfirm ? (
+                  <><span className="inline-block w-3 h-3 border-2 border-on-primary border-t-transparent rounded-full animate-spin"></span>Saving...</>
+                ) : 'Save Details'}
+              </button>
             </div>
           </div>
         </div>

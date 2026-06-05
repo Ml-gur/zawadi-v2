@@ -110,6 +110,20 @@ export interface DocumentVaultItem {
   analysis_status?: string | null;
   last_analyzed_at?: string | null;
   analysis_error?: string | null;
+  extraction_method?: string | null;
+  user_confirmed?: boolean | null;
+}
+
+export interface ExtractionConfirmationData {
+  institution_name: string | null;
+  degree_level: string | null;
+  field_of_study: string | null;
+  gpa: number | null;
+  gpa_scale: string | null;
+  gpa_system: string | null;
+  graduation_year: number | null;
+  work_experience_years: number | null;
+  skills: string[];
 }
 
 export interface EssayStudioGeneration {
