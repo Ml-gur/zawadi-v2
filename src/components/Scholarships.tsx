@@ -226,6 +226,13 @@ export default function Scholarships({
 
     return matchesSearch && matchesCountry && matchesDegree && matchesStatus && matchesFunding && matchesType && matchesAccess && matchesUrgency && matchesSchool && matchesDocsReady && matchesAmountVal && matchesRating && matchesNoIelts && matchesHostRegion && matchesSponsorType;
   }).sort((a, b) => {
+    // Push expired scholarships to the bottom regardless of match score
+    const now = Date.now();
+    const aExpired = a.deadline ? Math.ceil((new Date(a.deadline).getTime() - now) / 86400000) < 0 : false;
+    const bExpired = b.deadline ? Math.ceil((new Date(b.deadline).getTime() - now) / 86400000) < 0 : false;
+    if (aExpired && !bExpired) return 1;
+    if (!aExpired && bExpired) return -1;
+    // Within same expired/active group, sort by match score descending
     const scoreA = a.match ? a.match.score : 0;
     const scoreB = b.match ? b.match.score : 0;
     return scoreB - scoreA;

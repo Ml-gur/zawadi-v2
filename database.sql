@@ -181,6 +181,9 @@ CREATE TABLE IF NOT EXISTS scholarships (
   host_country                JSONB DEFAULT '[]'::jsonb,
   iso2                        TEXT,
 
+  -- Auto-unpublish tracking
+  auto_unpublished            BOOLEAN DEFAULT false,
+
   created_at               TIMESTAMPTZ DEFAULT NOW(),
   updated_at               TIMESTAMPTZ DEFAULT NOW()
 );
@@ -557,6 +560,22 @@ DROP TRIGGER IF EXISTS trg_scholarships_urgency ON scholarships;
 CREATE TRIGGER trg_scholarships_urgency
   BEFORE INSERT OR UPDATE OF deadline ON scholarships
   FOR EACH ROW EXECUTE FUNCTION compute_urgency();
+
+-- 4c. Auto-unpublish expired scholarships
+CREATE OR REPLACE FUNCTION auto_unpublish_expired_scholarships()
+RETURNS INTEGER LANGUAGE plpgsql SECURITY DEFINER AS $$
+DECLARE
+  affected_count INTEGER;
+BEGIN
+  UPDATE scholarships
+  SET published = false, auto_unpublished = true, updated_at = NOW()
+  WHERE deadline < CURRENT_DATE
+    AND published = true
+    AND auto_unpublished = false;
+  GET DIAGNOSTICS affected_count = ROW_COUNT;
+  RETURN affected_count;
+END;
+$$;
 
 -- ============================================================
 -- 5. ROW LEVEL SECURITY

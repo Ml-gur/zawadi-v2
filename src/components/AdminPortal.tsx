@@ -165,9 +165,32 @@ export default function AdminPortal({
     }
   };
 
+  // Auto-unpublished scholarships state
+  const [autoUnpublishedCount, setAutoUnpublishedCount] = useState(0);
+  const [autoUnpublishedList, setAutoUnpublishedList] = useState<Scholarship[]>([]);
+  const [showAutoUnpublishedBanner, setShowAutoUnpublishedBanner] = useState(true);
+
+  const fetchAutoUnpublished = async () => {
+    try {
+      const { data } = await supabase
+        .from('scholarships')
+        .select('*')
+        .eq('auto_unpublished', true)
+        .order('updated_at', { ascending: false });
+      if (data) {
+        setAutoUnpublishedList(data as Scholarship[]);
+        setAutoUnpublishedCount(data.length);
+      }
+    } catch {}
+  };
+
+  useEffect(() => {
+    fetchAutoUnpublished();
+  }, [scholarships]);
+
   // Search & Filter for Active Scholarships table
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterPublishStatus, setFilterPublishStatus] = useState<'all' | 'published' | 'draft' | 'archived'>('all');
+  const [filterPublishStatus, setFilterPublishStatus] = useState<'all' | 'published' | 'draft' | 'archived' | 'auto-unpublished'>('all');
   const [filterRegion, setFilterRegion] = useState<string>('all');
 
   // Multi-select row tracking state for bulk delete
@@ -726,8 +749,10 @@ export default function AdminPortal({
     
   const matchesPublish = 
     filterPublishStatus === 'all' ? true :
-    filterPublishStatus === 'published' ? s.published && !s.archived :
-    filterPublishStatus === 'archived' ? s.archived : !s.published && !s.archived;
+    filterPublishStatus === 'published' ? s.published && !s.archived && !s.auto_unpublished :
+    filterPublishStatus === 'archived' ? s.archived :
+    filterPublishStatus === 'auto-unpublished' ? s.auto_unpublished === true :
+    !s.published && !s.archived && !s.auto_unpublished;
 
     const matchesRegion =
       filterRegion === 'all' ? true :
@@ -1140,6 +1165,7 @@ export default function AdminPortal({
           <option value="published">Published</option>
           <option value="draft">Drafts</option>
           <option value="archived">Archived</option>
+          <option value="auto-unpublished">Auto-Unpublished</option>
         </select>
 
                   <select
@@ -1170,6 +1196,40 @@ export default function AdminPortal({
                 </div>
 
               </div>
+
+              {/* Auto-unpublished banner */}
+              {showAutoUnpublishedBanner && autoUnpublishedCount > 0 && (
+                <div className="bg-status-warning/10 border border-status-warning/30 rounded-2xl p-4 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-status-warning/20 flex items-center justify-center shrink-0">
+                      <AlertTriangle className="w-5 h-5 text-status-warning" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-black text-status-warning">
+                        {autoUnpublishedCount} scholarship{autoUnpublishedCount > 1 ? 's' : ''} auto-unpublished
+                      </p>
+                      <p className="text-[10px] text-on-surface-variant font-medium">
+                        {autoUnpublishedCount > 1 ? 'These scholarships had passed deadlines and were automatically taken down from the live site.' : 'This scholarship had a passed deadline and was automatically taken down from the live site.'}
+                        You can republish or delete them below.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => { setFilterPublishStatus('auto-unpublished'); }}
+                      className="px-3 py-1.5 bg-status-warning text-white rounded-lg text-[10px] font-bold hover:opacity-90 transition-opacity cursor-pointer"
+                    >
+                      Review
+                    </button>
+                    <button
+                      onClick={() => setShowAutoUnpublishedBanner(false)}
+                      className="p-1.5 hover:bg-surface-container rounded-lg cursor-pointer"
+                    >
+                      <X className="w-4 h-4 text-on-surface-variant" />
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Main scholarships table grid */}
               <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-3xl shadow-xs overflow-hidden">
@@ -1225,11 +1285,13 @@ export default function AdminPortal({
             <span className={`px-2 py-0.5 rounded-full text-[9px] font-black border ${
               s.archived
                 ? 'bg-surface-variant/40 border-outline-variant/30 text-on-surface-variant'
-                : s.published
-                  ? 'bg-status-success/15 border-status-success/25 text-status-success'
-                  : 'bg-status-warning/15 border-status-warning/25 text-status-warning'
+                : s.auto_unpublished
+                  ? 'bg-status-urgent/15 border-status-urgent/25 text-status-urgent'
+                  : s.published
+                    ? 'bg-status-success/15 border-status-success/25 text-status-success'
+                    : 'bg-status-warning/15 border-status-warning/25 text-status-warning'
             }`}>
-              {s.archived ? 'Archived' : s.published ? 'Published' : 'Draft'}
+              {s.archived ? 'Archived' : s.auto_unpublished ? 'Auto-Unpublished' : s.published ? 'Published' : 'Draft'}
             </span>
                           </td>
                           <td className="px-6 py-4">
@@ -1248,20 +1310,51 @@ export default function AdminPortal({
                               >
                                 <Edit className="w-3.5 h-3.5" />
                               </button>
-                              <button 
-                                onClick={() => onTogglePublish(s.id)}
-                                className={`p-1.5 border hover:-translate-y-0.5 transition-all rounded-lg cursor-pointer ${s.published ? 'bg-status-warning/10 border-status-warning/30 text-status-warning hover:bg-status-warning/20' : 'bg-status-success/10 border-status-success/30 text-status-success hover:bg-status-success/20'}`}
-                                title={s.published ? 'Unpublish from live site' : 'Publish to live site'}
-                              >
-                                {s.published ? <EyeOff className="w-3.5 h-3.5" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
-                              </button>
-                              <button 
-                                onClick={() => setScholarshipToDelete(s.id)}
-                                className="p-1.5 bg-surface-container border border-outline-variant/40 hover:bg-error-container hover:text-error hover:-translate-y-0.5 transition-all text-on-surface-variant rounded-lg cursor-pointer"
-                                title="Remove listing permanently"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
+                              {s.auto_unpublished ? (
+                                <>
+                                  <button 
+                                    onClick={async () => {
+                                      await supabase.from('scholarships').update({ published: true, auto_unpublished: false }).eq('id', s.id);
+                                      fetchAutoUnpublished();
+                                      toast.success('Scholarship republished successfully');
+                                    }}
+                                    className="p-1.5 bg-status-success/10 border border-status-success/30 text-status-success hover:bg-status-success/20 hover:-translate-y-0.5 transition-all rounded-lg cursor-pointer"
+                                    title="Republish to live site"
+                                  >
+                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button 
+                                    onClick={async () => {
+                                      if (window.confirm(`Permanently delete "${s.name}"? This cannot be undone.`)) {
+                                        await supabase.from('scholarships').delete().eq('id', s.id);
+                                        fetchAutoUnpublished();
+                                        toast.success('Scholarship permanently deleted');
+                                      }
+                                    }}
+                                    className="p-1.5 bg-error/10 border border-error/30 text-error hover:bg-error/20 hover:-translate-y-0.5 transition-all rounded-lg cursor-pointer"
+                                    title="Permanently delete"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </>
+                              ) : (
+                                <>
+                                  <button 
+                                    onClick={() => onTogglePublish(s.id)}
+                                    className={`p-1.5 border hover:-translate-y-0.5 transition-all rounded-lg cursor-pointer ${s.published ? 'bg-status-warning/10 border-status-warning/30 text-status-warning hover:bg-status-warning/20' : 'bg-status-success/10 border-status-success/30 text-status-success hover:bg-status-success/20'}`}
+                                    title={s.published ? 'Unpublish from live site' : 'Publish to live site'}
+                                  >
+                                    {s.published ? <EyeOff className="w-3.5 h-3.5" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
+                                  </button>
+                                  <button 
+                                    onClick={() => setScholarshipToDelete(s.id)}
+                                    className="p-1.5 bg-surface-container border border-outline-variant/40 hover:bg-error-container hover:text-error hover:-translate-y-0.5 transition-all text-on-surface-variant rounded-lg cursor-pointer"
+                                    title="Remove listing permanently"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </>
+                              )}
                             </div>
                           </td>
                         </tr>

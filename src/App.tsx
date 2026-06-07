@@ -15,6 +15,7 @@ import {
   deleteScholarship,
   bulkDeleteScholarships,
   togglePublishScholarship,
+  autoUnpublishExpiredScholarships,
   getProfileByEmail,
   upsertProfile,
   getUserApplications,
@@ -222,6 +223,9 @@ export default function App() {
   const fetchScholarships = async (_email?: string) => {
     try {
       const isAdmin = user?.role === 'super_admin' || user?.role === 'content_manager';
+      if (isAdmin) {
+        try { await autoUnpublishExpiredScholarships(); } catch {}
+      }
       let result;
       if (isAdmin) {
         result = await getAllScholarships();

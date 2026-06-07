@@ -55,6 +55,7 @@ export interface Scholarship {
   quality_score?: number;
   scam_flags?: string[];
   archived?: boolean;
+  auto_unpublished?: boolean;
 }
 
 export interface UserProfile {

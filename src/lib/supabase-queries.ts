@@ -39,6 +39,32 @@ export async function togglePublishScholarship(id: string, currentPublished: boo
     .single();
 }
 
+// ─── Auto-Unpublish ───
+export async function autoUnpublishExpiredScholarships() {
+  return supabase.rpc('auto_unpublish_expired_scholarships');
+}
+
+export async function getAutoUnpublishedScholarships() {
+  return supabase
+    .from('scholarships')
+    .select('*')
+    .eq('auto_unpublished', true)
+    .order('updated_at', { ascending: false });
+}
+
+export async function republishScholarship(id: string) {
+  return supabase
+    .from('scholarships')
+    .update({ published: true, auto_unpublished: false })
+    .eq('id', id)
+    .select()
+    .single();
+}
+
+export async function permanentlyDeleteScholarship(id: string) {
+  return supabase.from('scholarships').delete().eq('id', id);
+}
+
 // ─── Profiles ───
 export async function getProfile(userId: string) {
   return supabase.from('profiles').select('*').eq('id', userId).single();
