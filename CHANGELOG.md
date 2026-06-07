@@ -1,5 +1,34 @@
 # Changelog
 
+## 2026-06-07 — Auto-Unpublish Expired Scholarships
+
+### Added: Auto-Unpublish Expired Scholarships
+
+When a scholarship's deadline passes, it is now automatically unpublished from the live site and flagged for admin review.
+
+**`database.sql`**:
+- Added `auto_unpublished BOOLEAN DEFAULT false` column to `scholarships` table
+- Created `auto_unpublish_expired_scholarships()` function — sets `published=false, auto_unpublished=true` for all scholarships where `deadline < CURRENT_DATE`
+
+**`src/App.tsx`**:
+- Calls `autoUnpublishExpiredScholarships()` RPC on admin login/refresh — expired scholarships auto-unpublish silently
+
+**`src/components/AdminPortal.tsx`**:
+- **Notification banner**: Shows count of auto-unpublished scholarships with a "Review" button
+- **Filter**: "Auto-Unpublished" option added to status filter dropdown
+- **Status badges**: Auto-unpublished scholarships labeled in red
+- **Republish button**: One-click republish (`published=true, auto_unpublished=false`)
+- **Permanent delete**: Hard-delete auto-unpublished scholarships
+
+**`src/components/Scholarships.tsx`**:
+- Sort updated to push expired scholarships (deadline past) to the bottom regardless of match score
+
+**`src/lib/supabase-queries.ts`**:
+- Added `autoUnpublishExpiredScholarships()`, `getAutoUnpublishedScholarships()`, `republishScholarship()`, `permanentlyDeleteScholarship()`
+
+**`src/types.ts`**:
+- Added `auto_unpublished?: boolean` to `Scholarship` interface
+
 ## 2026-06-05 — Document Analysis Overhaul & AGENT.md
 
 ### Improved: Document Analysis Edge Function (Complete Rewrite)
