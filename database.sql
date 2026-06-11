@@ -184,6 +184,9 @@ CREATE TABLE IF NOT EXISTS scholarships (
   -- Auto-unpublish tracking
   auto_unpublished            BOOLEAN DEFAULT false,
 
+  -- Categorization for admin organization
+  category                    TEXT,
+
   created_at               TIMESTAMPTZ DEFAULT NOW(),
   updated_at               TIMESTAMPTZ DEFAULT NOW()
 );
@@ -477,6 +480,10 @@ DO $$ BEGIN
     -- Old bot_ingestions table exists with old schema; drop it so CREATE TABLE IF NOT EXISTS creates the new one
     DROP TABLE IF EXISTS bot_ingestions CASCADE;
   END IF;
+  -- Add category column if missing
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='scholarships' AND column_name='category') THEN
+    ALTER TABLE scholarships ADD COLUMN category TEXT;
+  END IF;
 END $$;
 
 -- ============================================================
@@ -502,6 +509,7 @@ CREATE INDEX IF NOT EXISTS idx_scholarships_deadline          ON scholarships(de
 CREATE INDEX IF NOT EXISTS idx_scholarships_funding_type      ON scholarships(funding_type);
 CREATE INDEX IF NOT EXISTS idx_scholarships_host_region       ON scholarships(host_region);
 CREATE INDEX IF NOT EXISTS idx_scholarships_urgency           ON scholarships(urgency);
+CREATE INDEX IF NOT EXISTS idx_scholarships_category          ON scholarships(category);
 CREATE INDEX IF NOT EXISTS idx_scholarships_host_country      ON scholarships USING gin(host_country);
 
 -- Bot ingestions indexes
@@ -1086,9 +1094,12 @@ INSERT INTO profiles (
   NULL
 ) ON CONFLICT (email) DO NOTHING;
 
--- Set password_hash for admin user (password: admin123)
--- Generated with: bcrypt.hash('admin123', 10)
-UPDATE profiles SET password_hash = '$2b$10$ULXcTPspShRTNaR9gAf1cuNeo2BVnhWoyDnMBNO9F48n6RAgyO42a' WHERE email = 'admin@zawadi.app';
+-- NOTE: Admin auth credentials are NOT hardcoded here.
+-- To create the admin Supabase Auth user and set their password, run:
+--   node scripts/setup-admin.mjs
+-- This reads ADMIN_EMAIL and ADMIN_PASSWORD from your .env file and creates
+-- the auth user via the setup-admin Edge Function (deployed separately).
+-- Alternatively, run the setup SQL via the setup-admin edge function endpoint.
 
 -- ============================================================
 -- 7. SEED DATA — APPLICATIONS

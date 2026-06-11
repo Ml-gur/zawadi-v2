@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 
+const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'admin@zawadi.app';
+
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -11,6 +13,13 @@ export default function AdminLoginPage() {
     e.preventDefault();
     setError('');
     setLoading(true);
+
+    if (email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+      setError('Access denied. Admin privileges required.');
+      setLoading(false);
+      return;
+    }
+
     try {
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email,

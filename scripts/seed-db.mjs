@@ -10,6 +10,24 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.resolve(__dirname, '../src/data');
 const DB_PATH = path.resolve(DATA_DIR, 'db.json');
 
+// Load .env vars if available
+try {
+  const { readFileSync } = await import('fs');
+  const envPath = path.resolve(__dirname, '..', '.env');
+  if (existsSync(envPath)) {
+    const text = readFileSync(envPath, 'utf-8');
+    for (const line of text.split('\n')) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const eqIdx = trimmed.indexOf('=');
+      if (eqIdx === -1) continue;
+      process.env[trimmed.slice(0, eqIdx).trim()] = trimmed.slice(eqIdx + 1).trim();
+    }
+  }
+} catch {}
+
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@zawadi.app';
+
 async function main() {
   const hash = await bcrypt.hash('password123', 12);
 
@@ -90,7 +108,7 @@ async function main() {
         password_hash: hash
       },
       {
-        email: 'admin@zawadi.app', name: 'Samuel Karanja', country: 'Kenya',
+        email: ADMIN_EMAIL, name: 'Samuel Karanja', country: 'Kenya',
         degree_level: 'PhD', field_of_study: 'Data Science', destination_openness: 'anywhere',
         native_language: 'English',
         plan: 'mentor', role: 'super_admin', status: 'active',

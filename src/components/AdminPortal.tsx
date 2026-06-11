@@ -11,6 +11,18 @@ import {
 } from '../config/matching-config';
 import { getCountryByISO2 } from '../lib/country-graph';
 
+// Scholarship categories for admin organization
+const SCHOLARSHIP_CATEGORIES = [
+  'Full Scholarships Open Now',
+  'Full Scholarships Opening Soon',
+  'Partial Scholarships & Tuition Waivers',
+  'Intra-African Scholarships',
+  'No IELTS Scholarships',
+  'Undergraduate Scholarships',
+  'Corporate & Foundation Scholarships',
+  'Francophone & Lusophone Scholarships',
+] as const;
+
 // Icons
 import { 
   Plus, Edit, Trash2, Eye, EyeOff, ClipboardCheck, CheckCircle2, CheckCircle, 
@@ -192,6 +204,7 @@ export default function AdminPortal({
   const [searchQuery, setSearchQuery] = useState('');
   const [filterPublishStatus, setFilterPublishStatus] = useState<'all' | 'published' | 'draft' | 'archived' | 'auto-unpublished'>('all');
   const [filterRegion, setFilterRegion] = useState<string>('all');
+  const [filterCategory, setFilterCategory] = useState<string>('all');
 
   // Multi-select row tracking state for bulk delete
   const [selectedScholIds, setSelectedScholIds] = useState<string[]>([]);
@@ -246,6 +259,7 @@ export default function AdminPortal({
   const [formAgeMasters, setFormAgeMasters] = useState<number | null>(null);
   const [formAgePhd, setFormAgePhd] = useState<number | null>(null);
   const [formSponsorType, setFormSponsorType] = useState('');
+  const [formCategory, setFormCategory] = useState('');
   const [formPipelineSource, setFormPipelineSource] = useState('');
   const [formQualityScore, setFormQualityScore] = useState<number | null>(null);
   const [formScamFlags, setFormScamFlags] = useState<string[]>([]);
@@ -400,7 +414,7 @@ export default function AdminPortal({
   // Reset checkboxes on filter / sub-tab navigation changes
   useEffect(() => {
     setSelectedScholIds([]);
-  }, [activeAdminSubTab, searchQuery, filterPublishStatus, filterRegion]);
+  }, [activeAdminSubTab, searchQuery, filterPublishStatus, filterRegion, filterCategory]);
 
   // Set default Verified Date
   useEffect(() => {
@@ -482,6 +496,7 @@ export default function AdminPortal({
     setFormAgeMasters(s.age_limit_masters ?? null);
     setFormAgePhd(s.age_limit_phd ?? null);
     setFormSponsorType(s.sponsor_type || '');
+    setFormCategory(s.category || '');
     setFormPipelineSource(s.pipeline_source || '');
     setFormQualityScore(s.quality_score ?? null);
     setFormScamFlags(s.scam_flags || []);
@@ -517,6 +532,8 @@ export default function AdminPortal({
     setFormHostCountry([]);
     setFormIso2('');
     setIso2Error('');
+
+    setFormCategory('');
 
     setShowForm(true);
   };
@@ -637,6 +654,7 @@ export default function AdminPortal({
       age_limit_masters: formAgeMasters,
       age_limit_phd: formAgePhd,
       sponsor_type: formSponsorType || undefined,
+      category: formCategory || undefined,
       pipeline_source: formPipelineSource || undefined,
       quality_score: formQualityScore,
       scam_flags: formScamFlags,
@@ -760,7 +778,11 @@ export default function AdminPortal({
       filterRegion.length === 2 ? (s.country || []).includes(filterRegion.toUpperCase()) :
       AFRICAN_COUNTRIES.filter(c => c.region === filterRegion).some(c => (s.country || []).includes(c.name));
 
-    return matchesSearch && matchesPublish && matchesRegion;
+    const matchesCategory =
+      filterCategory === 'all' ? true :
+      (s.category || '') === filterCategory;
+
+    return matchesSearch && matchesPublish && matchesRegion && matchesCategory;
   });
 
   // Pages header helper based on active selection
@@ -1185,6 +1207,17 @@ export default function AdminPortal({
                     </optgroup>
                   </select>
 
+                  <select
+                    value={filterCategory}
+                    onChange={(e) => setFilterCategory(e.target.value)}
+                    className="py-2 px-3 bg-surface border border-outline-variant text-[11px] font-bold rounded-xl outline-none max-w-[200px]"
+                  >
+                    <option value="all">All Categories</option>
+                    {SCHOLARSHIP_CATEGORIES.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+
                   <button 
                     onClick={handleExportCSV}
                     className="bg-primary hover:bg-primary-container text-white py-2 px-4 rounded-xl text-xs font-bold cursor-pointer flex items-center gap-1.5 shadow-xs border border-primary-fixed/10"
@@ -1247,6 +1280,7 @@ export default function AdminPortal({
                         </th>
                         <th className="px-6 py-3.5">Scholarship Title</th>
                         <th className="px-6 py-3.5">Provider Sponsor</th>
+                        <th className="px-6 py-3.5">Category</th>
                         <th className="px-6 py-3.5">Eligible Countries</th>
                         <th className="px-6 py-3.5">Closing Deadline</th>
                         <th className="px-6 py-3.5">Status</th>
@@ -1271,6 +1305,11 @@ export default function AdminPortal({
                             </span>
                           </td>
                           <td className="px-6 py-4 font-semibold text-primary">{s.provider}</td>
+                          <td className="px-6 py-4">
+                            <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-primary-fixed/20 text-primary border border-primary-fixed/30 max-w-[130px] block truncate">
+                              {s.category || '—'}
+                            </span>
+                          </td>
                           <td className="px-6 py-4 font-mono text-[10.5px]">
                           {(Array.isArray(s.country) && s.country[0] === 'ALL') ? (
                             <span className="bg-secondary-container/10 border border-secondary/20 text-secondary font-black px-1.5 py-0.5 rounded text-[8px]">PAN-AFRICAN ALL</span>
@@ -1836,6 +1875,19 @@ export default function AdminPortal({
                     ))}
                   </select>
                 </div>
+                <div>
+                  <label className="text-[9px] font-bold text-on-surface-variant uppercase">Category</label>
+                  <select value={formCategory} onChange={e => setFormCategory(e.target.value)}
+                          className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl p-2.5 text-xs outline-none focus:border-primary">
+                    <option value="">Uncategorized</option>
+                    {SCHOLARSHIP_CATEGORIES.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-[9px] font-bold text-on-surface-variant uppercase">Fields of Study</label>
                   <div className="flex flex-wrap gap-1 mt-1">

@@ -6,6 +6,8 @@ import crypto from 'crypto';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DB_PATH = join(__dirname, '..', 'src', 'data', 'db.json');
 
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@zawadi.app';
+
 // ─── Helper to build scholarship object ─────────────────────
 function schol({
   name, provider, host, host_institution, description, eligibility, amount, deadline,
@@ -40,7 +42,7 @@ function schol({
     published: published ?? false,
     archived: urgency === 'Archived' || false,
     verified_at: verified_at || null,
-    verified_by: verified_at ? 'admin@zawadi.app' : null,
+    verified_by: verified_at ? ADMIN_EMAIL : null,
     sponsor_type: sponsor_type || null,
     pipeline_source: pipeline_source || 'manual_import',
     quality_score: quality_score ?? null,

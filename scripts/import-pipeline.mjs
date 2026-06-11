@@ -10,6 +10,8 @@ config({ path: join(__dirname, '..', '.env') });
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const JWT_SECRET = process.env.JWT_SECRET;
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@zawadi.app';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   console.error('Supabase credentials required in .env');
@@ -114,7 +116,7 @@ async function importViaServer() {
     const loginRes = await fetch('http://localhost:3000/api/admin/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'admin@zawadi.app', password: 'admin123' }),
+      body: JSON.stringify({ email: ADMIN_EMAIL, password: ADMIN_PASSWORD || 'admin123' }),
     });
     
     let token;
@@ -124,7 +126,7 @@ async function importViaServer() {
     } else if (JWT_SECRET) {
       // Generate a dev JWT token directly
       const jwt = (await import('jsonwebtoken')).default;
-      token = jwt.sign({ email: 'admin@zawadi.app', role: 'super_admin', admin: true }, JWT_SECRET, { expiresIn: '1h' });
+      token = jwt.sign({ email: ADMIN_EMAIL, role: 'super_admin', admin: true }, JWT_SECRET, { expiresIn: '1h' });
     }
 
     if (!token) {

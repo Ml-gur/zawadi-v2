@@ -52,6 +52,7 @@ export interface Scholarship {
   urgency?: string;
   sponsor_type?: string;
   pipeline_source?: string;
+  category?: string;
   quality_score?: number;
   scam_flags?: string[];
   archived?: boolean;
