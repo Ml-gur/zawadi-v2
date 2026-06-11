@@ -1,9 +1,4 @@
 {
-  "version": 2,
-  "builds": [
-    { "src": "package.json", "use": "@vercel/static-build", "config": { "distDir": "dist" } },
-    { "src": "api/**/*.js", "use": "@vercel/node" }
-  ],
   "routes": [
     { "src": "/sitemap.xml", "dest": "/api/sitemap" },
     { "src": "/robots.txt", "dest": "/api/robots" },
