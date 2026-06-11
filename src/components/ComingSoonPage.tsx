@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Sparkles, Loader2, CheckCircle, Layers, Brain, FileText, Users } from 'lucide-react';
-import toast from 'react-hot-toast';
 
 const features = [
   {
@@ -28,31 +27,45 @@ const features = [
 
 export default function ComingSoonPage() {
   const [email, setEmail] = useState('');
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'duplicate' | 'error'>('idle');
+  const [message, setMessage] = useState('');
+
+  const validate = (value: string): string | null => {
+    if (!value.trim()) return 'Please enter your email';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) return 'Please enter a valid email address';
+    return null;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) {
-      toast.error('Please enter a valid email address');
+    const error = validate(email);
+    if (error) {
+      setStatus('error');
+      setMessage(error);
       return;
     }
-    setLoading(true);
+    setStatus('loading');
+    setMessage('');
     try {
-      const waitlist = JSON.parse(localStorage.getItem('essay_waitlist') || '[]');
-      if (waitlist.includes(email.trim())) {
-        toast.success('You\'re already on the list!');
-        setSubmitted(true);
-        return;
+      const res = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
+      });
+      const data = await res.json();
+      if (res.status === 200) {
+        setStatus('success');
+        setMessage('You are on the list! We will be in touch.');
+      } else if (res.status === 409) {
+        setStatus('duplicate');
+        setMessage('This email is already on the waitlist');
+      } else {
+        setStatus('error');
+        setMessage('Something went wrong, please try again');
       }
-      waitlist.push(email.trim());
-      localStorage.setItem('essay_waitlist', JSON.stringify(waitlist));
-      setSubmitted(true);
-      toast.success('You\'ll be notified when AI Essay Studio launches!');
     } catch {
-      toast.error('Something went wrong. Please try again.');
-    } finally {
-      setLoading(false);
+      setStatus('error');
+      setMessage('Something went wrong, please try again');
     }
   };
 
@@ -63,7 +76,6 @@ export default function ComingSoonPage() {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-2xl"
       >
-        {/* Header */}
         <div className="text-center mb-10">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center mx-auto mb-6 ring-1 ring-primary/10">
             <Sparkles className="w-8 h-8 text-primary" />
@@ -87,7 +99,6 @@ export default function ComingSoonPage() {
           </p>
         </div>
 
-        {/* Feature Cards */}
         <div className="grid gap-4 mb-10">
           {features.map((f, i) => (
             <motion.div
@@ -108,35 +119,52 @@ export default function ComingSoonPage() {
           ))}
         </div>
 
-        {/* CTA */}
         <div className="text-center">
-          <p className="text-xs text-on-surface-variant/50 mb-4">
-            Join the waitlist to be the first to know when we launch.
-          </p>
-
-          {submitted ? (
-            <div className="flex items-center justify-center gap-2 text-sm font-semibold text-success">
+          {status === 'success' ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="flex items-center justify-center gap-2 text-sm font-semibold text-success"
+            >
               <CheckCircle className="w-5 h-5" />
-              You're on the waitlist. We'll notify you when it's live!
-            </div>
+              {message}
+            </motion.div>
           ) : (
-            <form onSubmit={handleSubmit} className="flex items-center gap-2 max-w-sm mx-auto">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                className="flex-1 p-3 bg-surface border border-outline-variant/60 rounded-xl text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
-                required
-              />
-              <button
-                type="submit"
-                disabled={loading}
-                className="px-5 py-3 bg-primary text-on-primary font-bold rounded-xl hover:bg-primary-container transition-colors cursor-pointer disabled:opacity-50 whitespace-nowrap text-sm"
-              >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Notify Me When It\'s Live'}
-              </button>
-            </form>
+            <>
+              <p className="text-xs text-on-surface-variant/50 mb-4">
+                Join the waitlist to be the first to know when we launch.
+              </p>
+
+              <form onSubmit={handleSubmit} className="flex items-center gap-2 max-w-sm mx-auto">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); if (status === 'error' || status === 'duplicate') { setStatus('idle'); setMessage(''); } }}
+                  placeholder="Enter your email"
+                  disabled={status === 'loading'}
+                  className="flex-1 p-3 bg-surface border border-outline-variant/60 rounded-xl text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors disabled:opacity-50"
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={status === 'loading'}
+                  className="px-5 py-3 bg-primary text-on-primary font-bold rounded-xl hover:bg-primary-container transition-colors cursor-pointer disabled:opacity-50 whitespace-nowrap text-sm"
+                >
+                  {status === 'loading' ? (
+                    <span className="flex items-center gap-1.5">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Joining...
+                    </span>
+                  ) : (
+                    'Notify Me When It\'s Live'
+                  )}
+                </button>
+              </form>
+
+              {(status === 'error' || status === 'duplicate') && message && (
+                <p className="mt-3 text-xs font-medium text-error">{message}</p>
+              )}
+            </>
           )}
         </div>
       </motion.div>
