@@ -54,6 +54,7 @@ const AuthScreen = lazy(() => import('./components/AuthScreen'));
 const Dashboard = lazy(() => import('./components/Dashboard'));
 const Scholarships = lazy(() => import('./components/Scholarships'));
 const DocumentVault = lazy(() => import('./components/DocumentVault'));
+const ComingSoonPage = lazy(() => import('./components/ComingSoonPage'));
 const EssayGenerator = lazy(() => import('./components/EssayGenerator'));
 const AdminPortal = lazy(() => import('./components/AdminPortal'));
 const StudentProfile = lazy(() => import('./components/StudentProfile'));
@@ -812,7 +813,7 @@ export default function App() {
                   } />
                   <Route path="/scholarships" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading scholarships...</div>}><Scholarships user={user} scholarships={scholarships} applications={applications} documents={documents} onTrackScholarship={handleTrackScholarship} onUploadMetadata={handleUploadDocument} onNavigateToTab={handleNavigateToTab} /></Suspense>} />
                   <Route path="/vault" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading vault...</div>}><DocumentVault user={user} documents={documents} onUploadDocument={handleUploadDocument} onRemoveDoc={handleRemoveDoc} onReanalyzeDocument={handleReanalyzeDocument} onNavigateToTab={handleNavigateToTab} onRefreshDocuments={handleRefreshDocuments} userEmail={user?.email} /></Suspense>} />
-                  <Route path="/essays" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading essay studio...</div>}><EssayGenerator user={user} essays={essays} scholarships={scholarships} documents={documents} onGenerateEssay={handleGenerateEssay} onNavigateToTab={handleNavigateToTab} onUploadMetadata={handleUploadDocument} /></Suspense>} />
+                  <Route path="/essays" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading...</div>}><ComingSoonPage /></Suspense>} />
                   <Route path="/profile" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading profile...</div>}><StudentProfile user={user} onUpdateProfile={handleUpdateProfile} onNavigateToTab={handleNavigateToTab} /></Suspense>} />
                   <Route path="/applications" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading tracker...</div>}><ApplicationTracker scholarships={scholarships} applications={applications} onTrackScholarship={handleTrackScholarship} onRemoveTrack={handleRemoveTrack} onNavigateToTab={handleNavigateToTab} /></Suspense>} />
                   <Route path="/billing" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading plans...</div>}><SubscriptionPlans user={user} onPlanUpdated={(u) => { setUser(u); fetchUserData(u.email); }} onNavigateToTab={handleNavigateToTab} /></Suspense>} />
