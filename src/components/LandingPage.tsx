@@ -153,8 +153,8 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
   return (
     <div className="bg-background text-on-background min-h-screen">
       <SEO
-        title="Scholarships for African Students — Zawadi"
-        description="Find scholarships you qualify for across all 54 African countries. Deterministic matching, No-IELTS filter, AI essay help. Free for students."
+        title="Zawadi — Find Scholarships You're 100% Eligible For | African Students"
+        description="Zawadi uses AI to match African students with scholarships they actually qualify for. Stop wasting time on applications you won't win. Find your match in minutes."
         path="/"
         schema={organizationSchema}
       />

@@ -1,16 +1,17 @@
 <svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
   <rect width="1200" height="630" fill="#001736"/>
-  <rect x="0" y="0" width="1200" height="630" fill="url(#grad)" opacity="0.3"/>
+  <rect x="0" y="0" width="1200" height="630" fill="url(#grad)" opacity="0.25"/>
   <defs>
     <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0%" stop-color="#006c49"/>
       <stop offset="100%" stop-color="#6cf8bb"/>
     </linearGradient>
   </defs>
-  <circle cx="200" cy="120" r="300" fill="#006c49" opacity="0.08"/>
-  <circle cx="1000" cy="500" r="250" fill="#6cf8bb" opacity="0.06"/>
-  <text x="600" y="260" font-family="system-ui, sans-serif" font-size="86" font-weight="900" fill="white" text-anchor="middle" letter-spacing="-2">Zawadi</text>
-  <text x="600" y="320" font-family="system-ui, sans-serif" font-size="28" fill="#6cf8bb" text-anchor="middle" letter-spacing="4" font-weight="300">SCHOLARSHIPS FOR AFRICAN STUDENTS</text>
-  <rect x="520" y="350" width="160" height="3" rx="1.5" fill="#006c49"/>
-  <text x="600" y="420" font-family="system-ui, sans-serif" font-size="18" fill="rgba(255,255,255,0.5)" text-anchor="middle">techsari.online</text>
+  <circle cx="200" cy="120" r="300" fill="#006c49" opacity="0.1"/>
+  <circle cx="1000" cy="500" r="250" fill="#6cf8bb" opacity="0.08"/>
+  <text x="600" y="240" font-family="system-ui, sans-serif" font-size="86" font-weight="900" fill="white" text-anchor="middle" letter-spacing="-2">Zawadi</text>
+  <text x="600" y="300" font-family="system-ui, sans-serif" font-size="26" fill="#6cf8bb" text-anchor="middle" letter-spacing="3" font-weight="400">AI SCHOLARSHIP MATCHING</text>
+  <rect x="500" y="325" width="200" height="3" rx="1.5" fill="#006c49"/>
+  <text x="600" y="380" font-family="system-ui, sans-serif" font-size="20" fill="rgba(255,255,255,0.7)" text-anchor="middle">For African Students</text>
+  <text x="600" y="430" font-family="system-ui, sans-serif" font-size="16" fill="rgba(255,255,255,0.4)" text-anchor="middle">Find scholarships you're 100% eligible for</text>
 </svg>
