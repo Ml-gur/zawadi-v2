@@ -15,7 +15,7 @@ const organizationSchema = {
   "name": "Techsari Zawadi",
   "url": "https://www.techsari.online/",
   "logo": "https://www.techsari.online/icon.svg",
-  "description": "AI-powered scholarship matching platform built for African students. Deterministic eligibility matching, No-IELTS filter, AI essay generation.",
+  "description": "Stop searching global spam. Discover daily-updated, 100% eligible African scholarships, track deadlines, and write winning essays with our AI Studio.",
   "foundingDate": "2025",
   "contactPoint": {
     "@type": "ContactPoint",
@@ -154,7 +154,7 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
     <div className="bg-background text-on-background min-h-screen">
       <SEO
         title="Zawadi — Find Scholarships You're 100% Eligible For | African Students"
-        description="Zawadi uses AI to match African students with scholarships they actually qualify for. Stop wasting time on applications you won't win. Find your match in minutes."
+        description="Stop searching global spam. Discover daily-updated, 100% eligible African scholarships, track deadlines, and write winning essays with our AI Studio."
         path="/"
         schema={organizationSchema}
       />
