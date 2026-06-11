@@ -54,6 +54,8 @@ const AuthScreen = lazy(() => import('./components/AuthScreen'));
 const Dashboard = lazy(() => import('./components/Dashboard'));
 const Scholarships = lazy(() => import('./components/Scholarships'));
 const DocumentVault = lazy(() => import('./components/DocumentVault'));
+const PublicScholarshipList = lazy(() => import('./pages/public/PublicScholarshipList'));
+const PublicScholarshipDetail = lazy(() => import('./pages/public/PublicScholarshipDetail'));
 const ComingSoonPage = lazy(() => import('./components/ComingSoonPage'));
 const EssayGenerator = lazy(() => import('./components/EssayGenerator'));
 const AdminPortal = lazy(() => import('./components/AdminPortal'));
@@ -605,6 +607,7 @@ export default function App() {
         });
         alert("Listing saved successfully!");
         fetchUserData(user.email);
+        fetch('https://www.google.com/ping?sitemap=https://techsari.online/sitemap.xml').catch(() => {});
       }
     } catch (err) { console.error("CRUD insertion error", err); }
   };
@@ -624,6 +627,7 @@ export default function App() {
       const { data, error } = await togglePublishScholarship(id, current?.published ?? false);
       if (!error && data) {
         setScholarships(prev => prev.map(s => s.id === id ? { ...s, published: data.published ?? !s.published } : s));
+        fetch('https://www.google.com/ping?sitemap=https://techsari.online/sitemap.xml').catch(() => {});
       } else {
         alert(`Toggle failed: ${error?.message || 'Server error'}`);
       }
@@ -783,6 +787,8 @@ export default function App() {
               <Route path="/privacy" element={<PrivacyPolicy onBack={() => navigate('/')} />} />
               <Route path="/terms" element={<TermsOfService onBack={() => navigate('/')} />} />
               <Route path="/how-it-works" element={<HowItWorksPage onBack={() => navigate('/')} onGetStarted={() => { setShowAuth(true); navigate('/'); }} />} />
+              <Route path="/scholarships/browse" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading scholarships...</div>}><PublicScholarshipList /></Suspense>} />
+              <Route path="/scholarships/browse/:slug" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading...</div>}><PublicScholarshipDetail user={user} /></Suspense>} />
               <Route path="/contact" element={<ContactPage onBack={() => navigate('/')} />} />
               <Route path="/forgot-password" element={<Suspense fallback={null}><ForgotPassword onBack={() => { setShowAuth(false); navigate('/'); }} /></Suspense>} />
               <Route path="/reset-password" element={<Suspense fallback={null}><ResetPassword onBackToLogin={() => { setShowAuth(false); navigate('/'); }} /></Suspense>} />

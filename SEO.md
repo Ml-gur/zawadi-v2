@@ -201,4 +201,4 @@ The app also uses `react-helmet-async` via `SEO.tsx` component for per-page meta
 | Dynamic sitemap | ✅ `api/sitemap.js` — generates XML from DB, cached 12h |
 | robots.txt | ✅ `api/robots.js` — `/scholarships/browse` allowed, `/scholarships` disallowed |
 | Vercel rewrites | ✅ `/sitemap.xml` + `/robots.txt` routes added before SPA catch-all |
-| Google ping | Pending — need to find admin scholarship update routes |
+| Google ping | ✅ Added to `handleAddScholarship` + `handleTogglePublish` in `App.tsx` |
