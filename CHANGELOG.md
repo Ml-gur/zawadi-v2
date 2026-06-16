@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-06-16 — Vercel Web Analytics Integration
+
+### Added: @vercel/analytics React Component
+
+**`src/main.tsx`**:
+- Installed `@vercel/analytics` package (npm)
+- Added `<Analytics as VercelAnalytics />` component from `@vercel/analytics/react` alongside existing Google Analytics
+- The Vercel Analytics component automatically tracks page views, visits, and core web vitals for the Vercel dashboard
+
 ## 2026-06-16 — Per-Scholarship Social Sharing: Dynamic OG Tags + Share Buttons
 
 ### Added: Dynamic OG Tags for Scholarship Detail Pages (Edge Middleware)
