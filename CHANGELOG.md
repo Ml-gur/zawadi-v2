@@ -33,6 +33,78 @@
 **`playwright.config.ts`**:
 - Global timeout increased from 30s → 60s to accommodate slower mobile viewport tests against the live site
 
+## 2026-06-16 — Social Sharing Preview Overhaul: WhatsApp OG Tags, Custom Images, SEO Component Enhancement
+
+### Added: Custom OG Images for About and How It Works Pages
+
+**`public/og-about.svg` + `og-about.png`** (new):
+- 1200x630 OG image with "Built for African Students, by People Who Get It" headline
+- Three mission cards: "Our Mission", "What We Do", "Our Promise"
+- Bottom tagline bar with key features
+- URL: techsari.online/about
+
+**`public/og-how-it-works.svg` + `og-how-it-works.png`** (new):
+- 1200x630 OG image with "From Profile to Submission" headline
+- Four numbered step cards: Create Profile → Get Matched → Write with AI → Get Reviewed
+- Bottom tagline bar with key features
+- URL: techsari.online/how-it-works
+
+**`src/components/AboutPage.tsx`**:
+- Added `image="https://techsari.online/og-about.png"` prop to SEO
+
+**`src/components/HowItWorksPage.tsx`**:
+- Added `image="https://techsari.online/og-how-it-works.png"` prop to SEO
+
+**`src/components/ContactPage.tsx`**:
+- Added `ogTitle` and `ogDescription` props for richer WhatsApp preview (was falling back to generic title/description)
+
+### Added: WhatsApp Preview Critical OG Tags (SEO Component)
+
+**`src/components/SEO.tsx`** added 5 new tags:
+- `og:image:width` (1200) / `og:image:height` (630) — WhatsApp requires these dimension hints to properly render image preview; without them WhatsApp may show no image or a bad crop
+- `og:image:alt` — accessibility + some crawlers display alt text
+- `twitter:image:alt` — Twitter/WhatsApp accessibility
+- `twitter:creator` (@techsari) — social attribution (was missing, only `twitter:site` existed)
+
+### Removed: Redundant Twitter Meta Tags from Scholarships Page
+
+**`src/components/Scholarships.tsx`**:
+- Removed 4 redundant `<meta>` children (`twitter:card`, `twitter:title`, `twitter:description`, `twitter:image`) — the SEO component already emits these with consistent text. The child `twitter:description` had slightly different text from `ogDescription`, creating inconsistency across social platforms.
+
+### Changed: OG Image Generation Script
+
+**`scripts/gen-og.mjs`**:
+- Updated from single-file generator to batch-generate all 6 OG PNGs from their SVG sources
+- Generates: `og-image.png`, `og-home.png`, `og-scholarships.png`, `og-faq.png`, `og-about.png`, `og-how-it-works.png`
+- Skips missing SVG files with a warning
+
+### What This Means for WhatsApp Previews
+
+| Page | Before | After |
+|------|--------|-------|
+| `/` (home) | og-home.png, no dimension hints | og-home.png + width/height hints |
+| `/scholarships` | og-scholarships.png, inconsistent twitter:desc | Clean single source of truth |
+| `/faq` | og-faq.png, no dimension hints | + width/height hints |
+| `/about` | Generic og-image.png | **Custom og-about.png** |
+| `/how-it-works` | Generic og-image.png | **Custom og-how-it-works.png** |
+| `/contact` | Generic image, title fallback | Custom ogTitle/ogDescription |
+| `/scholarships/browse/:slug` | Dynamic OG image | Dynamic + width/height hints |
+
+### Per-Page OG Image Map
+
+| Page | OG Image | ogTitle | ogDescription |
+|------|----------|---------|--------------|
+| `/` | `og-home.png` | Custom | Custom |
+| `/scholarships` | `og-scholarships.png` | Custom | Custom |
+| `/about` | `og-about.png` | Custom | Custom |
+| `/how-it-works` | `og-how-it-works.png` | Custom | Custom |
+| `/faq` | `og-faq.png` | Custom | Custom |
+| `/contact` | Default `og-image.png` | Custom | Custom |
+| `/privacy` | Default `og-image.png` | fallback | fallback |
+| `/terms` | Default `og-image.png` | fallback | fallback |
+| `/scholarships/browse` | Default `og-image.png` | fallback | fallback |
+| `/scholarships/browse/:slug` | **Dynamic** `/api/og-scholarship` | fallback | fallback |
+
 ## 2026-06-16 — Bento Grid Refinement: Features + Empathy Sections, Test Stability
 
 ### Changed: Empathy Section — Bento Grid with Featured Card

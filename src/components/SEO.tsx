@@ -33,6 +33,9 @@ export function SEO({ title, description, ogDescription, ogTitle, path, image = 
       <meta property="og:title" content={ogTitle || title} />
       <meta property="og:description" content={ogDesc} />
       <meta property="og:image" content={image} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta property="og:image:alt" content={ogTitle || title} />
       <meta property="og:site_name" content="Zawadi" />
       <meta property="og:locale" content={locale} />
 
@@ -40,7 +43,9 @@ export function SEO({ title, description, ogDescription, ogTitle, path, image = 
       <meta name="twitter:title" content={ogTitle || title} />
       <meta name="twitter:description" content={ogDesc} />
       <meta name="twitter:image" content={image} />
+      <meta name="twitter:image:alt" content={ogTitle || title} />
       <meta name="twitter:site" content={TWITTER_HANDLE} />
+      <meta name="twitter:creator" content={TWITTER_HANDLE} />
 
       {schema && (
         <script type="application/ld+json">{JSON.stringify(schema)}</script>

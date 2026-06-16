@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#001736"/>
+      <stop offset="50%" style="stop-color:#0a2e5a"/>
+      <stop offset="100%" style="stop-color:#1a4a7a"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#6cf8bb"/>
+      <stop offset="100%" style="stop-color:#4ade80"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(255,255,255,0.08)"/>
+      <stop offset="100%" style="stop-color:rgba(255,255,255,0.03)"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)" rx="0"/>
+
+  <!-- Decorative orbs -->
+  <circle cx="600" cy="100" r="350" fill="rgba(108,248,187,0.04)"/>
+  <circle cx="1000" cy="500" r="250" fill="rgba(108,248,187,0.03)"/>
+  <circle cx="200" cy="500" r="200" fill="rgba(108,248,187,0.02)"/>
+
+  <!-- Grid pattern -->
+  <g opacity="0.03">
+    <line x1="0" y1="100" x2="1200" y2="100" stroke="white" stroke-width="0.5"/>
+    <line x1="0" y1="200" x2="1200" y2="200" stroke="white" stroke-width="0.5"/>
+    <line x1="0" y1="500" x2="1200" y2="500" stroke="white" stroke-width="0.5"/>
+    <line x1="300" y1="0" x2="300" y2="630" stroke="white" stroke-width="0.5"/>
+    <line x1="700" y1="0" x2="700" y2="630" stroke="white" stroke-width="0.5"/>
+    <line x1="1000" y1="0" x2="1000" y2="630" stroke="white" stroke-width="0.5"/>
+  </g>
+
+  <!-- Logo -->
+  <g transform="translate(60, 50)">
+    <rect width="48" height="48" rx="12" fill="url(#accent)"/>
+    <text x="24" y="33" font-family="Georgia, serif" font-size="28" font-weight="bold" fill="#001736" text-anchor="middle">Z</text>
+    <text x="60" y="32" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#6cf8bb">Zawadi</text>
+  </g>
+
+  <!-- Headline -->
+  <text x="600" y="180" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="white" text-anchor="middle">
+    From Profile to <tspan fill="#6cf8bb">Submission</tspan>
+  </text>
+  <text x="600" y="230" font-family="Arial, sans-serif" font-size="20" fill="rgba(255,255,255,0.55)" text-anchor="middle">
+    Four simple steps. One platform. Your scholarship journey starts here.
+  </text>
+
+  <!-- Step cards -->
+  <g transform="translate(60, 300)">
+    <rect width="240" height="145" rx="14" fill="url(#cardGrad)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+    <circle cx="30" cy="30" r="16" fill="rgba(108,248,187,0.15)"/>
+    <text x="30" y="36" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#6cf8bb" text-anchor="middle">1</text>
+    <text x="20" y="65" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="white">Create Profile</text>
+    <text x="20" y="88" font-family="Arial, sans-serif" font-size="12" fill="rgba(255,255,255,0.5)">Tell us about yourself.</text>
+    <text x="20" y="106" font-family="Arial, sans-serif" font-size="12" fill="rgba(255,255,255,0.5)">Takes 3 minutes.</text>
+  </g>
+
+  <g transform="translate(340, 300)">
+    <rect width="240" height="145" rx="14" fill="url(#cardGrad)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+    <circle cx="30" cy="30" r="16" fill="rgba(108,248,187,0.15)"/>
+    <text x="30" y="36" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#6cf8bb" text-anchor="middle">2</text>
+    <text x="20" y="65" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="white">Get Matched</text>
+    <text x="20" y="88" font-family="Arial, sans-serif" font-size="12" fill="rgba(255,255,255,0.5)">See only scholarships</text>
+    <text x="20" y="106" font-family="Arial, sans-serif" font-size="12" fill="rgba(255,255,255,0.5)">you're eligible for.</text>
+  </g>
+
+  <g transform="translate(620, 300)">
+    <rect width="240" height="145" rx="14" fill="url(#cardGrad)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+    <circle cx="30" cy="30" r="16" fill="rgba(108,248,187,0.15)"/>
+    <text x="30" y="36" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#6cf8bb" text-anchor="middle">3</text>
+    <text x="20" y="65" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="white">Write with AI</text>
+    <text x="20" y="88" font-family="Arial, sans-serif" font-size="12" fill="rgba(255,255,255,0.5)">Draft essays using AI</text>
+    <text x="20" y="106" font-family="Arial, sans-serif" font-size="12" fill="rgba(255,255,255,0.5)">that learns your voice.</text>
+  </g>
+
+  <g transform="translate(900, 300)">
+    <rect width="240" height="145" rx="14" fill="url(#cardGrad)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+    <circle cx="30" cy="30" r="16" fill="rgba(108,248,187,0.15)"/>
+    <text x="30" y="36" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#6cf8bb" text-anchor="middle">4</text>
+    <text x="20" y="65" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="white">Get Reviewed</text>
+    <text x="20" y="88" font-family="Arial, sans-serif" font-size="12" fill="rgba(255,255,255,0.5)">Submit with confidence</text>
+    <text x="20" y="106" font-family="Arial, sans-serif" font-size="12" fill="rgba(255,255,255,0.5)">after mentor review.</text>
+  </g>
+
+  <!-- Bottom Tagline Bar -->
+  <rect x="0" y="535" width="1200" height="95" fill="rgba(108,248,187,0.04)"/>
+  <line x1="60" y1="535" x2="1140" y2="535" stroke="rgba(108,248,187,0.1)" stroke-width="1"/>
+
+  <circle cx="100" cy="580" r="4" fill="#6cf8bb"/>
+  <text x="115" y="584" font-family="Arial, sans-serif" font-size="14" fill="rgba(255,255,255,0.5)">Free for Students</text>
+
+  <circle cx="430" cy="580" r="4" fill="#6cf8bb"/>
+  <text x="445" y="584" font-family="Arial, sans-serif" font-size="14" fill="rgba(255,255,255,0.5)">No IELTS Required</text>
+
+  <circle cx="760" cy="580" r="4" fill="#6cf8bb"/>
+  <text x="775" y="584" font-family="Arial, sans-serif" font-size="14" fill="rgba(255,255,255,0.5)">2,500+ Scholarships</text>
+
+  <!-- URL -->
+  <text x="920" y="615" font-family="Arial, sans-serif" font-size="12" fill="rgba(255,255,255,0.3)" text-anchor="end">techsari.online/how-it-works</text>
+</svg>

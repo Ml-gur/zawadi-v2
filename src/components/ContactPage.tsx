@@ -63,12 +63,14 @@ export default function ContactPage({ onBack }: { onBack: () => void }) {
 
   return (
     <div className="min-h-screen bg-background text-on-background">
-      <SEO
-        title="Contact Zawadi — Get Help or Partner With Us"
-        description="Contact the Zawadi team for student support, scholarship provider listings, institutional partnerships, or press inquiries."
-        path="/contact"
-        schema={contactSchema}
-      />
+<SEO
+  title="Contact Zawadi — Get Help or Partner With Us"
+  description="Contact the Zawadi team for student support, scholarship provider listings, institutional partnerships, or press inquiries."
+  path="/contact"
+  ogTitle="Contact Zawadi — We're Here to Help"
+  ogDescription="Reach out to the Zawadi team for student support, institutional partnerships, or scholarship provider inquiries. We respond within 24 hours."
+  schema={contactSchema}
+/>
 
       <div className="max-w-[960px] mx-auto px-6 py-16 md:py-24">
         <button onClick={onBack} className="flex items-center gap-1.5 text-xs font-bold text-on-surface-variant hover:text-primary mb-8 cursor-pointer transition-colors">

@@ -202,12 +202,7 @@ export default function Scholarships({
           ogDescription="Verified scholarships open to African students. Every listing is checked for active deadlines and real eligibility. See funding from UK, Germany, USA, Japan, and African universities."
           path="/scholarships"
           image="https://techsari.online/og-scholarships.png"
-        >
-          <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:title" content="Scholarships for African Students — Zawadi" />
-          <meta name="twitter:description" content="Verified scholarships open to African students from all 54 countries. No IELTS required options, full funding, undergraduate and postgraduate." />
-          <meta name="twitter:image" content="https://techsari.online/og-scholarships.png" />
-        </SEO>
+        />
 
         {/* Guest Banner */}
         <div className="bg-[#001736] rounded-2xl p-6 md:p-8 border border-[#002b6b]/60 shadow-sm">
