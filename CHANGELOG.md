@@ -1,5 +1,85 @@
 # Changelog
 
+## 2026-06-16 — Public Scholarships Preview, SEO Overhaul, robots.txt & sitemap
+
+### Fixed: /scholarships Page Error for Logged-Out Users
+
+**Root cause**: The `scholarships` table had no `created_at` or `updated_at` columns, but queries in both `Scholarships.tsx` and `supabase-queries.ts` used `.order('created_at'|'updated_at', ...)`, causing Supabase query failures. Additionally, no RLS policy allowed anonymous reads of published scholarships.
+
+**`src/components/Scholarships.tsx`**:
+- Removed `.order('updated_at', { ascending: false })` from public query (column doesn't exist)
+- Added `publicTotalCount` state and total count query (`.select('id', { count: 'exact', head: true })`)
+- Added `showTrackModal` state for save/track gate
+- Updated SEO title/description/ogDescription/ogTitle per spec with children `<meta>` tags
+- Dark navy guest banner (`#001736`) with green "Create Free Account" and white outline "Log In" buttons
+- "Log in for advanced filters" prompt in public filter bar
+- "Sign up free" CTA in results footer and empty state
+- Save/track auth modal for logged-out users
+
+**`src/lib/supabase-queries.ts`**:
+- Removed `.order('created_at', ...)` from `getPublishedScholarships` (column doesn't exist)
+- Added `.order('id', ...)` as fallback for consistent ordering
+
+**`src/App.tsx`**:
+- Added `/scholarships` and `/scholarships/` prefix to `isPublicPage` list so header/footer render for logged-out visitors on scholarships pages
+
+**`supabase/migrations/011_public_read_scholarships.sql`**:
+- New migration: allows `anon` role to SELECT published scholarships
+
+### Added: Production SEO Meta Tags for Every Public Page
+
+**`src/components/SEO.tsx`**:
+- Added optional `keywords`, `ogTitle`, `locale`, `children` props
+- `og:site_name` changed from `"Techsari Zawadi"` to `"Zawadi"`
+- `children` renders inside `<Helmet>` for extra meta/script tags
+
+**`src/components/LandingPage.tsx`**:
+- Updated SEO with specific title, description, keywords, ogTitle, ogDescription per spec
+- Dual schema: `WebSite` (with SearchAction) + `Organization` (with areaServed)
+
+**`src/components/AboutPage.tsx`**:
+- Updated SEO with specific title/description/ogTitle/ogDescription per spec
+
+**`src/components/FAQPage.tsx`**:
+- Updated SEO with specific title/description/ogTitle/ogDescription per spec
+- FAQPage JSON-LD schema already present
+
+**`src/components/HowItWorksPage.tsx`**:
+- Updated SEO with specific title/description/ogTitle/ogDescription per spec
+
+**`src/components/ContactPage.tsx`**:
+- Updated SEO with specific title/description per spec
+
+**`src/components/Scholarships.tsx`** (public preview):
+- Updated SEO with scholarships-specific tags per spec
+- Dynamic ItemList JSON-LD with `EducationalOccupationalProgram` items
+
+### Added: robots.txt & sitemap.xml
+
+**`public/robots.txt`**:
+- Allows all public pages, disallows protected routes (/dashboard, /admin, etc.)
+- Explicit `Allow` directives for GPTBot, Claude-Web, Googlebot on public pages
+- **Note**: Cloudflare's managed bot rules override this file — disable in Cloudflare dashboard Scrape Shield settings
+
+**`public/sitemap.xml`**:
+- All 8 public page URLs with lastmod, changefreq, priority values per spec
+
+### Added: /scholarships/:slug Redirect Route
+
+**`src/App.tsx`**:
+- Added `ScholarshipRedirect` component — redirects `/scholarships/:slug` to `/scholarships/browse/:slug`
+- Added `<Route path="/scholarships/:slug" element={<ScholarshipRedirect />} />` below the browse routes
+
+### Added: Dynamic OG Images for Homepage & FAQ
+
+**`public/og-home.svg` + `.png`**: Homepage OG image with Zawadi branding, value props, tagline
+**`public/og-faq.svg` + `.png`**: FAQ OG image with decorative "?" element, FAQ cards, stats
+**`api/og-scholarship.js`**: Vercel serverless function for dynamic per-scholarship OG images
+
+**`src/components/LandingPage.tsx`**: Updated OG image to `og-home.png`
+**`src/components/FAQPage.tsx`**: Updated OG image to `og-faq.png`
+**`src/pages/public/PublicScholarshipDetail.tsx`**: Dynamic OG image URL with per-scholarship data
+
 ## 2026-06-07 — Auto-Unpublish Expired Scholarships
 
 ### Added: Auto-Unpublish Expired Scholarships
