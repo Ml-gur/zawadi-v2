@@ -486,6 +486,14 @@ export default function Scholarships({
                 <button onClick={() => setSelectedSchol(null)} className="flex items-center gap-1.5 text-xs font-bold text-on-surface-variant hover:text-primary transition-colors cursor-pointer">
                   <ArrowLeft className="w-3.5 h-3.5" /> Back
                 </button>
+                {selectedSchol.slug && (
+                  <ShareButton
+                    url={`/scholarships/browse/${selectedSchol.slug}`}
+                    title={selectedSchol.name}
+                    iconOnly
+                    size="sm"
+                  />
+                )}
               </div>
 
               {/* Visible top half - name, provider, description, basic requirements */}
@@ -861,17 +869,27 @@ export default function Scholarships({
         <div className="animate-sweep space-y-6">
           
           {/* Breadcrumb / Back button */}
-          <div className="flex items-center gap-2 text-on-surface-variant font-semibold text-xs py-2">
-            <button 
-              onClick={() => setSelectedSchol(null)}
-              className="hover:text-primary flex items-center gap-1 transition-colors cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-sm">arrow_back</span> Back to Database
-            </button>
-            <span>/</span>
-            <span>{selectedSchol.fields?.[0] || "Global Development"}</span>
-            <span>/</span>
-            <span className="text-primary font-bold truncate max-w-[200px]">{selectedSchol.name}</span>
+          <div className="flex items-center justify-between text-on-surface-variant font-semibold text-xs py-2">
+            <div className="flex items-center gap-2 min-w-0">
+              <button 
+                onClick={() => setSelectedSchol(null)}
+                className="hover:text-primary flex items-center gap-1 transition-colors cursor-pointer shrink-0"
+              >
+                <span className="material-symbols-outlined text-sm">arrow_back</span> Back
+              </button>
+              <span className="shrink-0">/</span>
+              <span className="truncate">{selectedSchol.fields?.[0] || "Global Development"}</span>
+              <span className="shrink-0">/</span>
+              <span className="text-primary font-bold truncate max-w-[160px]">{selectedSchol.name}</span>
+            </div>
+            {selectedSchol.slug && (
+              <ShareButton
+                url={`/scholarships/browse/${selectedSchol.slug}`}
+                title={selectedSchol.name}
+                iconOnly
+                size="sm"
+              />
+            )}
           </div>
 
           {/* Bento Grid Layout for Details */}
@@ -1114,6 +1132,14 @@ export default function Scholarships({
                       </span>
                       {isSaved(selectedSchol.id) ? 'Saved ✓' : 'Save'}
                     </button>
+
+                    {selectedSchol.slug && (
+                      <ShareButton
+                        url={`/scholarships/browse/${selectedSchol.slug}`}
+                        title={selectedSchol.name}
+                        size="sm"
+                      />
+                    )}
 
                     <button 
                       onClick={() => {

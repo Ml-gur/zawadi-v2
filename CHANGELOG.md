@@ -9,7 +9,7 @@
 - Added `<Analytics as VercelAnalytics />` component from `@vercel/analytics/react` alongside existing Google Analytics
 - The Vercel Analytics component automatically tracks page views, visits, and core web vitals for the Vercel dashboard
 
-## 2026-06-16 — Per-Scholarship Social Sharing: Dynamic OG Tags + Share Buttons
+## 2026-06-16 — Per-Scholarship Social Sharing: Detail View Share + Full Crawler Coverage
 
 ### Added: Dynamic OG Tags for Scholarship Detail Pages (Edge Middleware)
 
@@ -33,14 +33,25 @@
 ### Added: Share Buttons on All Scholarship Surfaces
 
 **`src/pages/public/PublicScholarshipList.tsx`**:
-- Each card now has an icon-only share button next to "View Details" link
+- Each card has an icon-only share button next to "View Details" link
 
 **`src/pages/public/PublicScholarshipDetail.tsx`**:
 - Share button in page header (right-aligned, medium size)
 
 **`src/components/Scholarships.tsx`**:
 - Public card grid: share button in the bottom action bar (left side, before sign-up prompt)
+- Public detail modal: share button in the sticky header (right side, opposite Back)
 - Authenticated table: share button in the Scholarship column, after the "Official portal" link
+- Authenticated bento detail view: share button in the breadcrumb bar (right side) + full Share button in the application CTA grid (alongside Save/AI Essay)
+- All share buttons link to `/scholarships/browse/:slug` — each scholarship has a unique shareable URL
+
+### Verified: Comprehensive Crawler Coverage (50/50, 100%)
+
+**Middleware per-scholarship OG injection tested across**:
+- All 50 currently published scholarships — every slug returns per-scholarship OG tags
+- All major crawler user-agents: Twitterbot, Facebook External Hit, WhatsApp, LinkedInBot, Slackbot
+- HTTP 200 with route-specific title, description, and OG image URL for every combination
+- Graceful 404 fallback to generic `/scholarships` meta for invalid/unknown slugs
 
 ## 2026-06-16 — Vercel Edge Middleware: Social Crawler OG Tag Injection + Bento Polish
 
