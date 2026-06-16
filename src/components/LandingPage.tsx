@@ -434,17 +434,23 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            {/* Card 1: Absolute Precision */}
-            <div className="group bg-surface border border-outline-variant/20 rounded-2xl p-5 md:p-7 hover:border-primary/30 hover:shadow-lg transition-all duration-300 flex flex-col gap-3">
-              <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                <SearchIcon className="w-4 h-4 md:w-5 md:h-5" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+            {/* Card 1: Absolute Precision — spans 2 cols */}
+            <div className="sm:col-span-2 bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-2xl md:rounded-3xl p-5 md:p-8 flex flex-col justify-between relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-48 md:w-64 h-48 md:h-64 rounded-full bg-white/5 -translate-y-1/2 translate-x-1/4 pointer-events-none" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-white/20 flex items-center justify-center">
+                    <SearchIcon className="w-4 h-4 md:w-5 md:h-5" />
+                  </div>
+                  <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider text-white/70">Core Engine</span>
+                </div>
+                <div className="text-2xl md:text-4xl font-black mb-2">100%</div>
+                <h3 className="text-lg md:text-xl font-display font-black mb-2">Absolute Precision</h3>
+                <p className="text-xs md:text-sm text-white/80 leading-relaxed max-w-lg">
+                  Our deterministic engine matches you only to scholarships where you meet every single requirement.
+                </p>
               </div>
-              <div className="text-xl md:text-2xl font-black text-primary">100%</div>
-              <h3 className="font-display font-bold text-on-surface text-sm md:text-base">Absolute Precision</h3>
-              <p className="text-xs md:text-sm text-on-surface-variant leading-relaxed">
-                Our deterministic engine matches you only to scholarships where you meet every single requirement.
-              </p>
             </div>
 
             {/* Card 2: Zero Fatigue */}
@@ -460,23 +466,23 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
             </div>
 
             {/* Card 3: Structured Guidance */}
-            <div className="group bg-surface border border-outline-variant/20 rounded-2xl p-5 md:p-7 hover:border-primary/30 hover:shadow-lg transition-all duration-300 flex flex-col gap-3">
+            <div className="sm:col-span-2 lg:col-span-1 group bg-surface border border-outline-variant/20 rounded-2xl p-5 md:p-7 hover:border-primary/30 hover:shadow-lg transition-all duration-300 flex flex-col gap-3">
               <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-primary-fixed/40 text-primary flex items-center justify-center">
                 <MapIcon className="w-4 h-4 md:w-5 md:h-5" />
               </div>
               <div className="text-xl md:text-2xl font-black text-primary">4-step</div>
               <h3 className="font-display font-bold text-on-surface text-sm md:text-base">Structured Guidance</h3>
               <p className="text-xs md:text-sm text-on-surface-variant leading-relaxed">
-                A clear path from profile creation to submission, with AI and human support at every stage.
+                A clear path from profile creation to submission, with AI and human support.
               </p>
             </div>
 
             {/* Card 4: Verified Data */}
-            <div className="group bg-surface border border-outline-variant/20 rounded-2xl p-5 md:p-7 hover:border-primary/30 hover:shadow-lg transition-all duration-300 flex flex-col gap-3">
-              <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-secondary-container/30 text-secondary flex items-center justify-center">
+            <div className="group bg-gradient-to-br from-status-success/5 to-surface border border-status-success/20 rounded-2xl p-5 md:p-7 hover:border-status-success/40 hover:shadow-lg transition-all duration-300 flex flex-col gap-3 relative">
+              <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-status-success/15 text-status-success flex items-center justify-center">
                 <DatabaseCheckIcon className="w-4 h-4 md:w-5 md:h-5" />
               </div>
-              <div className="text-xl md:text-2xl font-black text-secondary">2,500+</div>
+              <div className="text-xl md:text-2xl font-black text-status-success">2,500+</div>
               <h3 className="font-display font-bold text-on-surface text-sm md:text-base">Verified Data</h3>
               <p className="text-xs md:text-sm text-on-surface-variant leading-relaxed">
                 Every scholarship in our database is verified and kept current — no dead links, no outdated info.

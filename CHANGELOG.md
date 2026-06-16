@@ -33,6 +33,18 @@
 **`playwright.config.ts`**:
 - Global timeout increased from 30s → 60s to accommodate slower mobile viewport tests against the live site
 
+## 2026-06-16 — Bento Grid Refinement: Features + Empathy Sections, Test Stability
+
+### Changed: Empathy Section — Bento Grid with Featured Card
+
+**`src/components/LandingPage.tsx`**:
+- Card 1 "Absolute Precision" now spans 2 columns (`sm:col-span-2`) with gradient background (`from-primary to-primary-container`), matching the bento featured-card pattern from Section 3
+- Added decorative radial overlay (`bg-white/5 rounded-full`) for depth on the featured card
+- Card 4 "Verified Data" now uses a green-tinted gradient (`from-status-success/5`) with green border accent (`border-status-success/20`) for visual variety
+- Card 3 optimized: `sm:col-span-2 lg:col-span-1` so it stays full-width on tablet but normal on desktop
+- Grid gaps tightened: `gap-4 md:gap-5` (was `gap-4 md:gap-6`)
+- Featured card includes "Core Engine" label badge matching Section 3's bento card language
+
 ## 2026-06-16 — Mobile-First Redesign: Navbar, Hero, Footer, Bottom Nav
 
 ### Changed: Navbar — Mobile-First Redesign
