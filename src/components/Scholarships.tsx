@@ -4,6 +4,7 @@ import { AFRICAN_COUNTRIES } from '../config/matching-config';
 import { Lock, Search, Globe, GraduationCap, Bookmark, ArrowLeft, ArrowDown, ExternalLink } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { SEO } from './SEO';
+import ShareButton from './ShareButton';
 
 interface ScholarshipsProps {
   user?: any;
@@ -416,8 +417,9 @@ export default function Scholarships({
                         </span>
                       </div>
 
-                      {/* Sign-up prompt */}
+                      {/* Share + Sign-up prompt */}
                       <div className="flex items-center justify-between pt-2 border-t border-outline-variant/20 mt-1">
+                        <ShareButton url={`/scholarships/browse/${s.slug}`} iconOnly size="sm" />
                         <div className="flex items-center gap-1.5 text-on-surface-variant/50">
                           <Lock className="w-3 h-3" />
                           <span className="text-[9px] font-medium">Sign up for match score</span>
@@ -1750,6 +1752,13 @@ export default function Scholarships({
                                 <span>Official portal</span>
                               </a>
                             </div>
+
+                            {/* Share button */}
+                            {s.slug && (
+                              <div className="pt-1.5">
+                                <ShareButton url={`/scholarships/browse/${s.slug}`} iconOnly size="sm" />
+                              </div>
+                            )}
                           </div>
                         </td>
 

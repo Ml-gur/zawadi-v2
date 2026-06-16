@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { SEO } from '../../components/SEO';
 import { ScholarshipSchema } from '../../components/ScholarshipSchema';
-import { Clock, Globe, GraduationCap, MapPin, Building2, BookOpen, Languages, ArrowLeft, Eye } from 'lucide-react';
+import { Clock, Globe, GraduationCap, MapPin, Building2, BookOpen, Languages, ArrowLeft, Eye, Share2 } from 'lucide-react';
+import ShareButton from '../../components/ShareButton';
 
 interface ScholarshipDetail {
   id: string;
@@ -158,6 +159,14 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
             {closingSoon && (
               <span className="shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-full bg-error/10 text-error">Closing Soon</span>
             )}
+            <div className="ml-auto shrink-0">
+              <ShareButton
+                url={`/scholarships/browse/${scholarship.slug}`}
+                title={scholarship.name}
+                iconOnly
+                size="md"
+              />
+            </div>
           </div>
           {scholarship.provider && (
             <p className="text-sm text-on-surface-variant/60">{scholarship.provider}</p>

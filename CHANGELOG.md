@@ -1,5 +1,38 @@
 # Changelog
 
+## 2026-06-16 — Per-Scholarship Social Sharing: Dynamic OG Tags + Share Buttons
+
+### Added: Dynamic OG Tags for Scholarship Detail Pages (Edge Middleware)
+
+**`middleware.ts`**:
+- Middleware now detects `/scholarships/browse/:slug` paths for social crawlers
+- Fetches scholarship data from internal API (`/api/scholarships-public-detail?slug=XXX`) when a crawler visits a detail page
+- Dynamically builds per-scholarship OG meta: title (`{Scholarship Name} | Zawadi`), description (stripped HTML + deadline + eligible countries), and OG image URL pointing to `og-scholarship` endpoint
+- Graceful fallback: if the API call fails or no data found, falls back to generic `/scholarships` meta
+- Added utility functions: `slugFromPath()`, `buildScholarOgUrl()`, `stripHtml()`, `formatDeadlineEdge()`, `encodeQueryValue()`
+
+### Added: Reusable ShareButton Component
+
+**`src/components/ShareButton.tsx`** (new, 1.50 kB / 0.81 kB gzipped):
+- Uses Web Share API (`navigator.share`) on mobile for native share sheet
+- Falls back to clipboard copy on desktop (with `navigator.clipboard.writeText` + legacy `execCommand` polyfill)
+- Shows checkmark + "Copied" feedback for 2 seconds after copy
+- `active:scale-95` press feedback
+- Props: `url` (relative or absolute), `title` (for Web Share), `iconOnly` (icon without text), `size` (`sm`/`md`)
+- Already supports `stopPropagation()` for use inside clickable cards
+
+### Added: Share Buttons on All Scholarship Surfaces
+
+**`src/pages/public/PublicScholarshipList.tsx`**:
+- Each card now has an icon-only share button next to "View Details" link
+
+**`src/pages/public/PublicScholarshipDetail.tsx`**:
+- Share button in page header (right-aligned, medium size)
+
+**`src/components/Scholarships.tsx`**:
+- Public card grid: share button in the bottom action bar (left side, before sign-up prompt)
+- Authenticated table: share button in the Scholarship column, after the "Official portal" link
+
 ## 2026-06-16 — Vercel Edge Middleware: Social Crawler OG Tag Injection + Bento Polish
 
 ### Fixed: Dynamic OG Endpoint — ESM Module Export (500 → Graceful Fallback)

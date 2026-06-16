@@ -86,6 +86,37 @@ function getMeta(pathname: string): RouteMeta {
   return ROUTE_META[normalized] || ROUTE_META['/scholarships'];
 }
 
+function slugFromPath(pathname: string): string | null {
+  const match = pathname.match(/^\/scholarships\/browse\/([^/]+)$/);
+  return match ? decodeURIComponent(match[1]).slice(0, 100) : null;
+}
+
+function encodeQueryValue(s: string): string {
+  return encodeURIComponent(s).replace(/%20/g, '+');
+}
+
+function buildScholarOgUrl(data: Record<string, any>): string {
+  const name = String(data.name || 'Scholarship').slice(0, 60);
+  const provider = String(data.provider || '').slice(0, 50);
+  const funding = String(data.funding_type || '');
+  const deadline = data.deadline ? formatDeadlineEdge(String(data.deadline)).slice(0, 40) : '';
+  const countries = (Array.isArray(data.countries) ? data.countries.slice(0, 3).join(', ') : '').slice(0, 80);
+  const degrees = (Array.isArray(data.degree_levels) ? data.degree_levels.slice(0, 2).join(', ') : '').slice(0, 40);
+  const noIelts = data.no_ielts ? 'true' : '';
+  return `${SITE_URL}/api/og-scholarship?name=${encodeQueryValue(name)}&provider=${encodeQueryValue(provider)}&funding_type=${encodeQueryValue(funding)}&deadline=${encodeQueryValue(deadline)}&countries=${encodeQueryValue(countries)}&degree_levels=${encodeQueryValue(degrees)}&no_ielts=${noIelts}`;
+}
+
+function stripHtml(s: string): string {
+  return (s || '').replace(/<[^>]*>/g, '').trim();
+}
+
+function formatDeadlineEdge(dateStr: string): string {
+  if (!dateStr) return 'Check website';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return 'Check website';
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+}
+
 function buildMetaTags(meta: RouteMeta, url: string): string {
   const title = meta.ogTitle || meta.title;
   const desc = meta.ogDescription || meta.description;
@@ -157,7 +188,36 @@ export default async function middleware(request: Request): Promise<Response> {
     });
 
     const html = await originResponse.text();
-    const meta = getMeta(pathname);
+
+    // Try per-scholarship OG tags for /scholarships/browse/:slug
+    let meta = getMeta(pathname);
+    const slug = slugFromPath(pathname);
+    if (slug) {
+      try {
+        const apiUrl = `${SITE_URL}/api/scholarships-public-detail?slug=${encodeURIComponent(slug)}`;
+        const apiRes = await fetch(apiUrl, { headers: { 'x-vercel-og': '1' } });
+        if (apiRes.ok) {
+          const data = await apiRes.json();
+          const cleanDesc = stripHtml(data.description || '');
+          const deadlineStr = formatDeadlineEdge(data.deadline);
+          const countriesStr = Array.isArray(data.countries) ? data.countries.join(', ') : '';
+          const seoDesc = cleanDesc
+            ? `${cleanDesc.slice(0, 155).trim()}... Deadline: ${deadlineStr}. Open to students from ${countriesStr || 'multiple countries'}.`
+            : `Apply for ${data.name}. Deadline: ${deadlineStr}.`;
+          const ogImageUrl = buildScholarOgUrl(data);
+          meta = {
+            title: `${data.name} | Zawadi`,
+            description: seoDesc,
+            image: ogImageUrl,
+            ogTitle: data.name,
+            ogDescription: seoDesc.slice(0, 200),
+          };
+        }
+      } catch {
+        // fall back to generic meta
+      }
+    }
+
     const metaTags = buildMetaTags(meta, url.href);
 
     // Inject meta tags into <head>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { SEO } from '../../components/SEO';
 import { ExternalLink, Clock, Globe, GraduationCap, Loader2 } from 'lucide-react';
+import ShareButton from '../../components/ShareButton';
 
 interface ScholarshipTeaser {
   id: string;
@@ -183,12 +184,19 @@ export default function PublicScholarshipList() {
                       {s.is_intra_african && <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">Intra-African</span>}
                     </div>
 
-                    <Link
-                      to={`/scholarships/browse/${s.slug}`}
-                      className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline"
-                    >
-                      View Details <ExternalLink className="w-3 h-3" />
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        to={`/scholarships/browse/${s.slug}`}
+                        className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline"
+                      >
+                        View Details <ExternalLink className="w-3 h-3" />
+                      </Link>
+                      <ShareButton
+                        url={`/scholarships/browse/${s.slug}`}
+                        title={s.name}
+                        iconOnly
+                      />
+                    </div>
                   </div>
                 );
               })}
