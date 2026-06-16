@@ -1,8 +1,8 @@
 export interface MatchScore {
-  score: number;
+  score: number | null;
   reasons: string[];
   disqualifying_reasons: string[];
-  is_eligible: boolean;
+  is_eligible: boolean | null;
   no_ielts_benefit?: boolean;
   needs_profile?: boolean;
   breakdown: {

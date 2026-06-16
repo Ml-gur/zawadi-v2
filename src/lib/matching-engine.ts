@@ -672,6 +672,17 @@ export function computeScholarshipMatch(
   const matchReasons: string[] = [];
   const disqualifyingReasons: string[] = [];
 
+  // Guard: if user or user.nationality is null, return match with null score
+  if (!user || !user.country || !user.degree_level) {
+    return {
+      score: null,
+      reasons: [],
+      disqualifying_reasons: [],
+      is_eligible: null,
+      breakdown: { country: 0, degree: 0, field: 0, gpa: 0, languages: 0, experience: 0, destination: 0, documents: 0 }
+    };
+  }
+
   const userCountry = user.country || '';
   const scholRequiredDocs = schol.required_documents || [];
   const eligibleCountries = schol.countries || schol.country || ['ALL'];

@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#001736"/>
+      <stop offset="50%" style="stop-color:#0a2e5a"/>
+      <stop offset="100%" style="stop-color:#1a4a7a"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(255,255,255,0.08)"/>
+      <stop offset="100%" style="stop-color:rgba(255,255,255,0.03)"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#6cf8bb"/>
+      <stop offset="100%" style="stop-color:#4ade80"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)" rx="0"/>
+
+  <!-- Decorative gradient orbs -->
+  <circle cx="100" cy="100" r="300" fill="rgba(108,248,187,0.04)"/>
+  <circle cx="1100" cy="500" r="250" fill="rgba(108,248,187,0.03)"/>
+  <circle cx="600" cy="315" r="200" fill="rgba(108,248,187,0.02)"/>
+
+  <!-- Grid pattern -->
+  <g opacity="0.03">
+    <line x1="0" y1="100" x2="1200" y2="100" stroke="white" stroke-width="0.5"/>
+    <line x1="0" y1="200" x2="1200" y2="200" stroke="white" stroke-width="0.5"/>
+    <line x1="0" y1="500" x2="1200" y2="500" stroke="white" stroke-width="0.5"/>
+    <line x1="200" y1="0" x2="200" y2="630" stroke="white" stroke-width="0.5"/>
+    <line x1="600" y1="0" x2="600" y2="630" stroke="white" stroke-width="0.5"/>
+    <line x1="1000" y1="0" x2="1000" y2="630" stroke="white" stroke-width="0.5"/>
+  </g>
+
+  <!-- Logo -->
+  <g transform="translate(60, 50)">
+    <rect width="48" height="48" rx="12" fill="url(#accent)"/>
+    <text x="24" y="33" font-family="Georgia, serif" font-size="28" font-weight="bold" fill="#001736" text-anchor="middle">Z</text>
+    <text x="60" y="32" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#6cf8bb">Zawadi</text>
+  </g>
+
+  <!-- Headline -->
+  <text x="60" y="190" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="white">
+    Find Scholarships You
+  </text>
+  <text x="60" y="245" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="white">
+    Actually Qualify For
+  </text>
+
+  <!-- Subtitle -->
+  <text x="60" y="285" font-family="Arial, sans-serif" font-size="18" fill="rgba(255,255,255,0.5)">
+    Deterministic eligibility matching for African students
+  </text>
+
+  <!-- Scholarship Cards -->
+  <!-- Card 1: Chevening -->
+  <g transform="translate(60, 330)">
+    <rect width="320" height="120" rx="14" fill="url(#cardGrad)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+    <text x="20" y="35" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="white">Chevening Scholarships</text>
+    <text x="20" y="58" font-family="Arial, sans-serif" font-size="12" fill="rgba(255,255,255,0.5)">UK Government</text>
+    <rect x="20" y="75" width="70" height="22" rx="20" fill="rgba(108,248,187,0.15)"/>
+    <text x="55" y="89" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#6cf8bb" text-anchor="middle">Full</text>
+    <rect x="100" y="75" width="80" height="22" rx="20" fill="rgba(255,255,255,0.08)"/>
+    <text x="140" y="89" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="rgba(255,255,255,0.6)" text-anchor="middle">Masters</text>
+  </g>
+
+  <!-- Card 2: DAAD EPOS -->
+  <g transform="translate(420, 330)">
+    <rect width="320" height="120" rx="14" fill="url(#cardGrad)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+    <text x="20" y="35" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="white">DAAD EPOS</text>
+    <text x="20" y="58" font-family="Arial, sans-serif" font-size="12" fill="rgba(255,255,255,0.5)">German Academic Exchange</text>
+    <rect x="20" y="75" width="70" height="22" rx="20" fill="rgba(108,248,187,0.15)"/>
+    <text x="55" y="89" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#6cf8bb" text-anchor="middle">Full</text>
+    <rect x="100" y="75" width="80" height="22" rx="20" fill="rgba(255,255,255,0.08)"/>
+    <text x="140" y="89" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="rgba(255,255,255,0.6)" text-anchor="middle">Masters/PhD</text>
+  </g>
+
+  <!-- Card 3: Mastercard Foundation -->
+  <g transform="translate(780, 330)">
+    <rect width="360" height="120" rx="14" fill="url(#cardGrad)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+    <text x="20" y="35" font-family="Arial, sans-serif" font-size="15" font-weight="bold" fill="white">Mastercard Foundation</text>
+    <text x="20" y="58" font-family="Arial, sans-serif" font-size="12" fill="rgba(255,255,255,0.5)">Mastercard Foundation</text>
+    <rect x="20" y="75" width="70" height="22" rx="20" fill="rgba(108,248,187,0.15)"/>
+    <text x="55" y="89" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#6cf8bb" text-anchor="middle">Full</text>
+    <rect x="100" y="75" width="80" height="22" rx="20" fill="rgba(255,255,255,0.08)"/>
+    <text x="140" y="89" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="rgba(255,255,255,0.6)" text-anchor="middle">Undergrad</text>
+  </g>
+
+  <!-- Bottom Tagline Bar -->
+  <rect x="0" y="535" width="1200" height="95" fill="rgba(108,248,187,0.04)"/>
+  <line x1="60" y1="535" x2="1140" y2="535" stroke="rgba(108,248,187,0.1)" stroke-width="1"/>
+
+  <!-- Tagline items -->
+  <circle cx="100" cy="580" r="4" fill="#6cf8bb"/>
+  <text x="115" y="584" font-family="Arial, sans-serif" font-size="14" fill="rgba(255,255,255,0.6)">54 African Countries</text>
+
+  <circle cx="350" cy="580" r="4" fill="#6cf8bb"/>
+  <text x="365" y="584" font-family="Arial, sans-serif" font-size="14" fill="rgba(255,255,255,0.6)">No Data Selling</text>
+
+  <circle cx="590" cy="580" r="4" fill="#6cf8bb"/>
+  <text x="605" y="584" font-family="Arial, sans-serif" font-size="14" fill="rgba(255,255,255,0.6)">No IELTS Required</text>
+
+  <circle cx="830" cy="580" r="4" fill="#6cf8bb"/>
+  <text x="845" y="584" font-family="Arial, sans-serif" font-size="14" fill="rgba(255,255,255,0.6)">Free for Students</text>
+
+  <!-- URL -->
+  <text x="920" y="615" font-family="Arial, sans-serif" font-size="12" fill="rgba(255,255,255,0.3)" text-anchor="end">techsari.online/scholarships</text>
+</svg>

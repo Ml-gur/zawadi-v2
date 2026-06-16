@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Scholarship, ApplicationTracker, DocumentVaultItem } from '../types';
 import { AFRICAN_COUNTRIES } from '../config/matching-config';
-import { ExternalLink, Lock, Search, Globe, GraduationCap, Bookmark, ArrowLeft } from 'lucide-react';
+import { Lock, Search, Globe, GraduationCap, Bookmark, ArrowLeft, ExternalLink } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { SEO } from './SEO';
 
@@ -55,14 +55,13 @@ export default function Scholarships({
     try {
       const { data, error } = await supabase
         .from('scholarships')
-        .select('*')
+        .select('id, name, provider, host_region, host_institution, funding_type, deadline, no_ielts, degree_levels, countries, fields_of_study, urgency, iso2, published, description, eligibility, amount, required_documents, apply_url, source_url, slug, created_at')
         .eq('published', true)
         .order('id', { ascending: false })
         .limit(12);
 
       if (!error && data) {
         setPublicScholarships(data as Scholarship[]);
-        supabase.from('scholarships').select('id', { count: 'exact', head: true }).eq('published', true).then(({ count }) => count && setPublicTotalCount(count)).catch(() => {});
       } else if (error) {
         console.error('Error fetching public scholarships:', error);
         setPublicError('Could not load scholarships. Please try again later.');
@@ -74,6 +73,12 @@ export default function Scholarships({
       setPublicLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!publicLoading && publicScholarships.length > 0) {
+      supabase.from('scholarships').select('id', { count: 'exact', head: true }).eq('published', true).then(({ count }) => { if (count != null) setPublicTotalCount(count); }).catch(() => {});
+    }
+  }, [publicLoading, publicScholarships.length]);
 
   const handleShowAuth = () => {
     setShowAuthModal(true);

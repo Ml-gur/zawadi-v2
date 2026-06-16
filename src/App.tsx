@@ -791,6 +791,12 @@ export default function App() {
           {!user && showAuth && location.pathname === '/' ? (
             <AuthScreen onLoginSuccess={handleLoginSuccess} countries={countries} />
           ) : (
+            <>
+            {!user && showAuth && (
+              <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm overflow-y-auto">
+                <AuthScreen onLoginSuccess={handleLoginSuccess} countries={countries} />
+              </div>
+            )}
             <Routes>
               <Route path="/" element={<LandingPage onGetStarted={() => setShowAuth(true)} onLogin={() => setShowAuth(true)} countries={countries} onViewAllFAQs={() => navigate('/faq')} />} />
               <Route path="/about" element={<AboutPage onBack={() => navigate('/')} />} />
@@ -842,6 +848,7 @@ export default function App() {
                 <Route path="*" element={<Suspense fallback={null}><NotFoundPage onBack={() => navigate('/')} /></Suspense>} />
               )}
             </Routes>
+            </>
           )}
         </Suspense>
       </main>

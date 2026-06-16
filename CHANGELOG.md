@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-06-16 — Fix /scholarships Runtime Error, Auth Overlay, Matching Engine Null Guard
+
+### Fixed: /scholarships Page Error for Logged-Out Visitors (Root Cause)
+
+**Root cause (updated diagnosis)**: The Supabase REST API and database columns (`created_at`, `updated_at`) both work correctly. The error originates from a React runtime exception caught by `<ErrorBoundary>` in `main.tsx`. Previously the fix focused on `select('*')` and column ordering, but the actual trigger was a combination of missing icon import and insufficient error isolation.
+
+**`src/components/Scholarships.tsx`**:
+- Added `ExternalLink` back to `lucide-react` import (was removed in prior refactor, breaks authenticated detail view)
+- Changed public query from `.select('*')` to specific column list (`id, name, provider, host_region, host_institution, funding_type, deadline, no_ielts, degree_levels, countries, fields_of_study, urgency, iso2, published, description, eligibility, amount, required_documents, apply_url, source_url, slug, created_at`) — avoids schema drift between local types and Supabase cache
+- Moved count query (`.select('id', { count: 'exact', head: true })`) into a separate `useEffect` that fires only after data loads — prevents the in-line promise from throwing during render
+- Added `useMemo` import for `systemAlerts` computation stability
+
+**`src/App.tsx`**:
+- Conditional auth overlay: when `showAuth=true` and path is not `/` (e.g., `/scholarships`), renders `<AuthScreen>` as a fixed overlay with backdrop blur instead of silently ignoring the request
+- Fragment wrapper added around the auth overlay and `<Routes>` for correct JSX nesting
+
+**`src/lib/matching-engine.ts`**:
+- Added null guard at top of `computeScholarshipMatch()`: if `user`, `user.country`, or `user.degree_level` is null/falsy, returns a match object with `{ score: null, is_eligible: null }` instead of crashing
+
+**`src/types.ts`**:
+- `MatchScore.score` changed from `number` to `number | null`
+- `MatchScore.is_eligible` changed from `boolean` to `boolean | null`
+
 ## 2026-06-16 — Public Scholarships Preview, SEO Overhaul, robots.txt & sitemap
 
 ### Fixed: /scholarships Page Error for Logged-Out Users
