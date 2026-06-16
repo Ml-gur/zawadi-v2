@@ -57,7 +57,7 @@ export default function Scholarships({
         .from('scholarships')
         .select('*')
         .eq('published', true)
-        .order('updated_at', { ascending: false })
+        .order('id', { ascending: false })
         .limit(12);
 
       if (!error && data) {
