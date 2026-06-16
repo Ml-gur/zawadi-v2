@@ -1,6 +1,15 @@
 // Vercel serverless function that generates a dynamic OG image (PNG) for a scholarship
 // Usage: /api/og-scholarship?name=Chevening&provider=UK+Government&funding=Full&deadline=Nov+2026&countries=Kenya&degree=Masters&noIelts=true
-const sharp = require('sharp');
+
+function escapeXml(s) {
+  if (!s) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
 
 function generateSvg({ name, provider, funding_type, deadline, countries, degree_levels, no_ielts }) {
   const safeName = (name || 'Scholarship').slice(0, 50);
@@ -106,22 +115,7 @@ function generateSvg({ name, provider, funding_type, deadline, countries, degree
 </svg>`;
 }
 
-function escapeXml(s) {
-  if (!s) return '';
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
-}
-
 module.exports = async (req, res) => {
-  // Set CORS and caching headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=86400'); // cache 24h on CDN
-  res.setHeader('Content-Type', 'image/png');
-
   const {
     name = 'Scholarship',
     provider = '',
@@ -132,17 +126,19 @@ module.exports = async (req, res) => {
     no_ielts = '',
   } = req.query;
 
-  try {
-    const svg = generateSvg({ name, provider, funding_type, deadline, countries, degree_levels, no_ielts });
-    const png = await sharp(Buffer.from(svg))
-      .resize(1200, 630)
-      .png()
-      .toBuffer();
+  // Generate SVG
+  const svg = generateSvg({ name, provider, funding_type, deadline, countries, degree_levels, no_ielts });
 
+  // Try sharp (native module) — if it fails, redirect to static fallback
+  try {
+    const sharp = require('sharp');
+    const png = await sharp(Buffer.from(svg)).png().toBuffer();
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=86400');
+    res.setHeader('Content-Type', 'image/png');
     res.status(200).send(png);
-  } catch (err) {
-    console.error('OG image generation error:', err);
-    // Fallback: return the static scholarships OG image as a redirect
+  } catch (e) {
+    console.error('og-scholarship: sharp unavailable, redirecting to static fallback', e.message || e);
     res.status(302).setHeader('Location', 'https://techsari.online/og-scholarships.png').end();
   }
 };

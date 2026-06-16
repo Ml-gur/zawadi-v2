@@ -33,6 +33,36 @@
 **`playwright.config.ts`**:
 - Global timeout increased from 30s → 60s to accommodate slower mobile viewport tests against the live site
 
+## 2026-06-16 — Static OG Fallback Enhancement, Dynamic OG Endpoint Resilience
+
+### Added: Static OG Fallback Tags in index.html
+
+**`index.html`**:
+- Added `og:image:width` (1200) / `og:image:height` (630) — critical for WhatsApp crawlers that don't execute JS; without these dimension hints WhatsApp may show no preview image
+- Added `og:image:alt`, `twitter:image:alt` — accessibility for all crawlers
+- Added `og:site_name` — brand attribution in share cards
+- Added `twitter:site` / `twitter:creator` — social attribution handles
+
+### Fixed: Dynamic OG Image Endpoint (500 Error → Graceful Fallback)
+
+**`api/og-scholarship.js`**:
+- **Root cause**: `const sharp = require('sharp')` was at module scope. On Vercel serverless, if the native `sharp` binary fails to load (incompatible platform, missing build), the entire function crashes with 500 before the handler even runs. The try/catch was useless.
+- **Fix**: Moved `require('sharp')` inside the handler's try/catch. If sharp fails to load or the PNG generation fails, the function now gracefully redirects to `https://techsari.online/og-scholarships.png` (static fallback).
+- Removed duplicate `escapeXml()` function definition
+- Function now gracefully handles sharp-native-module failures on any platform
+
+### Tested: OG Image URLs All Resolve
+
+| URL | Status |
+|-----|--------|
+| `https://techsari.online/og-image.png` | ✅ 200 OK |
+| `https://techsari.online/og-home.png` | ✅ 200 OK |
+| `https://techsari.online/og-scholarships.png` | ✅ 200 OK |
+| `https://techsari.online/og-faq.png` | ✅ 200 OK |
+| `https://techsari.online/og-about.png` | ✅ 200 OK |
+| `https://techsari.online/og-how-it-works.png` | ✅ 200 OK |
+| `https://techsari.online/api/og-scholarship?...` | ✅ Graceful fallback working |
+
 ## 2026-06-16 — Social Sharing Preview Overhaul: WhatsApp OG Tags, Custom Images, SEO Component Enhancement
 
 ### Added: Custom OG Images for About and How It Works Pages
