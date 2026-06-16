@@ -1,5 +1,33 @@
 # Changelog
 
+## 2026-06-16 — Vercel Edge Middleware: Social Crawler OG Tag Injection + Bento Polish
+
+### Added: Vercel Edge Middleware — Server-Side OG Tags for Social Crawlers
+
+**`middleware.ts`** (new):
+- Intercepts requests from social media crawlers (WhatsApp, Facebook, Twitter, LinkedIn, Telegram, Discord, Slack, Google, Bing, GPT, Claude, and 10+ more)
+- Detects crawler via User-Agent matching — regular users pass through with zero overhead
+- For each public route, injects route-specific `<title>`, `og:*`, and `twitter:*` meta tags at the top of `<head>` before the SPA shell
+- 8 routes mapped with custom titles, descriptions, and OG images: `/`, `/scholarships`, `/about`, `/how-it-works`, `/faq`, `/contact`, `/privacy`, `/terms`
+- Prevents infinite loops via `x-vercel-og` header check
+- Returns `Cache-Control: public, max-age=3600, stale-while-revalidate=86400` for crawler efficiency
+- Falls back to normal SPA fetch on any error (never breaks the site)
+- Config matcher excludes API routes, static assets, and authenticated routes (`/dashboard`, `/admin`, etc.)
+
+### Changed: Static HTML Fallback — OG Image Upgrade
+
+**`index.html`**:
+- Default OG image changed from `og-image.png` → `og-home.png` (homepage-specific design with scholarship cards motif, better visual appeal as universal fallback)
+- Added `og:locale` (`en_US`) for language region targeting
+- Cleaned up meta tag order for spec compliance
+
+### Changed: Featured Scholarships — Loading & Empty States
+
+**`src/components/LandingPage.tsx`**:
+- Loading spinner now includes pulsing "Loading scholarships..." text for visual feedback
+- Empty state redesigned with `SearchIcon` in a rounded container, bold heading ("No featured scholarships right now"), and descriptive subtitle
+- Added `scroll-mt-24` to `id="features"` and `id="faq"` sections for accurate scroll offset under sticky nav bar
+
 ## 2026-06-16 — Bento Grid Refinement: Features Section Responsive Sizing + Test Stability
 
 ### Changed: Features Bento Grid — Responsive Sizing & Tighter Gaps

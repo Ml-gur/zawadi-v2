@@ -314,11 +314,20 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
 
           {featuredLoading ? (
             <div className="flex justify-center py-16">
-              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              <div className="flex flex-col items-center gap-4">
+                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                <p className="text-xs text-on-surface-variant animate-pulse">Loading scholarships...</p>
+              </div>
             </div>
           ) : featuredScholarships.length === 0 ? (
-            <div className="text-center py-16">
-              <p className="text-sm text-on-surface-variant">Featured scholarships loading soon.</p>
+            <div className="text-center py-12 md:py-16 px-4">
+              <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-surface-container-high flex items-center justify-center mx-auto mb-4">
+                <SearchIcon className="w-6 h-6 md:w-7 md:h-7 text-on-surface-variant/50" />
+              </div>
+              <p className="text-sm font-bold text-on-surface mb-1">No featured scholarships right now</p>
+              <p className="text-xs text-on-surface-variant max-w-xs mx-auto">
+                New opportunities are added daily. Check back soon or browse all scholarships.
+              </p>
             </div>
           ) : (
             <>
@@ -495,7 +504,7 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
       {/* ═══════════════════════════════════════════════
           Section 3 — Bento Features Grid
           ═══════════════════════════════════════════════ */}
-      <RevealSection id="features" className="px-4 sm:px-6 py-16 md:py-28 bg-surface-container-low">
+      <RevealSection id="features" className="px-4 sm:px-6 py-16 md:py-28 bg-surface-container-low scroll-mt-24">
         <div className="max-w-[1080px] mx-auto">
           <div className="text-center mb-10 md:mb-16">
             <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display font-black text-on-surface leading-tight max-w-2xl mx-auto">
@@ -722,7 +731,7 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
       {/* ═══════════════════════════════════════════════
           Section 5 — FAQ (with FAQPage Schema)
           ═══════════════════════════════════════════════ */}
-      <RevealSection id="faq" className="px-4 sm:px-6 py-16 md:py-28 bg-surface-container-low">
+      <RevealSection id="faq" className="px-4 sm:px-6 py-16 md:py-28 bg-surface-container-low scroll-mt-24">
         <div className="max-w-[800px] mx-auto">
           <div className="text-center mb-8 md:mb-14">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-black text-on-surface">
