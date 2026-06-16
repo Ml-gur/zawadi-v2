@@ -9,9 +9,11 @@ export default function AboutPage({ onBack }: AboutPageProps) {
   return (
     <div className="bg-background text-on-background min-h-screen">
       <SEO
-        title="About Zawadi — Built for African Students"
-        description="Learn about Techsari Zawadi — the AI-powered scholarship platform built for African students. Our story, technology, and mission to close the scholarship access gap."
+        title="About Zawadi — Scholarship Platform Built for African Students"
+        description="Zawadi was built to fix the scholarship access gap for African students. We filter out irrelevant results, remove the IELTS barrier, and pair AI essay tools with human mentor review."
         path="/about"
+        ogTitle="About Zawadi — Built for African Students"
+        ogDescription="Most scholarship platforms sell student data to advertisers. Zawadi does not. We match students to funding they qualify for and help them apply without wasting time on irrelevant results."
       />
       <section className="px-6 py-20 md:py-24">
         <div className="max-w-[800px] mx-auto">

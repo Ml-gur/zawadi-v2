@@ -88,10 +88,12 @@ export default function FAQPage({ onBack }: FAQPageProps) {
   return (
     <div className="min-h-screen bg-surface-container-lowest">
       <SEO
-        title="Scholarship FAQs for African Students — Zawadi"
-        description="Answers to common questions African students ask about finding scholarships, IELTS requirements, AI essay help, and how Zawadi matching works."
+        title="Scholarship FAQ for African Students — Zawadi"
+        description="Answers to common questions about finding scholarships as an African student. Covers IELTS alternatives, eligibility matching, how to apply, and which countries qualify."
         path="/faq"
         image="https://techsari.online/og-faq.png"
+        ogTitle="Scholarship FAQ for African Students — Zawadi"
+        ogDescription="Common questions about scholarships for African students. IELTS requirements, application tips, eligibility criteria, and how the Zawadi matching system works."
         schema={faqSchema}
       />
       <div className="max-w-[960px] mx-auto px-6 py-12">

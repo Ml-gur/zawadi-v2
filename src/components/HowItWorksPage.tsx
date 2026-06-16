@@ -40,9 +40,11 @@ export default function HowItWorksPage({ onBack, onGetStarted }: HowItWorksPageP
   return (
     <div className="bg-background text-on-background min-h-screen">
       <SEO
-        title="How Zawadi Works — Scholarship Matching for Africa"
-        description="See how Zawadi matches African students to scholarships in three minutes using five profile data points and strict eligibility filtering."
+        title="How Zawadi Works — Scholarship Matching for African Students"
+        description="Create a profile in three minutes. See scholarships you qualify for. Build your application with AI that learns your writing style. Get mentor review before you submit."
         path="/how-it-works"
+        ogTitle="How Zawadi Works — From Profile to Scholarship Application"
+        ogDescription="Four steps from registration to submitted application. Zawadi handles eligibility filtering, essay drafting, and human mentor review so African students can focus on applying."
       />
       <section className="px-6 py-20 md:py-24">
         <div className="max-w-[800px] mx-auto">

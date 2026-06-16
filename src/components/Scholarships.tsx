@@ -29,7 +29,9 @@ export default function Scholarships({
   const [publicScholarships, setPublicScholarships] = useState<Scholarship[]>([]);
   const [publicLoading, setPublicLoading] = useState(false);
   const [publicError, setPublicError] = useState<string | null>(null);
+  const [publicTotalCount, setPublicTotalCount] = useState(0);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showTrackModal, setShowTrackModal] = useState(false);
 
   // Public mode filters
   const [publicSearch, setPublicSearch] = useState('');
@@ -60,6 +62,7 @@ export default function Scholarships({
 
       if (!error && data) {
         setPublicScholarships(data as Scholarship[]);
+        supabase.from('scholarships').select('id', { count: 'exact', head: true }).eq('published', true).then(({ count }) => count && setPublicTotalCount(count)).catch(() => {});
       } else if (error) {
         console.error('Error fetching public scholarships:', error);
         setPublicError('Could not load scholarships. Please try again later.');
@@ -105,32 +108,38 @@ export default function Scholarships({
     return (
       <div className="space-y-6 animate-fade-in">
         <SEO
-          title="Find Scholarships for African Students — Zawadi"
-          description="Browse verified scholarships across all 54 African countries. Deterministic eligibility matching. No IELTS required options. Free for students."
-          ogDescription="Browse verified scholarships across all 54 African countries. No spam. No data selling. See only scholarships you actually qualify for."
+          title="Scholarships for African Students — Zawadi"
+          description="Browse verified scholarships open to students from all 54 African countries. Filtered for real eligibility. No IELTS required options. Full funding and partial funding available."
+          ogTitle="Scholarships for African Students — Zawadi"
+          ogDescription="Verified scholarships open to African students. Every listing is checked for active deadlines and real eligibility. See funding from UK, Germany, USA, Japan, and African universities."
           path="/scholarships"
           image="https://techsari.online/og-scholarships.png"
-        />
+        >
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content="Scholarships for African Students — Zawadi" />
+          <meta name="twitter:description" content="Verified scholarships open to African students from all 54 countries. No IELTS required options, full funding, undergraduate and postgraduate." />
+          <meta name="twitter:image" content="https://techsari.online/og-scholarships.png" />
+        </SEO>
 
         {/* Guest Banner */}
-        <div className="bg-surface-container-highest rounded-2xl p-6 md:p-8 border border-outline-variant/60 shadow-sm">
+        <div className="bg-[#001736] rounded-2xl p-6 md:p-8 border border-[#002b6b]/60 shadow-sm">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex-1">
-              <h2 className="font-display font-black text-lg text-on-surface mb-1">You are browsing as a guest</h2>
-              <p className="text-xs text-on-surface-variant/80 max-w-xl">
-                Create a free profile to see your eligibility score for each scholarship and get matched to opportunities you actually qualify for.
+              <h2 className="font-display font-black text-lg text-white mb-1">You are viewing scholarships as a guest</h2>
+              <p className="text-xs text-white/70 max-w-xl">
+                Create a free account to see your eligibility score for each one.
               </p>
             </div>
             <div className="flex items-center gap-3 shrink-0">
               <button
-                onClick={handleShowAuth}
-                className="px-5 py-2.5 bg-primary text-on-primary font-bold rounded-xl hover:bg-primary-container transition-colors cursor-pointer text-xs shadow-sm"
+                onClick={() => { setShowAuthModal(false); handleAuthAction(); }}
+                className="px-5 py-2.5 bg-[#22c55e] text-white font-bold rounded-xl hover:bg-[#16a34a] transition-colors cursor-pointer text-xs shadow-sm"
               >
                 Create Free Account
               </button>
               <button
-                onClick={handleShowAuth}
-                className="px-5 py-2.5 bg-transparent border border-outline-variant/60 text-on-surface font-bold rounded-xl hover:bg-surface-container transition-colors cursor-pointer text-xs"
+                onClick={() => { setShowAuthModal(false); handleAuthAction(); }}
+                className="px-5 py-2.5 bg-transparent border border-white/40 text-white font-bold rounded-xl hover:bg-white/10 transition-colors cursor-pointer text-xs"
               >
                 Log In
               </button>
@@ -180,6 +189,7 @@ export default function Scholarships({
               />
               <span>No IELTS</span>
             </label>
+            <span className="text-[10px] text-outline font-medium italic"><button onClick={() => handleShowAuth()} className="text-secondary font-bold underline cursor-pointer">Log in</button> for advanced filters</span>
             {(publicSearch || publicCountry || publicDegree || publicNoIelts) && (
               <button
                 onClick={() => { setPublicSearch(''); setPublicCountry(''); setPublicDegree(''); setPublicNoIelts(false); }}
@@ -194,7 +204,10 @@ export default function Scholarships({
         {/* Results count */}
         <div className="flex items-center justify-between px-1">
           <span className="text-xs font-extrabold text-on-surface-variant uppercase tracking-wider bg-surface-container/40 px-3 py-1.5 rounded-lg border border-outline-variant/30">
-            {filteredPublic.length} Scholarships Found
+            Showing {filteredPublic.length} of {publicTotalCount} scholarships
+          </span>
+          <span className="text-[10px] text-on-surface-variant/60 font-medium">
+            <button onClick={() => handleShowAuth()} className="text-secondary font-bold underline cursor-pointer">Sign up free</button> to see all and get matched
           </span>
           {publicError && (
             <span className="text-[10px] font-bold text-status-error/80 bg-status-error/5 px-2.5 py-1 rounded-lg">
@@ -315,6 +328,7 @@ export default function Scholarships({
             <Search className="w-8 h-8 text-outline-variant mx-auto mb-3" />
             <p className="text-sm text-on-surface-variant font-medium">No scholarships match your filters.</p>
             <p className="text-xs text-on-surface-variant/50 mt-1">Try adjusting your search criteria or check back later.</p>
+          <p className="text-xs mt-4"><button onClick={() => handleShowAuth()} className="text-secondary font-bold underline cursor-pointer">Sign up free</button> to see all scholarships and get matched</p>
           </div>
         )}
 
@@ -426,6 +440,43 @@ export default function Scholarships({
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+                {/* Save/Track Auth Modal */}
+        {showTrackModal && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowTrackModal(false)}>
+            <div
+              className="bg-surface-container-lowest rounded-2xl shadow-2xl max-w-sm w-full p-8 text-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Bookmark className="w-12 h-12 text-primary mx-auto mb-4" />
+              <h3 className="text-lg font-display font-black text-primary mb-2">Save Scholarships</h3>
+              <p className="text-xs text-on-surface-variant mb-6 leading-relaxed">
+                You need a free account to save scholarships and track your applications.
+                It takes under two minutes to set up.
+              </p>
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => { setShowTrackModal(false); handleAuthAction(); }}
+                  className="w-full px-5 py-3 bg-primary text-on-primary font-bold rounded-xl hover:bg-primary-container transition-colors cursor-pointer text-sm"
+                >
+                  Create Free Account
+                </button>
+                <button
+                  onClick={() => { setShowTrackModal(false); handleAuthAction(); }}
+                  className="w-full px-5 py-2.5 bg-transparent border border-outline-variant/60 text-primary font-bold rounded-xl hover:bg-surface-container transition-colors cursor-pointer text-sm"
+                >
+                  Log In
+                </button>
+                <button
+                  onClick={() => setShowTrackModal(false)}
+                  className="w-full mt-1 text-xs font-bold text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
+                >
+                  Continue Browsing
+                </button>
               </div>
             </div>
           </div>

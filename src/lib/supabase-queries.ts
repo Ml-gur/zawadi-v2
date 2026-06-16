@@ -10,7 +10,7 @@ export async function getPublishedScholarships(filters?: {
   if (filters?.country) query = query.contains('countries', [filters.country]);
   if (filters?.degree) query = query.contains('degree_levels', [filters.degree]);
   if (filters?.no_ielts) query = query.eq('no_ielts', true);
-  return query.order('created_at', { ascending: false });
+  return query.order('id', { ascending: false });
 }
 
 export async function getAllScholarships() {

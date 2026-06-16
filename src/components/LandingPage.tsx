@@ -9,19 +9,28 @@ interface LandingPageProps {
   onViewAllFAQs?: () => void;
 }
 
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Zawadi",
+  "url": "https://techsari.online",
+  "description": "Scholarship matching platform for African students using strict eligibility filtering across all 54 African countries",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://techsari.online/scholarships?search={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+};
+
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  "name": "Techsari Zawadi",
-  "url": "https://www.techsari.online/",
-  "logo": "https://www.techsari.online/icon.svg",
-  "description": "Stop searching global spam. Discover daily-updated, 100% eligible African scholarships, track deadlines, and write winning essays with our AI Studio.",
-  "foundingDate": "2025",
-  "contactPoint": {
-    "@type": "ContactPoint",
-    "email": "hello@techsari.africa",
-    "contactType": "customer support"
-  }
+  "name": "Zawadi",
+  "url": "https://techsari.online",
+  "logo": "https://techsari.online/logo.png",
+  "description": "Zawadi matches African students to scholarships they are eligible to win using deterministic eligibility filtering across all 54 African Union member states",
+  "areaServed": "Africa",
+  "serviceType": "Scholarship Matching and Application Management"
 };
 
 /* ── Inline SVG icons ── */
@@ -153,11 +162,14 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
   return (
     <div className="bg-background text-on-background min-h-screen">
       <SEO
-        title="Zawadi — Find Scholarships You're 100% Eligible For | African Students"
-        description="Stop searching global spam. Discover daily-updated, 100% eligible African scholarships, track deadlines, and write winning essays with our AI Studio."
+        title="Zawadi — Scholarship Matching for African Students"
+        description="Find scholarships you are eligible to win across all 54 African countries. Strict eligibility filtering removes scholarships you do not qualify for. No IELTS required options included."
+        keywords="scholarships for African students, Africa scholarship matching, no IELTS scholarships Africa, fully funded scholarships Africa, scholarship application Africa"
         path="/"
         image="https://techsari.online/og-home.png"
-        schema={organizationSchema}
+        ogTitle="Zawadi — Find Scholarships You Actually Qualify For"
+        ogDescription="Strict eligibility matching for African students. See only scholarships where you meet every requirement. No spam. No data selling. No IELTS barrier."
+        schema={[websiteSchema, organizationSchema]}
       />
 
       {/* ═══════════════════════════════════════════════

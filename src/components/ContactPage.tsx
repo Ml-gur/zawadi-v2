@@ -6,7 +6,7 @@ import { SEO } from './SEO';
 const contactSchema = {
   "@context": "https://schema.org",
   "@type": "ContactPage",
-  "name": "Contact Techsari Zawadi",
+  "name": "Contact Zawadi",
   "description": "Get in touch with the Zawadi team for student support, scholarship listings, partnerships, and media inquiries."
 };
 
@@ -64,8 +64,8 @@ export default function ContactPage({ onBack }: { onBack: () => void }) {
   return (
     <div className="min-h-screen bg-background text-on-background">
       <SEO
-        title="Contact Us — Techsari Zawadi"
-        description="Get in touch with the Zawadi team for student support, scholarship listings, partnerships, and media inquiries."
+        title="Contact Zawadi — Get Help or Partner With Us"
+        description="Contact the Zawadi team for student support, scholarship provider listings, institutional partnerships, or press inquiries."
         path="/contact"
         schema={contactSchema}
       />
