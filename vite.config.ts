@@ -81,6 +81,19 @@ export default defineConfig(() => {
         '@': path.resolve(__dirname, '.'),
       },
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('node_modules/lucide-react')) return 'vendor-icons';
+            if (id.includes('node_modules/@supabase')) return 'vendor-supabase';
+            if (id.includes('node_modules/pdfjs-dist')) return 'vendor-pdf';
+            if (id.includes('node_modules/react-dom')) return 'vendor-react';
+            if (id.includes('node_modules/react')) return 'vendor-react';
+          }
+        }
+      }
+    },
     server: {
       hmr: process.env.DISABLE_HMR !== 'true',
       watch: process.env.DISABLE_HMR === 'true' ? null : { ignored: ['**/src/data/**', '**/uploads/**'] },

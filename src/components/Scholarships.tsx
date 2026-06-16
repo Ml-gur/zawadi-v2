@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Scholarship, ApplicationTracker, DocumentVaultItem } from '../types';
 import { AFRICAN_COUNTRIES } from '../config/matching-config';
-import { Lock, Search, Globe, GraduationCap, Bookmark, ArrowLeft, ExternalLink } from 'lucide-react';
+import { Lock, Search, Globe, GraduationCap, Bookmark, ArrowLeft, ArrowDown, ExternalLink } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { SEO } from './SEO';
 
@@ -30,6 +30,9 @@ export default function Scholarships({
   const [publicLoading, setPublicLoading] = useState(false);
   const [publicError, setPublicError] = useState<string | null>(null);
   const [publicTotalCount, setPublicTotalCount] = useState(0);
+  const [publicPage, setPublicPage] = useState(0);
+  const [publicHasMore, setPublicHasMore] = useState(true);
+  const PUBLIC_PAGE_SIZE = 24;
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showTrackModal, setShowTrackModal] = useState(false);
 
@@ -49,19 +52,27 @@ export default function Scholarships({
     }
   }, [user]);
 
-  const fetchPublicScholarships = async () => {
+  const fetchPublicScholarships = async (page = 0, append = false) => {
     setPublicLoading(true);
     setPublicError(null);
     try {
+      const from = page * PUBLIC_PAGE_SIZE;
+      const to = from + PUBLIC_PAGE_SIZE - 1;
       const { data, error } = await supabase
         .from('scholarships')
         .select('id, name, provider, host_region, host_institution, funding_type, deadline, no_ielts, degree_levels, countries, fields_of_study, urgency, iso2, published, description, eligibility, amount, required_documents, apply_url, source_url, slug, created_at')
         .eq('published', true)
         .order('id', { ascending: false })
-        .limit(12);
+        .range(from, to);
 
       if (!error && data) {
-        setPublicScholarships(data as unknown as Scholarship[]);
+        if (append) {
+          setPublicScholarships(prev => [...prev, ...(data as unknown as Scholarship[])]);
+        } else {
+          setPublicScholarships(data as unknown as Scholarship[]);
+        }
+        setPublicHasMore(data.length === PUBLIC_PAGE_SIZE);
+        setPublicPage(page);
       } else if (error) {
         console.error('Error fetching public scholarships:', error);
         setPublicError('Could not load scholarships. Please try again later.');
@@ -72,6 +83,10 @@ export default function Scholarships({
     } finally {
       setPublicLoading(false);
     }
+  };
+
+  const handleLoadMore = () => {
+    fetchPublicScholarships(publicPage + 1, true);
   };
 
   useEffect(() => {
@@ -290,7 +305,7 @@ export default function Scholarships({
         </div>
 
         {/* Scholarship Cards Grid */}
-        {publicLoading ? (
+        {publicLoading && publicScholarships.length === 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3, 4, 5, 6].map(i => (
               <div key={i} className="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-5 animate-pulse">
@@ -306,102 +321,159 @@ export default function Scholarships({
             ))}
           </div>
         ) : filteredPublic.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredPublic.map(s => {
-              // Deadline urgency color
-              const urgency = (() => {
-                if (!s.deadline || s.deadline.toLowerCase().includes('varies'))
-                  return { label: 'Varies', color: 'text-on-surface-variant/50', bg: 'bg-surface-container-high' };
-                const days = Math.ceil((new Date(s.deadline).getTime() - Date.now()) / 86400000);
-                if (days < 0) return { label: 'Deadline Passed', color: 'text-status-error', bg: 'bg-status-error/10' };
-                if (days <= 30) return { label: `${days} days left`, color: 'text-status-error', bg: 'bg-status-error/10' };
-                if (days <= 60) return { label: `${days} days left`, color: 'text-status-warning', bg: 'bg-status-warning/10' };
-                if (days <= 90) return { label: `${days} days left`, color: 'text-amber-600', bg: 'bg-amber-50' };
-                return { label: `${days} days left`, color: 'text-status-success', bg: 'bg-status-success/10' };
-              })();
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredPublic.map(s => {
+                const urgency = (() => {
+                  if (!s.deadline || s.deadline.toLowerCase().includes('varies'))
+                    return { label: 'Varies', color: 'text-on-surface-variant/50', bg: 'bg-surface-container-high' };
+                  const days = Math.ceil((new Date(s.deadline).getTime() - Date.now()) / 86400000);
+                  if (days < 0) return { label: 'Deadline Passed', color: 'text-status-error', bg: 'bg-status-error/10' };
+                  if (days <= 30) return { label: `${days} days left`, color: 'text-status-error', bg: 'bg-status-error/10' };
+                  if (days <= 60) return { label: `${days} days left`, color: 'text-status-warning', bg: 'bg-status-warning/10' };
+                  if (days <= 90) return { label: `${days} days left`, color: 'text-amber-600', bg: 'bg-amber-50' };
+                  return { label: `${days} days left`, color: 'text-status-success', bg: 'bg-status-success/10' };
+                })();
 
-              return (
-                <div
-                  key={s.id}
-                  onClick={() => setSelectedSchol(s)}
-                  className="group bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-5 hover:border-primary/30 hover:shadow-lg transition-all duration-200 cursor-pointer"
-                >
-                  {/* Top row: Name + urgency badge */}
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-display font-extrabold text-sm text-primary leading-tight group-hover:text-secondary transition-colors line-clamp-2">
-                        {s.name}
-                      </h3>
-                      {s.provider && (
-                        <p className="text-[11px] text-on-surface-variant/80 mt-0.5 font-medium">{s.provider}</p>
+                const hostInfo = [s.host_institution, s.host_region].filter(Boolean).join(' \u00B7 ');
+
+                return (
+                  <div
+                    key={s.id}
+                    onClick={() => setSelectedSchol(s)}
+                    className="group bg-surface-container-lowest border border-outline-variant/60 rounded-2xl hover:border-primary/30 hover:shadow-lg transition-all duration-200 cursor-pointer flex flex-col overflow-hidden"
+                  >
+                    {/* Accent bar */}
+                    <div className={`h-1.5 w-full ${
+                      urgency.label.includes('left') && parseInt(urgency.label) <= 30
+                        ? 'bg-status-error'
+                        : urgency.label.includes('left') && parseInt(urgency.label) <= 60
+                        ? 'bg-status-warning'
+                        : 'bg-primary/30'
+                    }`} />
+
+                    <div className="p-4 flex flex-col gap-2.5 flex-1">
+                      {/* Top: name + provider */}
+                      <div className="min-w-0">
+                        <h3 className="font-display font-extrabold text-sm text-primary leading-tight group-hover:text-secondary transition-colors line-clamp-2">
+                          {s.name}
+                        </h3>
+                        {s.provider && (
+                          <p className="text-[11px] text-on-surface-variant/70 mt-0.5 font-medium">{s.provider}</p>
+                        )}
+                      </div>
+
+                      {/* Host institution / region */}
+                      {hostInfo && (
+                        <p className="text-[10px] text-on-surface-variant/50 flex items-center gap-1">
+                          <GraduationCap className="w-3 h-3 shrink-0" />
+                          {hostInfo}
+                        </p>
                       )}
-                    </div>
-                    <span className={`shrink-0 text-[10px] font-bold px-2 py-1 rounded-full ${urgency.bg} ${urgency.color} whitespace-nowrap`}>
-                      {urgency.label}
-                    </span>
-                  </div>
 
-                  {/* Country / region */}
-                  {(s.countries || s.country) && (s.countries || s.country).length > 0 && (
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <Globe className="w-3 h-3 text-on-surface-variant/50" />
-                      <span className="text-[11px] text-on-surface-variant/70 font-medium truncate">
-                        {(s.countries || s.country || []).join(', ')}
-                      </span>
+                      {/* Eligible countries */}
+                      {(s.countries || s.country) && (s.countries || s.country).length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {(s.countries || s.country || []).slice(0, 3).map((c: string) => (
+                            <span key={c} className="text-[9px] px-1.5 py-0.5 rounded-md bg-primary-fixed/10 text-primary font-semibold">
+                              {c}
+                            </span>
+                          ))}
+                          {(s.countries || s.country || []).length > 3 && (
+                            <span className="text-[9px] text-on-surface-variant/50 font-medium">
+                              +{((s.countries || s.country || []).length - 3)} more
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Amount */}
+                      {s.amount && (
+                        <p className="text-[11px] font-bold text-status-success flex items-center gap-1">
+                          <span className="text-[9px]">●</span>
+                          {s.amount}
+                        </p>
+                      )}
+
+                      {/* Tags */}
+                      <div className="flex flex-wrap items-center gap-1.5 mt-auto">
+                        {s.funding_type && (
+                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
+                            s.funding_type === 'Full'
+                              ? 'bg-status-success/10 text-status-success'
+                              : 'bg-secondary-container/20 text-secondary'
+                          }`}>
+                            {s.funding_type === 'Full' ? 'Full Funding' : 'Partial Funding'}
+                          </span>
+                        )}
+                        {s.no_ielts && (
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                            No IELTS
+                          </span>
+                        )}
+                        {(s.degree_levels || []).slice(0, 1).map(d => (
+                          <span key={d} className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary-fixed/15 text-primary font-semibold">
+                            {d}
+                          </span>
+                        ))}
+                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-auto ${urgency.bg} ${urgency.color}`}>
+                          {urgency.label}
+                        </span>
+                      </div>
+
+                      {/* Sign-up prompt */}
+                      <div className="flex items-center justify-between pt-2 border-t border-outline-variant/20 mt-1">
+                        <div className="flex items-center gap-1.5 text-on-surface-variant/50">
+                          <Lock className="w-3 h-3" />
+                          <span className="text-[9px] font-medium">Sign up for match score</span>
+                        </div>
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleShowAuth(); }}
+                          className="text-[9px] font-bold text-primary hover:text-secondary transition-colors"
+                        >
+                          Sign Up Free
+                        </button>
+                      </div>
                     </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Load More */}
+            {publicHasMore && (
+              <div className="flex justify-center mt-8">
+                <button
+                  onClick={handleLoadMore}
+                  disabled={publicLoading}
+                  className="px-8 py-3 bg-primary text-on-primary font-bold rounded-full hover:bg-primary-container hover:text-on-primary-container transition-all duration-200 shadow-md text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
+                >
+                  {publicLoading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    <>
+                      Load More Scholarships
+                      <ArrowDown className="w-4 h-4" />
+                    </>
                   )}
-
-                  {/* Badges row */}
-                  <div className="flex flex-wrap items-center gap-1.5 mb-3">
-                    {s.funding_type && (
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        s.funding_type === 'Full'
-                          ? 'bg-status-success/10 text-status-success'
-                          : 'bg-secondary-container/20 text-secondary'
-                      }`}>
-                        {s.funding_type === 'Full' ? 'Full Funding' : 'Partial Funding'}
-                      </span>
-                    )}
-                    {s.no_ielts && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                        No IELTS
-                      </span>
-                    )}
-                    {(s.degree_levels || []).slice(0, 2).map(d => (
-                      <span key={d} className="text-[10px] px-2 py-0.5 rounded-full bg-primary-fixed/15 text-primary font-semibold">
-                        {d}
-                      </span>
-                    ))}
-                    {(s.degree_levels || []).length > 2 && (
-                      <span className="text-[10px] text-on-surface-variant/50 font-medium">
-                        +{s.degree_levels.length - 2} more
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Bottom: Lock icon + create account CTA */}
-                  <div className="flex items-center justify-between pt-2 border-t border-outline-variant/20">
-                    <div className="flex items-center gap-1.5 text-on-surface-variant/50">
-                      <Lock className="w-3.5 h-3.5" />
-                      <span className="text-[10px] font-medium">Sign up to see your match</span>
-                    </div>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handleShowAuth(); }}
-                      className="text-[10px] font-bold text-primary hover:text-secondary transition-colors"
-                    >
-                      Sign Up
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           <div className="text-center py-20 bg-surface-container-lowest border border-outline-variant/60 rounded-2xl">
             <Search className="w-8 h-8 text-outline-variant mx-auto mb-3" />
             <p className="text-sm text-on-surface-variant font-medium">No scholarships match your filters.</p>
             <p className="text-xs text-on-surface-variant/50 mt-1">Try adjusting your search criteria or check back later.</p>
-          <p className="text-xs mt-4"><button onClick={() => handleShowAuth()} className="text-secondary font-bold underline cursor-pointer">Sign up free</button> to see all scholarships and get matched</p>
+            <div className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 bg-primary/5 border border-primary/20 rounded-full">
+              <Lock className="w-3.5 h-3.5 text-primary" />
+              <button onClick={() => handleShowAuth()} className="text-xs font-bold text-primary hover:text-secondary transition-colors cursor-pointer">
+                Sign up free to see all scholarships and get matched
+              </button>
+            </div>
           </div>
         )}
 

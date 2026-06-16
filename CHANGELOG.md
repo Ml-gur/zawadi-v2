@@ -1,5 +1,56 @@
 # Changelog
 
+## 2026-06-16 — Pagination, Card Redesign, Analytics, Code Splitting
+
+### Added: Pagination (Remove 12-Scholarship Limit)
+
+**`src/components/Scholarships.tsx`**:
+- Removed `.limit(12)` and replaced with `.range()` pagination
+- Added `publicPage`, `publicHasMore`, `PUBLIC_PAGE_SIZE = 24` state
+- Added `handleLoadMore()` — fetches next page and appends to `publicScholarships`
+- Added `ArrowDown` icon from `lucide-react` for "Load More" button
+- "Load More" button hides when `publicHasMore` is false (fetched fewer items than page size)
+
+### Changed: Scholarship Card Redesign
+
+- Redesigned cards with accent bar (color-coded by deadline urgency: red ≤30d, amber ≤60d, blue)
+- Added host institution/region display line
+- Eligible countries shown as individual tags (max 3) with "+N more" overflow count
+- Amount display added to card
+- Tag layout reordered with urgency badge right-aligned
+- Smaller "Sign Up Free" prompt at card bottom
+- Empty-state CTA updated to pill-shaped button with lock icon
+
+### Added: Google Analytics 4 (Opt-In)
+
+**`src/components/Analytics.tsx`** (new):
+- Conditionally loads GA4 when `VITE_GA_MEASUREMENT_ID` env var is set
+- Tracks page views via React Router `useLocation`
+- Cleans up script tag on unmount
+
+**`src/main.tsx`**:
+- Added `<Analytics />` inside `<BrowserRouter>` for route tracking
+
+**`.env.example`**:
+- Added `VITE_GA_MEASUREMENT_ID` entry with instructions
+
+**`index.html`**:
+- Added preconnect/dns-prefetch for `www.googletagmanager.com`
+
+### Added: JSON-LD Structured Data
+
+- Added `WebSite` schema (`application/ld+json`) with SearchAction to `index.html`
+
+### Changed: Performance — Code Splitting
+
+**`vite.config.ts`**:
+- Added `manualChunks` to separate `lucide-react` (icons), `@supabase`, `pdfjs-dist`, and `react`/`react-dom` into dedicated vendor chunks
+- Reduced application bundle size and improved caching
+
+### Changed: Playwright E2E Tests
+
+All 27 existing Playwright tests pass across desktop/tablet/mobile viewports.
+
 ## 2026-06-16 — Fix React Error #300, Homepage Featured Scholarships, Guest CTA
 
 ### Fixed: React Error #300 "Rendered fewer hooks than expected"

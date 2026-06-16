@@ -29,10 +29,32 @@
     <link rel="preconnect" href="https://js.paystack.com" />
     <link rel="preconnect" href="https://api.openrouter.ai" />
     <link rel="preconnect" href="https://*.supabase.co" />
+    <link rel="preconnect" href="https://www.googletagmanager.com" />
     <link rel="dns-prefetch" href="https://js.paystack.com" />
     <link rel="dns-prefetch" href="https://api.openrouter.ai" />
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
     <script src="https://js.paystack.co/v1/inline.js"></script>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Zawadi",
+      "url": "https://techsari.online",
+      "description": "AI-powered scholarship matching for African students. Discover verified scholarships you're 100% eligible for.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://techsari.online/scholarships?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      },
+      "inLanguage": "en",
+      "audience": {
+        "@type": "Audience",
+        "audienceType": "African Students"
+      }
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
