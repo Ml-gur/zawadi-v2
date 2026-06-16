@@ -489,58 +489,58 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
       {/* ═══════════════════════════════════════════════
           Section 3 — Bento Features Grid
           ═══════════════════════════════════════════════ */}
-      <RevealSection id="features" className="px-6 py-20 md:py-28 bg-surface-container-low">
+      <RevealSection id="features" className="px-4 sm:px-6 py-16 md:py-28 bg-surface-container-low">
         <div className="max-w-[1080px] mx-auto">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-display font-black text-on-surface leading-tight max-w-2xl mx-auto">
+          <div className="text-center mb-10 md:mb-16">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display font-black text-on-surface leading-tight max-w-2xl mx-auto">
               Intelligent Tools for Global Excellence
             </h2>
-            <p className="mt-4 text-sm md:text-base text-on-surface-variant max-w-xl mx-auto">
+            <p className="mt-3 text-sm md:text-base text-on-surface-variant max-w-xl mx-auto">
               Purpose-built features that transform how African students discover and win international scholarships.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-            {/* Featured card — spans 2 columns on lg */}
-            <div className="md:col-span-2 lg:col-span-2 bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-3xl p-6 md:p-8 flex flex-col justify-between relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white/5 -translate-y-1/2 translate-x-1/4 pointer-events-none" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+            {/* Featured card — spans 2 columns on md+ */}
+            <div className="md:col-span-2 bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-2xl md:rounded-3xl p-5 md:p-8 flex flex-col justify-between relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-48 md:w-64 h-48 md:h-64 rounded-full bg-white/5 -translate-y-1/2 translate-x-1/4 pointer-events-none" />
               <div className="relative z-10">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-                    <SearchIcon className="w-5 h-5" />
+                <div className="flex items-center gap-2 mb-3 md:mb-4">
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-white/20 flex items-center justify-center">
+                    <SearchIcon className="w-4 h-4 md:w-5 md:h-5" />
                   </div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-white/70">Core Engine</span>
+                  <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider text-white/70">Core Engine</span>
                 </div>
-                <h3 className="text-xl md:text-2xl font-display font-black mb-3">
+                <h3 className="text-lg md:text-2xl font-display font-black mb-2 md:mb-3">
                   100% Deterministic Matching
                 </h3>
-                <p className="text-sm text-white/80 leading-relaxed max-w-lg mb-5">
+                <p className="text-xs md:text-sm text-white/80 leading-relaxed max-w-lg mb-4 md:mb-5">
                   Unlike AI chatbots that hallucinate eligibility, our engine cross-references your nationality,
                   degree level, field of study, and GPA against hard-coded requirements. If it says you qualify,
                   you actually qualify.
                 </p>
-                <div className="flex flex-wrap gap-2">
-                  <span className="px-3 py-1 rounded-full bg-white/15 text-xs font-semibold">54 Countries</span>
-                  <span className="px-3 py-1 rounded-full bg-white/15 text-xs font-semibold">Real-time Updates</span>
-                  <span className="px-3 py-1 rounded-full bg-white/15 text-xs font-semibold">No AI Hallucination</span>
+                <div className="flex flex-wrap gap-1.5 md:gap-2">
+                  <span className="px-2.5 md:px-3 py-1 rounded-full bg-white/15 text-[10px] md:text-xs font-semibold">54 Countries</span>
+                  <span className="px-2.5 md:px-3 py-1 rounded-full bg-white/15 text-[10px] md:text-xs font-semibold">Real-time Updates</span>
+                  <span className="px-2.5 md:px-3 py-1 rounded-full bg-white/15 text-[10px] md:text-xs font-semibold">No AI Hallucination</span>
                 </div>
               </div>
             </div>
 
             {/* Card: Track Every Application */}
-            <div className="bg-surface border border-outline-variant/20 rounded-2xl p-6 md:p-7 hover:border-primary/30 hover:shadow-md transition-all duration-300 flex flex-col gap-3">
-              <div className="w-11 h-11 rounded-xl bg-secondary-container/30 text-secondary flex items-center justify-center">
-                <ClipboardCheckIcon className="w-5 h-5" />
+            <div className="bg-surface border border-outline-variant/20 rounded-2xl p-5 md:p-7 hover:border-primary/30 hover:shadow-md transition-all duration-300 flex flex-col gap-3">
+              <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-secondary-container/30 text-secondary flex items-center justify-center">
+                <ClipboardCheckIcon className="w-4 h-4 md:w-5 md:h-5" />
               </div>
-              <h3 className="font-display font-bold text-on-surface">Track Every Application</h3>
-              <p className="text-sm text-on-surface-variant leading-relaxed">
+              <h3 className="font-display font-bold text-on-surface text-sm md:text-base">Track Every Application</h3>
+              <p className="text-xs md:text-sm text-on-surface-variant leading-relaxed">
                 A visual pipeline showing exactly where each application stands — draft, submitted, under review, or awarded.
               </p>
               {/* Mini pipeline illustration */}
               <div className="flex items-center gap-1 mt-2">
                 {['Draft', 'Submitted', 'Review', 'Awarded'].map((stage, i) => (
                   <React.Fragment key={stage}>
-                    <div className={`h-2 flex-1 rounded-full ${i === 0 ? 'bg-outline-variant/40' : i === 1 ? 'bg-status-info/40' : i === 2 ? 'bg-status-warning/40' : 'bg-secondary-container/60'}`} />
+                    <div className={`h-1.5 md:h-2 flex-1 rounded-full ${i === 0 ? 'bg-outline-variant/40' : i === 1 ? 'bg-status-info/40' : i === 2 ? 'bg-status-warning/40' : 'bg-secondary-container/60'}`} />
                     {i < 3 && <div className="w-1" />}
                   </React.Fragment>
                 ))}
@@ -548,57 +548,57 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
             </div>
 
             {/* Card: AI Co-Creation + Human Review */}
-            <div className="bg-surface border border-outline-variant/20 rounded-2xl p-6 md:p-7 hover:border-primary/30 hover:shadow-md transition-all duration-300 flex flex-col gap-3">
-              <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                <SparklesAIIcon className="w-5 h-5" />
+            <div className="bg-surface border border-outline-variant/20 rounded-2xl p-5 md:p-7 hover:border-primary/30 hover:shadow-md transition-all duration-300 flex flex-col gap-3">
+              <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                <SparklesAIIcon className="w-4 h-4 md:w-5 md:h-5" />
               </div>
-              <h3 className="font-display font-bold text-on-surface">AI Co-Creation + Human Review</h3>
-              <p className="text-sm text-on-surface-variant leading-relaxed">
+              <h3 className="font-display font-bold text-on-surface text-sm md:text-base">AI + Human Review</h3>
+              <p className="text-xs md:text-sm text-on-surface-variant leading-relaxed">
                 Our AI learns your writing voice to generate personal statements, then a real human mentor reviews
                 and refines every essay before submission.
               </p>
               <div className="flex items-center gap-2 mt-2 text-xs font-semibold text-secondary">
-                <BadgeCheckIcon className="w-4 h-4" />
+                <BadgeCheckIcon className="w-3.5 h-3.5 md:w-4 md:h-4" />
                 Human-reviewed on every plan
               </div>
             </div>
 
             {/* Card: Secure Document Vault */}
-            <div className="bg-surface border border-outline-variant/20 rounded-2xl p-6 md:p-7 hover:border-primary/30 hover:shadow-md transition-all duration-300 flex flex-col gap-3">
-              <div className="w-11 h-11 rounded-xl bg-secondary-container/30 text-secondary flex items-center justify-center">
-                <LockIcon className="w-5 h-5" />
+            <div className="bg-surface border border-outline-variant/20 rounded-2xl p-5 md:p-7 hover:border-primary/30 hover:shadow-md transition-all duration-300 flex flex-col gap-3">
+              <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-secondary-container/30 text-secondary flex items-center justify-center">
+                <LockIcon className="w-4 h-4 md:w-5 md:h-5" />
               </div>
-              <h3 className="font-display font-bold text-on-surface">Secure Document Vault</h3>
-              <p className="text-sm text-on-surface-variant leading-relaxed">
+              <h3 className="font-display font-bold text-on-surface text-sm md:text-base">Secure Document Vault</h3>
+              <p className="text-xs md:text-sm text-on-surface-variant leading-relaxed">
                 Upload transcripts, recommendation letters, and certificates once. We organize, store,
                 and surface the right documents for each application.
               </p>
             </div>
 
             {/* Card: Alternative English Pathways */}
-            <div className="bg-surface border border-outline-variant/20 rounded-2xl p-6 md:p-7 hover:border-primary/30 hover:shadow-md transition-all duration-300 flex flex-col gap-3 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-20 h-20 rounded-bl-3xl bg-status-success/10 pointer-events-none" />
-              <div className="w-11 h-11 rounded-xl bg-status-success/15 text-status-success flex items-center justify-center">
-                <GlobeIcon className="w-5 h-5" />
+            <div className="bg-surface border border-outline-variant/20 rounded-2xl p-5 md:p-7 hover:border-primary/30 hover:shadow-md transition-all duration-300 flex flex-col gap-3 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-16 h-16 md:w-20 md:h-20 rounded-bl-3xl bg-status-success/10 pointer-events-none" />
+              <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-status-success/15 text-status-success flex items-center justify-center">
+                <GlobeIcon className="w-4 h-4 md:w-5 md:h-5" />
               </div>
-              <h3 className="font-display font-bold text-on-surface">Alternative English Pathways</h3>
-              <p className="text-sm text-on-surface-variant leading-relaxed">
+              <h3 className="font-display font-bold text-on-surface text-sm md:text-base">Alternative English Pathways</h3>
+              <p className="text-xs md:text-sm text-on-surface-variant leading-relaxed">
                 Filter scholarships that accept Medium of Instruction certificates or the $60 Duolingo English Test.
                 No IELTS required.
               </p>
-              <div className="flex items-center gap-1.5 mt-1">
-                <span className="px-2.5 py-0.5 rounded-full bg-status-success/10 text-status-success text-xs font-semibold">No IELTS</span>
-                <span className="px-2.5 py-0.5 rounded-full bg-status-success/10 text-status-success text-xs font-semibold">MOI Accepted</span>
-                <span className="px-2.5 py-0.5 rounded-full bg-status-success/10 text-status-success text-xs font-semibold">Duolingo $60</span>
+              <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                <span className="px-2 md:px-2.5 py-0.5 rounded-full bg-status-success/10 text-status-success text-[10px] md:text-xs font-semibold">No IELTS</span>
+                <span className="px-2 md:px-2.5 py-0.5 rounded-full bg-status-success/10 text-status-success text-[10px] md:text-xs font-semibold">MOI Accepted</span>
+                <span className="px-2 md:px-2.5 py-0.5 rounded-full bg-status-success/10 text-status-success text-[10px] md:text-xs font-semibold">Duolingo $60</span>
               </div>
             </div>
           </div>
 
           {/* Bottom badge */}
-          <div className="flex justify-center mt-10">
-            <div className="inline-flex items-center gap-2 bg-secondary-container/20 border border-secondary-container/30 rounded-full px-5 py-2.5">
-              <BadgeCheckIcon className="w-4 h-4 text-secondary" />
-              <span className="text-xs font-bold text-on-surface-variant">
+          <div className="flex justify-center mt-8 md:mt-10">
+            <div className="inline-flex items-center gap-2 bg-secondary-container/20 border border-secondary-container/30 rounded-full px-4 md:px-5 py-2 md:py-2.5">
+              <BadgeCheckIcon className="w-3.5 h-3.5 md:w-4 md:h-4 text-secondary" />
+              <span className="text-[10px] md:text-xs font-bold text-on-surface-variant">
                 Human-Vetted Accuracy — every scholarship verified by our research team
               </span>
             </div>
@@ -607,55 +607,55 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
       </RevealSection>
 
       {/* ═══════════════════════════════════════════════
-          Section 4 — Testimonials
+          Section 4 — Testimonials (Bento Grid)
           ═══════════════════════════════════════════════ */}
-      <RevealSection className="px-6 py-20 md:py-28 bg-surface-container-lowest">
+      <RevealSection className="px-4 sm:px-6 py-16 md:py-28 bg-surface-container-lowest">
         <div className="max-w-[1080px] mx-auto">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-display font-black text-on-surface leading-tight max-w-2xl mx-auto">
+          <div className="text-center mb-10 md:mb-16">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display font-black text-on-surface leading-tight max-w-2xl mx-auto">
               Success Stories from African Scholars
             </h2>
-            <p className="mt-4 text-sm md:text-base text-on-surface-variant max-w-xl mx-auto">
-              Real students who found and won life-changing scholarships through Techsari Zawadi.
+            <p className="mt-3 text-sm md:text-base text-on-surface-variant max-w-xl mx-auto">
+              Real students who found and won life-changing scholarships through Zawadi.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 md:gap-6">
-            {/* Featured scholar — spans left side */}
-            <div className="lg:col-span-2 bg-gradient-to-br from-surface-container-low to-surface border border-outline-variant/20 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row gap-6 items-center md:items-start relative overflow-hidden">
-              <div className="absolute top-4 right-6 text-6xl text-primary/5 pointer-events-none">
-                <QuoteIcon className="w-16 h-16" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
+            {/* Featured scholar — spans left 2 cols */}
+            <div className="md:col-span-2 bg-gradient-to-br from-surface-container-low to-surface border border-outline-variant/20 rounded-2xl md:rounded-3xl p-5 md:p-8 flex flex-col md:flex-row gap-5 md:gap-6 items-center md:items-start relative overflow-hidden">
+              <div className="absolute top-4 right-4 md:top-6 md:right-6 text-5xl md:text-6xl text-primary/5 pointer-events-none">
+                <QuoteIcon className="w-12 h-12 md:w-16 md:h-16" />
               </div>
               <div className="flex-shrink-0">
-                <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary-container/40 flex items-center justify-center text-3xl font-black text-primary">
+                <div className="w-16 h-16 md:w-24 md:h-24 rounded-xl md:rounded-2xl bg-gradient-to-br from-primary/20 to-secondary-container/40 flex items-center justify-center text-xl md:text-3xl font-black text-primary">
                   AK
                 </div>
               </div>
               <div className="flex-1 relative z-10 text-center md:text-left">
-                <p className="text-base md:text-lg text-on-surface leading-relaxed italic mb-4">
+                <p className="text-sm md:text-lg text-on-surface leading-relaxed italic mb-4">
                   "I had been searching for scholarships for over a year and kept hitting dead ends.
-                  Techsari Zawadi showed me 12 opportunities I was 100% eligible for within minutes.
+                  Zawadi showed me 12 opportunities I was 100% eligible for within minutes.
                   I secured a fully-funded Master's in Germany. This platform changed my life."
                 </p>
                 <div>
-                  <div className="font-display font-bold text-primary">Amina Kouyaté</div>
+                  <div className="font-display font-bold text-primary text-sm md:text-base">Amina Kouyaté</div>
                   <div className="text-xs text-on-surface-variant flex items-center gap-1 justify-center md:justify-start mt-1">
                     <MapIcon className="w-3.5 h-3.5" />
                     Mali → Germany • MSc in Renewable Energy
                   </div>
                   <div className="flex items-center gap-0.5 mt-2 justify-center md:justify-start">
                     {[1, 2, 3, 4, 5].map((i) => (
-                      <StarIcon key={i} className="w-4 h-4 text-secondary" />
+                      <StarIcon key={i} className="w-3.5 h-3.5 text-secondary" />
                     ))}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Smaller testimonial 1 */}
-            <div className="bg-surface border border-outline-variant/20 rounded-2xl p-6 md:p-7 flex flex-col gap-4 hover:shadow-md transition-all duration-300">
+            {/* Smaller testimonial 1 — right col */}
+            <div className="bg-surface border border-outline-variant/20 rounded-2xl p-5 md:p-7 flex flex-col gap-3 hover:shadow-md transition-all duration-300">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-secondary-container/40 to-primary-fixed/40 flex items-center justify-center text-lg font-black text-secondary">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-secondary-container/40 to-primary-fixed/40 flex items-center justify-center text-base md:text-lg font-black text-secondary">
                   CN
                 </div>
                 <div>
@@ -663,21 +663,21 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
                   <div className="text-xs text-on-surface-variant">Nigeria → Canada</div>
                 </div>
               </div>
-              <p className="text-sm text-on-surface-variant leading-relaxed">
+              <p className="text-xs md:text-sm text-on-surface-variant leading-relaxed">
                 "The No-IELTS filter alone saved me $250 and months of preparation. I used my MOI certificate
                 and got accepted to the University of Toronto with a full scholarship."
               </p>
-              <div className="flex items-center gap-0.5">
+              <div className="flex items-center gap-0.5 mt-auto">
                 {[1, 2, 3, 4, 5].map((i) => (
-                  <StarIcon key={i} className="w-3.5 h-3.5 text-secondary" />
+                  <StarIcon key={i} className="w-3 h-3 md:w-3.5 md:h-3.5 text-secondary" />
                 ))}
               </div>
             </div>
 
             {/* Smaller testimonial 2 */}
-            <div className="bg-surface border border-outline-variant/20 rounded-2xl p-6 md:p-7 flex flex-col gap-4 hover:shadow-md transition-all duration-300 lg:col-start-1">
+            <div className="bg-surface border border-outline-variant/20 rounded-2xl p-5 md:p-7 flex flex-col gap-3 hover:shadow-md transition-all duration-300">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary-fixed/40 to-secondary-container/40 flex items-center justify-center text-lg font-black text-primary">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-primary-fixed/40 to-secondary-container/40 flex items-center justify-center text-base md:text-lg font-black text-primary">
                   FM
                 </div>
                 <div>
@@ -685,25 +685,25 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
                   <div className="text-xs text-on-surface-variant">Kenya → UK</div>
                 </div>
               </div>
-              <p className="text-sm text-on-surface-variant leading-relaxed">
+              <p className="text-xs md:text-sm text-on-surface-variant leading-relaxed">
                 "The AI essay co-creator helped me articulate my story in a way I never could alone.
                 My mentor's feedback made the difference. Now I'm studying Medicine at King's College London."
               </p>
-              <div className="flex items-center gap-0.5">
+              <div className="flex items-center gap-0.5 mt-auto">
                 {[1, 2, 3, 4, 5].map((i) => (
-                  <StarIcon key={i} className="w-3.5 h-3.5 text-secondary" />
+                  <StarIcon key={i} className="w-3 h-3 md:w-3.5 md:h-3.5 text-secondary" />
                 ))}
               </div>
             </div>
 
-            {/* Call to action card */}
-            <div className="bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-2xl p-6 md:p-7 flex flex-col justify-center items-center text-center gap-4">
-              <p className="font-display font-bold text-lg leading-snug">
+            {/* Call to action card — full width bottom */}
+            <div className="md:col-span-3 bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-4">
+              <p className="font-display font-bold text-base md:text-lg leading-snug text-center md:text-left">
                 Ready to write your own success story?
               </p>
               <button
                 onClick={onGetStarted}
-                className="bg-white text-primary hover:bg-primary-fixed hover:text-on-primary-fixed px-6 py-3 min-h-[48px] rounded-full font-bold transition-all duration-200 shadow-md flex items-center gap-2 cursor-pointer"
+                className="bg-white text-primary hover:bg-primary-fixed hover:text-on-primary-fixed px-6 py-3 min-h-[44px] rounded-xl md:rounded-full font-bold transition-all duration-200 shadow-md flex items-center gap-2 cursor-pointer shrink-0"
               >
                 Start Your Journey
                 <ArrowForward className="w-4 h-4" />
@@ -714,18 +714,34 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
       </RevealSection>
 
       {/* ═══════════════════════════════════════════════
-          Section 5 — FAQ
+          Section 5 — FAQ (with FAQPage Schema)
           ═══════════════════════════════════════════════ */}
-      <RevealSection id="faq" className="px-6 py-20 md:py-28 bg-surface-container-low">
+      <RevealSection id="faq" className="px-4 sm:px-6 py-16 md:py-28 bg-surface-container-low">
         <div className="max-w-[800px] mx-auto">
-          <div className="text-center mb-10 md:mb-14">
-            <h2 className="text-2xl md:text-3xl font-display font-black text-on-surface">
+          <div className="text-center mb-8 md:mb-14">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-black text-on-surface">
               Frequently Asked Questions
             </h2>
             <p className="mt-2 text-sm text-on-surface-variant">
-              Everything you need to know about finding scholarships with Techsari Zawadi.
+              Everything you need to know about finding scholarships with Zawadi.
             </p>
           </div>
+
+          {/* FAQPage JSON-LD */}
+          <script type="application/ld+json">
+            {JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              "mainEntity": landingFaqs.map(faq => ({
+                "@type": "Question",
+                "name": faq.q,
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": faq.a
+                }
+              }))
+            })}
+          </script>
 
           <div className="space-y-2">
             {landingFaqs.map((faq, idx) => {
@@ -734,7 +750,7 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
               return (
                 <div
                   key={faqId}
-                  className={`border rounded-2xl transition-all duration-300 overflow-hidden ${
+                  className={`border rounded-xl md:rounded-2xl transition-all duration-300 overflow-hidden ${
                     isOpen
                       ? 'bg-primary-fixed/5 border-primary shadow-md'
                       : 'bg-surface border-outline-variant/30'
@@ -742,18 +758,18 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
                 >
                   <button
                     onClick={() => setOpenFaq(isOpen ? null : faqId)}
-                    className="w-full flex justify-between items-center p-5 text-left cursor-pointer group"
+                    className="w-full flex justify-between items-center p-4 md:p-5 text-left cursor-pointer group"
                     aria-expanded={isOpen}
                   >
                     <span
-                      className={`font-bold text-sm transition-colors ${
+                      className={`font-bold text-xs md:text-sm transition-colors ${
                         isOpen ? 'text-primary' : 'text-on-surface group-hover:text-primary'
                       }`}
                     >
                       {faq.q}
                     </span>
                     <svg
-                      className={`w-5 h-5 flex-shrink-0 ml-4 transition-transform duration-300 ${
+                      className={`w-4 h-4 md:w-5 md:h-5 flex-shrink-0 ml-3 transition-transform duration-300 ${
                         isOpen ? 'rotate-180 text-primary' : 'text-on-surface-variant'
                       }`}
                       fill="none"
@@ -771,7 +787,7 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
                         : 'max-h-0 opacity-0'
                     }`}
                   >
-                    <div className="p-5 text-sm text-on-surface-variant leading-relaxed bg-surface-container-lowest/50">
+                    <div className="p-4 md:p-5 text-xs md:text-sm text-on-surface-variant leading-relaxed bg-surface-container-lowest/50">
                       {faq.a}
                     </div>
                   </div>
@@ -781,7 +797,7 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
           </div>
 
           {onViewAllFAQs && (
-            <div className="mt-10 text-center">
+            <div className="mt-8 md:mt-10 text-center">
               <button
                 onClick={onViewAllFAQs}
                 className="inline-flex items-center gap-2 text-sm font-bold text-secondary hover:text-primary transition-colors cursor-pointer border border-secondary/30 hover:border-primary/30 rounded-xl px-5 py-3"
@@ -797,19 +813,19 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
       {/* ═══════════════════════════════════════════════
           Footer CTA
           ═══════════════════════════════════════════════ */}
-      <RevealSection className="px-6 py-20 md:py-24 bg-primary text-on-primary text-center">
+      <RevealSection className="px-4 sm:px-6 py-16 md:py-24 bg-primary text-on-primary text-center">
         <div className="max-w-[640px] mx-auto">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-display font-black mb-6 leading-tight">
-            Your scholarship is out there. Let us help you find it.
+          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display font-black mb-4 md:mb-6 leading-tight">
+            Your scholarship is out there.<br className="hidden sm:inline" /> Let us help you find it.
           </h2>
           <button
             onClick={onGetStarted}
-            className="bg-white text-primary hover:bg-primary-fixed-dim hover:text-on-primary-fixed px-10 py-4 min-h-[48px] rounded-full font-bold text-lg transition-all duration-300 shadow-lg inline-flex items-center gap-2 cursor-pointer"
+            className="bg-white text-primary hover:bg-primary-fixed-dim hover:text-on-primary-fixed px-8 md:px-10 py-3.5 md:py-4 min-h-[48px] rounded-xl md:rounded-full font-bold text-base md:text-lg transition-all duration-300 shadow-lg inline-flex items-center gap-2 cursor-pointer active:scale-[0.97]"
           >
             Start for Free
             <ArrowForward className="w-4 h-4" />
           </button>
-          <p className="mt-6 text-xs text-on-primary/60">
+          <p className="mt-4 md:mt-6 text-xs text-on-primary/60">
             Create your profile in 3 minutes. No credit card required.
           </p>
         </div>

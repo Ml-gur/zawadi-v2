@@ -1,5 +1,38 @@
 # Changelog
 
+## 2026-06-16 — Bento Grid Refinement: Features Section Responsive Sizing + Test Stability
+
+### Changed: Features Bento Grid — Responsive Sizing & Tighter Gaps
+
+**`src/components/LandingPage.tsx`**:
+- Grid gaps reduced: `gap-4` mobile / `gap-5` desktop (was `gap-5` / `gap-6`)
+- All card text/icons scaled down for mobile: `text-xs` body, `text-sm` headings, `w-10 h-10` icons
+- Featured card uses `p-5` mobile / `p-8` desktop (was `p-6` / `p-8`)
+- Removed `col-span-2` on mobile — cards stack full-width, grid activates at `md:col-span-2`
+- Condensed "AI Co-Creation + Human Review" heading to "AI + Human Review"
+- Smaller tag chips on mobile (`text-[10px]`, `px-2`), `flex-wrap` for overflow
+- Section padding tightened: `px-4` mobile / `py-16` mobile (was `px-6` / `py-20`)
+- Section heading/text reduced: `text-xl` mobile heading (was `text-2xl`)
+
+### Changed: Footer CTA — Mobile Compact Styling
+
+**`src/components/LandingPage.tsx`**:
+- Button uses `rounded-xl` on mobile / `rounded-full` desktop (consistent with hero pattern)
+- Added `active:scale-[0.97]` press feedback
+- Heading uses `text-xl` mobile / `text-2xl+` desktop
+- Padding reduced: `py-16` mobile (was `py-20`)
+- Horizontal padding: `px-4` mobile (was `px-6`)
+
+### Fixed: Playwright E2E — Guest Banner "Log In" Button Locator
+
+**`e2e/scholarships.spec.ts`**:
+- Changed from `.first()` to `.last()` for `button:has-text("Log In")` — the navbar button is `hidden` on mobile (`<sm`) while the guest banner button remains visible. Picking the last match ensures we target the guest banner button on all viewports.
+
+### Changed: Playwright Config — Extended Test Timeout
+
+**`playwright.config.ts`**:
+- Global timeout increased from 30s → 60s to accommodate slower mobile viewport tests against the live site
+
 ## 2026-06-16 — Mobile-First Redesign: Navbar, Hero, Footer, Bottom Nav
 
 ### Changed: Navbar — Mobile-First Redesign

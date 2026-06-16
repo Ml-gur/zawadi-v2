@@ -33,7 +33,7 @@ test.describe('Scholarships Page - Live Site', () => {
 
     await expect(page.locator('text=You are viewing scholarships as a guest')).toBeVisible({ timeout: 10000 });
     await expect(page.locator('button:has-text("Create Free Account")')).toBeVisible({ timeout: 5000 });
-    await expect(page.locator('button:has-text("Log In")').first()).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('button:has-text("Log In")').last()).toBeVisible({ timeout: 5000 });
   });
 
   test('scholarship list renders data', async ({ page }) => {
