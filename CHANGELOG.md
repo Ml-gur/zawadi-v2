@@ -2,6 +2,17 @@
 
 ## 2026-06-16 — Vercel Edge Middleware: Social Crawler OG Tag Injection + Bento Polish
 
+### Fixed: Dynamic OG Endpoint — ESM Module Export (500 → Graceful Fallback)
+
+**`api/og-scholarship.js`**:
+- **Root cause**: The project's `package.json` has `"type": "module"`, but the function used `module.exports = async (req, res)` (CommonJS). Vercel's Node.js runtime loaded it as ESM, making the handler `undefined` → 500 `FUNCTION_INVOCATION_FAILED`. The try/catch was never reached.
+- **Fix**: Changed to `export default async function handler(req, res)` (ESM syntax)
+- Changed `require('sharp')` → `await import('sharp')` (ESM-compatible dynamic import)
+- Changed manual 302 redirect headers to `res.redirect(302, '...')` (cleaner API)
+- Graceful fallback confirmed working: when `sharp` native module fails, redirects to `og-scholarships.png` static image
+
+## 2026-06-16 — Vercel Edge Middleware: Social Crawler OG Tag Injection + Bento Polish
+
 ### Added: Vercel Edge Middleware — Server-Side OG Tags for Social Crawlers
 
 **`middleware.ts`** (new):

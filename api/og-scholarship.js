@@ -115,7 +115,7 @@ function generateSvg({ name, provider, funding_type, deadline, countries, degree
 </svg>`;
 }
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   const {
     name = 'Scholarship',
     provider = '',
@@ -131,7 +131,7 @@ module.exports = async (req, res) => {
 
   // Try sharp (native module) — if it fails, redirect to static fallback
   try {
-    const sharp = require('sharp');
+    const { default: sharp } = await import('sharp');
     const png = await sharp(Buffer.from(svg)).png().toBuffer();
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=86400');
@@ -139,6 +139,6 @@ module.exports = async (req, res) => {
     res.status(200).send(png);
   } catch (e) {
     console.error('og-scholarship: sharp unavailable, redirecting to static fallback', e.message || e);
-    res.status(302).setHeader('Location', 'https://techsari.online/og-scholarships.png').end();
+    return res.redirect(302, 'https://techsari.online/og-scholarships.png');
   }
-};
+}
