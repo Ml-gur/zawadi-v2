@@ -197,46 +197,46 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
       />
 
       {/* ═══════════════════════════════════════════════
-          Section 1 — Hero
+          Section 1 — Hero (Mobile-First Bento Layout)
           ═══════════════════════════════════════════════ */}
-      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-grid-pattern mesh-gradient px-6 pt-24 md:pt-28 pb-16 md:pb-32">
+      <section className="relative min-h-[90dvh] flex items-center justify-center overflow-hidden bg-grid-pattern mesh-gradient px-4 sm:px-6 pt-20 md:pt-28 pb-12 md:pb-32">
         {/* Decorative gradient orbs */}
-        <div className="absolute top-[-15%] right-[-8%] w-[600px] h-[600px] rounded-full bg-[radial-gradient(circle,rgba(0,107,73,0.10)_0%,transparent_70%)] pointer-events-none" />
-        <div className="absolute bottom-[-20%] left-[-8%] w-[500px] h-[500px] rounded-full bg-[radial-gradient(circle,rgba(0,23,54,0.06)_0%,transparent_70%)] pointer-events-none" />
-        <div className="absolute top-[40%] left-[60%] w-[300px] h-[300px] rounded-full bg-[radial-gradient(circle,rgba(254,147,44,0.06)_0%,transparent_70%)] pointer-events-none" />
+        <div className="absolute top-[-10%] right-[-20%] w-[400px] md:w-[600px] h-[400px] md:h-[600px] rounded-full bg-[radial-gradient(circle,rgba(0,107,73,0.10)_0%,transparent_70%)] pointer-events-none" />
+        <div className="absolute bottom-[-20%] left-[-20%] w-[350px] md:w-[500px] h-[350px] md:h-[500px] rounded-full bg-[radial-gradient(circle,rgba(0,23,54,0.06)_0%,transparent_70%)] pointer-events-none" />
+        <div className="absolute top-[50%] left-[50%] w-[200px] md:w-[300px] h-[200px] md:h-[300px] rounded-full bg-[radial-gradient(circle,rgba(254,147,44,0.06)_0%,transparent_70%)] pointer-events-none" />
 
         <div className="max-w-[1100px] mx-auto w-full z-10">
-          <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
+          <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
             {/* Left: text content */}
-            <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left gap-6">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-black leading-tight max-w-xl">
+            <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left gap-5">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-black leading-tight max-w-xl">
                 Unlock Your Academic Future with{' '}
-                <span className="text-primary">Techsari Zawadi</span>
+                <span className="text-primary">Zawadi</span>
               </h1>
 
-              <p className="text-lg md:text-xl text-on-surface-variant max-w-lg leading-relaxed">
+              <p className="text-base sm:text-lg md:text-xl text-on-surface-variant max-w-lg leading-relaxed">
                 AI-powered scholarship matching built exclusively for African students.
                 Find and apply for opportunities you are 100% eligible for.
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 mt-2 w-full sm:w-auto">
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                 <button
                   onClick={onGetStarted}
-                  className="bg-primary text-on-primary hover:bg-primary-container hover:scale-105 px-8 py-4 min-h-[48px] rounded-full font-semibold transition-all duration-200 shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+                  className="bg-primary text-on-primary hover:bg-primary-container hover:scale-[1.02] active:scale-[0.98] px-6 sm:px-8 py-3.5 sm:py-4 min-h-[48px] rounded-xl sm:rounded-full font-semibold transition-all duration-200 shadow-lg flex items-center justify-center gap-2 cursor-pointer"
                 >
                   Start Your Journey
                   <ArrowForward className="w-4 h-4" />
                 </button>
                 <Link
                   to="/scholarships"
-                  className="bg-secondary text-on-secondary hover:bg-secondary-container hover:text-on-secondary-container px-8 py-4 min-h-[48px] rounded-full font-semibold transition-all duration-200 shadow-md flex items-center justify-center gap-2 text-center"
+                  className="bg-secondary text-on-secondary hover:bg-secondary-container hover:text-on-secondary-container px-6 sm:px-8 py-3.5 sm:py-4 min-h-[48px] rounded-xl sm:rounded-full font-semibold transition-all duration-200 shadow-md flex items-center justify-center gap-2 text-center"
                 >
                   Browse Scholarships
                   <ArrowForward className="w-4 h-4" />
                 </Link>
                 <a
                   href="#features"
-                  className="bg-surface-container-lowest text-on-surface border border-outline-variant hover:bg-surface-container-low hover:border-outline px-8 py-4 min-h-[48px] rounded-full font-semibold transition-all duration-200 shadow-sm flex items-center justify-center gap-2 text-center"
+                  className="hidden sm:inline-flex bg-surface-container-lowest text-on-surface border border-outline-variant hover:bg-surface-container-low hover:border-outline px-8 py-4 min-h-[48px] rounded-full font-semibold transition-all duration-200 shadow-sm items-center justify-center gap-2 text-center"
                 >
                   See How it Works
                 </a>
@@ -251,18 +251,18 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
               </p>
 
               {/* Trust indicators */}
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-5 mt-3 text-xs text-on-surface-variant/70">
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mt-2 text-xs text-on-surface-variant/70">
                 <span className="flex items-center gap-1.5">
-                  <ShieldCheckIcon className="w-4 h-4 text-status-success" />
+                  <ShieldCheckIcon className="w-3.5 h-3.5 text-status-success" />
                   No data selling
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <GlobeIcon className="w-4 h-4" />
+                  <GlobeIcon className="w-3.5 h-3.5" />
                   {countries.length} African countries
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <BadgeCheckIcon className="w-4 h-4 text-secondary" />
-                  Human-vetted accuracy
+                  <BadgeCheckIcon className="w-3.5 h-3.5 text-secondary" />
+                  Human-vetted
                 </span>
               </div>
             </div>
@@ -271,25 +271,25 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
             <div className="flex-1 flex justify-center lg:justify-end">
               <div className="relative">
                 {/* Decorative image placeholder with gradient */}
-                <div className="w-72 h-80 md:w-80 md:h-96 rounded-3xl bg-gradient-to-br from-primary-container/30 via-primary-fixed/20 to-secondary-container/30 border border-surface-container-highest/50 shadow-2xl overflow-hidden">
+                <div className="w-[260px] h-[300px] sm:w-72 sm:h-80 md:w-80 md:h-96 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-primary-container/30 via-primary-fixed/20 to-secondary-container/30 border border-surface-container-highest/50 shadow-2xl overflow-hidden">
                   {/* Abstract illustration inside */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-40 h-40 rounded-full bg-primary/5 flex items-center justify-center">
-                      <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
-                        <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                          <SearchIcon className="w-6 h-6 text-primary" />
+                    <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-primary/5 flex items-center justify-center">
+                      <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-primary/10 flex items-center justify-center">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                          <SearchIcon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                         </div>
                       </div>
                     </div>
                   </div>
                   {/* Floating stats */}
-                  <div className="absolute top-6 left-6 bg-surface-container-lowest/80 backdrop-blur-md border border-outline-variant/20 rounded-2xl px-4 py-3 shadow-lg">
-                    <div className="text-2xl font-black text-primary">98%</div>
-                    <div className="text-xs text-on-surface-variant">Match Accuracy</div>
+                  <div className="absolute top-4 left-4 sm:top-6 sm:left-6 bg-surface-container-lowest/80 backdrop-blur-md border border-outline-variant/20 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 shadow-lg">
+                    <div className="text-xl sm:text-2xl font-black text-primary">98%</div>
+                    <div className="text-[10px] sm:text-xs text-on-surface-variant">Match Accuracy</div>
                   </div>
-                  <div className="absolute bottom-8 right-6 bg-surface-container-lowest/80 backdrop-blur-md border border-outline-variant/20 rounded-2xl px-4 py-3 shadow-lg">
-                    <div className="text-2xl font-black text-secondary">2,500+</div>
-                    <div className="text-xs text-on-surface-variant">Scholarships</div>
+                  <div className="absolute bottom-6 right-4 sm:bottom-8 sm:right-6 bg-surface-container-lowest/80 backdrop-blur-md border border-outline-variant/20 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 shadow-lg">
+                    <div className="text-xl sm:text-2xl font-black text-secondary">2,500+</div>
+                    <div className="text-[10px] sm:text-xs text-on-surface-variant">Scholarships</div>
                   </div>
                 </div>
               </div>
@@ -299,15 +299,15 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
       </section>
 
       {/* ═══════════════════════════════════════════════
-          Featured Scholarships Section
+          Featured Scholarships Section (Mobile Swipe)
           ═══════════════════════════════════════════════ */}
-      <RevealSection className="px-6 py-20 md:py-28 bg-surface-container-low">
+      <RevealSection className="px-4 sm:px-6 py-16 md:py-28 bg-surface-container-low">
         <div className="max-w-[1080px] mx-auto">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-display font-black text-on-surface leading-tight max-w-2xl mx-auto">
+          <div className="text-center mb-8 md:mb-16">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display font-black text-on-surface leading-tight max-w-2xl mx-auto">
               Explore Active Scholarships
             </h2>
-            <p className="mt-4 text-sm md:text-base text-on-surface-variant max-w-xl mx-auto">
+            <p className="mt-3 text-sm md:text-base text-on-surface-variant max-w-xl mx-auto">
               Hand-picked opportunities currently open for African students. Updated daily.
             </p>
           </div>
@@ -321,52 +321,96 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
               <p className="text-sm text-on-surface-variant">Featured scholarships loading soon.</p>
             </div>
           ) : (
-            <div className={`grid grid-cols-1 ${featuredCols >= 2 ? 'md:grid-cols-2' : ''} ${featuredCols >= 3 ? 'lg:grid-cols-3' : ''} gap-5 md:gap-6`}>
-              {featuredScholarships.map(s => (
-                <Link
-                  key={s.id}
-                  to={`/scholarships`}
-                  className="group bg-surface border border-outline-variant/20 rounded-2xl p-6 hover:border-primary/30 hover:shadow-lg transition-all duration-300 flex flex-col gap-3"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <h3 className="font-display font-bold text-on-surface group-hover:text-primary transition-colors text-sm leading-snug flex-1">
-                      {s.name}
-                    </h3>
-                    {s.no_ielts && (
-                      <span className="shrink-0 px-2 py-0.5 rounded-full bg-status-success/10 text-status-success text-[10px] font-bold uppercase tracking-wide">
-                        No IELTS
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-on-surface-variant line-clamp-2 leading-relaxed">
-                    {s.provider}{s.host_institution ? ` \u00B7 ${s.host_institution}` : ''}
-                  </p>
-                  <div className="flex flex-wrap gap-1.5 mt-auto pt-2">
-                    {s.funding_type && (
-                      <span className="px-2 py-0.5 rounded-full bg-primary/5 text-primary text-[10px] font-semibold">
-                        {s.funding_type}
-                      </span>
-                    )}
-                    {s.degree_levels?.slice(0, 2).map((d: string) => (
-                      <span key={d} className="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant text-[10px] font-semibold">
-                        {d}
-                      </span>
-                    ))}
-                    {s.deadline && (
-                      <span className="px-2 py-0.5 rounded-full bg-status-warning/10 text-status-warning text-[10px] font-semibold">
-                        {s.deadline}
-                      </span>
-                    )}
-                  </div>
-                </Link>
-              ))}
-            </div>
+            <>
+              {/* Mobile: horizontal scroll */}
+              <div className="flex md:hidden gap-4 overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-2 -mx-4 px-4">
+                {featuredScholarships.map(s => (
+                  <Link
+                    key={s.id}
+                    to={`/scholarships`}
+                    className="snap-start shrink-0 w-[280px] bg-surface border border-outline-variant/20 rounded-2xl p-5 hover:border-primary/30 hover:shadow-lg transition-all duration-300 flex flex-col gap-3"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <h3 className="font-display font-bold text-on-surface hover:text-primary transition-colors text-sm leading-snug flex-1 line-clamp-2">
+                        {s.name}
+                      </h3>
+                      {s.no_ielts && (
+                        <span className="shrink-0 px-2 py-0.5 rounded-full bg-status-success/10 text-status-success text-[10px] font-bold uppercase tracking-wide">
+                          No IELTS
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-on-surface-variant line-clamp-2 leading-relaxed">
+                      {s.provider}{s.host_institution ? ` \u00B7 ${s.host_institution}` : ''}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5 mt-auto pt-2">
+                      {s.funding_type && (
+                        <span className="px-2 py-0.5 rounded-full bg-primary/5 text-primary text-[10px] font-semibold">
+                          {s.funding_type}
+                        </span>
+                      )}
+                      {s.degree_levels?.slice(0, 2).map((d: string) => (
+                        <span key={d} className="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant text-[10px] font-semibold">
+                          {d}
+                        </span>
+                      ))}
+                      {s.deadline && (
+                        <span className="px-2 py-0.5 rounded-full bg-status-warning/10 text-status-warning text-[10px] font-semibold">
+                          {s.deadline}
+                        </span>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+              {/* Desktop: grid */}
+              <div className={`hidden md:grid grid-cols-2 ${featuredCols >= 3 ? 'lg:grid-cols-3' : ''} gap-5 md:gap-6`}>
+                {featuredScholarships.map(s => (
+                  <Link
+                    key={s.id}
+                    to={`/scholarships`}
+                    className="group bg-surface border border-outline-variant/20 rounded-2xl p-6 hover:border-primary/30 hover:shadow-lg transition-all duration-300 flex flex-col gap-3"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <h3 className="font-display font-bold text-on-surface group-hover:text-primary transition-colors text-sm leading-snug flex-1">
+                        {s.name}
+                      </h3>
+                      {s.no_ielts && (
+                        <span className="shrink-0 px-2 py-0.5 rounded-full bg-status-success/10 text-status-success text-[10px] font-bold uppercase tracking-wide">
+                          No IELTS
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-on-surface-variant line-clamp-2 leading-relaxed">
+                      {s.provider}{s.host_institution ? ` \u00B7 ${s.host_institution}` : ''}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5 mt-auto pt-2">
+                      {s.funding_type && (
+                        <span className="px-2 py-0.5 rounded-full bg-primary/5 text-primary text-[10px] font-semibold">
+                          {s.funding_type}
+                        </span>
+                      )}
+                      {s.degree_levels?.slice(0, 2).map((d: string) => (
+                        <span key={d} className="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant text-[10px] font-semibold">
+                          {d}
+                        </span>
+                      ))}
+                      {s.deadline && (
+                        <span className="px-2 py-0.5 rounded-full bg-status-warning/10 text-status-warning text-[10px] font-semibold">
+                          {s.deadline}
+                        </span>
+                      )}
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </>
           )}
 
-          <div className="flex justify-center mt-10">
+          <div className="flex justify-center mt-8 md:mt-10">
             <Link
               to="/scholarships"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-on-primary font-bold rounded-full hover:bg-primary-container hover:text-on-primary-container transition-all duration-200 shadow-md text-sm"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-on-primary font-bold rounded-xl sm:rounded-full hover:bg-primary-container hover:text-on-primary-container transition-all duration-200 shadow-md text-sm"
             >
               View All Scholarships
               <ArrowForward className="w-3.5 h-3.5" />
@@ -376,65 +420,65 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
       </RevealSection>
 
       {/* ═══════════════════════════════════════════════
-          Section 2 — Problem / Empathy
+          Section 2 — Problem / Empathy (Bento Grid)
           ═══════════════════════════════════════════════ */}
-      <RevealSection className="px-6 py-20 md:py-28 bg-surface-container-lowest">
+      <RevealSection className="px-4 sm:px-6 py-16 md:py-28 bg-surface-container-lowest">
         <div className="max-w-[1080px] mx-auto">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-display font-black text-on-surface leading-tight max-w-2xl mx-auto">
+          <div className="text-center mb-10 md:mb-16">
+            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display font-black text-on-surface leading-tight max-w-2xl mx-auto">
               The System Isn't Built for Us.<br />We Understand Your Journey.
             </h2>
-            <p className="mt-4 text-sm md:text-base text-on-surface-variant max-w-xl mx-auto">
+            <p className="mt-3 text-sm md:text-base text-on-surface-variant max-w-xl mx-auto">
               Finding scholarships as an African student shouldn't be overwhelming.
               We've built the tools that put clarity and confidence back in your hands.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {/* Card 1: Absolute Precision */}
-            <div className="group bg-surface border border-outline-variant/20 rounded-2xl p-6 md:p-7 hover:border-primary/30 hover:shadow-lg transition-all duration-300 flex flex-col gap-3">
-              <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                <SearchIcon className="w-5 h-5" />
+            <div className="group bg-surface border border-outline-variant/20 rounded-2xl p-5 md:p-7 hover:border-primary/30 hover:shadow-lg transition-all duration-300 flex flex-col gap-3">
+              <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                <SearchIcon className="w-4 h-4 md:w-5 md:h-5" />
               </div>
-              <div className="text-2xl font-black text-primary">100%</div>
-              <h3 className="font-display font-bold text-on-surface">Absolute Precision</h3>
-              <p className="text-sm text-on-surface-variant leading-relaxed">
+              <div className="text-xl md:text-2xl font-black text-primary">100%</div>
+              <h3 className="font-display font-bold text-on-surface text-sm md:text-base">Absolute Precision</h3>
+              <p className="text-xs md:text-sm text-on-surface-variant leading-relaxed">
                 Our deterministic engine matches you only to scholarships where you meet every single requirement.
               </p>
             </div>
 
             {/* Card 2: Zero Fatigue */}
-            <div className="group bg-surface border border-outline-variant/20 rounded-2xl p-6 md:p-7 hover:border-primary/30 hover:shadow-lg transition-all duration-300 flex flex-col gap-3">
-              <div className="w-11 h-11 rounded-xl bg-secondary-container/30 text-secondary flex items-center justify-center">
-                <LightningIcon className="w-5 h-5" />
+            <div className="group bg-surface border border-outline-variant/20 rounded-2xl p-5 md:p-7 hover:border-primary/30 hover:shadow-lg transition-all duration-300 flex flex-col gap-3">
+              <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-secondary-container/30 text-secondary flex items-center justify-center">
+                <LightningIcon className="w-4 h-4 md:w-5 md:h-5" />
               </div>
-              <div className="text-2xl font-black text-secondary">3 min</div>
-              <h3 className="font-display font-bold text-on-surface">Zero Fatigue</h3>
-              <p className="text-sm text-on-surface-variant leading-relaxed">
+              <div className="text-xl md:text-2xl font-black text-secondary">3 min</div>
+              <h3 className="font-display font-bold text-on-surface text-sm md:text-base">Zero Fatigue</h3>
+              <p className="text-xs md:text-sm text-on-surface-variant leading-relaxed">
                 Set up your profile in under three minutes. No endless scrolling, just your matches.
               </p>
             </div>
 
             {/* Card 3: Structured Guidance */}
-            <div className="group bg-surface border border-outline-variant/20 rounded-2xl p-6 md:p-7 hover:border-primary/30 hover:shadow-lg transition-all duration-300 flex flex-col gap-3">
-              <div className="w-11 h-11 rounded-xl bg-primary-fixed/40 text-primary flex items-center justify-center">
-                <MapIcon className="w-5 h-5" />
+            <div className="group bg-surface border border-outline-variant/20 rounded-2xl p-5 md:p-7 hover:border-primary/30 hover:shadow-lg transition-all duration-300 flex flex-col gap-3">
+              <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-primary-fixed/40 text-primary flex items-center justify-center">
+                <MapIcon className="w-4 h-4 md:w-5 md:h-5" />
               </div>
-              <div className="text-2xl font-black text-primary">4-step</div>
-              <h3 className="font-display font-bold text-on-surface">Structured Guidance</h3>
-              <p className="text-sm text-on-surface-variant leading-relaxed">
+              <div className="text-xl md:text-2xl font-black text-primary">4-step</div>
+              <h3 className="font-display font-bold text-on-surface text-sm md:text-base">Structured Guidance</h3>
+              <p className="text-xs md:text-sm text-on-surface-variant leading-relaxed">
                 A clear path from profile creation to submission, with AI and human support at every stage.
               </p>
             </div>
 
             {/* Card 4: Verified Data */}
-            <div className="group bg-surface border border-outline-variant/20 rounded-2xl p-6 md:p-7 hover:border-primary/30 hover:shadow-lg transition-all duration-300 flex flex-col gap-3">
-              <div className="w-11 h-11 rounded-xl bg-secondary-container/30 text-secondary flex items-center justify-center">
-                <DatabaseCheckIcon className="w-5 h-5" />
+            <div className="group bg-surface border border-outline-variant/20 rounded-2xl p-5 md:p-7 hover:border-primary/30 hover:shadow-lg transition-all duration-300 flex flex-col gap-3">
+              <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-secondary-container/30 text-secondary flex items-center justify-center">
+                <DatabaseCheckIcon className="w-4 h-4 md:w-5 md:h-5" />
               </div>
-              <div className="text-2xl font-black text-secondary">2,500+</div>
-              <h3 className="font-display font-bold text-on-surface">Verified Data</h3>
-              <p className="text-sm text-on-surface-variant leading-relaxed">
+              <div className="text-xl md:text-2xl font-black text-secondary">2,500+</div>
+              <h3 className="font-display font-bold text-on-surface text-sm md:text-base">Verified Data</h3>
+              <p className="text-xs md:text-sm text-on-surface-variant leading-relaxed">
                 Every scholarship in our database is verified and kept current — no dead links, no outdated info.
               </p>
             </div>

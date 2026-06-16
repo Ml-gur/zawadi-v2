@@ -63,6 +63,7 @@ html { scroll-behavior: smooth; }
 
 /* Global body modifications for modern mesh gradient background */
 body {
+  overflow-x: hidden;
   font-family: 'Plus Jakarta Sans', sans-serif;
   background-color: #f8f9ff;
   background-image: 
@@ -106,6 +107,10 @@ body {
 @keyframes sweep {
   0%    { opacity: 0; transform: translateY(-5px); }
   100%  { opacity: 1; transform: translateY(0); }
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .animate-sweep {

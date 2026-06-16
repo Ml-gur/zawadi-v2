@@ -1,5 +1,60 @@
 # Changelog
 
+## 2026-06-16 — Mobile-First Redesign: Navbar, Hero, Footer, Bottom Nav
+
+### Changed: Navbar — Mobile-First Redesign
+
+**`src/App.tsx`** (header section):
+- Brand text "Techsari Zawadi" hidden on mobile (<sm) — only the Z logo icon shows, freeing ~60% header width
+- Two auth buttons ("Log In" + "Create Your Profile") collapsed into single "Get Started" on mobile — prevents overflow on 375px viewports
+- Hamburger menu now visible at `md:hidden` (768px) instead of `lg:hidden` (1024px) — tablets see inline nav, phones see hamburger
+- Mobile drawer now accessible to **all users** (removed `user &&` guard) — anonymous visitors can navigate About, FAQ, How It Works, Contact, plus Scholarships
+- Mobile drawer has smooth height transition (`max-h` animation) and includes "Sign In" / "Create Account" buttons for non-logged-in users
+- Added hover/active states with rounded-lg touch targets for better thumb reach
+- Horizontal padding reduced from `px-6` to `px-4` on mobile for more breathing room
+
+### Changed: Hero Section — Mobile-Compact Bento Layout
+
+**`src/components/LandingPage.tsx`**:
+- Heading text-size reduced on mobile (`text-3xl` from `text-4xl`) for better fit
+- Buttons use `rounded-xl` (squarish) on mobile for modern look, `rounded-full` on desktop
+- "See How it Works" tertiary button hidden on mobile to reduce clutter
+- Smarter spacing: `gap-5` mobile vs `gap-6` desktop, `py-12` mobile vs `py-28` desktop
+- Floating illustration card uses responsive sizing: `w-[260px] h-[300px]` on mobile, `w-80 h-96` on desktop — no overflow on 320px screens
+- Floating stat cards scale down on mobile (`text-xl`, smaller padding)
+- Smaller trust indicator icons on mobile
+
+### Changed: Featured Scholarships — Mobile Horizontal Swipe
+
+- Mobile (<md): Featured scholarships displayed as horizontal scroll (`overflow-x-auto`, `snap-x`, `hide-scrollbar`) with 280px cards — thumb-swipeable
+- Desktop (md+): Same grid layout as before
+- Padding reduced on mobile, "View All" button uses `rounded-xl` on mobile
+
+### Changed: Footer — Compact Layout + Mobile Bottom Nav
+
+**`src/App.tsx`** (footer section):
+- Footer padding reduced on mobile (`pt-8` vs `pt-12`)
+- "Techsari Zawadi" brand shortened to "Zawadi"
+- Removed duplicate FAQ entry, streamlined navigation links
+- Added `pb-24` so content isn't obscured by bottom nav
+
+**Mobile Bottom Nav Bar** (new, `<md` only):
+- Fixed bottom bar with 4 items: Home, Search (scholarships), Profile (auth), About
+- Thumb-friendly tap targets with `9px` labels and 20px icons
+- Includes `safe-area-bottom` class for iOS notch devices
+- Only shown for non-logged-in users (logged-in users have the hamburger menu)
+
+### Fixed: Global CSS Overflow
+
+**`src/index.css`**:
+- Added `overflow-x: hidden` to body — prevents any horizontal scroll edge cases
+- Added `.safe-area-bottom` utility class for iOS safe area insets
+- Updated padding/margin values to use `dvh` unit where relevant
+
+### Changed: Playwright E2E Tests
+
+All 27 existing Playwright tests continue to pass across desktop/tablet/mobile viewports.
+
 ## 2026-06-16 — Pagination, Card Redesign, Analytics, Code Splitting
 
 ### Added: Pagination (Remove 12-Scholarship Limit)
