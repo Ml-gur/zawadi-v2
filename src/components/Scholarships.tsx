@@ -28,6 +28,7 @@ export default function Scholarships({
   const [isPublic, setIsPublic] = useState(false);
   const [publicScholarships, setPublicScholarships] = useState<Scholarship[]>([]);
   const [publicLoading, setPublicLoading] = useState(false);
+  const [publicError, setPublicError] = useState<string | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Public mode filters
@@ -48,19 +49,24 @@ export default function Scholarships({
 
   const fetchPublicScholarships = async () => {
     setPublicLoading(true);
+    setPublicError(null);
     try {
       const { data, error } = await supabase
         .from('scholarships')
         .select('*')
         .eq('published', true)
-        .order('created_at', { ascending: false })
+        .order('updated_at', { ascending: false })
         .limit(12);
 
       if (!error && data) {
         setPublicScholarships(data as Scholarship[]);
+      } else if (error) {
+        console.error('Error fetching public scholarships:', error);
+        setPublicError('Could not load scholarships. Please try again later.');
       }
     } catch (e) {
       console.error('Error fetching public scholarships', e);
+      setPublicError('An unexpected error occurred. Please refresh the page.');
     } finally {
       setPublicLoading(false);
     }
@@ -190,6 +196,11 @@ export default function Scholarships({
           <span className="text-xs font-extrabold text-on-surface-variant uppercase tracking-wider bg-surface-container/40 px-3 py-1.5 rounded-lg border border-outline-variant/30">
             {filteredPublic.length} Scholarships Found
           </span>
+          {publicError && (
+            <span className="text-[10px] font-bold text-status-error/80 bg-status-error/5 px-2.5 py-1 rounded-lg">
+              {publicError}
+            </span>
+          )}
         </div>
 
         {/* Scholarship Cards Grid */}

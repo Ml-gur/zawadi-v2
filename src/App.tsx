@@ -149,7 +149,7 @@ export default function App() {
   };
 
   const currentTab = pathToTab[location.pathname] || '';
-  const isPublicPage = ['/', '/about', '/faq', '/privacy', '/terms', '/how-it-works', '/contact', '/forgot-password', '/reset-password'].includes(location.pathname);
+  const isPublicPage = ['/', '/about', '/faq', '/privacy', '/terms', '/how-it-works', '/contact', '/forgot-password', '/reset-password', '/scholarships'].includes(location.pathname) || location.pathname.startsWith('/scholarships/');
 
   const hideHeaderFooter = !isPublicPage && !user;
 
