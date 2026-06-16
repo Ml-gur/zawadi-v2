@@ -61,7 +61,7 @@ export default function Scholarships({
         .limit(12);
 
       if (!error && data) {
-        setPublicScholarships(data as Scholarship[]);
+        setPublicScholarships(data as unknown as Scholarship[]);
       } else if (error) {
         console.error('Error fetching public scholarships:', error);
         setPublicError('Could not load scholarships. Please try again later.');

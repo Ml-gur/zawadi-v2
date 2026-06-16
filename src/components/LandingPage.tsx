@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { ArrowForward } from './Icons';
 import { SEO } from './SEO';
+import { supabase } from '../lib/supabase';
+import type { Scholarship } from '../types';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -158,6 +161,27 @@ function RevealSection({ children, className = '', threshold = 0.15, as: Tag = '
 
 export default function LandingPage({ onGetStarted, onLogin, countries, onViewAllFAQs }: LandingPageProps) {
   const [openFaq, setOpenFaq] = useState<string | null>(null);
+  const [featuredScholarships, setFeaturedScholarships] = useState<Scholarship[]>([]);
+  const [featuredLoading, setFeaturedLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    supabase
+      .from('scholarships')
+      .select('id, name, provider, host_region, host_institution, funding_type, deadline, no_ielts, degree_levels, countries, fields_of_study, urgency, iso2, published, description, eligibility, amount, required_documents, apply_url, source_url, slug, created_at')
+      .eq('published', true)
+      .order('id', { ascending: false })
+      .limit(3)
+      .then(({ data, error }) => {
+        if (!cancelled && !error && data) {
+          setFeaturedScholarships(data as unknown as Scholarship[]);
+        }
+        if (!cancelled) setFeaturedLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  const featuredCols = featuredScholarships.length;
 
   return (
     <div className="bg-background text-on-background min-h-screen">
@@ -203,6 +227,13 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
                   Start Your Journey
                   <ArrowForward className="w-4 h-4" />
                 </button>
+                <Link
+                  to="/scholarships"
+                  className="bg-secondary text-on-secondary hover:bg-secondary-container hover:text-on-secondary-container px-8 py-4 min-h-[48px] rounded-full font-semibold transition-all duration-200 shadow-md flex items-center justify-center gap-2 text-center"
+                >
+                  Browse Scholarships
+                  <ArrowForward className="w-4 h-4" />
+                </Link>
                 <a
                   href="#features"
                   className="bg-surface-container-lowest text-on-surface border border-outline-variant hover:bg-surface-container-low hover:border-outline px-8 py-4 min-h-[48px] rounded-full font-semibold transition-all duration-200 shadow-sm flex items-center justify-center gap-2 text-center"
@@ -266,6 +297,83 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
           </div>
         </div>
       </section>
+
+      {/* ═══════════════════════════════════════════════
+          Featured Scholarships Section
+          ═══════════════════════════════════════════════ */}
+      <RevealSection className="px-6 py-20 md:py-28 bg-surface-container-low">
+        <div className="max-w-[1080px] mx-auto">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-display font-black text-on-surface leading-tight max-w-2xl mx-auto">
+              Explore Active Scholarships
+            </h2>
+            <p className="mt-4 text-sm md:text-base text-on-surface-variant max-w-xl mx-auto">
+              Hand-picked opportunities currently open for African students. Updated daily.
+            </p>
+          </div>
+
+          {featuredLoading ? (
+            <div className="flex justify-center py-16">
+              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : featuredScholarships.length === 0 ? (
+            <div className="text-center py-16">
+              <p className="text-sm text-on-surface-variant">Featured scholarships loading soon.</p>
+            </div>
+          ) : (
+            <div className={`grid grid-cols-1 ${featuredCols >= 2 ? 'md:grid-cols-2' : ''} ${featuredCols >= 3 ? 'lg:grid-cols-3' : ''} gap-5 md:gap-6`}>
+              {featuredScholarships.map(s => (
+                <Link
+                  key={s.id}
+                  to={`/scholarships`}
+                  className="group bg-surface border border-outline-variant/20 rounded-2xl p-6 hover:border-primary/30 hover:shadow-lg transition-all duration-300 flex flex-col gap-3"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <h3 className="font-display font-bold text-on-surface group-hover:text-primary transition-colors text-sm leading-snug flex-1">
+                      {s.name}
+                    </h3>
+                    {s.no_ielts && (
+                      <span className="shrink-0 px-2 py-0.5 rounded-full bg-status-success/10 text-status-success text-[10px] font-bold uppercase tracking-wide">
+                        No IELTS
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-on-surface-variant line-clamp-2 leading-relaxed">
+                    {s.provider}{s.host_institution ? ` \u00B7 ${s.host_institution}` : ''}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5 mt-auto pt-2">
+                    {s.funding_type && (
+                      <span className="px-2 py-0.5 rounded-full bg-primary/5 text-primary text-[10px] font-semibold">
+                        {s.funding_type}
+                      </span>
+                    )}
+                    {s.degree_levels?.slice(0, 2).map((d: string) => (
+                      <span key={d} className="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant text-[10px] font-semibold">
+                        {d}
+                      </span>
+                    ))}
+                    {s.deadline && (
+                      <span className="px-2 py-0.5 rounded-full bg-status-warning/10 text-status-warning text-[10px] font-semibold">
+                        {s.deadline}
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+
+          <div className="flex justify-center mt-10">
+            <Link
+              to="/scholarships"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-on-primary font-bold rounded-full hover:bg-primary-container hover:text-on-primary-container transition-all duration-200 shadow-md text-sm"
+            >
+              View All Scholarships
+              <ArrowForward className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        </div>
+      </RevealSection>
 
       {/* ═══════════════════════════════════════════════
           Section 2 — Problem / Empathy
