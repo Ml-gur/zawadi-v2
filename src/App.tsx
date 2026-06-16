@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
-import { Routes, Route, Navigate, useNavigate, useLocation, Link } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate, useLocation, useParams, Link } from 'react-router-dom';
 import { Scholarship, UserProfile, ApplicationTracker as TrackerType, DocumentVaultItem, EssayStudioGeneration, BotQueueIngestion, AuditLogItem } from './types';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
 import ProfileSetupWizard from './components/ProfileSetupWizard';
@@ -29,6 +29,11 @@ import {
   getBotIngestions,
   getAuditLogs,
 } from './lib/supabase-queries';
+
+function ScholarshipRedirect() {
+  const { slug } = useParams();
+  return <Navigate to={`/scholarships/browse/${slug}`} replace />;
+}
 
 function DashboardSkeleton() {
   return (
@@ -222,6 +227,14 @@ export default function App() {
     window.addEventListener('open-profile-setup', handler);
     return () => window.removeEventListener('open-profile-setup', handler);
   }, [user?.role]);
+
+  useEffect(() => {
+    const handler = () => {
+      setShowAuth(true);
+    };
+    window.addEventListener('open-auth', handler);
+    return () => window.removeEventListener('open-auth', handler);
+  }, []);
 
   const fetchScholarships = async (_email?: string) => {
     try {
@@ -772,9 +785,7 @@ export default function App() {
             </div>
           )}
         </header>
-      )}
-
-      {/* Main Content */}
+      )}              {/* Main Content */}
       <main className="flex-grow max-w-[1280px] w-full mx-auto px-6 py-8">
         <Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading...</div>}>
           {!user && showAuth && location.pathname === '/' ? (
@@ -789,6 +800,8 @@ export default function App() {
               <Route path="/how-it-works" element={<HowItWorksPage onBack={() => navigate('/')} onGetStarted={() => { setShowAuth(true); navigate('/'); }} />} />
               <Route path="/scholarships/browse" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading scholarships...</div>}><PublicScholarshipList /></Suspense>} />
               <Route path="/scholarships/browse/:slug" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading...</div>}><PublicScholarshipDetail user={user} /></Suspense>} />
+              <Route path="/scholarships/:slug" element={<ScholarshipRedirect />} />
+              <Route path="/scholarships" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading scholarships...</div>}><Scholarships user={user} scholarships={scholarships} applications={applications} documents={documents} onTrackScholarship={handleTrackScholarship} onUploadMetadata={handleUploadDocument} onNavigateToTab={handleNavigateToTab} /></Suspense>} />
               <Route path="/contact" element={<ContactPage onBack={() => navigate('/')} />} />
               <Route path="/forgot-password" element={<Suspense fallback={null}><ForgotPassword onBack={() => { setShowAuth(false); navigate('/'); }} /></Suspense>} />
               <Route path="/reset-password" element={<Suspense fallback={null}><ResetPassword onBackToLogin={() => { setShowAuth(false); navigate('/'); }} /></Suspense>} />
@@ -817,7 +830,6 @@ export default function App() {
                       </Suspense>
                     )
                   } />
-                  <Route path="/scholarships" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading scholarships...</div>}><Scholarships user={user} scholarships={scholarships} applications={applications} documents={documents} onTrackScholarship={handleTrackScholarship} onUploadMetadata={handleUploadDocument} onNavigateToTab={handleNavigateToTab} /></Suspense>} />
                   <Route path="/vault" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading vault...</div>}><DocumentVault user={user} documents={documents} onUploadDocument={handleUploadDocument} onRemoveDoc={handleRemoveDoc} onReanalyzeDocument={handleReanalyzeDocument} onNavigateToTab={handleNavigateToTab} onRefreshDocuments={handleRefreshDocuments} userEmail={user?.email} /></Suspense>} />
                   <Route path="/essays" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading...</div>}><ComingSoonPage /></Suspense>} />
                   <Route path="/profile" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading profile...</div>}><StudentProfile user={user} onUpdateProfile={handleUpdateProfile} onNavigateToTab={handleNavigateToTab} /></Suspense>} />

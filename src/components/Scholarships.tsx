@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Scholarship, ApplicationTracker, DocumentVaultItem } from '../types';
 import { AFRICAN_COUNTRIES } from '../config/matching-config';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Lock, Search, Globe, GraduationCap, Bookmark, ArrowLeft } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { SEO } from './SEO';
 
 interface ScholarshipsProps {
-  user: any;
+  user?: any;
   scholarships: Scholarship[];
   applications: ApplicationTracker[];
   documents: DocumentVaultItem[];
@@ -23,7 +25,440 @@ export default function Scholarships({
   onNavigateToTab
 }: ScholarshipsProps) {
   const [selectedSchol, setSelectedSchol] = useState<Scholarship | null>(null);
-  
+  const [isPublic, setIsPublic] = useState(false);
+  const [publicScholarships, setPublicScholarships] = useState<Scholarship[]>([]);
+  const [publicLoading, setPublicLoading] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  // Public mode filters
+  const [publicSearch, setPublicSearch] = useState('');
+  const [publicCountry, setPublicCountry] = useState('');
+  const [publicDegree, setPublicDegree] = useState('');
+  const [publicNoIelts, setPublicNoIelts] = useState(false);
+
+  // Check auth session at mount
+  useEffect(() => {
+    if (!user) {
+      setIsPublic(true);
+      fetchPublicScholarships();
+    } else {
+      setIsPublic(false);
+    }
+  }, [user]);
+
+  const fetchPublicScholarships = async () => {
+    setPublicLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('scholarships')
+        .select('*')
+        .eq('published', true)
+        .order('created_at', { ascending: false })
+        .limit(12);
+
+      if (!error && data) {
+        setPublicScholarships(data as Scholarship[]);
+      }
+    } catch (e) {
+      console.error('Error fetching public scholarships', e);
+    } finally {
+      setPublicLoading(false);
+    }
+  };
+
+  const handleShowAuth = () => {
+    setShowAuthModal(true);
+  };
+
+  const handleAuthAction = () => {
+    window.dispatchEvent(new CustomEvent('open-auth', { detail: { action: 'signup' } }));
+  };
+
+  // Public mode filters
+  const filteredPublic = publicScholarships.filter(s => {
+    const matchesSearch = !publicSearch ||
+      (s.name || '').toLowerCase().includes(publicSearch.toLowerCase()) ||
+      (s.provider || '').toLowerCase().includes(publicSearch.toLowerCase());
+
+    const matchesCountry = !publicCountry ||
+      (s.countries || s.country || []).some((c: string) =>
+        c.toLowerCase().includes(publicCountry.toLowerCase())
+      );
+
+    const degLevels = Array.isArray(s.degree_levels) ? s.degree_levels : [];
+    const matchesDegree = !publicDegree ||
+      degLevels.some(d => d && typeof d === 'string' && d.toLowerCase() === publicDegree.toLowerCase());
+
+    const matchesNoIelts = !publicNoIelts || s.no_ielts === true;
+
+    return matchesSearch && matchesCountry && matchesDegree && matchesNoIelts;
+  });
+
+  // Public preview rendering
+  if (isPublic) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <SEO
+          title="Find Scholarships for African Students — Zawadi"
+          description="Browse verified scholarships across all 54 African countries. Deterministic eligibility matching. No IELTS required options. Free for students."
+          ogDescription="Browse verified scholarships across all 54 African countries. No spam. No data selling. See only scholarships you actually qualify for."
+          path="/scholarships"
+          image="https://techsari.online/og-scholarships.png"
+        />
+
+        {/* Guest Banner */}
+        <div className="bg-surface-container-highest rounded-2xl p-6 md:p-8 border border-outline-variant/60 shadow-sm">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex-1">
+              <h2 className="font-display font-black text-lg text-on-surface mb-1">You are browsing as a guest</h2>
+              <p className="text-xs text-on-surface-variant/80 max-w-xl">
+                Create a free profile to see your eligibility score for each scholarship and get matched to opportunities you actually qualify for.
+              </p>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              <button
+                onClick={handleShowAuth}
+                className="px-5 py-2.5 bg-primary text-on-primary font-bold rounded-xl hover:bg-primary-container transition-colors cursor-pointer text-xs shadow-sm"
+              >
+                Create Free Account
+              </button>
+              <button
+                onClick={handleShowAuth}
+                className="px-5 py-2.5 bg-transparent border border-outline-variant/60 text-on-surface font-bold rounded-xl hover:bg-surface-container transition-colors cursor-pointer text-xs"
+              >
+                Log In
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Filter Bar */}
+        <div className="bg-surface-container-lowest/95 border border-outline-variant/60 rounded-2xl p-4 shadow-xs">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-on-surface-variant/50" />
+              <input
+                value={publicSearch}
+                onChange={(e) => setPublicSearch(e.target.value)}
+                placeholder="Search scholarships..."
+                className="w-full pl-9 pr-3 py-2 border border-outline-variant/70 rounded-lg text-xs bg-surface text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+              />
+            </div>
+            <select
+              value={publicCountry}
+              onChange={(e) => setPublicCountry(e.target.value)}
+              className="bg-surface border border-outline-variant/70 rounded-lg px-3 py-2 text-xs font-bold text-on-surface-variant focus:outline-none focus:border-primary cursor-pointer"
+            >
+              <option value="">All countries</option>
+              {AFRICAN_COUNTRIES.map(c => (
+                <option key={c.code} value={c.name}>{c.name}</option>
+              ))}
+              <option value="Europe">Europe</option>
+              <option value="United States">United States</option>
+              <option value="United Kingdom">United Kingdom</option>
+            </select>
+            <select
+              value={publicDegree}
+              onChange={(e) => setPublicDegree(e.target.value)}
+              className="bg-surface border border-outline-variant/70 rounded-lg px-3 py-2 text-xs font-bold text-on-surface-variant focus:outline-none focus:border-primary cursor-pointer"
+            >
+              <option value="">All levels</option>
+              {['Bachelors', 'Masters', 'PhD', 'Doctorate', 'Postdoctoral'].map(d => <option key={d} value={d}>{d}</option>)}
+            </select>
+            <label className="flex items-center gap-1.5 text-xs text-on-surface font-bold bg-surface border border-outline-variant/70 px-3 py-2 rounded-lg cursor-pointer hover:bg-surface-variant/45 transition-colors">
+              <input
+                type="checkbox"
+                checked={publicNoIelts}
+                onChange={(e) => setPublicNoIelts(e.target.checked)}
+                className="rounded text-secondary border-outline-variant/80 accent-secondary cursor-pointer w-3.5 h-3.5"
+              />
+              <span>No IELTS</span>
+            </label>
+            {(publicSearch || publicCountry || publicDegree || publicNoIelts) && (
+              <button
+                onClick={() => { setPublicSearch(''); setPublicCountry(''); setPublicDegree(''); setPublicNoIelts(false); }}
+                className="text-xs font-black text-secondary hover:text-primary cursor-pointer hover:underline"
+              >
+                Clear Filters
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Results count */}
+        <div className="flex items-center justify-between px-1">
+          <span className="text-xs font-extrabold text-on-surface-variant uppercase tracking-wider bg-surface-container/40 px-3 py-1.5 rounded-lg border border-outline-variant/30">
+            {filteredPublic.length} Scholarships Found
+          </span>
+        </div>
+
+        {/* Scholarship Cards Grid */}
+        {publicLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3, 4, 5, 6].map(i => (
+              <div key={i} className="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-5 animate-pulse">
+                <div className="h-4 bg-outline-variant/30 rounded w-3/4 mb-3" />
+                <div className="h-3 bg-outline-variant/20 rounded w-1/2 mb-4" />
+                <div className="flex gap-2 mb-3">
+                  <div className="h-5 bg-outline-variant/20 rounded-full w-16" />
+                  <div className="h-5 bg-outline-variant/20 rounded-full w-20" />
+                </div>
+                <div className="h-3 bg-outline-variant/20 rounded w-full mb-2" />
+                <div className="h-3 bg-outline-variant/20 rounded w-2/3" />
+              </div>
+            ))}
+          </div>
+        ) : filteredPublic.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredPublic.map(s => {
+              // Deadline urgency color
+              const urgency = (() => {
+                if (!s.deadline || s.deadline.toLowerCase().includes('varies'))
+                  return { label: 'Varies', color: 'text-on-surface-variant/50', bg: 'bg-surface-container-high' };
+                const days = Math.ceil((new Date(s.deadline).getTime() - Date.now()) / 86400000);
+                if (days < 0) return { label: 'Deadline Passed', color: 'text-status-error', bg: 'bg-status-error/10' };
+                if (days <= 30) return { label: `${days} days left`, color: 'text-status-error', bg: 'bg-status-error/10' };
+                if (days <= 60) return { label: `${days} days left`, color: 'text-status-warning', bg: 'bg-status-warning/10' };
+                if (days <= 90) return { label: `${days} days left`, color: 'text-amber-600', bg: 'bg-amber-50' };
+                return { label: `${days} days left`, color: 'text-status-success', bg: 'bg-status-success/10' };
+              })();
+
+              return (
+                <div
+                  key={s.id}
+                  onClick={() => setSelectedSchol(s)}
+                  className="group bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-5 hover:border-primary/30 hover:shadow-lg transition-all duration-200 cursor-pointer"
+                >
+                  {/* Top row: Name + urgency badge */}
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-display font-extrabold text-sm text-primary leading-tight group-hover:text-secondary transition-colors line-clamp-2">
+                        {s.name}
+                      </h3>
+                      {s.provider && (
+                        <p className="text-[11px] text-on-surface-variant/80 mt-0.5 font-medium">{s.provider}</p>
+                      )}
+                    </div>
+                    <span className={`shrink-0 text-[10px] font-bold px-2 py-1 rounded-full ${urgency.bg} ${urgency.color} whitespace-nowrap`}>
+                      {urgency.label}
+                    </span>
+                  </div>
+
+                  {/* Country / region */}
+                  {(s.countries || s.country) && (s.countries || s.country).length > 0 && (
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <Globe className="w-3 h-3 text-on-surface-variant/50" />
+                      <span className="text-[11px] text-on-surface-variant/70 font-medium truncate">
+                        {(s.countries || s.country || []).join(', ')}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Badges row */}
+                  <div className="flex flex-wrap items-center gap-1.5 mb-3">
+                    {s.funding_type && (
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        s.funding_type === 'Full'
+                          ? 'bg-status-success/10 text-status-success'
+                          : 'bg-secondary-container/20 text-secondary'
+                      }`}>
+                        {s.funding_type === 'Full' ? 'Full Funding' : 'Partial Funding'}
+                      </span>
+                    )}
+                    {s.no_ielts && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                        No IELTS
+                      </span>
+                    )}
+                    {(s.degree_levels || []).slice(0, 2).map(d => (
+                      <span key={d} className="text-[10px] px-2 py-0.5 rounded-full bg-primary-fixed/15 text-primary font-semibold">
+                        {d}
+                      </span>
+                    ))}
+                    {(s.degree_levels || []).length > 2 && (
+                      <span className="text-[10px] text-on-surface-variant/50 font-medium">
+                        +{s.degree_levels.length - 2} more
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Bottom: Lock icon + create account CTA */}
+                  <div className="flex items-center justify-between pt-2 border-t border-outline-variant/20">
+                    <div className="flex items-center gap-1.5 text-on-surface-variant/50">
+                      <Lock className="w-3.5 h-3.5" />
+                      <span className="text-[10px] font-medium">Sign up to see your match</span>
+                    </div>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleShowAuth(); }}
+                      className="text-[10px] font-bold text-primary hover:text-secondary transition-colors"
+                    >
+                      Sign Up
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-20 bg-surface-container-lowest border border-outline-variant/60 rounded-2xl">
+            <Search className="w-8 h-8 text-outline-variant mx-auto mb-3" />
+            <p className="text-sm text-on-surface-variant font-medium">No scholarships match your filters.</p>
+            <p className="text-xs text-on-surface-variant/50 mt-1">Try adjusting your search criteria or check back later.</p>
+          </div>
+        )}
+
+        {/* Public Scholarship Detail Modal with Soft Gate */}
+        {selectedSchol && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setSelectedSchol(null)}>
+            <div
+              className="bg-surface-container-lowest rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close button */}
+              <div className="sticky top-0 bg-surface-container-lowest/90 backdrop-blur-sm flex items-center justify-between p-4 border-b border-outline-variant/20 z-10">
+                <button onClick={() => setSelectedSchol(null)} className="flex items-center gap-1.5 text-xs font-bold text-on-surface-variant hover:text-primary transition-colors cursor-pointer">
+                  <ArrowLeft className="w-3.5 h-3.5" /> Back
+                </button>
+              </div>
+
+              {/* Visible top half - name, provider, description, basic requirements */}
+              <div className="p-6 space-y-6">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    {selectedSchol.funding_type && (
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        selectedSchol.funding_type === 'Full'
+                          ? 'bg-status-success/10 text-status-success'
+                          : 'bg-secondary-container/20 text-secondary'
+                      }`}>
+                        {selectedSchol.funding_type === 'Full' ? 'Fully Funded' : 'Partially Funded'}
+                      </span>
+                    )}
+                    {selectedSchol.no_ielts && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">No IELTS</span>
+                    )}
+                  </div>
+                  <h2 className="text-xl font-display font-black text-primary mb-1">{selectedSchol.name}</h2>
+                  <p className="text-sm text-on-surface-variant font-medium">{selectedSchol.provider} {selectedSchol.host_institution ? `• ${selectedSchol.host_institution}` : ''}</p>
+                </div>
+
+                {(selectedSchol.countries || selectedSchol.country) && (selectedSchol.countries || selectedSchol.country).length > 0 && (
+                  <div>
+                    <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">Eligible Countries</h4>
+                    <div className="flex flex-wrap gap-1">
+                      {(selectedSchol.countries || selectedSchol.country || []).map((c: string) => (
+                        <span key={c} className="text-[11px] px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-medium">{c}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {selectedSchol.description && (
+                  <div>
+                    <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">Description</h4>
+                    <p className="text-xs text-on-surface-variant/80 leading-relaxed line-clamp-6">{selectedSchol.description}</p>
+                  </div>
+                )}
+
+                {selectedSchol.eligibility && (
+                  <div>
+                    <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">Basic Requirements</h4>
+                    <p className="text-xs text-on-surface-variant/80 leading-relaxed line-clamp-4">{selectedSchol.eligibility}</p>
+                  </div>
+                )}
+
+                {(selectedSchol.degree_levels || []).length > 0 && (
+                  <div>
+                    <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">Degree Levels</h4>
+                    <div className="flex flex-wrap gap-1">
+                      {(selectedSchol.degree_levels || []).map((d: string) => (
+                        <span key={d} className="text-[11px] px-2 py-0.5 rounded-full bg-primary-fixed/15 text-primary font-semibold">{d}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Soft gate - blurred bottom section */}
+                <div className="relative mt-8 rounded-2xl overflow-hidden">
+                  {/* Blurred content preview */}
+                  <div className="p-6 blur-sm select-none space-y-4">
+                    <div className="h-4 bg-outline-variant/30 rounded w-3/4" />
+                    <div className="h-4 bg-outline-variant/30 rounded w-1/2" />
+                    <div className="h-4 bg-outline-variant/30 rounded w-5/6" />
+                    <div className="grid grid-cols-2 gap-3 mt-4">
+                      <div className="h-20 bg-outline-variant/20 rounded-xl" />
+                      <div className="h-20 bg-outline-variant/20 rounded-xl" />
+                    </div>
+                    <div className="h-12 bg-primary/10 rounded-xl" />
+                  </div>
+
+                  {/* Gate overlay */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/70 backdrop-blur-[2px] p-6 text-center">
+                    <Lock className="w-8 h-8 text-primary mb-3" />
+                    <h3 className="text-base font-display font-black text-primary mb-2">Unlock Full Details</h3>
+                    <p className="text-xs text-on-surface-variant mb-4 max-w-sm">
+                      Create a free account to see your full eligibility breakdown, required documents, and match score.
+                    </p>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => handleShowAuth()}
+                        className="px-5 py-2.5 bg-primary text-on-primary font-bold rounded-xl hover:bg-primary-container transition-colors cursor-pointer text-xs"
+                      >
+                        Sign Up Free
+                      </button>
+                      <button
+                        onClick={() => handleShowAuth()}
+                        className="px-5 py-2.5 bg-transparent border border-outline-variant text-primary font-bold rounded-xl hover:bg-surface-container transition-colors cursor-pointer text-xs"
+                      >
+                        Log In
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Auth Modal */}
+        {showAuthModal && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowAuthModal(false)}>
+            <div
+              className="bg-surface-container-lowest rounded-2xl shadow-2xl max-w-sm w-full p-8 text-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <GraduationCap className="w-12 h-12 text-primary mx-auto mb-4" />
+              <h3 className="text-lg font-display font-black text-primary mb-2">Welcome to Zawadi</h3>
+              <p className="text-xs text-on-surface-variant mb-6 leading-relaxed">
+                Create a free profile to see your eligibility score for each scholarship, track applications, and get matched to opportunities you qualify for.
+              </p>
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => { setShowAuthModal(false); handleAuthAction(); }}
+                  className="w-full px-5 py-3 bg-primary text-on-primary font-bold rounded-xl hover:bg-primary-container transition-colors cursor-pointer text-sm"
+                >
+                  Create Free Account
+                </button>
+                <button
+                  onClick={() => { setShowAuthModal(false); handleAuthAction(); }}
+                  className="w-full px-5 py-2.5 bg-transparent border border-outline-variant/60 text-primary font-bold rounded-xl hover:bg-surface-container transition-colors cursor-pointer text-sm"
+                >
+                  Log In
+                </button>
+                <button
+                  onClick={() => setShowAuthModal(false)}
+                  className="w-full mt-1 text-xs font-bold text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
+                >
+                  Continue Browsing
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   // Filtering state
   const [search, setSearch] = useState('');
   const [degree, setDegree] = useState('');

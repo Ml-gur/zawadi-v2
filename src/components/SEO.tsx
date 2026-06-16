@@ -7,13 +7,15 @@ const TWITTER_HANDLE = '@techsari';
 interface SEOMeta {
   title: string;
   description: string;
+  ogDescription?: string;
   path: string;
   image?: string;
   schema?: object | object[];
 }
 
-export function SEO({ title, description, path, image = OG_IMAGE, schema }: SEOMeta) {
+export function SEO({ title, description, ogDescription, path, image = OG_IMAGE, schema }: SEOMeta) {
   const fullUrl = `${SITE_URL}${path}`;
+  const ogDesc = ogDescription || description;
 
   return (
     <Helmet>
@@ -24,13 +26,13 @@ export function SEO({ title, description, path, image = OG_IMAGE, schema }: SEOM
       <meta property="og:type" content="website" />
       <meta property="og:url" content={fullUrl} />
       <meta property="og:title" content={title} />
-      <meta property="og:description" content={description} />
+      <meta property="og:description" content={ogDesc} />
       <meta property="og:image" content={image} />
       <meta property="og:site_name" content="Techsari Zawadi" />
 
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={title} />
-      <meta name="twitter:description" content={description} />
+      <meta name="twitter:description" content={ogDesc} />
       <meta name="twitter:image" content={image} />
       <meta name="twitter:site" content={TWITTER_HANDLE} />
 
