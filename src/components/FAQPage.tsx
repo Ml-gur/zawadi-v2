@@ -91,6 +91,7 @@ export default function FAQPage({ onBack }: FAQPageProps) {
         title="Scholarship FAQs for African Students — Zawadi"
         description="Answers to common questions African students ask about finding scholarships, IELTS requirements, AI essay help, and how Zawadi matching works."
         path="/faq"
+        image="https://techsari.online/og-faq.png"
         schema={faqSchema}
       />
       <div className="max-w-[960px] mx-auto px-6 py-12">

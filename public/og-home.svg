@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#001736"/>
+      <stop offset="50%" style="stop-color:#0a2e5a"/>
+      <stop offset="100%" style="stop-color:#1a4a7a"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#6cf8bb"/>
+      <stop offset="100%" style="stop-color:#4ade80"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(255,255,255,0.08)"/>
+      <stop offset="100%" style="stop-color:rgba(255,255,255,0.03)"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)" rx="0"/>
+
+  <!-- Decorative orbs -->
+  <circle cx="200" cy="150" r="350" fill="rgba(108,248,187,0.04)"/>
+  <circle cx="1050" cy="500" r="280" fill="rgba(108,248,187,0.03)"/>
+  <circle cx="600" cy="315" r="200" fill="rgba(108,248,187,0.02)"/>
+
+  <!-- Grid pattern -->
+  <g opacity="0.03">
+    <line x1="0" y1="120" x2="1200" y2="120" stroke="white" stroke-width="0.5"/>
+    <line x1="0" y1="240" x2="1200" y2="240" stroke="white" stroke-width="0.5"/>
+    <line x1="0" y1="480" x2="1200" y2="480" stroke="white" stroke-width="0.5"/>
+    <line x1="300" y1="0" x2="300" y2="630" stroke="white" stroke-width="0.5"/>
+    <line x1="700" y1="0" x2="700" y2="630" stroke="white" stroke-width="0.5"/>
+  </g>
+
+  <!-- Logo -->
+  <g transform="translate(60, 50)">
+    <rect width="48" height="48" rx="12" fill="url(#accent)"/>
+    <text x="24" y="33" font-family="Georgia, serif" font-size="28" font-weight="bold" fill="#001736" text-anchor="middle">Z</text>
+    <text x="60" y="32" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#6cf8bb">Zawadi</text>
+  </g>
+
+  <!-- Hero Headline -->
+  <text x="60" y="190" font-family="Arial, sans-serif" font-size="52" font-weight="bold" fill="white">
+    Unlock Your Academic Future
+  </text>
+  <text x="60" y="250" font-family="Arial, sans-serif" font-size="52" font-weight="bold" fill="white">
+    with <tspan fill="#6cf8bb">Techsari Zawadi</tspan>
+  </text>
+
+  <!-- Subtitle -->
+  <text x="60" y="300" font-family="Arial, sans-serif" font-size="20" fill="rgba(255,255,255,0.55)">
+    AI-powered scholarship matching built exclusively for African students.
+  </text>
+
+  <!-- Value Props Row -->
+  <!-- Card 1: 100% Eligible -->
+  <g transform="translate(60, 360)">
+    <rect width="240" height="90" rx="12" fill="url(#cardGrad)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    <text x="20" y="35" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#6cf8bb">100%</text>
+    <text x="20" y="58" font-family="Arial, sans-serif" font-size="13" fill="rgba(255,255,255,0.6)">Eligible Matches</text>
+    <circle cx="210" cy="25" r="3" fill="#6cf8bb" opacity="0.3"/>
+    <circle cx="220" cy="25" r="2" fill="#6cf8bb" opacity="0.2"/>
+  </g>
+
+  <!-- Card 2: 54 Countries -->
+  <g transform="translate(320, 360)">
+    <rect width="240" height="90" rx="12" fill="url(#cardGrad)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    <text x="20" y="35" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#6cf8bb">54</text>
+    <text x="20" y="58" font-family="Arial, sans-serif" font-size="13" fill="rgba(255,255,255,0.6)">African Countries</text>
+  </g>
+
+  <!-- Card 3: AI Essay Studio -->
+  <g transform="translate(580, 360)">
+    <rect width="240" height="90" rx="12" fill="url(#cardGrad)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    <text x="20" y="35" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#6cf8bb">AI</text>
+    <text x="20" y="58" font-family="Arial, sans-serif" font-size="13" fill="rgba(255,255,255,0.6)">Essay Co-Creation</text>
+  </g>
+
+  <!-- Card 4: No IELTS -->
+  <g transform="translate(840, 360)">
+    <rect width="300" height="90" rx="12" fill="url(#cardGrad)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+    <text x="20" y="35" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#6cf8bb">No IELTS</text>
+    <text x="20" y="58" font-family="Arial, sans-serif" font-size="13" fill="rgba(255,255,255,0.6)">Required. MOI &amp; Duolingo OK</text>
+  </g>
+
+  <!-- Bottom Tagline Bar -->
+  <rect x="0" y="510" width="1200" height="120" fill="rgba(108,248,187,0.04)"/>
+  <line x1="60" y1="510" x2="1140" y2="510" stroke="rgba(108,248,187,0.1)" stroke-width="1"/>
+
+  <circle cx="100" cy="555" r="4" fill="#6cf8bb"/>
+  <text x="115" y="559" font-family="Arial, sans-serif" font-size="14" fill="rgba(255,255,255,0.5)">Deterministic Eligibility Matching</text>
+
+  <circle cx="430" cy="555" r="4" fill="#6cf8bb"/>
+  <text x="445" y="559" font-family="Arial, sans-serif" font-size="14" fill="rgba(255,255,255,0.5)">No Data Selling. Always Free.</text>
+
+  <circle cx="760" cy="555" r="4" fill="#6cf8bb"/>
+  <text x="775" y="559" font-family="Arial, sans-serif" font-size="14" fill="rgba(255,255,255,0.5)">2,500+ Verified Scholarships</text>
+
+  <!-- URL -->
+  <text x="920" y="600" font-family="Arial, sans-serif" font-size="12" fill="rgba(255,255,255,0.3)" text-anchor="end">techsari.online</text>
+</svg>

@@ -112,12 +112,23 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
     ? `${cleanDesc.slice(0, 155).trim()}... Deadline: ${formatDeadline(scholarship.deadline)}. Open to students from ${scholarship.countries?.join(', ') || 'multiple countries'}.`
     : `Apply for ${scholarship.name}. Deadline: ${formatDeadline(scholarship.deadline)}.`;
 
+  // Build dynamic OG image URL (truncate long values to keep URL safe)
+  const ogName = (scholarship.name || '').slice(0, 60);
+  const ogProvider = (scholarship.provider || '').slice(0, 50);
+  const ogCountries = (scholarship.countries || []).slice(0, 3).join(', ').slice(0, 80);
+  const ogDegrees = (scholarship.degree_levels || []).slice(0, 2).join(', ').slice(0, 40);
+  const ogDeadline = formatDeadline(scholarship.deadline).slice(0, 40);
+  const ogUpdated = scholarship.updated_at ? `&_=${scholarship.updated_at.slice(0, 10)}` : '';
+
+  const ogImageUrl = `https://techsari.online/api/og-scholarship?name=${encodeURIComponent(ogName)}&provider=${encodeURIComponent(ogProvider)}&funding_type=${encodeURIComponent(scholarship.funding_type || '')}&deadline=${encodeURIComponent(ogDeadline)}&countries=${encodeURIComponent(ogCountries)}&degree_levels=${encodeURIComponent(ogDegrees)}&no_ielts=${scholarship.no_ielts ? 'true' : ''}${ogUpdated}`;
+
   return (
     <div className="min-h-screen bg-background">
       <SEO
         title={`${scholarship.name} | Zawadi`}
         description={seoDesc}
         path={`/scholarships/browse/${scholarship.slug}`}
+        image={ogImageUrl}
       />
       <ScholarshipSchema scholarship={scholarship} />
 

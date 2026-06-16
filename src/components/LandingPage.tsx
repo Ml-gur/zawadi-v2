@@ -156,6 +156,7 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
         title="Zawadi — Find Scholarships You're 100% Eligible For | African Students"
         description="Stop searching global spam. Discover daily-updated, 100% eligible African scholarships, track deadlines, and write winning essays with our AI Studio."
         path="/"
+        image="https://techsari.online/og-home.png"
         schema={organizationSchema}
       />
 
