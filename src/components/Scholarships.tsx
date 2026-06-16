@@ -108,6 +108,74 @@ export default function Scholarships({
     return matchesSearch && matchesCountry && matchesDegree && matchesNoIelts;
   });
 
+  // Filtering state (moved before early return to preserve hook count across renders)
+  const [search, setSearch] = useState('');
+  const [degree, setDegree] = useState('');
+  const [field, setField] = useState('');
+  const [funding, setFunding] = useState('');
+
+  // Premium Custom filter systems as shown in screenshot
+  const [countryFilter, setCountryFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [accessFilter, setAccessFilter] = useState('');
+  const [urgencyFilter, setUrgencyFilter] = useState('');
+  const [hostRegionFilter, setHostRegionFilter] = useState('');
+  const [sponsorTypeFilter, setSponsorTypeFilter] = useState('');
+  const [schoolFilter, setSchoolFilter] = useState('');
+  const [docsReadyFilter, setDocsReadyFilter] = useState(false);
+  const [amountShownFilter, setAmountShownFilter] = useState(false);
+  const [matchSortFilter, setMatchSortFilter] = useState<'default' | 'high' | 'all'>('default');
+  const [noIeltsFilter, setNoIeltsFilter] = useState(false);
+  const [showAlertsModal, setShowAlertsModal] = useState(false);
+  const [showNoIeltsTooltip, setShowNoIeltsTooltip] = useState(false);
+
+  // Compute live alerts dynamically from current active listings
+  const systemAlerts = React.useMemo(() => {
+    const alerts: Array<{
+      id: string;
+      title: string;
+      description: string;
+      date: string;
+      severity: 'urgent' | 'info';
+      sourceSchol: Scholarship;
+    }> = [];
+
+    const eligible = scholarships.filter(s => s && s.published);
+
+    eligible.forEach(s => {
+      const isUrgent = s.deadline && !s.deadline.toLowerCase().includes('varies') && !s.deadline.toLowerCase().includes('annual');
+      if (isUrgent) {
+        alerts.push({
+          id: `deadline-${s.id}`,
+          title: `Approaching Deadline: ${s.name}`,
+          description: `The deadline is ${s.deadline}. Please make sure your personal essays in AI Essay Studio are complete and ready.`,
+          date: `Closing: ${s.deadline}`,
+          severity: 'urgent',
+          sourceSchol: s
+        });
+      } else {
+        const isHighMatch = (s.match?.score || 0) >= 94;
+        if (isHighMatch) {
+          alerts.push({
+            id: `new-${s.id}`,
+            title: `New Match recommendation: ${s.name}`,
+            description: `A highly recommended opportunity from ${s.provider} matches your configured study profile with ${s.match!.score}% compatibility.`,
+            date: `New`,
+            severity: 'info',
+            sourceSchol: s
+          });
+        }
+      }
+    });
+
+    return alerts.sort((a, b) => {
+      if (a.severity === 'urgent' && b.severity !== 'urgent') return -1;
+      if (a.severity !== 'urgent' && b.severity === 'urgent') return 1;
+      return 0;
+    });
+  }, [scholarships]);
+
   // Public preview rendering
   if (isPublic) {
     return (
@@ -525,78 +593,6 @@ export default function Scholarships({
       </div>
     );
   }
-
-  // Filtering state
-  const [search, setSearch] = useState('');
-  const [degree, setDegree] = useState('');
-  const [field, setField] = useState('');
-  const [funding, setFunding] = useState('');
-
-  // Premium Custom filter systems as shown in screenshot
-  const [countryFilter, setCountryFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
-  const [accessFilter, setAccessFilter] = useState('');
-  const [urgencyFilter, setUrgencyFilter] = useState('');
-  const [hostRegionFilter, setHostRegionFilter] = useState('');
-  const [sponsorTypeFilter, setSponsorTypeFilter] = useState('');
-  const [schoolFilter, setSchoolFilter] = useState('');
-  const [docsReadyFilter, setDocsReadyFilter] = useState(false);
-  const [amountShownFilter, setAmountShownFilter] = useState(false);
-  const [matchSortFilter, setMatchSortFilter] = useState<'default' | 'high' | 'all'>('default');
-  const [noIeltsFilter, setNoIeltsFilter] = useState(false);
-  const [showAlertsModal, setShowAlertsModal] = useState(false);
-  const [showNoIeltsTooltip, setShowNoIeltsTooltip] = useState(false);
-
-  // Compute live alerts dynamically from current active listings
-  const systemAlerts = React.useMemo(() => {
-    const alerts: Array<{
-      id: string;
-      title: string;
-      description: string;
-      date: string;
-      severity: 'urgent' | 'info';
-      sourceSchol: Scholarship;
-    }> = [];
-
-    // Filter scholarships that are published
-    const eligible = scholarships.filter(s => s && s.published);
-
-    eligible.forEach(s => {
-      // 1. Upcoming deadlines (e.g. contains solid month dates, not is Varies)
-      const isUrgent = s.deadline && !s.deadline.toLowerCase().includes('varies') && !s.deadline.toLowerCase().includes('annual');
-      if (isUrgent) {
-        alerts.push({
-          id: `deadline-${s.id}`,
-          title: `Approaching Deadline: ${s.name}`,
-          description: `The deadline is ${s.deadline}. Please make sure your personal essays in AI Essay Studio are complete and ready.`,
-          date: `Closing: ${s.deadline}`,
-          severity: 'urgent',
-          sourceSchol: s
-        });
-      } else {
-        // 2. High matching affinity resource
-        const isHighMatch = (s.match?.score || 0) >= 94;
-        if (isHighMatch) {
-          alerts.push({
-            id: `new-${s.id}`,
-            title: `New Match recommendation: ${s.name}`,
-            description: `A highly recommended opportunity from ${s.provider} matches your configured study profile with ${s.match!.score}% compatibility.`,
-            date: `New`,
-            severity: 'info',
-            sourceSchol: s
-          });
-        }
-      }
-    });
-
-    // Sort to show urgent first
-    return alerts.sort((a, b) => {
-      if (a.severity === 'urgent' && b.severity !== 'urgent') return -1;
-      if (a.severity !== 'urgent' && b.severity === 'urgent') return 1;
-      return 0;
-    });
-  }, [scholarships]);
 
   // Dropdown options
   const degrees = ["Bachelors", "Masters", "PhD", "Doctorate", "Postdoctoral"];
