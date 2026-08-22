@@ -6,15 +6,17 @@ test.describe('route guards (logged out)', () => {
   for (const route of protectedRoutes) {
     test(`logged-out visit to ${route} does not render app content`, async ({ page }) => {
       await page.goto(route, { waitUntil: 'domcontentloaded' });
-      await page.waitForTimeout(1000);
-      const url = page.url();
-      // Either redirected away from the protected path, or shown auth/404 UI
-      if (url.replace(/\/$/, '') === route) {
-        // Must not contain dashboard/workspace markers
+      await page.waitForTimeout(1200);
+      const { pathname } = new URL(page.url());
+
+      if (pathname.replace(/\/$/, '') === route) {
+        // Still on the protected path: must be showing 404/auth, never app content
         const bodyText = await page.locator('main').innerText().catch(() => '');
-        expect(bodyText.toLowerCase()).not.toMatch(/welcome back|your matches|workspace overview/);
+        expect(bodyText.toLowerCase()).not.toMatch(/welcome back|your matches|workspace overview|track every application/);
+        expect(bodyText).toMatch(/404|log in|sign in/i);
       } else {
-        expect(url).not.toContain(route);
+        // Redirected away — guard worked
+        expect(pathname).not.toBe(route);
       }
     });
   }
