@@ -213,24 +213,24 @@ export default function Scholarships({
         />
 
         {/* Guest Banner */}
-        <div className="bg-[#001736] rounded-lg p-6 md:p-8 border border-[#002b6b]/60">
+        <div className="bg-off-black rounded-lg p-6 md:p-8 border border-hairline bg-[radial-gradient(circle_at_85%_20%,rgba(10,228,72,0.07)_0%,transparent_55%)]">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex-1">
-              <h2 className="font-display font-black text-lg text-white mb-1">You are viewing scholarships as a guest</h2>
-              <p className="text-xs text-white/70 max-w-xl">
+              <h2 className="font-display font-semibold text-lg text-cream mb-1">You are viewing scholarships as a guest</h2>
+              <p className="text-xs text-muted max-w-xl">
                 Create a free account to see your eligibility score for each one.
               </p>
             </div>
             <div className="flex items-center gap-3 shrink-0">
               <button
                 onClick={() => { setShowAuthModal(false); handleAuthAction(); }}
-                className="px-5 py-2.5 bg-[#22c55e] text-white font-bold rounded-lg hover:bg-[#16a34a] transition-colors cursor-pointer text-xs"
+                className="btn-gradient-stroke px-5 py-2.5 min-h-[44px] text-cream font-semibold rounded-full hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer text-xs"
               >
                 Create Free Account
               </button>
               <button
                 onClick={() => { setShowAuthModal(false); handleAuthAction(); }}
-                className="px-5 py-2.5 bg-transparent border border-white/40 text-white font-bold rounded-lg hover:bg-white/10 transition-colors cursor-pointer text-xs"
+                className="px-5 py-2.5 min-h-[44px] bg-transparent border border-cream/40 text-cream font-semibold rounded-full hover:border-cream hover:bg-cream/[0.04] transition-colors cursor-pointer text-xs"
               >
                 Log In
               </button>
@@ -334,7 +334,7 @@ export default function Scholarships({
                   if (days < 0) return { label: 'Deadline Passed', color: 'text-status-error', bg: 'bg-status-error/10' };
                   if (days <= 30) return { label: `${days} days left`, color: 'text-status-error', bg: 'bg-status-error/10' };
                   if (days <= 60) return { label: `${days} days left`, color: 'text-status-warning', bg: 'bg-status-warning/10' };
-                  if (days <= 90) return { label: `${days} days left`, color: 'text-amber-600', bg: 'bg-amber-50' };
+                  if (days <= 90) return { label: `${days} days left`, color: 'text-status-warning', bg: 'bg-status-warning/10' };
                   return { label: `${days} days left`, color: 'text-status-success', bg: 'bg-status-success/10' };
                 })();
 
@@ -410,7 +410,7 @@ export default function Scholarships({
                           </span>
                         )}
                         {s.no_ielts && (
-                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
+                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-status-warning/10 text-status-warning border border-status-warning/30">
                             No IELTS
                           </span>
                         )}
@@ -517,7 +517,7 @@ export default function Scholarships({
                       </span>
                     )}
                     {selectedSchol.no_ielts && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">No IELTS</span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-status-warning/10 text-status-warning border border-status-warning/30">No IELTS</span>
                     )}
                   </div>
                   <h2 className="text-xl font-display font-black text-primary mb-1">{selectedSchol.name}</h2>
@@ -919,7 +919,7 @@ export default function Scholarships({
                         <span className="material-symbols-outlined text-[12px]">verified</span> Fully Funded
                       </span>
                       {selectedSchol.no_ielts && (
-                        <span className="bg-amber-50 text-amber-700 font-semibold text-[10px] px-2.5 py-1 rounded uppercase tracking-wider flex items-center gap-1 border border-amber-200">
+                        <span className="bg-status-warning/10 text-status-warning font-medium text-[10px] px-2.5 py-1 rounded uppercase tracking-wider flex items-center gap-1 border border-status-warning/30">
                           <span className="material-symbols-outlined text-[12px]">check_circle</span> No IELTS
                         </span>
                       )}
@@ -984,13 +984,13 @@ export default function Scholarships({
                         <div className="w-16 h-16 flex items-center justify-center bg-off-black rounded-full">
                           <span className="material-symbols-outlined text-2xl text-muted">person_edit</span>
                         </div>
-                        <button onClick={() => window.dispatchEvent(new CustomEvent('open-profile-setup'))} className="mt-2 text-[8px] font-black text-primary hover:underline uppercase tracking-wider">
+                        <button onClick={() => window.dispatchEvent(new CustomEvent('open-profile-setup'))} className="mt-2 text-[8px] font-semibold text-primary hover:underline uppercase tracking-wider">
                           Set up profile
                         </button>
                       </>
                     )}
                     {selectedSchol.no_ielts && (
-                      <span className="mt-2 text-[8px] font-black text-amber-600 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5 uppercase">No IELTS</span>
+                      <span className="mt-2 text-[8px] font-semibold text-status-warning bg-status-warning/10 border border-status-warning/30 rounded px-1.5 py-0.5 uppercase">No IELTS</span>
                     )}
                   </div>
                 </div>
@@ -1177,7 +1177,7 @@ export default function Scholarships({
                       const currentStatus = getApplicationForSchol(selectedSchol.id)?.status || 'not_started';
                       let selectBgStyle = "bg-off-black border-hairline text-on-surface";
                       if (currentStatus === 'Applied') {
-                        selectBgStyle = "bg-secondary text-white border-secondary font-black";
+                        selectBgStyle = "bg-accent-green/15 text-accent-green border-accent-green/50 font-semibold";
                       } else if (currentStatus === 'Drafting' || currentStatus === 'Essay Drafting') {
                         selectBgStyle = "border-accent-green bg-accent-green/15 text-accent-green font-semibold animate-pulse";
                       } else if (currentStatus === 'Saved') {
@@ -1282,8 +1282,8 @@ export default function Scholarships({
                     );
                   })}
                   {selectedSchol.match?.no_ielts_benefit && (
-                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-2 text-[10px] text-amber-800 font-bold flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-sm text-amber-600">check_circle</span>
+                    <div className="bg-status-warning/10 border border-status-warning/30 rounded-lg p-2 text-[10px] text-status-warning font-medium flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-sm text-status-warning">check_circle</span>
                       No IELTS required — save $300+ on English proficiency tests
                     </div>
                   )}
@@ -1335,10 +1335,10 @@ export default function Scholarships({
                 onClick={() => setShowAlertsModal(true)}
                 className="relative flex items-center gap-1.5 px-3 py-2 bg-canvas hover:bg-off-black border border-hairline/50 rounded-lg text-xs font-bold text-cream cursor-pointer shadow-3xs transition-all"
               >
-                <span className="material-symbols-outlined text-[16px] text-amber-500 font-bold">notifications</span>
+                <span className="material-symbols-outlined text-[16px] text-status-warning">notifications</span>
                 <span>Alerts</span>
                 {systemAlerts.length > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-[9px] font-black text-white animate-pulse">
+                  <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-accent-green/15 border border-accent-green/50 text-accent-green text-[9px] font-semibold animate-pulse">
                     {systemAlerts.length}
                   </span>
                 )}
@@ -1635,7 +1635,7 @@ export default function Scholarships({
                     // Dynamic colors for the tracking stage select dropdown inside table
                     let trackingStageBg = "bg-off-black border-hairline/80 text-on-surface";
                     if (currentStatus === 'Applied') {
-                      trackingStageBg = "bg-secondary text-white border-secondary font-black";
+                      trackingStageBg = "bg-accent-green/15 text-accent-green border-accent-green/50 font-semibold";
                     } else if (currentStatus === 'Drafting' || currentStatus === 'Essay Drafting') {
                       trackingStageBg = "border-accent-green bg-accent-green/15 text-accent-green font-semibold animate-pulse";
                     } else if (currentStatus === 'Saved') {
@@ -1713,7 +1713,7 @@ export default function Scholarships({
 
                             {/* No-IELTS badge */}
                             {s.no_ielts && (
-                              <span className="text-[7px] font-black text-amber-600 bg-amber-50 border border-amber-200 rounded px-1 py-0.5 uppercase tracking-wide whitespace-nowrap">
+                              <span className="text-[7px] font-black text-status-warning bg-status-warning/10 border border-status-warning/30 rounded px-1 py-0.5 uppercase tracking-wide whitespace-nowrap">
                                 No IELTS
                               </span>
                             )}
@@ -1737,13 +1737,13 @@ export default function Scholarships({
                         <td className="py-5 px-5 max-w-[280px]">
                           <div className="space-y-1 relative">
                             {s.urgency === 'Urgent' && (
-                              <span className="inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-status-urgent text-white mb-1">Urgent</span>
+                              <span className="inline-block px-2 py-0.5 rounded text-[9px] font-bold border border-status-urgent/50 text-status-urgent mb-1">Urgent</span>
                             )}
                             {s.urgency === 'Warning' && (
-                              <span className="inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-status-warning text-white mb-1">Closing Soon</span>
+                              <span className="inline-block px-2 py-0.5 rounded text-[9px] font-bold border border-status-warning/50 text-status-warning mb-1">Closing Soon</span>
                             )}
                             {s.urgency === 'Expired' && (
-                              <span className="inline-block px-2 py-0.5 rounded text-[9px] font-bold bg-outline text-white mb-1">Deadline Passed</span>
+                              <span className="inline-block px-2 py-0.5 rounded text-[9px] font-bold border border-hairline text-muted mb-1">Deadline Passed</span>
                             )}
                             <h4 
                               onClick={() => setSelectedSchol(s)}
@@ -1921,7 +1921,7 @@ export default function Scholarships({
             {/* Header */}
             <div className="p-6 border-b border-hairline/40 flex items-center justify-between">
               <div className="flex items-center gap-2 font-display">
-                <span className="material-symbols-outlined text-amber-500 font-bold">notifications_active</span>
+                <span className="material-symbols-outlined text-status-warning font-bold">notifications_active</span>
                 <div>
                   <h3 className="font-display font-black text-primary text-base">Scholarship Alert Center</h3>
                   <p className="text-[10px] text-muted uppercase font-bold tracking-wider">Live deadlines & updates</p>
@@ -1962,7 +1962,7 @@ export default function Scholarships({
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
-                          <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-md ${
+                          <span className={`text-[9px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded-md ${
                             alert.severity === 'urgent' ? 'bg-status-urgent/10 text-status-urgent' : 'bg-status-info/10 text-status-info'
                           }`}>
                             {alert.severity === 'urgent' ? 'Urgent' : 'Opportunity'}

@@ -111,7 +111,7 @@ function ParagraphEssay({ content, highlighted, onToggle }: { content: string; h
           onClick={() => onToggle(i)}
           className={`p-3 rounded-lg border cursor-pointer transition-colors text-sm leading-relaxed ${
             highlighted.has(i)
-              ? 'bg-amber-500/20 border-amber-500/40 text-amber-900 dark:text-amber-100'
+              ? 'bg-status-warning/15 border-status-warning/40 text-status-warning'
               : 'bg-off-black border-outline-variant/30 hover:border-primary/30'
           }`}
         >
@@ -131,7 +131,7 @@ function StarRating({ value, onChange, max = 5 }: { value: number; onChange?: (v
           key={i}
           type="button"
           onClick={() => onChange?.(i + 1)}
-          className={`p-0.5 transition-colors cursor-pointer ${i < value ? 'text-amber-400' : 'text-outline/40 hover:text-amber-300'}`}
+          className={`p-0.5 transition-colors cursor-pointer ${i < value ? 'text-status-warning' : 'text-muted/40 hover:text-status-warning'}`}
         >
           <Star className="w-5 h-5 fill-current" />
         </button>
@@ -392,7 +392,7 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
                 {item.request_reference}
               </span>
               {isUrgent && (
-                <span className="flex items-center gap-1 text-[10px] font-black text-white bg-status-urgent px-2 py-0.5 rounded-full">
+                <span className="flex items-center gap-1 text-[10px] font-medium text-status-urgent border border-status-urgent/50 px-2 py-0.5 rounded-full">
                   <AlertTriangle className="w-3 h-3" /> URGENT
                 </span>
               )}
@@ -461,7 +461,7 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
         )}
         {item.student_rating !== undefined && item.student_rating > 0 && (
           <span className="flex items-center gap-1">
-            <Star className="w-3 h-3 text-amber-400 fill-current" />
+            <Star className="w-3 h-3 text-status-warning fill-current" />
             {item.student_rating}/5
           </span>
         )}
@@ -501,7 +501,7 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
             >
               <MessageSquare className="w-4 h-4 text-on-surface-variant" />
               {notifications.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-status-urgent text-white text-[8px] font-black rounded-full flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-status-urgent/15 border border-status-urgent/50 text-status-urgent text-[8px] font-mono rounded-full flex items-center justify-center">
                   {notifications.length}
                 </span>
               )}
@@ -614,7 +614,7 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
             return (
               <div className="bg-canvas border border-outline-variant/60 rounded-lg p-6 space-y-4 max-w-xl">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-lg bg-primary flex items-center justify-center text-white text-xl font-black">
+            <div className="w-14 h-14 rounded-lg ring-1 ring-cream/40 flex items-center justify-center text-cream text-xl font-black">
               {user.name?.[0] || user.email?.[0] || 'M'}
             </div>
             <div>

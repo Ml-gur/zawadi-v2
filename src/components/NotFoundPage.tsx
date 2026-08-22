@@ -8,7 +8,7 @@ interface NotFoundPageProps {
 
 export default function NotFoundPage({ onBack }: NotFoundPageProps) {
   return (
-    <div className="min-h-screen bg-canvas text-cream flex items-center justify-center px-6">
+    <div className="min-h-[100dvh] bg-canvas text-cream flex items-center justify-center px-6">
       <SEO
         title="Page Not Found — Techsari Zawadi"
         description="The page you are looking for does not exist. Return to the Zawadi homepage to find scholarships for African students."

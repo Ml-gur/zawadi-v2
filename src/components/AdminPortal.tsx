@@ -854,7 +854,7 @@ export default function AdminPortal({
               <Bot className="w-4 h-4 shrink-0" />
               Bot Queue (Ingestion)
               {stats.pending_crawler_queue > 0 && (
-                <span className="absolute right-3.5 px-2 py-0.5 rounded-full text-[9px] font-black bg-status-urgent text-white scale-90">
+                <span className="absolute right-3.5 px-2 py-0.5 rounded-full text-[9px] font-black bg-status-urgent/15 border border-status-urgent/50 text-status-urgent scale-90">
                   {stats.pending_crawler_queue}
                 </span>
               )}
@@ -868,7 +868,7 @@ export default function AdminPortal({
               <MessageSquare className="w-4 h-4 shrink-0" />
               Mentor Queue
               {mentorQueueItems.filter(r => r.status === 'pending' || r.status === 'submitted_by_mentor').length > 0 && (
-                <span className="absolute right-3.5 px-2 py-0.5 rounded-full text-[9px] font-black bg-status-urgent text-white scale-90">
+                <span className="absolute right-3.5 px-2 py-0.5 rounded-full text-[9px] font-black bg-status-urgent/15 border border-status-urgent/50 text-status-urgent scale-90">
                   {mentorQueueItems.filter(r => r.status === 'pending' || r.status === 'submitted_by_mentor').length}
                 </span>
               )}
@@ -1032,7 +1032,7 @@ export default function AdminPortal({
                       <div className="flex items-start justify-between mb-3">
                         <div>
                           <div className="flex items-center gap-2 mb-1">
-                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-medium uppercase tracking-wider ${
                               item.status === 'pending' ? 'bg-status-warning/10 text-status-warning' :
                               item.status === 'assigned' ? 'bg-primary-fixed text-primary' :
                               item.status === 'under_review' ? 'bg-status-info/10 text-status-info' :
@@ -1102,7 +1102,7 @@ export default function AdminPortal({
                       {/* Submitted by mentor — approve/reject */}
                       {(item.status === 'submitted_by_mentor') && (
                         <div className="flex items-center gap-2 pt-3 border-t border-outline-variant/30">
-                          <button onClick={() => handleApproveReview(item.id)} className="flex items-center gap-1 px-3 py-1.5 bg-status-success text-white rounded-lg text-[10px] font-bold hover:opacity-90 transition-opacity cursor-pointer">
+                          <button onClick={() => handleApproveReview(item.id)} className="flex items-center gap-1 px-3 py-1.5 bg-status-success/15 border border-status-success/40 text-status-success rounded-full text-[10px] font-semibold hover:bg-status-success/25 transition-opacity cursor-pointer">
                             <CheckCircle className="w-3 h-3" /> Approve & Deliver
                           </button>
                           <button onClick={() => {
@@ -1250,7 +1250,7 @@ export default function AdminPortal({
                   <div className="flex items-center gap-2 shrink-0">
                     <button
                       onClick={() => { setFilterPublishStatus('auto-unpublished'); }}
-                      className="px-3 py-1.5 bg-status-warning text-white rounded-lg text-[10px] font-bold hover:opacity-90 transition-opacity cursor-pointer"
+                      className="px-3 py-1.5 bg-status-warning/15 border border-status-warning/40 text-status-warning rounded-full text-[10px] font-semibold hover:bg-status-warning/25 transition-opacity cursor-pointer"
                     >
                       Review
                     </button>
@@ -1468,7 +1468,7 @@ export default function AdminPortal({
               {/* Box 1: Core visual */}
               <div className="bg-transparent text-cream border border-cream/60 hover:border-cream hover:bg-cream/[0.04] rounded-lg p-5 space-y-3">
                 <div className="flex justify-between items-start gap-3">
-                  <span className="bg-secondary text-white font-extrabold text-[9px] uppercase px-2 py-0.5 rounded tracking-wider">{selectedPreviewSchol.funding_type} Funding</span>
+                  <span className="bg-accent-green/15 border border-accent-green/40 text-accent-green font-semibold text-[9px] uppercase px-2 py-0.5 rounded-full tracking-wider">{selectedPreviewSchol.funding_type} Funding</span>
                   <span className="text-[11px] font-mono opacity-80 font-bold">📆 Deadline: {selectedPreviewSchol.deadline || 'Continuous'}</span>
                 </div>
                 <h2 className="font-display font-black text-lg md:text-xl leading-snug">{selectedPreviewSchol.name}</h2>
@@ -1725,14 +1725,14 @@ export default function AdminPortal({
                     <button 
                       type="button"
                       onClick={() => setFormFundingType('Full')}
-                      className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${formFundingType === 'Full' ? 'bg-primary border-primary text-white' : 'bg-surface hover:bg-surface-container text-on-surface-variant border-outline-variant/60'}`}
+                      className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${formFundingType === 'Full' ? 'bg-cream border-cream text-canvas' : 'bg-surface hover:bg-surface-container text-on-surface-variant border-outline-variant/60'}`}
                     >
                       Full
                     </button>
                     <button 
                       type="button"
                       onClick={() => setFormFundingType('Partial')}
-                      className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${formFundingType === 'Partial' ? 'bg-primary border-primary text-white' : 'bg-surface hover:bg-surface-container text-on-surface-variant border-outline-variant/60'}`}
+                      className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${formFundingType === 'Partial' ? 'bg-cream border-cream text-canvas' : 'bg-surface hover:bg-surface-container text-on-surface-variant border-outline-variant/60'}`}
                     >
                       Partial
                     </button>
@@ -1774,11 +1774,11 @@ export default function AdminPortal({
                       id="formNoIeltsCheck"
                       checked={formNoIelts}
                       onChange={(e) => setFormNoIelts(e.target.checked)}
-                      className="w-4 h-4 text-amber-600 bg-surface border-outline-variant rounded focus:ring-amber-600 shrink-0 accent-amber-600"
+                      className="w-4 h-4 text-accent-green bg-canvas border-hairline rounded focus:ring-accent-green shrink-0 accent-accent-green"
                     />
-                    <label htmlFor="formNoIeltsCheck" className="text-xs font-bold text-amber-700 select-none cursor-pointer flex items-center gap-1.5">
+                    <label htmlFor="formNoIeltsCheck" className="text-xs font-medium text-cream select-none cursor-pointer flex items-center gap-1.5">
                       <span>No IELTS required</span>
-                      <span className="text-[9px] bg-amber-50 text-amber-600 border border-amber-200 rounded px-1.5 py-0.5 font-black uppercase">Accepts MOI / Duolingo</span>
+                      <span className="text-[9px] bg-status-warning/10 text-status-warning border border-status-warning/30 rounded px-1.5 py-0.5 font-black uppercase">Accepts MOI / Duolingo</span>
                     </label>
                   </div>
                 </div>
@@ -2185,7 +2185,7 @@ export default function AdminPortal({
                   <button 
                     type="button"
                     onClick={() => { handleFormSubmit({ preventDefault: () => {} } as any, false); }}
-                    className="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-lg transition-colors cursor-pointer"
+                    className="px-4 py-2.5 border border-status-warning/50 text-status-warning hover:bg-status-warning/10 font-semibold text-xs rounded-full transition-colors cursor-pointer"
                   >
                     Unpublish
                   </button>
@@ -2194,7 +2194,7 @@ export default function AdminPortal({
                   <button 
                     type="button"
                     onClick={() => { handleFormSubmit({ preventDefault: () => {} } as any, true); }}
-                    className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg transition-colors cursor-pointer"
+                    className="px-4 py-2.5 btn-gradient-stroke text-cream font-semibold text-xs rounded-full transition-all hover:brightness-110 cursor-pointer"
                   >
                     Publish
                   </button>

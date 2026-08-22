@@ -240,7 +240,7 @@ export default function ApplicationTracker({
                       onChange={(e) => handleUpdateStatus(app, e.target.value)}
                       className={`text-xs border rounded-lg p-2 focus:outline-none focus:border-primary cursor-pointer font-bold transition-all ${
                         app.status === 'Applied' 
-                          ? 'bg-secondary text-white border-secondary' 
+                          ? 'bg-accent-green/15 text-accent-green border-accent-green/50' 
                           : (app.status === 'Drafting' || app.status === 'Essay Drafting')
                           ? 'border-accent-green bg-accent-green/15 text-accent-green'
                           : app.status === 'Saved'

@@ -173,7 +173,7 @@ export default function StudentProfile({ user, onUpdateProfile, onNavigateToTab 
       </div>
 
       {successMsg && (
-        <div className="p-5 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/40 text-emerald-800 dark:text-emerald-300 text-xs rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4 animate-sweep">
+        <div className="p-5 bg-gradient-to-r bg-[radial-gradient(circle_at_90%_20%,rgba(10,228,72,0.08)_0%,transparent_60%)] border-accent-green/30 text-accent-green text-xs rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-4 animate-sweep">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-600 font-extrabold shrink-0">
               <span className="material-symbols-outlined text-base">check_circle</span>

@@ -85,7 +85,7 @@ export default function PublicScholarshipList() {
   }, [page]);
 
   return (
-    <div className="min-h-screen bg-canvas text-cream">
+    <div className="min-h-[100dvh] bg-canvas text-cream">
       <SEO
         title="Open Scholarships for African Students | Zawadi"
         description={`Browse ${data?.total || 'available'} open scholarships for African students. Find opportunities you're 100% eligible for, powered by AI matching.`}

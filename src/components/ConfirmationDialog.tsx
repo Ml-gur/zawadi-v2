@@ -30,7 +30,7 @@ export default function ConfirmationDialog({
           bg: 'bg-error-container/15',
           text: 'text-error',
           border: 'border-error/20',
-          accent: 'bg-error hover:bg-error/90 text-white focus:ring-error',
+          accent: 'bg-status-urgent/15 hover:bg-status-urgent/25 text-status-urgent border border-status-urgent/40 focus:ring-status-urgent/50',
           icon: 'error'
         };
       case 'warning':
@@ -38,7 +38,7 @@ export default function ConfirmationDialog({
           bg: 'bg-status-warning/15',
           text: 'text-status-warning',
           border: 'border-status-warning/20',
-          accent: 'bg-status-warning hover:bg-status-warning/90 text-white focus:ring-status-warning',
+          accent: 'bg-status-warning/15 hover:bg-status-warning/25 text-status-warning border border-status-warning/40 focus:ring-status-warning/50',
           icon: 'warning'
         };
       case 'info':
@@ -47,7 +47,7 @@ export default function ConfirmationDialog({
           bg: 'bg-primary/5',
           text: 'text-primary',
           border: 'border-primary/20',
-          accent: 'bg-primary hover:bg-primary/90 text-white focus:ring-primary',
+          accent: 'bg-accent-green/15 hover:bg-accent-green/25 text-accent-green border border-accent-green/40 focus:ring-accent-green/50',
           icon: 'info'
         };
     }
@@ -64,7 +64,7 @@ export default function ConfirmationDialog({
       ></div>
 
       {/* Dialog box Panel */}
-      <div className="relative w-full max-w-md bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 shadow-2xl animate-sweep overflow-hidden z-10">
+      <div className="relative w-full max-w-md bg-surface-container-lowest border border-outline-variant rounded-2xl p-6 animate-sweep overflow-hidden z-10">
         
         {/* Top-Decoration Border row */}
         <div className={`absolute top-0 left-0 right-0 h-1.5 ${type === 'danger' ? 'bg-error' : type === 'warning' ? 'bg-secondary' : 'bg-primary'}`}></div>
@@ -98,7 +98,7 @@ export default function ConfirmationDialog({
           
           <button
             onClick={onConfirm}
-            className={`px-5 py-2 font-bold text-xs rounded-lg transition-all transform hover:scale-102 active:scale-98 cursor-pointer shadow-xs ${theme.accent}`}
+            className={`px-5 py-2 font-bold text-xs rounded-full transition-all active:scale-[0.98] cursor-pointer min-h-[44px] ${theme.accent}`}
           >
             {confirmText}
           </button>

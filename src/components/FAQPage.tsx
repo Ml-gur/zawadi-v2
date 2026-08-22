@@ -86,7 +86,7 @@ export default function FAQPage({ onBack }: FAQPageProps) {
     .filter(cat => cat.items.length > 0);
 
   return (
-    <div className="min-h-screen bg-canvas text-cream">
+    <div className="min-h-[100dvh] bg-canvas text-cream">
       <SEO
         title="Scholarship FAQ for African Students — Zawadi"
         description="Answers to common questions about finding scholarships as an African student. Covers IELTS alternatives, eligibility matching, how to apply, and which countries qualify."

@@ -7,7 +7,7 @@ interface PrivacyPolicyProps {
 
 export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
   return (
-    <div className="bg-canvas text-cream min-h-screen">
+    <div className="bg-canvas text-cream min-h-[100dvh]">
       <SEO
         title="Privacy Policy — Techsari Zawadi"
         description="Techsari Zawadi Privacy Policy — how we collect, use, and protect your data as an African student using our scholarship platform."

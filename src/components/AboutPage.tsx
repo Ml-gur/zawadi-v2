@@ -7,7 +7,7 @@ interface AboutPageProps {
 
 export default function AboutPage({ onBack }: AboutPageProps) {
   return (
-    <div className="bg-canvas text-cream min-h-screen">
+    <div className="bg-canvas text-cream min-h-[100dvh]">
 <SEO
   title="About Zawadi — Scholarship Platform Built for African Students"
   description="Zawadi was built to fix the scholarship access gap for African students. We filter out irrelevant results, remove the IELTS barrier, and pair AI essay tools with human mentor review."

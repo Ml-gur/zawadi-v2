@@ -65,7 +65,7 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-canvas p-6">
+    <div className="min-h-[100dvh] flex items-center justify-center bg-canvas p-6">
       <div className="w-full max-w-sm">
         <form onSubmit={handleSubmit} className="bg-off-black border border-hairline rounded-lg p-8 space-y-5">
           <div className="text-center">

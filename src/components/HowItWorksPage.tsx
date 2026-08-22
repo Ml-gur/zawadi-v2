@@ -39,7 +39,7 @@ export default function HowItWorksPage({ onBack, onGetStarted }: HowItWorksPageP
   ];
 
   return (
-    <div className="bg-canvas text-cream min-h-screen">
+    <div className="bg-canvas text-cream min-h-[100dvh]">
 <SEO
   title="How Zawadi Works — Scholarship Matching for African Students"
   description="Create a profile in three minutes. See scholarships you qualify for. Build your application with AI that learns your writing style. Get mentor review before you submit."

@@ -238,7 +238,7 @@ export default function Dashboard({
             </div>
 
             <div className="relative z-10 flex flex-col items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-primary border-2 border-surface-container-lowest flex items-center justify-center font-bold text-sm text-white">
+              <div className="w-10 h-10 rounded-full ring-1 ring-hairline bg-off-black flex items-center justify-center font-mono font-medium text-sm text-cream">
                 {appliedCount}
               </div>
               <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Applied</span>
@@ -447,7 +447,7 @@ export default function Dashboard({
                 </div>
                 <button 
                   onClick={() => onViewScholarship(s)}
-                  className="w-full py-3 bg-canvas border-2 border-hairline/30 text-primary rounded-lg font-bold hover:bg-primary hover:border-primary hover:text-white transition-all group- cursor-pointer"
+                  className="w-full py-3 min-h-[44px] bg-canvas border border-hairline text-cream rounded-full font-semibold hover:border-cream hover:bg-cream/[0.04] transition-colors cursor-pointer"
                 >
                   Review & Apply
                 </button>

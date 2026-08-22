@@ -422,7 +422,7 @@ export default function BotQueueReview() {
               {/* Action buttons */}
               <div className="flex gap-2 pt-2 border-t border-outline-variant/30">
                 <button onClick={() => handleApprove(item.id)}
-                        className={`flex-1 py-2 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition-all ${hasScamFlags ? 'bg-error text-white hover:bg-error-fixed' : 'bg-status-success/10 text-status-success border border-status-success/20 hover:bg-status-success/20'}`}>
+                        className={`flex-1 py-2 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition-all ${hasScamFlags ? 'border border-status-urgent/50 bg-status-urgent/10 text-status-urgent hover:bg-status-urgent/20' : 'bg-status-success/10 text-status-success border border-status-success/20 hover:bg-status-success/20'}`}>
                   <ThumbsUp className="w-3.5 h-3.5" />
                   {hasScamFlags ? 'Approve with Flags' : 'Approve'}
                 </button>
@@ -473,7 +473,7 @@ export default function BotQueueReview() {
   return (
     <div className="space-y-6 animate-sweep">
       {toast && (
-        <div className={`fixed bottom-6 right-6 ${toast.type === 'error' ? 'bg-error' : 'bg-primary'} text-white border border-outline-variant/50 px-4 py-3 rounded-lg flex items-center gap-2 z-50 animate-sweep text-xs font-bold`}>
+        <div className={`fixed bottom-6 right-6 bg-canvas ${toast.type === 'error' ? 'text-error border-status-urgent/40' : 'text-accent-green border-accent-green/40'} border px-4 py-3 rounded-full flex items-center gap-2 z-50 animate-sweep text-xs font-medium`}>
           <CheckCircle className="w-4 h-4 text-secondary shrink-0" />
           {toast.msg}
         </div>

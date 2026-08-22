@@ -53,7 +53,7 @@ export default function AdminDashboard({
 
   // Build chart data from real distribution
   const planMixData = [
-    { name: 'Explorer (Free)', value: distribution.explorer || 1, color: '#001736' },
+    { name: 'Explorer (Free)', value: distribution.explorer || 1, color: '#00bae2' },
     { name: 'Scholar Plus', value: distribution.plus || 0, color: '#006c49' },
     { name: 'Pro Plan', value: distribution.pro || 0, color: '#6cf8bb' },
     { name: 'Institutional', value: distribution.institutional || 0, color: '#f59e0b' }
@@ -157,7 +157,7 @@ export default function AdminDashboard({
               <p className="font-bold text-sm">Review Bot Queue</p>
               <p className="text-xs text-on-primary-container/85 mt-1">{pendingBotCount} opportunities pending review</p>
             </div>
-            <div className="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-white group-hover:scale-105 transition-transform">
+            <div className="w-10 h-10 rounded-full ring-1 ring-hairline flex items-center justify-center text-cream group-hover:scale-105 transition-transform">
               <Bot className="w-5 h-5 text-on-primary-fixed" />
             </div>
           </button>
@@ -165,7 +165,7 @@ export default function AdminDashboard({
           {/* Action 2: Add Manual Scholarship */}
           <button 
             onClick={onOpenCreateModal}
-            className="w-full text-left bg-secondary-container hover:bg-secondary text-primary hover:text-white p-5 rounded-lg transition-all flex justify-between items-center group cursor-pointer border border-secondary/20"
+            className="w-full text-left hover:border-muted p-5 rounded-lg transition-colors flex justify-between items-center group cursor-pointer border border-hairline bg-off-black"
           >
             <div>
               <p className="font-bold text-sm">Add New Scholarship</p>

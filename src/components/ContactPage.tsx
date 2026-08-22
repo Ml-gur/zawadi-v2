@@ -63,7 +63,7 @@ export default function ContactPage({ onBack }: { onBack: () => void }) {
   };
 
   return (
-    <div className="min-h-screen bg-canvas text-cream">
+    <div className="min-h-[100dvh] bg-canvas text-cream">
 <SEO
   title="Contact Zawadi — Get Help or Partner With Us"
   description="Contact the Zawadi team for student support, scholarship provider listings, institutional partnerships, or press inquiries."

@@ -86,7 +86,7 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-canvas flex items-center justify-center">
+      <div className="min-h-[100dvh] bg-canvas flex items-center justify-center">
         <div className="w-8 h-8 border-[3px] border-accent-green border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -94,7 +94,7 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
 
   if (notFound || !scholarship) {
     return (
-      <div className="min-h-screen bg-canvas text-cream flex items-center justify-center px-4">
+      <div className="min-h-[100dvh] bg-canvas text-cream flex items-center justify-center px-4">
         <div className="text-center max-w-sm">
           <h1 className="text-2xl font-semibold text-cream tracking-tight mb-3">Scholarship Not Available</h1>
           <p className="text-sm text-muted mb-6">
@@ -128,7 +128,7 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
   const ogImageUrl = `https://techsari.online/api/og-scholarship?name=${encodeURIComponent(ogName)}&provider=${encodeURIComponent(ogProvider)}&funding_type=${encodeURIComponent(scholarship.funding_type || '')}&deadline=${encodeURIComponent(ogDeadline)}&countries=${encodeURIComponent(ogCountries)}&degree_levels=${encodeURIComponent(ogDegrees)}&no_ielts=${scholarship.no_ielts ? 'true' : ''}${ogUpdated}`;
 
   return (
-    <div className="min-h-screen bg-canvas text-cream">
+    <div className="min-h-[100dvh] bg-canvas text-cream">
       <SEO
         title={`${scholarship.name} | Zawadi`}
         description={seoDesc}

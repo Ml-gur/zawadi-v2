@@ -107,12 +107,12 @@ export default function DocumentVault({
     const badges: Record<string, { label: string; cls: string; tip: string }> = {
       pattern: { label: 'P', cls: 'bg-green-100 text-green-700 border-green-200', tip: 'Extracted by pattern matching — no AI used' },
       ai: { label: 'AI', cls: 'bg-purple-100 text-purple-700 border-purple-200', tip: 'Extracted by DeepSeek AI' },
-      hybrid: { label: 'H', cls: 'bg-amber-100 text-amber-700 border-amber-200', tip: 'Hybrid — pattern matching with AI fallback' },
+      hybrid: { label: 'H', cls: 'bg-status-warning/10 text-status-warning border-amber-200', tip: 'Hybrid — pattern matching with AI fallback' },
     };
 
     const b = badges[method] || badges.hybrid;
     return (
-      <span title={b.tip} className={`inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full border ${b.cls}`}>
+      <span title={b.tip} className={`inline-flex items-center gap-1 text-[9px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded-full border ${b.cls}`}>
         {b.label}
       </span>
     );
@@ -383,7 +383,7 @@ export default function DocumentVault({
                   {getExtractionBadge(doc)}
                   <button
                     onClick={() => openConfirmation(doc)}
-                    className="inline-flex items-center gap-1 bg-primary-fixed/20 text-primary text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-primary/20 cursor-pointer hover:bg-primary-fixed/40 transition-colors"
+                    className="inline-flex items-center gap-1 bg-primary-fixed/20 text-primary text-[9px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border border-primary/20 cursor-pointer hover:bg-primary-fixed/40 transition-colors"
                     title={doc.user_confirmed ? 'Confirmed by you' : 'Review & confirm extracted data'}
                   >
                     <span className="material-symbols-outlined text-[10px]">
@@ -394,19 +394,19 @@ export default function DocumentVault({
                 </>
               )}
               {doc.analysis_status === 'failed' && (
-                <span className="inline-flex items-center gap-1 bg-status-urgent/10 text-status-urgent text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-status-urgent/20">
+                <span className="inline-flex items-center gap-1 bg-status-urgent/10 text-status-urgent text-[9px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border border-status-urgent/20">
                   <span className="material-symbols-outlined text-[10px]">error_outline</span>
                   Failed
                 </span>
               )}
               {doc.analysis_status === 'pending' && (
-                <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-700 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-amber-200">
+                <span className="inline-flex items-center gap-1 bg-status-warning/10 text-status-warning text-[9px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border border-amber-200">
                   <span className="material-symbols-outlined text-[10px]">pending</span>
                   Pending
                 </span>
               )}
               {doc.analysis_status === 'completed' && !doc.ai_extraction_result && (
-                <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-green-200">
+                <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-[9px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border border-green-200">
                   <span className="material-symbols-outlined text-[10px]">check_circle</span>
                   Analyzed
                 </span>
@@ -421,7 +421,7 @@ export default function DocumentVault({
                     });
                     setManualEntryDoc(doc);
                   }}
-                  className="inline-flex items-center gap-1 bg-off-black text-muted text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-hairline/40 cursor-pointer hover:bg-primary-fixed/20 hover:text-primary transition-colors"
+                  className="inline-flex items-center gap-1 bg-off-black text-muted text-[9px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border border-hairline/40 cursor-pointer hover:bg-primary-fixed/20 hover:text-primary transition-colors"
                 >
                   <span className="material-symbols-outlined text-[10px]">edit_note</span>
                   Enter manually
@@ -438,7 +438,7 @@ export default function DocumentVault({
                     }
                   }}
                   disabled={aiExtracting === doc.id}
-                  className="inline-flex items-center gap-1 bg-off-black text-muted text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-hairline/40 cursor-pointer hover:bg-primary-fixed/20 hover:text-primary transition-colors disabled:opacity-50"
+                  className="inline-flex items-center gap-1 bg-off-black text-muted text-[9px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border border-hairline/40 cursor-pointer hover:bg-primary-fixed/20 hover:text-primary transition-colors disabled:opacity-50"
                 >
                   {aiExtracting === doc.id ? (
                     <span className="inline-block w-2.5 h-2.5 border-2 border-on-surface-variant border-t-transparent rounded-full animate-spin"></span>

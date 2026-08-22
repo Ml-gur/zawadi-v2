@@ -7,7 +7,7 @@ interface TermsOfServiceProps {
 
 export default function TermsOfService({ onBack }: TermsOfServiceProps) {
   return (
-    <div className="bg-canvas text-cream min-h-screen">
+    <div className="bg-canvas text-cream min-h-[100dvh]">
       <SEO
         title="Terms of Service — Techsari Zawadi"
         description="Techsari Zawadi Terms of Service — the terms governing your use of our AI-powered scholarship platform for African students."

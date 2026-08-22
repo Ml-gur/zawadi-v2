@@ -403,7 +403,7 @@ export default function SubscriptionPlans({ user, onPlanUpdated, onNavigateToTab
             }`}
           >
             <span>Annual (Pre-paid)</span>
-            <span className="bg-emerald-500 text-white text-[8px] font-black uppercase px-1.5 py-0.5 rounded-md">Save 17%</span>
+            <span className="border border-accent-green/40 text-accent-green text-[8px] font-semibold uppercase px-1.5 py-0.5 rounded-full">Save 17%</span>
           </button>
         </div>
         <p className="text-[11px] text-muted font-medium">USD base rates approximated against stable Kes conversion index. Secure payment processing for African markets.</p>
@@ -494,7 +494,7 @@ export default function SubscriptionPlans({ user, onPlanUpdated, onNavigateToTab
                   className={`w-full py-3 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
                     isCurrent 
                       ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/30 cursor-not-allowed text-center flex items-center justify-center gap-1.5'
-                      : 'bg-primary hover:bg-primary/95 text-white hover:translate-y-[-1px]'
+                      : 'btn-gradient-stroke text-cream hover:brightness-110'
                   }`}
                 >
                   {isCurrent ? (
@@ -519,7 +519,7 @@ export default function SubscriptionPlans({ user, onPlanUpdated, onNavigateToTab
         <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <span className="bg-secondary text-white text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full">B2B / Institutional</span>
+              <span className="border border-accent-blue/40 text-accent-blue text-[9px] font-semibold uppercase tracking-widest px-3 py-1 rounded-full">B2B / Institutional</span>
               <span className="bg-primary/10 text-primary text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Custom Pricing</span>
             </div>
             <h3 className="font-display text-2xl font-black text-primary">Zawadi Institutional</h3>
@@ -553,7 +553,7 @@ export default function SubscriptionPlans({ user, onPlanUpdated, onNavigateToTab
             <p className="text-xs text-muted mt-1">Volume-based pricing • Per-seat or flat rate</p>
             <a
               href="mailto:partnerships@zawadi.app?subject=Zawadi%20Institutional%20Plan%20Inquiry"
-              className="inline-block mt-4 bg-secondary hover:bg-secondary/90 text-white font-extrabold text-xs py-3 px-8 rounded-lg transition-all"
+              className="inline-block mt-4 inline-flex items-center justify-center mt-4 border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream font-semibold text-xs py-3 px-8 min-h-[44px] rounded-full transition-all"
             >
               Contact Partnerships →
             </a>
@@ -673,7 +673,7 @@ export default function SubscriptionPlans({ user, onPlanUpdated, onNavigateToTab
             {/* Header branding */}
             <div className="p-6 border-b border-hairline/30 bg-primary/2 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white shrink-0">
+                <div className="w-10 h-10 rounded-lg ring-1 ring-hairline flex items-center justify-center text-cream shrink-0">
                   <span className="material-symbols-outlined text-lg">lock</span>
                 </div>
                 <div>
@@ -872,10 +872,10 @@ export default function SubscriptionPlans({ user, onPlanUpdated, onNavigateToTab
                   type="button"
                   disabled={isProcessing || !isPaymentDetailsComplete}
                   onClick={handleInitiatePayment}
-                  className={`flex-1 py-3 text-white font-extrabold text-xs rounded-lg transition-all flex items-center justify-center gap-2 ${
+                  className={`flex-1 py-3 font-semibold text-sm rounded-full transition-all flex items-center justify-center gap-2 min-h-[48px] ${
                     isProcessing || !isPaymentDetailsComplete
-                      ? 'bg-primary/40 cursor-not-allowed'
-                      : 'bg-primary hover:bg-opacity-95 cursor-pointer'
+                      ? 'border border-hairline text-muted cursor-not-allowed'
+                      : 'btn-gradient-stroke text-cream hover:brightness-110 active:scale-[0.98] cursor-pointer'
                   }`}
                 >
                   {isProcessing ? (

@@ -492,7 +492,7 @@ export default function EssayGenerator({
             <div className="flex items-center gap-1.5 text-xs">
               <div className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] ${
                 stage === 'drafting' ? 'bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream animate-pulse' :
-                stage === 'ready_draft' || stage === 'critiquing' || stage === 'ready_critique' || stage === 'polishing' || stage === 'ready_polish' ? 'bg-status-success text-white' : 'bg-off-blackest text-muted'
+                stage === 'ready_draft' || stage === 'critiquing' || stage === 'ready_critique' || stage === 'polishing' || stage === 'ready_polish' ? 'bg-status-success text-canvas' : 'bg-off-black text-muted'
               }`}>
                 {stage === 'ready_draft' || stage === 'critiquing' || stage === 'ready_critique' || stage === 'polishing' || stage === 'ready_polish' ? '✓' : '1'}
               </div>
@@ -502,7 +502,7 @@ export default function EssayGenerator({
             <div className={`flex items-center gap-1.5 text-xs transition-opacity ${stage === 'critiquing' || stage === 'ready_critique' || stage === 'polishing' || stage === 'ready_polish' ? 'opacity-100' : 'opacity-30'}`}>
               <div className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] ${
                 stage === 'critiquing' ? 'bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream animate-pulse' :
-                stage === 'ready_critique' || stage === 'polishing' || stage === 'ready_polish' ? 'bg-status-success text-white' : 'bg-off-blackest text-muted'
+                stage === 'ready_critique' || stage === 'polishing' || stage === 'ready_polish' ? 'bg-status-success text-canvas' : 'bg-off-black text-muted'
               }`}>
                 {stage === 'ready_polish' || stage === 'polishing' ? '✓' : '2'}
               </div>
@@ -512,7 +512,7 @@ export default function EssayGenerator({
             <div className={`flex items-center gap-1.5 text-xs transition-opacity ${stage === 'polishing' || stage === 'ready_polish' ? 'opacity-100' : 'opacity-30'}`}>
               <div className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] ${
                 stage === 'polishing' ? 'bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream animate-pulse' :
-                stage === 'ready_polish' ? 'bg-status-success text-white' : 'bg-off-blackest text-muted'
+                stage === 'ready_polish' ? 'bg-status-success text-canvas' : 'bg-off-black text-muted'
               }`}>3</div>
               <span className={`font-bold ${stage === 'ready_polish' ? 'text-status-success' : 'text-primary'}`}>Polish</span>
             </div>
