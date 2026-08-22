@@ -27,7 +27,7 @@ export async function extractTextFromBuffer(
 
   if (lowerMime.includes('wordprocessingml') || lowerName.endsWith('.docx')) {
     const mammoth = await import('mammoth');
-    const result = await mammoth.extractRawText({ buffer });
+    const result = await mammoth.extractRawText({ buffer: Buffer.from(buffer as Uint8Array) });
     return { text: cleanText(result.value), method: 'docx' };
   }
 
@@ -38,8 +38,9 @@ export async function extractTextFromBuffer(
       import.meta.url
     ).toString();
 
-    const arrayBuf = buffer instanceof ArrayBuffer ? buffer : (buffer as Uint8Array).buffer;
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuf.slice(0) }).promise;
+    const bytes = new Uint8Array(buffer instanceof ArrayBuffer ? buffer : buffer as Uint8Array);
+    const copy = new Uint8Array(bytes);
+    const pdf = await pdfjsLib.getDocument({ data: copy }).promise;
 
     let extractedPages: string[] = [];
 
@@ -61,8 +62,8 @@ export async function extractTextFromBuffer(
         const viewport = page.getViewport({ scale: 2 });
         const canvas = new OffscreenCanvas(viewport.width, viewport.height);
         const ctx = canvas.getContext('2d')!;
-        await page.render({ canvasContext: ctx, viewport }).promise;
-        const blob = await canvas.convertToBlob({ type: 'image/png' });
+        await page.render({ canvas: canvas as unknown as HTMLCanvasElement, canvasContext: ctx as unknown as CanvasRenderingContext2D, viewport }).promise;
+        await canvas.convertToBlob({ type: 'image/png' });
         const warnMsg = 'This PDF appears to be a scanned image. Only text-based PDFs are supported for extraction.';
         return { text: cleanText(pageText), method: 'pdf-text', warning: warnMsg };
       }

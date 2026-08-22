@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, type MouseEvent as ReactMouseEvent } from 'react';
 import { Share2, Check } from 'lucide-react';
 
 interface ShareButtonProps {
@@ -12,7 +12,7 @@ interface ShareButtonProps {
 export default function ShareButton({ url, title, className = '', iconOnly, size = 'sm' }: ShareButtonProps) {
   const [copied, setCopied] = useState(false);
 
-  const handleShare = useCallback(async (e: React.MouseEvent) => {
+  const handleShare = useCallback(async (e: ReactMouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     const shareUrl = url.startsWith('http') ? url : `https://techsari.online${url}`;

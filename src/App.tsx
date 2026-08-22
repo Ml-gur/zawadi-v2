@@ -164,24 +164,31 @@ export default function App() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         localStorage.setItem('zawadi_token', session.access_token);
-        supabase.from('profiles').select('*').eq('id', session.user.id).single().then(({ data: profile, error }) => {
-          if (!error && profile) {
-            setUser(profile as UserProfile);
-            if (profile.role === 'super_admin') {
-              localStorage.setItem('zawadi_admin_token', session.access_token);
+        (async () => {
+          try {
+            const { data: profile, error } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+            if (!error && profile) {
+              setUser(profile as UserProfile);
+              if ((profile as { role?: string }).role === 'super_admin') {
+                localStorage.setItem('zawadi_admin_token', session.access_token);
+              }
+            } else {
+              setUser({
+                email: session.user.email!,
+                name: session.user.user_metadata?.name || '',
+                country: session.user.user_metadata?.country || '',
+                role: 'user',
+                plan: 'explorer',
+                joined_at: session.user.created_at ?? new Date().toISOString(),
+                status: 'active',
+              });
             }
-          } else {
-            setUser({
-              email: session.user.email!,
-              name: session.user.user_metadata?.name || '',
-              country: session.user.user_metadata?.country || '',
-              role: 'student',
-              plan: 'explorer',
-            } as UserProfile);
+          } catch {
+            localStorage.removeItem('zawadi_token');
+          } finally {
+            setAuthLoading(false);
           }
-        }).catch(() => {
-          localStorage.removeItem('zawadi_token');
-        }).finally(() => setAuthLoading(false));
+        })();
       } else {
         localStorage.removeItem('zawadi_token');
         setAuthLoading(false);
@@ -326,9 +333,11 @@ export default function App() {
             email: authUser.email!,
             name: authUser.user_metadata?.name || '',
             country: authUser.user_metadata?.country || '',
-            role: 'student',
+            role: 'user',
             plan: 'explorer',
-          } as UserProfile;
+            joined_at: authUser.created_at ?? new Date().toISOString(),
+            status: 'active',
+          };
           setUser(basicUser);
           setShowAuth(false);
           navigate('/dashboard');

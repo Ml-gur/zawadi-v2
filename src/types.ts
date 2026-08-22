@@ -20,6 +20,7 @@ export interface MatchScore {
 
 export interface Scholarship {
   id: string;
+  slug?: string;
   name: string;
   provider: string;
   host: string;

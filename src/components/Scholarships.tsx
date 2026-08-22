@@ -92,7 +92,14 @@ export default function Scholarships({
 
   useEffect(() => {
     if (!publicLoading && publicScholarships.length > 0) {
-      supabase.from('scholarships').select('id', { count: 'exact', head: true }).eq('published', true).then(({ count }) => { if (count != null) setPublicTotalCount(count); }).catch(() => {});
+      (async () => {
+        try {
+          const { count } = await supabase.from('scholarships').select('id', { count: 'exact', head: true }).eq('published', true);
+          if (count != null) setPublicTotalCount(count);
+        } catch {
+          // keep previous total
+        }
+      })();
     }
   }, [publicLoading, publicScholarships.length]);
 

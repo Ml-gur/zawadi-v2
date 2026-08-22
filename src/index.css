@@ -1,106 +1,151 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&family=Inter:wght@300;400;500;600;700;800&display=swap');
-html { scroll-behavior: smooth; }
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Plus Jakarta Sans", sans-serif;
+  /* Typography */
+  --font-sans: "Inter Tight", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Inter Tight", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  /* Brand / Primary */
-  --color-primary: #001736;
-  --color-on-primary: #ffffff;
-  --color-primary-container: #002b5b;
-  --color-on-primary-container: #7594ca;
-  --color-primary-fixed: #d6e3ff;
-  --color-primary-fixed-dim: #a9c7ff;
-  --color-inverse-primary: #a9c7ff;
-  --color-on-primary-fixed: #001b3d;
-  --color-on-primary-fixed-variant: #264778;
+  /* Type scale — display sizes clamp down on small screens */
+  --text-display: clamp(4rem, 14vw, 14rem);
+  --text-display--line-height: 0.9;
+  --text-display--letter-spacing: -0.02em;
+  --text-heading-lg: clamp(3rem, 9vw, 6.3125rem);
+  --text-heading-lg--line-height: 1;
+  --text-heading-lg--letter-spacing: -0.011em;
+  --text-heading: clamp(2.5rem, 7vw, 4.125rem);
+  --text-heading--line-height: 1.2;
+  --text-heading--letter-spacing: -0.01em;
+  --text-heading-sm: clamp(1.875rem, 5vw, 2.75rem);
+  --text-heading-sm--line-height: 1.2;
+  --text-heading-sm--letter-spacing: -0.01em;
+  --text-subheading: clamp(1.5rem, 4vw, 2.125rem);
+  --text-subheading--line-height: 1.2;
+  --text-subheading--letter-spacing: -0.01em;
 
-  /* Secondary (Green) */
-  --color-secondary: #006c49;
-  --color-on-secondary: #ffffff;
-  --color-secondary-container: #6cf8bb;
-  --color-on-secondary-container: #00714d;
-  --color-secondary-fixed: #6ffbbe;
-  --color-secondary-fixed-dim: #4edea3;
-  --color-on-secondary-fixed: #002113;
-  --color-on-secondary-fixed-variant: #005236;
+  /* Core surfaces — dark chalkboard system */
+  --color-canvas: #0e100f;
+  --color-off-black: #191919;
+  --color-cream: #fffce1;
+  --color-muted: #7c7c6f;
+  --color-hairline: #42433d;
 
-  /* Surfaces & Backgrounds */
-  --color-background: #faf9fe;
-  --color-surface: #faf9fe;
-  --color-surface-bright: #faf9fe;
-  --color-surface-dim: #dad9de;
-  --color-surface-variant: #e3e2e7;
-  --color-surface-container-lowest: #ffffff;
-  --color-surface-container-low: #f4f3f8;
-  --color-surface-container: #eeedf2;
-  --color-surface-container-high: #e8e7ec;
-  --color-surface-container-highest: #e3e2e7;
-  --color-on-surface: #1a1c1f;
-  --color-on-surface-variant: #43474f;
-  --color-on-background: #1a1c1f;
-  --color-inverse-surface: #2f3034;
-  --color-inverse-on-surface: #f1f0f5;
+  /* Taxonomy accents (locked domains) */
+  --color-accent-green: #0ae448;
+  --color-accent-light-green: #abff84;
+  --color-accent-orange: #ff8709;
+  --color-accent-pink: #fec5fb;
+  --color-accent-lilac: #9d95ff;
+  --color-accent-blue: #00bae2;
 
-  /* Status */
-  --color-status-success: #10B981;
-  --color-status-info: #3B82F6;
-  --color-status-warning: #F59E0B;
-  --color-status-urgent: #EF4444;
-  --color-error: #ba1a1a;
-  --color-error-container: #ffdad6;
-  --color-on-error: #ffffff;
-  --color-on-error-container: #93000a;
+  /* Status — AA-checked against canvas */
+  --color-status-success: #34d399;
+  --color-status-info: #38bdf8;
+  --color-status-warning: #fbbf24;
+  --color-status-urgent: #ff6b6b;
+  --color-error: #ff6b6b;
+  --color-on-error: #0e100f;
 
-  /* Borders & Outlines */
-  --color-outline: #747780;
-  --color-outline-variant: #c4c6d0;
-  --color-surface-tint: #405f91;
+  /* Legacy aliases — old token names now resolve to the dark system.
+     Delete each alias as its consumers migrate to semantic names. */
+  --color-primary: #fffce1;
+  --color-on-primary: #0e100f;
+  --color-secondary: #0ae448;
+  --color-on-secondary: #0e100f;
+  --color-background: #0e100f;
+  --color-surface: #0e100f;
+  --color-surface-bright: #191919;
+  --color-surface-dim: #0a0b0a;
+  --color-surface-variant: #191919;
+  --color-surface-container-lowest: #0e100f;
+  --color-surface-container-low: #131513;
+  --color-surface-container: #191919;
+  --color-surface-container-high: #1e201e;
+  --color-surface-container-highest: #232623;
+  --color-on-surface: #fffce1;
+  --color-on-background: #fffce1;
+  --color-on-surface-variant: #7c7c6f;
+  --color-inverse-surface: #fffce1;
+  --color-inverse-on-surface: #0e100f;
+  --color-outline: #7c7c6f;
+  --color-outline-variant: #42433d;
 }
 
-/* Global body modifications for modern mesh gradient background */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   overflow-x: hidden;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  background-color: #f8f9ff;
-  background-image: 
-    radial-gradient(circle at 80% 20%, rgba(254, 147, 44, 0.14) 0%, transparent 40%),
-    radial-gradient(circle at 10% 80%, rgba(0, 53, 39, 0.1) 0%, transparent 40%);
-  background-attachment: fixed;
-  color: #0b1c30;
-  min-height: 100vh;
+  font-family: var(--font-sans);
+  background-color: var(--color-canvas);
+  color: var(--color-cream);
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Custom styles and animations */
+::selection {
+  background: rgba(10, 228, 72, 0.25);
+  color: var(--color-cream);
+}
+
+/* Designed focus ring everywhere */
+:focus-visible {
+  outline: 2px solid var(--color-accent-green);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Slim dark scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-hairline) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--color-hairline);
+  border-radius: 9999px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 @layer utilities {
-  .bg-grid-pattern {
-    background-size: 40px 40px;
-    background-image: 
-      linear-gradient(to right, rgba(148, 163, 184, 0.06) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
-  }
-  
-  .mesh-gradient {
-    background: radial-gradient(circle at 80% 20%, rgba(254, 147, 44, 0.14) 0%, transparent 40%),
-                radial-gradient(circle at 10% 80%, rgba(0, 53, 39, 0.1) 0%, transparent 40%);
-  }
-  
-  .premium-glass, .frosted-card {
-    background: rgba(255, 255, 255, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 2px 8px 0 rgba(31, 38, 135, 0.04);
+  /* Full-width hairline divider between sibling sections */
+  .hairline {
+    border-top: 1px solid var(--color-hairline);
   }
 
-  /* Hide native scrollbars but keep functionality */
+  /* Primary CTA — gradient-stroked ghost pill (only chromatic control) */
+  .btn-gradient-stroke {
+    border: 1.5px solid transparent;
+    background:
+      linear-gradient(var(--color-canvas), var(--color-canvas)) padding-box,
+      linear-gradient(114.41deg, #0ae448 20.74%, #abff84 65.5%) border-box;
+  }
+
+  .bg-grid-pattern {
+    background-size: 40px 40px;
+    background-image:
+      linear-gradient(to right, rgba(124, 124, 111, 0.07) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(124, 124, 111, 0.07) 1px, transparent 1px);
+  }
+
+  .mesh-gradient {
+    background:
+      radial-gradient(circle at 80% 20%, rgba(10, 228, 72, 0.06) 0%, transparent 40%),
+      radial-gradient(circle at 10% 80%, rgba(157, 149, 255, 0.05) 0%, transparent 40%);
+  }
+
   .hide-scrollbar {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
   .hide-scrollbar::-webkit-scrollbar {
-    display: none; /* Chrome, Safari and Opera */
+    display: none;
   }
 }
 
@@ -108,17 +153,16 @@ body {
   0%    { opacity: 0; transform: translateY(-5px); }
   100%  { opacity: 1; transform: translateY(0); }
 }
+.animate-sweep {
+  animation: sweep 0.25s ease-out forwards;
+}
 
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-.animate-sweep {
-  animation: sweep 0.25s ease-out forwards;
-}
-
 .radial-progress {
-  background: conic-gradient(var(--progress-color, #fe932c) var(--progress, 0deg), rgba(255, 255, 255, 0.3) 0deg);
+  background: conic-gradient(var(--progress-color, #0ae448) var(--progress, 0deg), rgba(124, 124, 111, 0.25) 0deg);
   border-radius: 50%;
 }
 
@@ -126,11 +170,20 @@ body {
 button, a, input, select, textarea {
   min-height: 44px;
 }
-button, a {
-  min-height: 44px;
-}
 .icon-btn {
   min-height: 44px;
   min-width: 44px;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

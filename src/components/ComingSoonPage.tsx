@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { motion } from 'motion/react';
 import { Sparkles, Loader2, CheckCircle, Layers, Brain, FileText, Users } from 'lucide-react';
 
@@ -36,7 +36,7 @@ export default function ComingSoonPage() {
     return null;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const error = validate(email);
     if (error) {

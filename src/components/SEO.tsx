@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Helmet } from 'react-helmet-async';
 
 const SITE_URL = 'https://techsari.online';
@@ -14,7 +15,7 @@ interface SEOMeta {
   keywords?: string;
   locale?: string;
   schema?: object | object[];
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 export function SEO({ title, description, ogDescription, ogTitle, path, image = OG_IMAGE, keywords, locale = 'en_US', schema, children }: SEOMeta) {
