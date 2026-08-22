@@ -112,7 +112,7 @@ export default function FAQPage({ onBack }: FAQPageProps) {
         </h1>
         <p className="text-sm text-muted mb-8">
           Common questions about Zawadi, the No-IELTS filter, and how our eligibility matching works. Can't find what you're looking for?{' '}
-          <a href="mailto:hello@techsari.online" className="text-accent-green hover:underline">
+          <a href="mailto:hello@techsari.online" className="text-accent-green underline underline-offset-2 decoration-accent-green/50">
             Contact us
           </a>.
         </p>
@@ -188,7 +188,7 @@ export default function FAQPage({ onBack }: FAQPageProps) {
 
         <div className="mt-16 text-center border-t border-hairline pt-8">
           <p className="text-xs text-muted">
-            Still have questions? <a href="mailto:hello@techsari.online" className="text-accent-green hover:underline">hello@techsari.online</a>
+            Still have questions? <a href="mailto:hello@techsari.online" className="text-accent-green underline underline-offset-2 decoration-accent-green/50">hello@techsari.online</a>
           </p>
         </div>
       </div>

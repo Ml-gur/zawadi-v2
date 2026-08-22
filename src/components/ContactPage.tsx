@@ -109,7 +109,7 @@ export default function ContactPage({ onBack }: { onBack: () => void }) {
 
                 <div>
                   <label className="block text-xs font-bold text-cream mb-1.5 uppercase tracking-wider">Subject <span className="text-status-error">*</span></label>
-                  <select value={subject} onChange={(e) => setSubject(e.target.value)} className="w-full p-3 rounded-lg border border-hairline bg-canvas text-xs text-cream focus:outline-none focus:border-accent-green focus-visible:ring-1 focus-visible:ring-accent-green/40 cursor-pointer">
+                  <select aria-label="Subject" value={subject} onChange={(e) => setSubject(e.target.value)} className="w-full p-3 rounded-lg border border-hairline bg-canvas text-xs text-cream focus:outline-none focus:border-accent-green focus-visible:ring-1 focus-visible:ring-accent-green/40 cursor-pointer">
                     {SUBJECTS.map((s) => (
                       <option key={s.value} value={s.value}>{s.label}</option>
                     ))}

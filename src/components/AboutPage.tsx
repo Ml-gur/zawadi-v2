@@ -57,7 +57,7 @@ export default function AboutPage({ onBack }: AboutPageProps) {
           <div className="mt-12 p-6 bg-off-black border border-hairline/40 rounded-lg">
             <p className="text-xs text-muted">
               <strong className="text-cream">Contact:</strong>{' '}
-              <a href="mailto:hello@techsari.online" className="text-accent-green hover:underline">hello@techsari.online</a>
+              <a href="mailto:hello@techsari.online" className="text-accent-green underline underline-offset-2 decoration-accent-green/50">hello@techsari.online</a>
               {' | '}Nairobi, Kenya
             </p>
           </div>

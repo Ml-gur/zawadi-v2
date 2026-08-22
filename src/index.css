@@ -27,7 +27,7 @@
   --color-canvas: #0e100f;
   --color-off-black: #191919;
   --color-cream: #fffce1;
-  --color-muted: #7c7c6f;
+  --color-muted: #909083; /* bumped from #7c7c6f for WCAG AA on canvas */
   --color-hairline: #42433d;
 
   /* Taxonomy accents (locked domains) */
@@ -64,10 +64,10 @@
   --color-surface-container-highest: #232623;
   --color-on-surface: #fffce1;
   --color-on-background: #fffce1;
-  --color-on-surface-variant: #7c7c6f;
+  --color-on-surface-variant: #909083;
   --color-inverse-surface: #fffce1;
   --color-inverse-on-surface: #0e100f;
-  --color-outline: #7c7c6f;
+  --color-outline: #909083;
   --color-outline-variant: #42433d;
 }
 
