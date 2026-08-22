@@ -536,7 +536,7 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
       {/* Tabs */}
       <div className="flex gap-2 overflow-x-auto bg-canvas border border-outline-variant/50 rounded-lg p-2">
         <button onClick={() => setActiveTab('queue')} className={tabClass('queue')}>
-          My Queue {queue.length > 0 && <span className="ml-1.5 px-1.5 py-0.5 bg-status-urgent text-white rounded-full text-[9px]">{queue.length}</span>}
+          My Queue {queue.length > 0 && <span className="ml-1.5 px-1.5 py-0.5 bg-status-urgent/15 border border-status-urgent/50 text-status-urgent font-mono rounded-full text-[9px]">{queue.length}</span>}
         </button>
         <button onClick={() => setActiveTab('under_review')} className={tabClass('under_review')}>
           Under Review {underReview.length > 0 && <span className="ml-1.5 px-1.5 py-0.5 bg-accent-green/15 text-accent-green rounded-full text-[9px] font-mono">{underReview.length}</span>}

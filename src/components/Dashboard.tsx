@@ -245,7 +245,7 @@ export default function Dashboard({
             </div>
 
             <div className="relative z-10 flex flex-col items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-status-success border-2 border-surface-container-lowest flex items-center justify-center text-white">
+              <div className="w-10 h-10 rounded-full ring-1 ring-hairline bg-off-black flex items-center justify-center text-accent-green">
                 <span className="material-symbols-outlined text-[18px]">workspace_premium</span>
               </div>
               <span className="text-[10px] font-bold text-status-success uppercase tracking-wider">Awarded ({awardedCount})</span>

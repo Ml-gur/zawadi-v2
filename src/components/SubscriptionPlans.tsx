@@ -435,7 +435,7 @@ export default function SubscriptionPlans({ user, onPlanUpdated, onNavigateToTab
             >
               {/* Highlight badge */}
               {plan.badge && (
-                <span className="absolute -top-3 right-6 bg-gradient-to-r from-primary to-secondary text-white text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
+                <span className="absolute -top-3 right-6 btn-gradient-stroke text-cream text-[8px] font-semibold uppercase tracking-widest px-3 py-1 rounded-full">
                   {plan.badge}
                 </span>
               )}

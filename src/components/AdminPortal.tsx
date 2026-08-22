@@ -1170,7 +1170,7 @@ export default function AdminPortal({
                   {selectedScholIds.length > 0 && (
                     <button 
                       onClick={handleBulkDelete}
-                      className="bg-error hover:bg-opacity-90 text-white py-2 px-4 rounded-lg text-xs font-bold cursor-pointer flex items-center gap-1.5 border border-error/20"
+                      className="border border-status-urgent/50 bg-status-urgent/10 hover:bg-status-urgent/20 text-status-urgent py-2 px-4 min-h-[44px] rounded-full text-xs font-semibold cursor-pointer inline-flex items-center gap-1.5 transition-colors"
                       title="Bulk delete selected scholarship records permanently"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

@@ -214,7 +214,7 @@ export default function BotQueueReview() {
           <div className="lg:col-span-5 space-y-3">
             <div className="flex items-start justify-between gap-2">
               <h3 className="font-display font-black text-primary text-lg leading-tight">{name}</h3>
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-sm text-white shrink-0 ${confidenceColor}`}>
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center font-mono text-sm text-cream shrink-0 ring-1 ring-hairline ${confidenceColor}`}>
                 {Math.round(confidence * 100)}%
               </div>
             </div>
@@ -536,7 +536,7 @@ export default function BotQueueReview() {
           </button>
         ))}
         <button onClick={() => setScamFilterOnly(!scamFilterOnly)}
-                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold border cursor-pointer transition-all ${scamFilterOnly ? 'bg-error text-white border-error' : 'bg-off-black text-on-surface-variant border-outline-variant/40'}`}>
+                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold border cursor-pointer transition-all ${scamFilterOnly ? 'bg-status-urgent/15 text-status-urgent border-status-urgent/50' : 'bg-off-black text-on-surface-variant border-outline-variant/40'}`}>
           Scam Flagged
         </button>
       </div>
@@ -563,7 +563,7 @@ export default function BotQueueReview() {
                       placeholder="Reason for rejection (optional)"
                       className="w-full bg-off-black border border-outline-variant/40 rounded-lg p-3 text-xs outline-none focus:border-primary resize-none" rows={3} />
             <div className="flex gap-2 mt-4">
-              <button onClick={handleReject} className="flex-1 py-2 bg-error text-white rounded-lg font-bold text-xs cursor-pointer">Confirm Reject</button>
+              <button onClick={handleReject} className="flex-1 py-2 min-h-[44px] border border-status-urgent/50 bg-status-urgent/10 hover:bg-status-urgent/20 text-status-urgent rounded-full font-semibold text-xs cursor-pointer transition-colors">Confirm Reject</button>
               <button onClick={() => { setRejectModal(null); setRejectReason(''); }} className="flex-1 py-2 bg-surface-container text-on-surface rounded-lg font-bold text-xs cursor-pointer">Cancel</button>
             </div>
           </div>

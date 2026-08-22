@@ -1996,7 +1996,7 @@ export default function Scholarships({
             <div className="p-6 border-t border-hairline/40 bg-off-black/50">
               <button
                 onClick={() => setShowAlertsModal(false)}
-                className="w-full py-2.5 bg-primary hover:bg-primary/95 text-white font-extrabold text-xs rounded-lg cursor-pointer transition-all text-center"
+                className="w-full py-2.5 min-h-[44px] border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream font-semibold text-sm rounded-full cursor-pointer transition-colors text-center"
               >
                 Got it, Thanks
               </button>

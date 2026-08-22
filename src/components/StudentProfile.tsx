@@ -185,7 +185,7 @@ export default function StudentProfile({ user, onUpdateProfile, onNavigateToTab 
           </div>
           <button
             onClick={() => onNavigateToTab('scholarships')}
-            className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-lg text-xs cursor-pointer transition-all self-start md:self-auto flex items-center gap-1.5"
+            className="px-5 py-2.5 min-h-[44px] btn-gradient-stroke text-cream font-semibold rounded-full text-xs cursor-pointer transition-all active:scale-[0.98] self-start md:self-auto inline-flex items-center gap-1.5"
           >
             <span>View Scholarship Matches</span>
             <span className="material-symbols-outlined text-xs">arrow_forward</span>
@@ -212,7 +212,7 @@ export default function StudentProfile({ user, onUpdateProfile, onNavigateToTab 
                 step === currentStep
                   ? 'border-accent-green bg-accent-green/15 text-accent-green scale-110'
                   : step < currentStep
-                  ? 'bg-status-success text-white border-status-success'
+                  ? 'bg-status-success/15 text-status-success border-status-success'
                   : 'bg-canvas text-muted border-hairline hover:border-primary'
               }`}
             >
