@@ -1,11 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { GhostPillButton } from './ui/GhostPillButton';
 
 interface AuthScreenProps {
   onLoginSuccess: (email: string, token?: string) => void;
   countries: string[];
 }
+
+const inputBase =
+  'w-full bg-canvas border rounded-lg px-4 py-3 min-h-[44px] text-cream placeholder:text-muted focus:border-accent-green focus-visible:ring-2 focus-visible:ring-accent-green/40 outline-none transition-colors';
+const inputClass = `${inputBase} border-hairline`;
+const inputErrorClass = `${inputBase} border-error`;
 
 export default function AuthScreen({ onLoginSuccess, countries }: AuthScreenProps) {
   const navigate = useNavigate();
@@ -62,7 +68,7 @@ export default function AuthScreen({ onLoginSuccess, countries }: AuthScreenProp
           setLoading(false);
           return;
         }
-        
+
         // No session = email confirmation may be required. Try auto-login.
         if (data.user) {
           const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({
@@ -134,22 +140,20 @@ export default function AuthScreen({ onLoginSuccess, countries }: AuthScreenProp
   };
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center p-6 bg-grid-pattern">
-      <div className="w-full max-w-md bg-surface-container-lowest border border-outline-variant/50 rounded-2xl p-8 shadow-xl relative overflow-hidden animate-sweep">
-        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary via-secondary-container to-secondary"></div>
-        
-        <h3 className="font-display text-2xl font-black text-primary text-center mb-2">
+    <div className="min-h-[85vh] flex items-center justify-center p-6 bg-canvas bg-grid-pattern">
+      <div className="w-full max-w-md bg-off-black border border-hairline rounded-lg p-6 animate-sweep">
+        <h3 className="font-display text-2xl font-black text-cream text-center mb-2">
           {isSignUp ? "Create Account" : "Sign In"}
         </h3>
-        <p className="text-xs text-on-surface-variant text-center mb-8">
-          {isSignUp 
-            ? "Your scholarship journey starts here." 
+        <p className="text-xs text-muted text-center mb-8">
+          {isSignUp
+            ? "Your scholarship journey starts here."
             : "Welcome back — continue your scholarship journey."
           }
         </p>
 
         {errorMsg && (
-          <div className="mb-6 p-4 bg-error-container/10 border border-error/20 text-error text-xs rounded-xl flex items-center gap-2">
+          <div className="mb-6 flex items-center gap-2 rounded-lg border border-error/20 bg-error/10 p-4 text-xs text-error">
             <span className="material-symbols-outlined text-sm">warning</span>
             <span>{errorMsg}</span>
           </div>
@@ -158,36 +162,36 @@ export default function AuthScreen({ onLoginSuccess, countries }: AuthScreenProp
         <div className="space-y-4" onKeyDown={handleKeyDown}>
           {isSignUp && (
             <div>
-              <label className="block text-xs font-bold text-on-surface-variant uppercase mb-2">Full Name</label>
-              <input 
+              <label className="mb-2 block text-sm text-cream">Full Name</label>
+              <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Your full name"
-                className="w-full p-3 bg-surface border border-outline-variant/60 rounded-xl text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+                className={inputClass}
                 type="text"
               />
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-bold text-on-surface-variant uppercase mb-2">Email Address</label>
-            <input 
+            <label className="mb-2 block text-sm text-cream">Email Address</label>
+            <input
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-              className={`w-full p-3 bg-surface border ${emailError ? 'border-red-500' : 'border-outline-variant/60'} rounded-xl text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors`}
+              placeholder="you@example.com"
+              className={emailError ? inputErrorClass : inputClass}
               type="email"
             />
-            {emailError && <p className="text-[11px] text-red-600 font-medium mt-1">{emailError}</p>}
+            {emailError && <p className="mt-1 text-xs text-error">{emailError}</p>}
           </div>
 
           {isSignUp && (
             <div>
-              <label className="block text-xs font-bold text-on-surface-variant uppercase mb-2">Country of Citizenship</label>
-              <select 
+              <label className="mb-2 block text-sm text-cream">Country of Citizenship</label>
+              <select
                 value={country}
                 onChange={(e) => setCountry(e.target.value)}
-                className="w-full p-3 bg-surface border border-outline-variant/60 rounded-xl text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors cursor-pointer"
+                className={`${inputClass} cursor-pointer`}
               >
                 {countries.map((c) => (
                   <option key={c} value={c}>{c}</option>
@@ -197,32 +201,34 @@ export default function AuthScreen({ onLoginSuccess, countries }: AuthScreenProp
           )}
 
           <div>
-            <label className="block text-xs font-bold text-on-surface-variant uppercase mb-2">Password</label>
-            <input 
+            <label className="mb-2 block text-sm text-cream">Password</label>
+            <input
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="At least 6 characters"
-              className={`w-full p-3 bg-surface border ${passwordError ? 'border-red-500' : 'border-outline-variant/60'} rounded-xl text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors`}
+              className={passwordError ? inputErrorClass : inputClass}
               type="password"
             />
-            {passwordError && <p className="text-[11px] text-red-600 font-medium mt-1">{passwordError}</p>}
+            {passwordError && <p className="mt-1 text-xs text-error">{passwordError}</p>}
           </div>
 
-          <button 
+          <GhostPillButton
             type="button"
+            variant="gradient"
+            fullWidth
             disabled={loading}
             onClick={handleSubmit}
-            className="w-full py-3.5 bg-primary text-on-primary font-bold rounded-xl hover:bg-primary-container transition-colors shadow-sm cursor-pointer mt-4 disabled:opacity-50"
+            className="mt-4"
           >
             {loading ? "Please wait..." : (isSignUp ? "Create Account" : "Sign In")}
-          </button>
+          </GhostPillButton>
 
           {!isSignUp && (
-            <div className="text-center mt-3">
+            <div className="mt-3 text-center">
               <button
                 type="button"
                 onClick={() => navigate('/forgot-password')}
-                className="text-[11px] text-on-surface-variant hover:text-secondary transition-colors font-medium cursor-pointer"
+                className="text-xs font-medium text-accent-green underline-offset-4 hover:underline transition-colors cursor-pointer"
               >
                 Forgot Password?
               </button>
@@ -231,17 +237,17 @@ export default function AuthScreen({ onLoginSuccess, countries }: AuthScreenProp
         </div>
 
         <div className="mt-6 text-center">
-          <button 
+          <button
             type="button"
             onClick={toggleMode}
-            className="text-xs text-secondary hover:text-primary transition-colors font-medium border-b border-secondary/30 pb-0.5 cursor-pointer"
+            className="text-xs font-medium text-accent-green underline-offset-4 hover:underline transition-colors cursor-pointer"
           >
             {isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up instead"}
           </button>
         </div>
 
         {!isSignUp && (
-          <p className="mt-6 text-[10px] text-center text-outline">
+          <p className="mt-6 text-xs text-center text-muted">
             Sign in with your email and password
           </p>
         )}

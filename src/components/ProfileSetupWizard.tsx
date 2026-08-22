@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { AFRICAN_COUNTRIES } from '../config/matching-config';
+import { GhostPillButton } from './ui/GhostPillButton';
 
 // ARCHITECTURAL DECISION — conversational replacement candidate
 // Future sprint: replace this profile wizard with a sequential
@@ -16,6 +17,9 @@ interface ProfileSetupWizardProps {
   onSave: (profile: any) => void | Promise<void>;
   onDismiss: () => void;
 }
+
+const inputClass =
+  'w-full bg-canvas border border-hairline rounded-lg px-4 py-3 min-h-[44px] text-cream placeholder:text-muted focus:border-accent-green focus-visible:ring-2 focus-visible:ring-accent-green/40 outline-none transition-colors';
 
 export default function ProfileSetupWizard({ user, onSave, onDismiss }: ProfileSetupWizardProps) {
   const [profile, setProfile] = useState({
@@ -49,17 +53,17 @@ export default function ProfileSetupWizard({ user, onSave, onDismiss }: ProfileS
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-sweep">
-      <div className="bg-surface-container-lowest rounded-2xl shadow-2xl border border-outline-variant w-full max-w-lg max-h-[90vh] flex flex-col">
+      <div className="bg-off-black border border-hairline rounded-lg w-full max-w-lg max-h-[90vh] flex flex-col">
         <div className="p-6 pb-0 flex items-center justify-between">
           <div>
-            <h2 className="font-display text-xl font-black text-primary">
+            <h2 className="font-display text-xl font-black text-cream">
               Tell us about yourself
             </h2>
-            <p className="text-xs text-on-surface-variant mt-0.5">
+            <p className="text-xs text-muted mt-0.5">
               Five quick questions so we can match you to the right scholarships.
             </p>
           </div>
-          <button onClick={onDismiss} className="p-2 hover:bg-surface-container rounded-lg cursor-pointer text-on-surface-variant">
+          <button onClick={onDismiss} className="p-2 rounded-lg cursor-pointer text-muted transition-colors hover:bg-cream/[0.04] hover:text-cream">
             <span className="material-symbols-outlined text-lg">close</span>
           </button>
         </div>
@@ -67,22 +71,22 @@ export default function ProfileSetupWizard({ user, onSave, onDismiss }: ProfileS
         <div className="flex-1 overflow-y-auto p-6 space-y-5">
           {/* 1. Date of Birth */}
           <div>
-            <label className="block text-xs font-bold text-on-surface mb-2 uppercase tracking-wider">Date of Birth *</label>
+            <label className="mb-2 block text-sm text-cream">Date of Birth *</label>
             <input
               type="date"
               value={profile.date_of_birth}
               onChange={e => update('date_of_birth', e.target.value)}
-              className="w-full p-3 rounded-xl border border-outline-variant bg-surface text-xs text-on-surface focus:outline-none focus:border-primary"
+              className={inputClass}
             />
           </div>
 
           {/* 2. Nationality */}
           <div>
-            <label className="block text-xs font-bold text-on-surface mb-2 uppercase tracking-wider">Your Country / Nationality *</label>
+            <label className="mb-2 block text-sm text-cream">Your Country / Nationality *</label>
             <select
               value={profile.country}
               onChange={e => update('country', e.target.value)}
-              className="w-full p-3 rounded-xl border border-outline-variant bg-surface text-xs text-on-surface focus:outline-none focus:border-primary cursor-pointer"
+              className={`${inputClass} bg-canvas text-cream cursor-pointer`}
             >
               <option value="">Select your country...</option>
               {AFRICAN_COUNTRIES.map(c => (
@@ -93,16 +97,16 @@ export default function ProfileSetupWizard({ user, onSave, onDismiss }: ProfileS
 
           {/* 3. Current Degree Level */}
           <div>
-            <label className="block text-xs font-bold text-on-surface mb-2 uppercase tracking-wider">Current Degree Level *</label>
+            <label className="mb-2 block text-sm text-cream">Current Degree Level *</label>
             <div className="grid grid-cols-2 gap-2">
               {['Bachelors', 'Masters', 'PhD', 'Doctorate', 'Postdoctoral'].map(d => (
                 <button
                   key={d}
                   onClick={() => update('degree_level', d)}
-                  className={`p-3 rounded-xl border text-xs font-bold text-left transition-all cursor-pointer ${
+                  className={`p-3 rounded-lg border text-xs font-bold text-left transition-all cursor-pointer ${
                     profile.degree_level === d
-                      ? 'bg-primary text-on-primary border-primary'
-                      : 'bg-surface border-outline-variant text-on-surface hover:border-primary'
+                      ? 'border-accent-blue bg-accent-blue/10 text-accent-blue'
+                      : 'bg-canvas border-hairline text-cream hover:border-accent-blue/60'
                   }`}
                 >
                   {d}
@@ -113,11 +117,11 @@ export default function ProfileSetupWizard({ user, onSave, onDismiss }: ProfileS
 
           {/* 4. Desired Field of Study */}
           <div>
-            <label className="block text-xs font-bold text-on-surface mb-2 uppercase tracking-wider">Desired Field of Study *</label>
+            <label className="mb-2 block text-sm text-cream">Desired Field of Study *</label>
             <select
               value={profile.field_of_study}
               onChange={e => update('field_of_study', e.target.value)}
-              className="w-full p-3 rounded-xl border border-outline-variant bg-surface text-xs text-on-surface focus:outline-none focus:border-primary cursor-pointer"
+              className={`${inputClass} bg-canvas text-cream cursor-pointer`}
             >
               <option value="">Select your field...</option>
               {["Computer Science", "Engineering", "Business", "Public Health", "Law",
@@ -131,20 +135,20 @@ export default function ProfileSetupWizard({ user, onSave, onDismiss }: ProfileS
 
           {/* 5. Current GPA */}
           <div>
-            <label className="block text-xs font-bold text-on-surface mb-2 uppercase tracking-wider">Current GPA *</label>
+            <label className="mb-2 block text-sm text-cream">Current GPA *</label>
             <div className="flex gap-3 items-start">
               <input
                 type="number"
                 value={profile.gpa}
                 onChange={e => update('gpa', e.target.value)}
                 placeholder="e.g. 3.8"
-                className="flex-1 p-3 rounded-xl border border-outline-variant bg-surface text-xs text-on-surface focus:outline-none focus:border-primary"
+                className={`${inputClass} flex-1`}
                 step="0.01"
                 min="0"
                 max="100"
               />
               <div className="flex flex-col gap-1 shrink-0">
-                <label className={`px-3 py-2 rounded-lg border text-[10px] font-bold cursor-pointer transition-all ${profile.gpa_system === 'us4' ? 'bg-primary text-on-primary border-primary' : 'bg-surface border-outline-variant text-on-surface-variant hover:border-primary'}`}>
+                <label className={`px-3 py-2 rounded-lg border text-[10px] font-bold cursor-pointer transition-all ${profile.gpa_system === 'us4' ? 'border-accent-blue bg-accent-blue/10 text-accent-blue' : 'bg-canvas border-hairline text-muted hover:border-accent-blue/60'}`}>
                   <input
                     type="radio"
                     name="gpa_scale"
@@ -155,7 +159,7 @@ export default function ProfileSetupWizard({ user, onSave, onDismiss }: ProfileS
                   />
                   4.0 scale
                 </label>
-                <label className={`px-3 py-2 rounded-lg border text-[10px] font-bold cursor-pointer transition-all ${profile.gpa_system === 'pct_100' ? 'bg-primary text-on-primary border-primary' : 'bg-surface border-outline-variant text-on-surface-variant hover:border-primary'}`}>
+                <label className={`px-3 py-2 rounded-lg border text-[10px] font-bold cursor-pointer transition-all ${profile.gpa_system === 'pct_100' ? 'border-accent-blue bg-accent-blue/10 text-accent-blue' : 'bg-canvas border-hairline text-muted hover:border-accent-blue/60'}`}>
                   <input
                     type="radio"
                     name="gpa_scale"
@@ -172,13 +176,14 @@ export default function ProfileSetupWizard({ user, onSave, onDismiss }: ProfileS
         </div>
 
         <div className="p-6 pt-0">
-          <button
-            onClick={handleFinish}
+          <GhostPillButton
+            variant="gradient"
+            fullWidth
             disabled={!allFilled}
-            className="w-full py-3 rounded-xl bg-primary text-on-primary text-xs font-bold hover:bg-primary-container transition-colors disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+            onClick={handleFinish}
           >
             Save & See My Matches
-          </button>
+          </GhostPillButton>
         </div>
       </div>
     </div>

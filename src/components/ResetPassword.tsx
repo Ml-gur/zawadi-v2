@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
+import { GhostPillButton } from './ui/GhostPillButton';
 
 interface ResetPasswordProps {
   onBackToLogin: () => void;
 }
+
+const inputClass =
+  'w-full bg-canvas border border-hairline rounded-lg px-4 py-3 min-h-[44px] text-cream placeholder:text-muted focus:border-accent-green focus-visible:ring-2 focus-visible:ring-accent-green/40 outline-none transition-colors';
 
 export default function ResetPassword({ onBackToLogin }: ResetPasswordProps) {
   const [password, setPassword] = useState('');
@@ -56,9 +60,9 @@ export default function ResetPassword({ onBackToLogin }: ResetPasswordProps) {
   // Still loading session state
   if (hasSession === null) {
     return (
-      <div className="min-h-[85vh] flex items-center justify-center p-6 bg-grid-pattern">
-        <div className="w-full max-w-md bg-surface-container-lowest border border-outline-variant/50 rounded-2xl p-8 shadow-xl text-center">
-          <p className="text-xs text-on-surface-variant">Checking reset link...</p>
+      <div className="min-h-[85vh] flex items-center justify-center p-6 bg-canvas bg-grid-pattern">
+        <div className="w-full max-w-md bg-off-black border border-hairline rounded-lg p-6 text-center">
+          <p className="text-xs text-muted">Checking reset link...</p>
         </div>
       </div>
     );
@@ -66,20 +70,20 @@ export default function ResetPassword({ onBackToLogin }: ResetPasswordProps) {
 
   if (!hasSession) {
     return (
-      <div className="min-h-[85vh] flex items-center justify-center p-6 bg-grid-pattern">
-        <div className="w-full max-w-md bg-surface-container-lowest border border-outline-variant/50 rounded-2xl p-8 shadow-xl relative overflow-hidden animate-sweep">
-          <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary via-secondary-container to-secondary"></div>
-          <h3 className="font-display text-2xl font-black text-primary text-center mb-2">Invalid Link</h3>
-          <p className="text-xs text-on-surface-variant text-center mb-8">
+      <div className="min-h-[85vh] flex items-center justify-center p-6 bg-canvas bg-grid-pattern">
+        <div className="w-full max-w-md bg-off-black border border-hairline rounded-lg p-6 animate-sweep">
+          <h3 className="font-display text-2xl font-black text-cream text-center mb-2">Invalid Link</h3>
+          <p className="text-xs text-muted text-center mb-8">
             This password reset link is invalid or has expired. Please request a new one.
           </p>
-          <button
+          <GhostPillButton
             type="button"
+            variant="gradient"
+            fullWidth
             onClick={onBackToLogin}
-            className="w-full py-3.5 bg-primary text-on-primary font-bold rounded-xl hover:bg-primary-container transition-colors shadow-sm cursor-pointer"
           >
             Back to Sign In
-          </button>
+          </GhostPillButton>
         </div>
       </div>
     );
@@ -87,79 +91,79 @@ export default function ResetPassword({ onBackToLogin }: ResetPasswordProps) {
 
   if (success) {
     return (
-      <div className="min-h-[85vh] flex items-center justify-center p-6 bg-grid-pattern">
-        <div className="w-full max-w-md bg-surface-container-lowest border border-outline-variant/50 rounded-2xl p-8 shadow-xl relative overflow-hidden animate-sweep">
-          <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary via-secondary-container to-secondary"></div>
-          <h3 className="font-display text-2xl font-black text-primary text-center mb-2">Password Reset</h3>
-          <div className="p-4 bg-status-success/10 border border-status-success/20 text-status-success text-xs rounded-xl mb-8">
+      <div className="min-h-[85vh] flex items-center justify-center p-6 bg-canvas bg-grid-pattern">
+        <div className="w-full max-w-md bg-off-black border border-hairline rounded-lg p-6 animate-sweep">
+          <h3 className="font-display text-2xl font-black text-cream text-center mb-2">Password Reset</h3>
+          <div className="mb-8 rounded-lg border border-status-success/20 bg-status-success/10 p-4 text-xs text-status-success">
             Your password has been reset successfully. You can now sign in with your new password.
           </div>
-          <button
+          <GhostPillButton
             type="button"
+            variant="gradient"
+            fullWidth
             onClick={onBackToLogin}
-            className="w-full py-3.5 bg-primary text-on-primary font-bold rounded-xl hover:bg-primary-container transition-colors shadow-sm cursor-pointer"
           >
             Back to Sign In
-          </button>
+          </GhostPillButton>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center p-6 bg-grid-pattern">
-      <div className="w-full max-w-md bg-surface-container-lowest border border-outline-variant/50 rounded-2xl p-8 shadow-xl relative overflow-hidden animate-sweep">
-        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary via-secondary-container to-secondary"></div>
-
-        <h3 className="font-display text-2xl font-black text-primary text-center mb-2">Set New Password</h3>
-        <p className="text-xs text-on-surface-variant text-center mb-8">
+    <div className="min-h-[85vh] flex items-center justify-center p-6 bg-canvas bg-grid-pattern">
+      <div className="w-full max-w-md bg-off-black border border-hairline rounded-lg p-6 animate-sweep">
+        <h3 className="font-display text-2xl font-black text-cream text-center mb-2">Set New Password</h3>
+        <p className="text-xs text-muted text-center mb-8">
           Enter your new password below.
         </p>
 
         {error && (
-          <div className="mb-6 p-4 bg-error-container/10 border border-error/20 text-error text-xs rounded-xl flex items-center gap-2">
+          <div className="mb-6 flex items-center gap-2 rounded-lg border border-error/20 bg-error/10 p-4 text-xs text-error">
             <span>{error}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-bold text-on-surface-variant uppercase mb-2">New Password</label>
+            <label className="mb-2 block text-sm text-cream">New Password</label>
             <input
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="At least 6 characters"
-              className="w-full p-3 bg-surface border border-outline-variant/60 rounded-xl text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+              className={inputClass}
               type="password"
               required
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-on-surface-variant uppercase mb-2">Confirm Password</label>
+            <label className="mb-2 block text-sm text-cream">Confirm Password</label>
             <input
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Re-enter your new password"
-              className="w-full p-3 bg-surface border border-outline-variant/60 rounded-xl text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+              className={inputClass}
               type="password"
               required
             />
           </div>
 
-          <button
+          <GhostPillButton
             type="submit"
+            variant="gradient"
+            fullWidth
             disabled={loading}
-            className="w-full py-3.5 bg-primary text-on-primary font-bold rounded-xl hover:bg-primary-container transition-colors shadow-sm cursor-pointer mt-4 disabled:opacity-50"
+            className="mt-4"
           >
             {loading ? 'Resetting...' : 'Reset Password'}
-          </button>
+          </GhostPillButton>
 
           <div className="text-center">
             <button
               type="button"
               onClick={onBackToLogin}
-              className="text-xs text-secondary hover:text-primary transition-colors font-medium cursor-pointer"
+              className="text-xs font-medium text-accent-green underline-offset-4 hover:underline transition-colors cursor-pointer"
             >
               Back to Sign In
             </button>
