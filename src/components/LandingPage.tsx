@@ -18,11 +18,6 @@ const websiteSchema = {
   "name": "Zawadi",
   "url": "https://techsari.online",
   "description": "Scholarship matching platform for African students using strict eligibility filtering across all 54 African countries",
-  "potentialAction": {
-    "@type": "SearchAction",
-    "target": "https://techsari.online/scholarships?search={search_term_string}",
-    "query-input": "required name=search_term_string"
-  }
 };
 
 const organizationSchema = {
@@ -30,72 +25,70 @@ const organizationSchema = {
   "@type": "Organization",
   "name": "Zawadi",
   "url": "https://techsari.online",
-  "logo": "https://techsari.online/logo.png",
-  "description": "Zawadi matches African students to scholarships they are eligible to win using deterministic eligibility filtering across all 54 African Union member states",
-  "areaServed": "Africa",
-  "serviceType": "Scholarship Matching and Application Management"
+  "description": "AI-powered scholarship matching built exclusively for African students."
 };
 
-/* ── Inline SVG icons ── */
+/* ── Inline stroked icons (1.5px, cream) ── */
 
 const ShieldCheckIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
   </svg>
 );
 
 const LightningIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
   </svg>
 );
 
-const MapIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l5.447 2.724A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+const MapPinIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
   </svg>
 );
 
 const DatabaseCheckIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4" />
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 5.625c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75l1.5 1.5L14.25 10.5" />
   </svg>
 );
 
 const SearchIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
   </svg>
 );
 
 const ClipboardCheckIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M10.125 2.25h-4.5c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125v-9M10.125 2.25h.375a9 9 0 019 9v.375M10.125 2.25A3.375 3.375 0 0113.5 5.625v1.5c0 .621.504 1.125 1.125 1.125h1.5a3.375 3.375 0 013.375 3.375M9 15l2.25 2.25L15 12" />
   </svg>
 );
 
 const SparklesAIIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
   </svg>
 );
 
 const LockIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
   </svg>
 );
 
 const GlobeIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
   </svg>
 );
 
 const BadgeCheckIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
   </svg>
 );
 
@@ -105,61 +98,65 @@ const StarIcon: React.FC<{ className?: string }> = ({ className = 'w-5 h-5' }) =
   </svg>
 );
 
-const QuoteIcon: React.FC<{ className?: string }> = ({ className = 'w-8 h-8' }) => (
-  <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-    <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-  </svg>
+const QuoteMark = ({ className = 'w-8 h-8' }: { className?: string }) => (
+  <span className={`font-display font-semibold leading-none select-none ${className}`}>{'"'}</span>
 );
-
-/* ── Scroll reveal hook ── */
 
 function useScrollReveal(threshold = 0.15) {
   const ref = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
-
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
-          observer.unobserve(el);
+          observer.disconnect();
         }
       },
-      { threshold, rootMargin: '0px 0px -40px 0px' }
+      { threshold }
     );
-
     observer.observe(el);
     return () => observer.disconnect();
   }, [threshold]);
-
   return { ref, isVisible };
 }
 
-function RevealSection({ children, className = '', threshold = 0.15, as = 'section', id }: {
-  children: React.ReactNode;
-  className?: string;
-  threshold?: number;
-  as?: keyof React.JSX.IntrinsicElements;
-  id?: string;
-}) {
-  const { ref, isVisible } = useScrollReveal(threshold);
-  return React.createElement(
-    as,
-    {
-      ref,
-      ...(id ? { id } : {}),
-      className: `transition-all duration-700 ease-out ${
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-      } ${className}`,
-    },
-    children
+function Reveal({ children, className = '', delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
+  const { ref, isVisible } = useScrollReveal();
+  return (
+    <div
+      ref={ref}
+      style={{ transitionDelay: `${delay}ms` }}
+      className={`transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+      } ${className}`}
+    >
+      {children}
+    </div>
   );
 }
 
-/* ── Main component ── */
+/* ── Shared card shells ── */
+
+const panelBase = 'bg-off-black border border-hairline/70 rounded-lg';
+
+const Chip: React.FC<{ children: React.ReactNode; tone?: 'cream' | 'orange' | 'pink' | 'green' | 'blue' | 'lilac' }> = ({ children, tone = 'cream' }) => {
+  const tones = {
+    cream: 'border-hairline text-muted',
+    orange: 'border-accent-orange/40 text-accent-orange',
+    pink: 'border-accent-pink/40 text-accent-pink',
+    green: 'border-accent-green/40 text-accent-green',
+    blue: 'border-accent-blue/40 text-accent-blue',
+    lilac: 'border-accent-lilac/40 text-accent-lilac',
+  };
+  return (
+    <span className={`px-2 py-0.5 rounded-full border text-[10px] md:text-xs font-medium ${tones[tone]}`}>
+      {children}
+    </span>
+  );
+}
 
 export default function LandingPage({ onGetStarted, onLogin, countries, onViewAllFAQs }: LandingPageProps) {
   const [openFaq, setOpenFaq] = useState<string | null>(null);
@@ -183,10 +180,8 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
     return () => { cancelled = true; };
   }, []);
 
-  const featuredCols = featuredScholarships.length;
-
   return (
-    <div className="bg-background text-on-background min-h-screen">
+    <div className="bg-canvas text-cream min-h-[100dvh]">
       <SEO
         title="Zawadi — Scholarship Matching for African Students"
         description="Find scholarships you are eligible to win across all 54 African countries. Strict eligibility filtering removes scholarships you do not qualify for. No IELTS required options included."
@@ -198,553 +193,351 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
         schema={[websiteSchema, organizationSchema]}
       />
 
-      {/* ═══════════════════════════════════════════════
-          Section 1 — Hero (Mobile-First Bento Layout)
-          ═══════════════════════════════════════════════ */}
-      <section className="relative min-h-[90dvh] flex items-center justify-center overflow-hidden bg-grid-pattern mesh-gradient px-4 sm:px-6 pt-20 md:pt-28 pb-12 md:pb-32">
-        {/* Decorative gradient orbs */}
-        <div className="absolute top-[-10%] right-[-20%] w-[400px] md:w-[600px] h-[400px] md:h-[600px] rounded-full bg-[radial-gradient(circle,rgba(0,107,73,0.10)_0%,transparent_70%)] pointer-events-none" />
-        <div className="absolute bottom-[-20%] left-[-20%] w-[350px] md:w-[500px] h-[350px] md:h-[500px] rounded-full bg-[radial-gradient(circle,rgba(0,23,54,0.06)_0%,transparent_70%)] pointer-events-none" />
-        <div className="absolute top-[50%] left-[50%] w-[200px] md:w-[300px] h-[200px] md:h-[300px] rounded-full bg-[radial-gradient(circle,rgba(254,147,44,0.06)_0%,transparent_70%)] pointer-events-none" />
+      {/* ═══ Hero ═══ */}
+      <section className="relative min-h-[100dvh] flex items-center overflow-hidden bg-grid-pattern px-4 sm:px-6 pt-24 pb-16">
+        {/* Decorative gradient shapes — overlap the type, lit from within */}
+        <div aria-hidden className="absolute top-[8%] right-[-12%] w-[420px] h-[420px] md:w-[640px] md:h-[640px] rounded-full pointer-events-none bg-[radial-gradient(circle_at_35%_35%,rgba(254,197,251,0.16)_0%,rgba(0,186,226,0.07)_45%,transparent_70%)]" />
+        <div aria-hidden className="absolute bottom-[-18%] left-[-14%] w-[380px] h-[380px] md:w-[560px] md:h-[560px] rounded-full pointer-events-none bg-[radial-gradient(circle_at_60%_40%,rgba(10,228,72,0.10)_0%,rgba(171,255,132,0.05)_50%,transparent_72%)]" />
 
-        <div className="max-w-[1100px] mx-auto w-full z-10">
-          <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
-            {/* Left: text content */}
-            <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left gap-5">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-black leading-tight max-w-xl">
-                Unlock Your Academic Future with{' '}
-                <span className="text-primary">Zawadi</span>
-              </h1>
+        <div className="max-w-[1280px] mx-auto w-full z-10">
+          <Reveal>
+            <p className="text-base md:text-lg text-cream mb-5 md:mb-7">{'{'} Scholarships, matched honestly {'}'}</p>
+          </Reveal>
 
-              <p className="text-base sm:text-lg md:text-xl text-on-surface-variant max-w-lg leading-relaxed">
-                AI-powered scholarship matching built exclusively for African students.
-                Find and apply for opportunities you are 100% eligible for.
-              </p>
+          <Reveal delay={80}>
+            <h1 className="text-heading-lg lg:text-display font-semibold text-cream max-w-none lg:max-w-[12ch]">
+              Animate your future<span className="text-accent-green">.</span>
+            </h1>
+          </Reveal>
 
-              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                <button
-                  onClick={onGetStarted}
-                  className="bg-primary text-on-primary hover:bg-primary-container hover:scale-[1.02] active:scale-[0.98] px-6 sm:px-8 py-3.5 sm:py-4 min-h-[48px] rounded-xl sm:rounded-full font-semibold transition-all duration-200 shadow-lg flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  Start Your Journey
-                  <ArrowForward className="w-4 h-4" />
-                </button>
-                <Link
-                  to="/scholarships"
-                  className="bg-secondary text-on-secondary hover:bg-secondary-container hover:text-on-secondary-container px-6 sm:px-8 py-3.5 sm:py-4 min-h-[48px] rounded-xl sm:rounded-full font-semibold transition-all duration-200 shadow-md flex items-center justify-center gap-2 text-center"
-                >
-                  Browse Scholarships
-                  <ArrowForward className="w-4 h-4" />
-                </Link>
-                <a
-                  href="#features"
-                  className="hidden sm:inline-flex bg-surface-container-lowest text-on-surface border border-outline-variant hover:bg-surface-container-low hover:border-outline px-8 py-4 min-h-[48px] rounded-full font-semibold transition-all duration-200 shadow-sm items-center justify-center gap-2 text-center"
-                >
-                  See How it Works
-                </a>
-              </div>
+          <Reveal delay={160}>
+            <p className="text-body md:text-body-lg text-muted mt-5 md:mt-7 max-w-[52ch] leading-relaxed">
+              Zawadi matches African students to scholarships they are 100% eligible for — verified daily, no spam.
+            </p>
+          </Reveal>
 
-              {/* Login link */}
-              <p className="text-xs text-on-surface-variant/60 mt-1">
-                Already have an account?{' '}
-                <button onClick={onLogin} className="font-semibold text-primary hover:underline cursor-pointer">
-                  Sign in
-                </button>
-              </p>
-
-              {/* Trust indicators */}
-              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mt-2 text-xs text-on-surface-variant/70">
-                <span className="flex items-center gap-1.5">
-                  <ShieldCheckIcon className="w-3.5 h-3.5 text-status-success" />
-                  No data selling
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <GlobeIcon className="w-3.5 h-3.5" />
-                  {countries.length} African countries
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <BadgeCheckIcon className="w-3.5 h-3.5 text-secondary" />
-                  Human-vetted
-                </span>
-              </div>
+          <Reveal delay={240}>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-8 md:mt-10">
+              <button
+                onClick={onGetStarted}
+                className="btn-gradient-stroke inline-flex items-center justify-center gap-2 rounded-full px-7 py-3 min-h-[48px] text-base md:text-lg font-semibold text-cream transition-all duration-200 hover:brightness-110 active:scale-[0.98] cursor-pointer"
+              >
+                Start free
+                <ArrowForward className="w-4 h-4" />
+              </button>
+              <Link
+                to="/scholarships/browse"
+                className="inline-flex items-center justify-center gap-2 rounded-full px-7 py-3 min-h-[48px] text-base md:text-lg font-semibold text-cream border border-cream/60 hover:border-cream hover:bg-cream/[0.04] transition-all duration-200 active:scale-[0.98]"
+              >
+                Browse scholarships
+              </Link>
             </div>
+          </Reveal>
 
-            {/* Right: floating glass card */}
-            <div className="flex-1 flex justify-center lg:justify-end">
-              <div className="relative">
-                {/* Decorative image placeholder with gradient */}
-                <div className="w-[260px] h-[300px] sm:w-72 sm:h-80 md:w-80 md:h-96 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-primary-container/30 via-primary-fixed/20 to-secondary-container/30 border border-surface-container-highest/50 shadow-2xl overflow-hidden">
-                  {/* Abstract illustration inside */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full bg-primary/5 flex items-center justify-center">
-                      <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-primary/10 flex items-center justify-center">
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/20 flex items-center justify-center">
-                          <SearchIcon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  {/* Floating stats */}
-                  <div className="absolute top-4 left-4 sm:top-6 sm:left-6 bg-surface-container-lowest/80 backdrop-blur-md border border-outline-variant/20 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 shadow-lg">
-                    <div className="text-xl sm:text-2xl font-black text-primary">98%</div>
-                    <div className="text-[10px] sm:text-xs text-on-surface-variant">Match Accuracy</div>
-                  </div>
-                  <div className="absolute bottom-6 right-4 sm:bottom-8 sm:right-6 bg-surface-container-lowest/80 backdrop-blur-md border border-outline-variant/20 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 sm:py-3 shadow-lg">
-                    <div className="text-xl sm:text-2xl font-black text-secondary">2,500+</div>
-                    <div className="text-[10px] sm:text-xs text-on-surface-variant">Scholarships</div>
-                  </div>
-                </div>
-              </div>
+          <Reveal delay={320}>
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-8 md:mt-12 text-sm text-muted">
+              <span className="flex items-center gap-1.5">
+                <ShieldCheckIcon className="w-4 h-4" />
+                No data selling
+              </span>
+              <span className="flex items-center gap-1.5">
+                <GlobeIcon className="w-4 h-4" />
+                {countries.length || 54} African countries
+              </span>
+              <span className="flex items-center gap-1.5">
+                <BadgeCheckIcon className="w-4 h-4" />
+                Human-vetted listings
+              </span>
+              <button onClick={onLogin} className="underline underline-offset-4 decoration-hairline hover:decoration-cream cursor-pointer text-left">
+                Already have an account? Sign in
+              </button>
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════
-          Featured Scholarships Section (Mobile Swipe)
-          ═══════════════════════════════════════════════ */}
-      <RevealSection className="px-4 sm:px-6 py-16 md:py-28 bg-surface-container-low">
-        <div className="max-w-[1080px] mx-auto">
-          <div className="text-center mb-8 md:mb-16">
-            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display font-black text-on-surface leading-tight max-w-2xl mx-auto">
-              Explore Active Scholarships
-            </h2>
-            <p className="mt-3 text-sm md:text-base text-on-surface-variant max-w-xl mx-auto">
-              Hand-picked opportunities currently open for African students. Updated daily.
-            </p>
+      {/* ═══ Featured scholarships ═══ */}
+      <section className="hairline">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-16 md:py-24">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-8 md:mb-12">
+            <div>
+              <p className="text-accent-orange font-semibold mb-2"><span className="text-cream">{'{'}</span> Open now <span className="text-cream">{'}'}</span></p>
+              <h2 className="text-subheading font-semibold text-cream tracking-tight">Explore active scholarships</h2>
+            </div>
+            <p className="text-muted text-sm md:text-base max-w-[38ch]">Hand-picked opportunities currently open to African students. Updated daily.</p>
           </div>
 
           {featuredLoading ? (
-            <div className="flex justify-center py-16">
-              <div className="flex flex-col items-center gap-4">
-                <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                <p className="text-xs text-on-surface-variant animate-pulse">Loading scholarships...</p>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[0, 1, 2].map((i) => (
+                <div key={i} className={`${panelBase} p-6 animate-pulse`}>
+                  <div className="h-4 w-3/4 bg-hairline/40 rounded mb-3" />
+                  <div className="h-3 w-1/2 bg-hairline/30 rounded mb-6" />
+                  <div className="flex gap-2">
+                    <div className="h-5 w-16 bg-hairline/30 rounded-full" />
+                    <div className="h-5 w-20 bg-hairline/30 rounded-full" />
+                  </div>
+                </div>
+              ))}
             </div>
           ) : featuredScholarships.length === 0 ? (
-            <div className="text-center py-12 md:py-16 px-4">
-              <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-surface-container-high flex items-center justify-center mx-auto mb-4">
-                <SearchIcon className="w-6 h-6 md:w-7 md:h-7 text-on-surface-variant/50" />
-              </div>
-              <p className="text-sm font-bold text-on-surface mb-1">No featured scholarships right now</p>
-              <p className="text-xs text-on-surface-variant max-w-xs mx-auto">
-                New opportunities are added daily. Check back soon or browse all scholarships.
-              </p>
+            <div className={`${panelBase} text-center py-14 px-6`}>
+              <SearchIcon className="w-7 h-7 text-muted mx-auto mb-3" />
+              <p className="text-cream font-medium mb-1">No featured scholarships right now</p>
+              <p className="text-muted text-sm">New opportunities are added daily. Check back soon or browse all scholarships.</p>
             </div>
           ) : (
             <>
-              {/* Mobile: horizontal scroll */}
-              <div className="flex md:hidden gap-4 overflow-x-auto snap-x snap-mandatory hide-scrollbar pb-2 -mx-4 px-4">
+              {/* Mobile: horizontal snap scroll */}
+              <div className="flex md:hidden gap-4 overflow-x-auto snap-x snap-mandatory hide-scrollbar -mx-4 px-4 pb-1">
                 {featuredScholarships.map(s => (
                   <Link
                     key={s.id}
                     to={`/scholarships`}
-                    className="snap-start shrink-0 w-[280px] bg-surface border border-outline-variant/20 rounded-2xl p-5 hover:border-primary/30 hover:shadow-lg transition-all duration-300 flex flex-col gap-3"
+                    className={`snap-start shrink-0 w-[280px] ${panelBase} p-5 flex flex-col gap-3 hover:border-hairline`}
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="font-display font-bold text-on-surface hover:text-primary transition-colors text-sm leading-snug flex-1 line-clamp-2">
-                        {s.name}
-                      </h3>
-                      {s.no_ielts && (
-                        <span className="shrink-0 px-2 py-0.5 rounded-full bg-status-success/10 text-status-success text-[10px] font-bold uppercase tracking-wide">
-                          No IELTS
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-on-surface-variant line-clamp-2 leading-relaxed">
-                      {s.provider}{s.host_institution ? ` \u00B7 ${s.host_institution}` : ''}
-                    </p>
-                    <div className="flex flex-wrap gap-1.5 mt-auto pt-2">
-                      {s.funding_type && (
-                        <span className="px-2 py-0.5 rounded-full bg-primary/5 text-primary text-[10px] font-semibold">
-                          {s.funding_type}
-                        </span>
-                      )}
-                      {s.degree_levels?.slice(0, 2).map((d: string) => (
-                        <span key={d} className="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant text-[10px] font-semibold">
-                          {d}
-                        </span>
-                      ))}
-                      {s.deadline && (
-                        <span className="px-2 py-0.5 rounded-full bg-status-warning/10 text-status-warning text-[10px] font-semibold">
-                          {s.deadline}
-                        </span>
-                      )}
-                    </div>
+                    <ScholarshipCardBody s={s} />
                   </Link>
                 ))}
               </div>
               {/* Desktop: grid */}
-              <div className={`hidden md:grid grid-cols-2 ${featuredCols >= 3 ? 'lg:grid-cols-3' : ''} gap-5 md:gap-6`}>
+              <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-5">
                 {featuredScholarships.map(s => (
-                  <Link
-                    key={s.id}
-                    to={`/scholarships`}
-                    className="group bg-surface border border-outline-variant/20 rounded-2xl p-6 hover:border-primary/30 hover:shadow-lg transition-all duration-300 flex flex-col gap-3"
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <h3 className="font-display font-bold text-on-surface group-hover:text-primary transition-colors text-sm leading-snug flex-1">
-                        {s.name}
-                      </h3>
-                      {s.no_ielts && (
-                        <span className="shrink-0 px-2 py-0.5 rounded-full bg-status-success/10 text-status-success text-[10px] font-bold uppercase tracking-wide">
-                          No IELTS
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-xs text-on-surface-variant line-clamp-2 leading-relaxed">
-                      {s.provider}{s.host_institution ? ` \u00B7 ${s.host_institution}` : ''}
-                    </p>
-                    <div className="flex flex-wrap gap-1.5 mt-auto pt-2">
-                      {s.funding_type && (
-                        <span className="px-2 py-0.5 rounded-full bg-primary/5 text-primary text-[10px] font-semibold">
-                          {s.funding_type}
-                        </span>
-                      )}
-                      {s.degree_levels?.slice(0, 2).map((d: string) => (
-                        <span key={d} className="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant text-[10px] font-semibold">
-                          {d}
-                        </span>
-                      ))}
-                      {s.deadline && (
-                        <span className="px-2 py-0.5 rounded-full bg-status-warning/10 text-status-warning text-[10px] font-semibold">
-                          {s.deadline}
-                        </span>
-                      )}
-                    </div>
+                  <Link key={s.id} to={`/scholarships`} className={`${panelBase} p-6 flex flex-col gap-3 transition-colors duration-200 hover:border-muted`}>
+                    <ScholarshipCardBody s={s} />
                   </Link>
                 ))}
               </div>
             </>
           )}
 
-          <div className="flex justify-center mt-8 md:mt-10">
+          <div className="mt-8 md:mt-10">
             <Link
               to="/scholarships"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-on-primary font-bold rounded-xl sm:rounded-full hover:bg-primary-container hover:text-on-primary-container transition-all duration-200 shadow-md text-sm"
+              className="inline-flex items-center gap-2 rounded-full px-6 py-3 min-h-[44px] text-sm font-semibold text-cream border border-cream/60 hover:border-cream hover:bg-cream/[0.04] transition-all duration-200"
             >
-              View All Scholarships
+              View all scholarships
               <ArrowForward className="w-3.5 h-3.5" />
             </Link>
           </div>
         </div>
-      </RevealSection>
+      </section>
 
-      {/* ═══════════════════════════════════════════════
-          Section 2 — Problem / Empathy (Bento Grid)
-          ═══════════════════════════════════════════════ */}
-      <RevealSection className="px-4 sm:px-6 py-16 md:py-28 bg-surface-container-lowest">
-        <div className="max-w-[1080px] mx-auto">
-          <div className="text-center mb-10 md:mb-16">
-            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display font-black text-on-surface leading-tight max-w-2xl mx-auto">
-              The System Isn't Built for Us.<br />We Understand Your Journey.
+      {/* ═══ Why Zawadi — stat bento ═══ */}
+      <section className="hairline">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-16 md:py-24">
+          <Reveal>
+            <h2 className="text-subheading md:text-heading font-semibold text-cream tracking-tight max-w-[22ch] mb-10 md:mb-14">
+              The system isn't built for us. So we built our own.
             </h2>
-            <p className="mt-3 text-sm md:text-base text-on-surface-variant max-w-xl mx-auto">
-              Finding scholarships as an African student shouldn't be overwhelming.
-              We've built the tools that put clarity and confidence back in your hands.
-            </p>
-          </div>
+          </Reveal>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-            {/* Card 1: Absolute Precision — spans 2 cols */}
-            <div className="sm:col-span-2 bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-2xl md:rounded-3xl p-5 md:p-8 flex flex-col justify-between relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-48 md:w-64 h-48 md:h-64 rounded-full bg-white/5 -translate-y-1/2 translate-x-1/4 pointer-events-none" />
-              <div className="relative z-10">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-white/20 flex items-center justify-center">
-                    <SearchIcon className="w-4 h-4 md:w-5 md:h-5" />
-                  </div>
-                  <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider text-white/70">Core Engine</span>
+            <Reveal className="sm:col-span-2">
+              <div className={`${panelBase} relative overflow-hidden p-6 md:p-8 h-full bg-[radial-gradient(circle_at_85%_15%,rgba(10,228,72,0.08)_0%,transparent_55%)]`}>
+                <p className="text-xs uppercase tracking-wider text-muted mb-4">Matching engine</p>
+                <div className="font-mono text-5xl md:text-6xl font-medium tabular-nums text-accent-green">100%</div>
+                <h3 className="font-semibold text-cream text-lg md:text-xl mt-3 mb-2">Deterministic eligibility</h3>
+                <p className="text-sm text-muted leading-relaxed max-w-md">
+                  Every listing is checked against your nationality, degree level, field of study and GPA.
+                  If it says you qualify, you qualify.
+                </p>
+                <div className="flex flex-wrap gap-2 mt-5">
+                  <Chip tone="green">54 countries</Chip>
+                  <Chip>Daily refresh</Chip>
+                  <Chip>No hallucinations</Chip>
                 </div>
-                <div className="text-2xl md:text-4xl font-black mb-2">100%</div>
-                <h3 className="text-lg md:text-xl font-display font-black mb-2">Absolute Precision</h3>
-                <p className="text-xs md:text-sm text-white/80 leading-relaxed max-w-lg">
-                  Our deterministic engine matches you only to scholarships where you meet every single requirement.
+              </div>
+            </Reveal>
+
+            <Reveal delay={80}>
+              <div className={`${panelBase} p-6 h-full flex flex-col gap-3`}>
+                <LightningIcon className="w-5 h-5 text-accent-light-green" />
+                <div className="font-mono text-3xl tabular-nums text-cream mt-auto pt-6">3 min</div>
+                <h3 className="font-medium text-cream text-sm">Profile to matches</h3>
+                <p className="text-xs text-muted leading-relaxed">Set up once. No endless scrolling — just scholarships you can actually win.</p>
+              </div>
+            </Reveal>
+
+            <Reveal delay={140}>
+              <div className={`${panelBase} p-6 h-full flex flex-col gap-3`}>
+                <MapPinIcon className="w-5 h-5 text-accent-orange" />
+                <div className="font-mono text-3xl tabular-nums text-cream mt-auto pt-6">4-step</div>
+                <h3 className="font-medium text-cream text-sm">Guided path</h3>
+                <p className="text-xs text-muted leading-relaxed">Profile, matches, essays, submission — with AI and human support at each stage.</p>
+              </div>
+            </Reveal>
+
+            <Reveal delay={200} className="sm:col-span-2 lg:col-span-4">
+              <div className={`${panelBase} p-6 md:p-8 flex flex-col md:flex-row md:items-center gap-4 md:gap-8`}>
+                <DatabaseCheckIcon className="w-5 h-5 text-accent-blue shrink-0" />
+                <div className="font-mono text-3xl md:text-4xl tabular-nums text-cream shrink-0">2,500+</div>
+                <p className="text-sm text-muted leading-relaxed">
+                  verified listings kept current — no dead links, no expired deadlines, no recycled spam.
                 </p>
               </div>
-            </div>
-
-            {/* Card 2: Zero Fatigue */}
-            <div className="group bg-surface border border-outline-variant/20 rounded-2xl p-5 md:p-7 hover:border-primary/30 hover:shadow-lg transition-all duration-300 flex flex-col gap-3">
-              <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-secondary-container/30 text-secondary flex items-center justify-center">
-                <LightningIcon className="w-4 h-4 md:w-5 md:h-5" />
-              </div>
-              <div className="text-xl md:text-2xl font-black text-secondary">3 min</div>
-              <h3 className="font-display font-bold text-on-surface text-sm md:text-base">Zero Fatigue</h3>
-              <p className="text-xs md:text-sm text-on-surface-variant leading-relaxed">
-                Set up your profile in under three minutes. No endless scrolling, just your matches.
-              </p>
-            </div>
-
-            {/* Card 3: Structured Guidance */}
-            <div className="sm:col-span-2 lg:col-span-1 group bg-surface border border-outline-variant/20 rounded-2xl p-5 md:p-7 hover:border-primary/30 hover:shadow-lg transition-all duration-300 flex flex-col gap-3">
-              <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-primary-fixed/40 text-primary flex items-center justify-center">
-                <MapIcon className="w-4 h-4 md:w-5 md:h-5" />
-              </div>
-              <div className="text-xl md:text-2xl font-black text-primary">4-step</div>
-              <h3 className="font-display font-bold text-on-surface text-sm md:text-base">Structured Guidance</h3>
-              <p className="text-xs md:text-sm text-on-surface-variant leading-relaxed">
-                A clear path from profile creation to submission, with AI and human support.
-              </p>
-            </div>
-
-            {/* Card 4: Verified Data */}
-            <div className="group bg-gradient-to-br from-status-success/5 to-surface border border-status-success/20 rounded-2xl p-5 md:p-7 hover:border-status-success/40 hover:shadow-lg transition-all duration-300 flex flex-col gap-3 relative">
-              <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-status-success/15 text-status-success flex items-center justify-center">
-                <DatabaseCheckIcon className="w-4 h-4 md:w-5 md:h-5" />
-              </div>
-              <div className="text-xl md:text-2xl font-black text-status-success">2,500+</div>
-              <h3 className="font-display font-bold text-on-surface text-sm md:text-base">Verified Data</h3>
-              <p className="text-xs md:text-sm text-on-surface-variant leading-relaxed">
-                Every scholarship in our database is verified and kept current — no dead links, no outdated info.
-              </p>
-            </div>
+            </Reveal>
           </div>
         </div>
-      </RevealSection>
+      </section>
 
-      {/* ═══════════════════════════════════════════════
-          Section 3 — Bento Features Grid
-          ═══════════════════════════════════════════════ */}
-      <RevealSection id="features" className="px-4 sm:px-6 py-16 md:py-28 bg-surface-container-low scroll-mt-24">
-        <div className="max-w-[1080px] mx-auto">
-          <div className="text-center mb-10 md:mb-16">
-            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display font-black text-on-surface leading-tight max-w-2xl mx-auto">
-              Intelligent Tools for Global Excellence
+      {/* ═══ Features ═══ */}
+      <section id="features" className="hairline scroll-mt-24">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-16 md:py-24">
+          <Reveal>
+            <h2 className="text-subheading md:text-heading font-semibold text-cream tracking-tight max-w-[24ch] mb-10 md:mb-14">
+              Built for how applications actually happen.
             </h2>
-            <p className="mt-3 text-sm md:text-base text-on-surface-variant max-w-xl mx-auto">
-              Purpose-built features that transform how African students discover and win international scholarships.
-            </p>
-          </div>
+          </Reveal>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-            {/* Featured card — spans 2 columns on md+ */}
-            <div className="md:col-span-2 bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-2xl md:rounded-3xl p-5 md:p-8 flex flex-col justify-between relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-48 md:w-64 h-48 md:h-64 rounded-full bg-white/5 -translate-y-1/2 translate-x-1/4 pointer-events-none" />
-              <div className="relative z-10">
-                <div className="flex items-center gap-2 mb-3 md:mb-4">
-                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-white/20 flex items-center justify-center">
-                    <SearchIcon className="w-4 h-4 md:w-5 md:h-5" />
-                  </div>
-                  <span className="text-[10px] md:text-xs font-bold uppercase tracking-wider text-white/70">Core Engine</span>
+            <FeatureCard
+              icon={<ClipboardCheckIcon className="w-5 h-5 text-accent-pink" />}
+              title="Track every application"
+              body="A visual pipeline showing exactly where each application stands."
+              accent={<PipelineBars />}
+            />
+            <FeatureCard
+              icon={<SparklesAIIcon className="w-5 h-5 text-accent-lilac" />}
+              title="AI + human review"
+              body="The AI learns your writing voice for personal statements; a real mentor reviews every essay before you submit."
+              foot={
+                <span className="flex items-center gap-2 text-xs font-medium text-accent-green">
+                  <BadgeCheckIcon className="w-4 h-4" />
+                  Human-reviewed on every plan
+                </span>
+              }
+            />
+            <FeatureCard
+              icon={<LockIcon className="w-5 h-5 text-accent-blue" />}
+              title="Secure document vault"
+              body="Upload transcripts, references and certificates once — we surface the right document for every application."
+            />
+            <FeatureCard
+              icon={<GlobeIcon className="w-5 h-5 text-status-success" />}
+              title="Alternative English pathways"
+              body="Filter for scholarships that accept a Medium-of-Instruction certificate or the $60 Duolingo test."
+              foot={
+                <div className="flex flex-wrap gap-1.5">
+                  <Chip tone="green">No IELTS</Chip>
+                  <Chip tone="green">MOI accepted</Chip>
+                  <Chip tone="green">Duolingo $60</Chip>
                 </div>
-                <h3 className="text-lg md:text-2xl font-display font-black mb-2 md:mb-3">
-                  100% Deterministic Matching
-                </h3>
-                <p className="text-xs md:text-sm text-white/80 leading-relaxed max-w-lg mb-4 md:mb-5">
-                  Unlike AI chatbots that hallucinate eligibility, our engine cross-references your nationality,
-                  degree level, field of study, and GPA against hard-coded requirements. If it says you qualify,
-                  you actually qualify.
-                </p>
-                <div className="flex flex-wrap gap-1.5 md:gap-2">
-                  <span className="px-2.5 md:px-3 py-1 rounded-full bg-white/15 text-[10px] md:text-xs font-semibold">54 Countries</span>
-                  <span className="px-2.5 md:px-3 py-1 rounded-full bg-white/15 text-[10px] md:text-xs font-semibold">Real-time Updates</span>
-                  <span className="px-2.5 md:px-3 py-1 rounded-full bg-white/15 text-[10px] md:text-xs font-semibold">No AI Hallucination</span>
+              }
+            />
+            <Reveal delay={120} className="md:col-span-2">
+              <div className={`${panelBase} p-6 md:p-8 h-full flex flex-col justify-between gap-6 bg-[radial-gradient(circle_at_15%_85%,rgba(0,186,226,0.06)_0%,transparent_55%)]`}>
+                <div>
+                  <h3 className="font-semibold text-cream text-lg md:text-xl mb-2">Deadlines that find you first</h3>
+                  <p className="text-sm text-muted leading-relaxed max-w-lg">
+                    Deadline tracking with reminders calibrated to each scholarship's timezone and requirements,
+                    so no opportunity lapses because of a date you missed.
+                  </p>
+                </div>
+                <div className="font-mono text-muted text-sm tabular-nums flex items-center gap-3">
+                  <span className="text-accent-pink">●</span> rolling · seasonal · fixed deadlines tracked
                 </div>
               </div>
-            </div>
-
-            {/* Card: Track Every Application */}
-            <div className="bg-surface border border-outline-variant/20 rounded-2xl p-5 md:p-7 hover:border-primary/30 hover:shadow-md transition-all duration-300 flex flex-col gap-3">
-              <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-secondary-container/30 text-secondary flex items-center justify-center">
-                <ClipboardCheckIcon className="w-4 h-4 md:w-5 md:h-5" />
-              </div>
-              <h3 className="font-display font-bold text-on-surface text-sm md:text-base">Track Every Application</h3>
-              <p className="text-xs md:text-sm text-on-surface-variant leading-relaxed">
-                A visual pipeline showing exactly where each application stands — draft, submitted, under review, or awarded.
-              </p>
-              {/* Mini pipeline illustration */}
-              <div className="flex items-center gap-1 mt-2">
-                {['Draft', 'Submitted', 'Review', 'Awarded'].map((stage, i) => (
-                  <React.Fragment key={stage}>
-                    <div className={`h-1.5 md:h-2 flex-1 rounded-full ${i === 0 ? 'bg-outline-variant/40' : i === 1 ? 'bg-status-info/40' : i === 2 ? 'bg-status-warning/40' : 'bg-secondary-container/60'}`} />
-                    {i < 3 && <div className="w-1" />}
-                  </React.Fragment>
-                ))}
-              </div>
-            </div>
-
-            {/* Card: AI Co-Creation + Human Review */}
-            <div className="bg-surface border border-outline-variant/20 rounded-2xl p-5 md:p-7 hover:border-primary/30 hover:shadow-md transition-all duration-300 flex flex-col gap-3">
-              <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-                <SparklesAIIcon className="w-4 h-4 md:w-5 md:h-5" />
-              </div>
-              <h3 className="font-display font-bold text-on-surface text-sm md:text-base">AI + Human Review</h3>
-              <p className="text-xs md:text-sm text-on-surface-variant leading-relaxed">
-                Our AI learns your writing voice to generate personal statements, then a real human mentor reviews
-                and refines every essay before submission.
-              </p>
-              <div className="flex items-center gap-2 mt-2 text-xs font-semibold text-secondary">
-                <BadgeCheckIcon className="w-3.5 h-3.5 md:w-4 md:h-4" />
-                Human-reviewed on every plan
-              </div>
-            </div>
-
-            {/* Card: Secure Document Vault */}
-            <div className="bg-surface border border-outline-variant/20 rounded-2xl p-5 md:p-7 hover:border-primary/30 hover:shadow-md transition-all duration-300 flex flex-col gap-3">
-              <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-secondary-container/30 text-secondary flex items-center justify-center">
-                <LockIcon className="w-4 h-4 md:w-5 md:h-5" />
-              </div>
-              <h3 className="font-display font-bold text-on-surface text-sm md:text-base">Secure Document Vault</h3>
-              <p className="text-xs md:text-sm text-on-surface-variant leading-relaxed">
-                Upload transcripts, recommendation letters, and certificates once. We organize, store,
-                and surface the right documents for each application.
-              </p>
-            </div>
-
-            {/* Card: Alternative English Pathways */}
-            <div className="bg-surface border border-outline-variant/20 rounded-2xl p-5 md:p-7 hover:border-primary/30 hover:shadow-md transition-all duration-300 flex flex-col gap-3 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-16 h-16 md:w-20 md:h-20 rounded-bl-3xl bg-status-success/10 pointer-events-none" />
-              <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-status-success/15 text-status-success flex items-center justify-center">
-                <GlobeIcon className="w-4 h-4 md:w-5 md:h-5" />
-              </div>
-              <h3 className="font-display font-bold text-on-surface text-sm md:text-base">Alternative English Pathways</h3>
-              <p className="text-xs md:text-sm text-on-surface-variant leading-relaxed">
-                Filter scholarships that accept Medium of Instruction certificates or the $60 Duolingo English Test.
-                No IELTS required.
-              </p>
-              <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                <span className="px-2 md:px-2.5 py-0.5 rounded-full bg-status-success/10 text-status-success text-[10px] md:text-xs font-semibold">No IELTS</span>
-                <span className="px-2 md:px-2.5 py-0.5 rounded-full bg-status-success/10 text-status-success text-[10px] md:text-xs font-semibold">MOI Accepted</span>
-                <span className="px-2 md:px-2.5 py-0.5 rounded-full bg-status-success/10 text-status-success text-[10px] md:text-xs font-semibold">Duolingo $60</span>
-              </div>
-            </div>
+            </Reveal>
           </div>
 
-          {/* Bottom badge */}
           <div className="flex justify-center mt-8 md:mt-10">
-            <div className="inline-flex items-center gap-2 bg-secondary-container/20 border border-secondary-container/30 rounded-full px-4 md:px-5 py-2 md:py-2.5">
-              <BadgeCheckIcon className="w-3.5 h-3.5 md:w-4 md:h-4 text-secondary" />
-              <span className="text-[10px] md:text-xs font-bold text-on-surface-variant">
-                Human-Vetted Accuracy — every scholarship verified by our research team
-              </span>
+            <div className="inline-flex items-center gap-2 border border-hairline rounded-full px-5 py-2.5">
+              <BadgeCheckIcon className="w-4 h-4 text-accent-green" />
+              <span className="text-xs text-muted">Human-vetted accuracy — every listing verified by our research team</span>
             </div>
           </div>
         </div>
-      </RevealSection>
+      </section>
 
-      {/* ═══════════════════════════════════════════════
-          Section 4 — Testimonials (Bento Grid)
-          ═══════════════════════════════════════════════ */}
-      <RevealSection className="px-4 sm:px-6 py-16 md:py-28 bg-surface-container-lowest">
-        <div className="max-w-[1080px] mx-auto">
-          <div className="text-center mb-10 md:mb-16">
-            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display font-black text-on-surface leading-tight max-w-2xl mx-auto">
-              Success Stories from African Scholars
+      {/* ═══ Testimonials ═══ */}
+      <section className="hairline">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-16 md:py-24">
+          <Reveal>
+            <p className="text-base md:text-lg text-cream mb-4">{'{'} Proof, not promises {'}'}</p>
+            <h2 className="text-subheading md:text-heading font-semibold text-cream tracking-tight max-w-[24ch] mb-10 md:mb-14">
+              Scholars already there.
             </h2>
-            <p className="mt-3 text-sm md:text-base text-on-surface-variant max-w-xl mx-auto">
-              Real students who found and won life-changing scholarships through Zawadi.
-            </p>
-          </div>
+          </Reveal>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
-            {/* Featured scholar — spans left 2 cols */}
-            <div className="md:col-span-2 bg-gradient-to-br from-surface-container-low to-surface border border-outline-variant/20 rounded-2xl md:rounded-3xl p-5 md:p-8 flex flex-col md:flex-row gap-5 md:gap-6 items-center md:items-start relative overflow-hidden">
-              <div className="absolute top-4 right-4 md:top-6 md:right-6 text-5xl md:text-6xl text-primary/5 pointer-events-none">
-                <QuoteIcon className="w-12 h-12 md:w-16 md:h-16" />
-              </div>
-              <div className="flex-shrink-0">
-                <div className="w-16 h-16 md:w-24 md:h-24 rounded-xl md:rounded-2xl bg-gradient-to-br from-primary/20 to-secondary-container/40 flex items-center justify-center text-xl md:text-3xl font-black text-primary">
-                  AK
-                </div>
-              </div>
-              <div className="flex-1 relative z-10 text-center md:text-left">
-                <p className="text-sm md:text-lg text-on-surface leading-relaxed italic mb-4">
-                  "I had been searching for scholarships for over a year and kept hitting dead ends.
-                  Zawadi showed me 12 opportunities I was 100% eligible for within minutes.
-                  I secured a fully-funded Master's in Germany. This platform changed my life."
-                </p>
-                <div>
-                  <div className="font-display font-bold text-primary text-sm md:text-base">Amina Kouyaté</div>
-                  <div className="text-xs text-on-surface-variant flex items-center gap-1 justify-center md:justify-start mt-1">
-                    <MapIcon className="w-3.5 h-3.5" />
-                    Mali → Germany • MSc in Renewable Energy
-                  </div>
-                  <div className="flex items-center gap-0.5 mt-2 justify-center md:justify-start">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <StarIcon key={i} className="w-3.5 h-3.5 text-secondary" />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+            <Reveal className="md:col-span-2">
+              <figure className={`${panelBase} relative overflow-hidden p-6 md:p-8 h-full flex flex-col gap-5`}>
+                <QuoteMark className="absolute top-5 right-6 text-6xl text-hairline/50" />
+                <blockquote className="text-base md:text-xl leading-relaxed text-cream max-w-[52ch]">
+                  "Zawadi showed me twelve opportunities I was 100% eligible for within minutes.
+                  I secured a fully-funded Master's in Germany."
+                </blockquote>
+                <figcaption className="mt-auto flex items-center gap-4">
+                  <span className="w-12 h-12 md:w-14 md:h-14 rounded-lg ring-1 ring-hairline flex items-center justify-center font-mono text-cream">AK</span>
+                  <span className="flex flex-col gap-0.5">
+                    <span className="font-medium text-cream text-sm">Amina Kouyaté</span>
+                    <span className="flex items-center gap-1.5 text-xs text-muted">
+                      <MapPinIcon className="w-3.5 h-3.5" /> Mali → Germany · MSc Renewable Energy
+                    </span>
+                    <span className="flex items-center gap-0.5 text-accent-green">
+                      {[1, 2, 3, 4, 5].map(i => <StarIcon key={i} className="w-3.5 h-3.5" />)}
+                    </span>
+                  </span>
+                </figcaption>
+              </figure>
+            </Reveal>
 
-            {/* Smaller testimonial 1 — right col */}
-            <div className="bg-surface border border-outline-variant/20 rounded-2xl p-5 md:p-7 flex flex-col gap-3 hover:shadow-md transition-all duration-300">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-secondary-container/40 to-primary-fixed/40 flex items-center justify-center text-base md:text-lg font-black text-secondary">
-                  CN
+            <Reveal delay={100}>
+              <figure className={`${panelBase} p-6 h-full flex flex-col gap-4`}>
+                <div className="flex items-center gap-3">
+                  <span className="w-10 h-10 md:w-12 md:h-12 rounded-lg ring-1 ring-hairline flex items-center justify-center font-mono text-cream text-sm">CN</span>
+                  <span className="flex flex-col">
+                    <span className="font-medium text-cream text-sm">Chidi Nnamdi</span>
+                    <span className="text-xs text-muted">Nigeria → Canada</span>
+                  </span>
                 </div>
-                <div>
-                  <div className="font-display font-bold text-on-surface text-sm">Chidi Nnamdi</div>
-                  <div className="text-xs text-on-surface-variant">Nigeria → Canada</div>
-                </div>
-              </div>
-              <p className="text-xs md:text-sm text-on-surface-variant leading-relaxed">
-                "The No-IELTS filter alone saved me $250 and months of preparation. I used my MOI certificate
-                and got accepted to the University of Toronto with a full scholarship."
-              </p>
-              <div className="flex items-center gap-0.5 mt-auto">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <StarIcon key={i} className="w-3 h-3 md:w-3.5 md:h-3.5 text-secondary" />
-                ))}
-              </div>
-            </div>
+                <blockquote className="text-sm text-muted leading-relaxed">
+                  "The No-IELTS filter saved me $250 and months of prep. MOI certificate, full ride at Toronto."
+                </blockquote>
+                <span className="flex items-center gap-0.5 mt-auto text-accent-green">
+                  {[1, 2, 3, 4, 5].map(i => <StarIcon key={i} className="w-3 h-3" />)}
+                </span>
+              </figure>
+            </Reveal>
 
-            {/* Smaller testimonial 2 */}
-            <div className="bg-surface border border-outline-variant/20 rounded-2xl p-5 md:p-7 flex flex-col gap-3 hover:shadow-md transition-all duration-300">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-primary-fixed/40 to-secondary-container/40 flex items-center justify-center text-base md:text-lg font-black text-primary">
-                  FM
+            <Reveal delay={60}>
+              <figure className={`${panelBase} p-6 h-full flex flex-col gap-4`}>
+                <div className="flex items-center gap-3">
+                  <span className="w-10 h-10 md:w-12 md:h-12 rounded-lg ring-1 ring-hairline flex items-center justify-center font-mono text-cream text-sm">FM</span>
+                  <span className="flex flex-col">
+                    <span className="font-medium text-cream text-sm">Faith Muthoni</span>
+                    <span className="text-xs text-muted">Kenya → UK</span>
+                  </span>
                 </div>
-                <div>
-                  <div className="font-display font-bold text-on-surface text-sm">Faith Muthoni</div>
-                  <div className="text-xs text-on-surface-variant">Kenya → UK</div>
-                </div>
-              </div>
-              <p className="text-xs md:text-sm text-on-surface-variant leading-relaxed">
-                "The AI essay co-creator helped me articulate my story in a way I never could alone.
-                My mentor's feedback made the difference. Now I'm studying Medicine at King's College London."
-              </p>
-              <div className="flex items-center gap-0.5 mt-auto">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <StarIcon key={i} className="w-3 h-3 md:w-3.5 md:h-3.5 text-secondary" />
-                ))}
-              </div>
-            </div>
+                <blockquote className="text-sm text-muted leading-relaxed">
+                  "My mentor's feedback made the difference. Now studying Medicine at King's College London."
+                </blockquote>
+                <span className="flex items-center gap-0.5 mt-auto text-accent-green">
+                  {[1, 2, 3, 4, 5].map(i => <StarIcon key={i} className="w-3 h-3" />)}
+                </span>
+              </figure>
+            </Reveal>
 
-            {/* Call to action card — full width bottom */}
-            <div className="md:col-span-3 bg-gradient-to-br from-primary to-primary-container text-on-primary rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-4">
-              <p className="font-display font-bold text-base md:text-lg leading-snug text-center md:text-left">
-                Ready to write your own success story?
-              </p>
-              <button
-                onClick={onGetStarted}
-                className="bg-white text-primary hover:bg-primary-fixed hover:text-on-primary-fixed px-6 py-3 min-h-[44px] rounded-xl md:rounded-full font-bold transition-all duration-200 shadow-md flex items-center gap-2 cursor-pointer shrink-0"
-              >
-                Start Your Journey
-                <ArrowForward className="w-4 h-4" />
-              </button>
-            </div>
+            <Reveal delay={120} className="md:col-span-2">
+              <div className={`${panelBase} p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-5`}>
+                <p className="font-medium text-cream text-lg md:text-xl max-w-[28ch]">Ready to write your own story?</p>
+                <button
+                  onClick={onGetStarted}
+                  className="btn-gradient-stroke inline-flex items-center gap-2 rounded-full px-6 py-3 min-h-[48px] font-semibold text-cream transition-all duration-200 hover:brightness-110 active:scale-[0.98] cursor-pointer shrink-0"
+                >
+                  Start free
+                  <ArrowForward className="w-4 h-4" />
+                </button>
+              </div>
+            </Reveal>
           </div>
         </div>
-      </RevealSection>
+      </section>
 
-      {/* ═══════════════════════════════════════════════
-          Section 5 — FAQ (with FAQPage Schema)
-          ═══════════════════════════════════════════════ */}
-      <RevealSection id="faq" className="px-4 sm:px-6 py-16 md:py-28 bg-surface-container-low scroll-mt-24">
-        <div className="max-w-[800px] mx-auto">
-          <div className="text-center mb-8 md:mb-14">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-display font-black text-on-surface">
-              Frequently Asked Questions
-            </h2>
-            <p className="mt-2 text-sm text-on-surface-variant">
-              Everything you need to know about finding scholarships with Zawadi.
-            </p>
-          </div>
-
-          {/* FAQPage JSON-LD */}
+      {/* ═══ FAQ ═══ */}
+      <section id="faq" className="hairline scroll-mt-24">
+        <div className="max-w-[800px] mx-auto px-4 sm:px-6 py-16 md:py-24">
           <script type="application/ld+json">
             {JSON.stringify({
               "@context": "https://schema.org",
@@ -752,61 +545,37 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
               "mainEntity": landingFaqs.map(faq => ({
                 "@type": "Question",
                 "name": faq.q,
-                "acceptedAnswer": {
-                  "@type": "Answer",
-                  "text": faq.a
-                }
+                "acceptedAnswer": { "@type": "Answer", "text": faq.a }
               }))
             })}
           </script>
+
+          <Reveal>
+            <h2 className="text-subheading font-semibold text-cream tracking-tight mb-2">Frequently asked</h2>
+            <p className="text-muted text-sm mb-8">Everything about finding scholarships with Zawadi.</p>
+          </Reveal>
 
           <div className="space-y-2">
             {landingFaqs.map((faq, idx) => {
               const faqId = `lf-${idx}`;
               const isOpen = openFaq === faqId;
               return (
-                <div
-                  key={faqId}
-                  className={`border rounded-xl md:rounded-2xl transition-all duration-300 overflow-hidden ${
-                    isOpen
-                      ? 'bg-primary-fixed/5 border-primary shadow-md'
-                      : 'bg-surface border-outline-variant/30'
-                  }`}
-                >
+                <div key={faqId} className={`border rounded-lg transition-colors duration-200 overflow-hidden ${isOpen ? 'border-hairline bg-off-black' : 'border-hairline/60 bg-transparent hover:border-hairline'}`}>
                   <button
                     onClick={() => setOpenFaq(isOpen ? null : faqId)}
-                    className="w-full flex justify-between items-center p-4 md:p-5 text-left cursor-pointer group"
+                    className="w-full flex justify-between items-center gap-4 p-4 md:p-5 text-left cursor-pointer"
                     aria-expanded={isOpen}
                   >
-                    <span
-                      className={`font-bold text-xs md:text-sm transition-colors ${
-                        isOpen ? 'text-primary' : 'text-on-surface group-hover:text-primary'
-                      }`}
-                    >
-                      {faq.q}
-                    </span>
+                    <span className={`text-sm md:text-base transition-colors ${isOpen ? 'text-accent-green' : 'text-cream'}`}>{faq.q}</span>
                     <svg
-                      className={`w-4 h-4 md:w-5 md:h-5 flex-shrink-0 ml-3 transition-transform duration-300 ${
-                        isOpen ? 'rotate-180 text-primary' : 'text-on-surface-variant'
-                      }`}
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
+                      className={`w-4 h-4 shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180 text-accent-green' : 'text-muted'}`}
+                      fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
-                  <div
-                    className={`transition-all duration-300 ease-in-out ${
-                      isOpen
-                        ? 'max-h-[500px] opacity-100 border-t border-outline-variant/20'
-                        : 'max-h-0 opacity-0'
-                    }`}
-                  >
-                    <div className="p-4 md:p-5 text-xs md:text-sm text-on-surface-variant leading-relaxed bg-surface-container-lowest/50">
-                      {faq.a}
-                    </div>
+                  <div className={`transition-all duration-300 ease-out ${isOpen ? 'max-h-[400px]' : 'max-h-0'}`}>
+                    <p className="px-4 md:px-5 pb-5 text-sm text-muted leading-relaxed">{faq.a}</p>
                   </div>
                 </div>
               );
@@ -814,40 +583,103 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
           </div>
 
           {onViewAllFAQs && (
-            <div className="mt-8 md:mt-10 text-center">
+            <div className="mt-8">
               <button
                 onClick={onViewAllFAQs}
-                className="inline-flex items-center gap-2 text-sm font-bold text-secondary hover:text-primary transition-colors cursor-pointer border border-secondary/30 hover:border-primary/30 rounded-xl px-5 py-3"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-accent-green hover:brightness-110 cursor-pointer underline underline-offset-4 decoration-accent-green/40 hover:decoration-accent-green transition-all"
               >
-                View All FAQs
+                View all FAQs
                 <ArrowForward className="w-3.5 h-3.5" />
               </button>
             </div>
           )}
         </div>
-      </RevealSection>
+      </section>
 
-      {/* ═══════════════════════════════════════════════
-          Footer CTA
-          ═══════════════════════════════════════════════ */}
-      <RevealSection className="px-4 sm:px-6 py-16 md:py-24 bg-primary text-on-primary text-center">
-        <div className="max-w-[640px] mx-auto">
-          <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display font-black mb-4 md:mb-6 leading-tight">
-            Your scholarship is out there.<br className="hidden sm:inline" /> Let us help you find it.
-          </h2>
-          <button
-            onClick={onGetStarted}
-            className="bg-white text-primary hover:bg-primary-fixed-dim hover:text-on-primary-fixed px-8 md:px-10 py-3.5 md:py-4 min-h-[48px] rounded-xl md:rounded-full font-bold text-base md:text-lg transition-all duration-300 shadow-lg inline-flex items-center gap-2 cursor-pointer active:scale-[0.97]"
-          >
-            Start for Free
-            <ArrowForward className="w-4 h-4" />
-          </button>
-          <p className="mt-4 md:mt-6 text-xs text-on-primary/60">
-            Create your profile in 3 minutes. No credit card required.
-          </p>
+      {/* ═══ Final CTA ═══ */}
+      <section className="hairline relative overflow-hidden">
+        <div aria-hidden className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_50%_120%,rgba(10,228,72,0.10)_0%,transparent_60%)]" />
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-20 md:py-32 relative">
+          <Reveal>
+            <h2 className="text-heading md:text-heading-lg font-semibold text-cream tracking-tight max-w-[18ch]">
+              Your scholarship is out there.
+            </h2>
+            <button
+              onClick={onGetStarted}
+              className="btn-gradient-stroke inline-flex items-center gap-2 rounded-full px-8 py-3.5 min-h-[52px] text-lg font-semibold text-cream transition-all duration-200 hover:brightness-110 active:scale-[0.98] cursor-pointer mt-8 md:mt-10"
+            >
+              Start for free
+              <ArrowForward className="w-4 h-4" />
+            </button>
+            <p className="mt-5 text-sm text-muted">Create your profile in three minutes. No credit card required.</p>
+          </Reveal>
         </div>
-      </RevealSection>
+      </section>
     </div>
+  );
+}
+
+/* ── Sub-components ── */
+
+function ScholarshipCardBody({ s }: { s: Scholarship }) {
+  return (
+    <>
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="font-medium text-cream text-sm leading-snug line-clamp-2 flex-1">{s.name}</h3>
+        {s.no_ielts && (
+          <span className="shrink-0 px-2 py-0.5 rounded-full border border-accent-green/40 text-accent-green text-[10px] font-medium uppercase tracking-wide">
+            No IELTS
+          </span>
+        )}
+      </div>
+      <p className="text-xs text-muted line-clamp-2">
+        {s.provider}{s.host_institution ? ` \u00B7 ${s.host_institution}` : ''}
+      </p>
+      <div className="flex flex-wrap gap-1.5 mt-auto pt-2">
+        {s.funding_type && <Chip>{s.funding_type}</Chip>}
+        {s.degree_levels?.slice(0, 2).map((d: string) => <Chip key={d}>{d}</Chip>)}
+        {s.deadline && <Chip tone="pink">{s.deadline}</Chip>}
+      </div>
+    </>
+  );
+}
+
+function PipelineBars() {
+  return (
+    <div className="flex items-center gap-1 mt-1" aria-hidden>
+      {[
+        ['Draft', 'bg-hairline'],
+        ['Submitted', 'bg-accent-blue/50'],
+        ['Review', 'bg-status-warning/50'],
+        ['Awarded', 'bg-accent-green/60'],
+      ].map(([stage, color], i) => (
+        <React.Fragment key={stage}>
+          <div className={`h-1.5 flex-1 rounded-full ${color}`} title={stage} />
+          {i < 3 && <div className="w-1" />}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+}
+
+function FeatureCard({ icon, title, body, foot, accent, delay = 0 }: {
+  icon: React.ReactNode;
+  title: string;
+  body: string;
+  foot?: React.ReactNode;
+  accent?: React.ReactNode;
+  delay?: number;
+}) {
+  return (
+    <Reveal delay={delay} className="h-full">
+      <div className={`${panelBase} p-6 h-full flex flex-col gap-3 transition-colors duration-200 hover:border-muted`}>
+        {icon}
+        <h3 className="font-medium text-cream text-base">{title}</h3>
+        <p className="text-sm text-muted leading-relaxed">{body}</p>
+        {accent}
+        {foot && <div className="mt-auto pt-3">{foot}</div>}
+      </div>
+    </Reveal>
   );
 }
 
