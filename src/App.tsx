@@ -689,7 +689,7 @@ export default function App() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4">
+      <div className="min-h-[100dvh] flex flex-col items-center justify-center bg-canvas gap-4">
         <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
         <p className="text-xs text-on-surface-variant font-medium">Loading...</p>
       </div>
@@ -697,19 +697,19 @@ export default function App() {
   }
 
   return (
-    <div className="bg-transparent text-on-surface font-sans min-h-screen flex flex-col">
+    <div className="bg-canvas text-on-surface font-sans min-h-[100dvh] flex flex-col">
 
       {/* Header */}
       {!hideHeaderFooter && (
-        <header className="sticky top-0 bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant/60 z-40">
+        <header className="sticky top-0 bg-canvas/85 backdrop-blur-xl border-b border-hairline z-40">
           <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
 
             <div className="flex items-center gap-2 sm:gap-6">
               <Link to={user ? '/dashboard' : '/'} className="flex items-center gap-1.5 sm:gap-2.5 cursor-pointer hover:opacity-90">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-primary to-secondary flex items-center justify-center text-white shadow-md font-display font-black text-sm sm:text-base">Z</div>
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg ring-1 ring-cream/40 flex items-center justify-center text-cream font-display font-black text-sm sm:text-base">Z</div>
                 <div className="hidden sm:block">
                   <span className="font-display text-lg font-black text-primary tracking-tight whitespace-nowrap">Techsari Zawadi</span>
-                  <span className="text-[9px] bg-primary-fixed text-primary px-1.5 py-0.5 rounded font-bold uppercase block w-max mt-0.5 tracking-wider">African Scholars</span>
+                  <span className="text-[9px] bg-cream/[0.06] text-muted px-1.5 py-0.5 rounded font-bold uppercase block w-max mt-0.5 tracking-wider">African Scholars</span>
                 </div>
               </Link>
 
@@ -717,18 +717,18 @@ export default function App() {
                 <nav className="hidden lg:flex items-center gap-1 text-xs font-bold text-on-surface-variant uppercase tracking-tight">
                   {user.role !== 'super_admin' ? (
                     <>
-                      <button onClick={() => navigate('/dashboard')} className={`px-3 py-2 rounded-lg hover:text-primary ${isActive('/dashboard') ? 'text-primary bg-primary/5' : ''}`}>Workspace</button>
-                      <button onClick={() => navigate('/scholarships')} className={`px-3 py-2 rounded-lg hover:text-primary ${isActive('/scholarships') ? 'text-primary bg-primary/5' : ''}`}>Scholarships</button>
-                      <button onClick={() => navigate('/vault')} className={`px-3 py-2 rounded-lg hover:text-primary ${isActive('/vault') ? 'text-primary bg-primary/5' : ''}`}>Doc Vault</button>
-                      <button onClick={() => navigate('/essays')} className={`px-3 py-2 rounded-lg hover:text-primary ${isActive('/essays') ? 'text-primary bg-primary/5' : ''}`}>AI Essay Studio</button>
-                      <button onClick={() => navigate('/profile')} className={`px-3 py-2 rounded-lg hover:text-primary ${isActive('/profile') ? 'text-primary bg-primary/5' : ''}`}>My Profile</button>
-                      <button onClick={() => navigate('/billing')} className={`px-3 py-2 rounded-lg hover:text-primary ${isActive('/billing') ? 'text-primary bg-primary/5' : ''}`}>Premium Plans</button>
+                      <button onClick={() => navigate('/dashboard')} className={`px-3 py-2 rounded-lg hover:text-cream ${isActive('/dashboard') ? 'text-cream bg-cream/[0.06]' : ''}`}>Workspace</button>
+                      <button onClick={() => navigate('/scholarships')} className={`px-3 py-2 rounded-lg hover:text-cream ${isActive('/scholarships') ? 'text-cream bg-cream/[0.06]' : ''}`}>Scholarships</button>
+                      <button onClick={() => navigate('/vault')} className={`px-3 py-2 rounded-lg hover:text-cream ${isActive('/vault') ? 'text-cream bg-cream/[0.06]' : ''}`}>Doc Vault</button>
+                      <button onClick={() => navigate('/essays')} className={`px-3 py-2 rounded-lg hover:text-cream ${isActive('/essays') ? 'text-cream bg-cream/[0.06]' : ''}`}>AI Essay Studio</button>
+                      <button onClick={() => navigate('/profile')} className={`px-3 py-2 rounded-lg hover:text-cream ${isActive('/profile') ? 'text-cream bg-cream/[0.06]' : ''}`}>My Profile</button>
+                      <button onClick={() => navigate('/billing')} className={`px-3 py-2 rounded-lg hover:text-cream ${isActive('/billing') ? 'text-cream bg-cream/[0.06]' : ''}`}>Premium Plans</button>
                     </>
                   ) : null}
                   {user.role === 'super_admin' && (
                     <>
-                      <button onClick={() => navigate('/mentor')} className={`px-3 py-2 rounded-lg hover:text-primary ${isActive('/mentor') ? 'text-primary bg-primary/5' : ''}`}>Mentor Queue</button>
-                      <button onClick={() => navigate('/admin')} className={`px-3.5 py-2 rounded-lg text-secondary bg-secondary-container/10 border border-secondary/20 hover:bg-secondary-container/30 ${isActive('/admin') ? 'bg-secondary-container/30 text-primary font-black' : ''}`}>System Control</button>
+                      <button onClick={() => navigate('/mentor')} className={`px-3 py-2 rounded-lg hover:text-cream ${isActive('/mentor') ? 'text-cream bg-cream/[0.06]' : ''}`}>Mentor Queue</button>
+                      <button onClick={() => navigate('/admin')} className={`px-3.5 py-2 rounded-full border border-accent-green/50 text-accent-green hover:bg-accent-green/10 ${isActive('/admin') ? 'bg-accent-green/15 font-semibold' : ''}`}>System Control</button>
                     </>
                   )}
                 </nav>
@@ -750,19 +750,19 @@ export default function App() {
                     <p className="text-[10px] font-extrabold text-secondary flex items-center justify-end gap-1.5">
                       <span>{user.plan && user.plan.toLowerCase() !== 'explorer' ? user.plan.toUpperCase() + ' TIER' : 'FREE ACADEMIC ACCOUNT'}</span>
                       {(!user.plan || user.plan.toLowerCase() === 'explorer') && (
-                        <button onClick={() => navigate('/billing')} className="bg-amber-500 hover:bg-amber-600 text-white font-black text-[9px] uppercase px-1.5 py-0.5 rounded cursor-pointer transition-all shrink-0">Upgrade</button>
+                        <button onClick={() => navigate('/billing')} className="border border-accent-green/60 text-accent-green hover:bg-accent-green/10 font-semibold text-[9px] uppercase px-1.5 py-0.5 rounded-full cursor-pointer transition-colors shrink-0">Upgrade</button>
                       )}
                     </p>
                   </div>
-                  <button onClick={handleLogout} className="bg-surface hover:bg-surface-variant border border-outline-variant text-[11px] font-bold uppercase tracking-tight py-2 px-3 sm:px-3.5 rounded-lg flex items-center gap-1.5 cursor-pointer transition-colors">
+                  <button onClick={handleLogout} className="bg-transparent hover:bg-cream/[0.04] border border-hairline text-cream text-[11px] font-semibold uppercase tracking-tight py-2 px-3 sm:px-3.5 rounded-full flex items-center gap-1.5 cursor-pointer transition-colors">
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
                     <span className="hidden sm:inline">Logout</span>
                   </button>
                 </div>
               ) : (
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <button onClick={() => setShowAuth(true)} className="hidden sm:inline-flex bg-transparent hover:bg-surface-container text-primary font-bold text-xs px-4 py-2.5 rounded-lg transition-colors cursor-pointer whitespace-nowrap">Log In</button>
-                  <button onClick={() => setShowAuth(true)} className="bg-primary hover:bg-primary-container text-on-primary font-bold text-xs px-4 sm:px-6 py-2.5 rounded-lg shadow-sm transition-colors cursor-pointer whitespace-nowrap">Get Started</button>
+                  <button onClick={() => setShowAuth(true)} className="hidden sm:inline-flex bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream font-semibold text-xs px-4 py-2.5 rounded-full transition-colors cursor-pointer whitespace-nowrap">Log In</button>
+                  <button onClick={() => setShowAuth(true)} className="btn-gradient-stroke text-cream font-semibold text-xs px-4 sm:px-6 py-2.5 rounded-full transition-all hover:brightness-110 active:scale-[0.98] cursor-pointer whitespace-nowrap">Get Started</button>
                 </div>
               )}
 
@@ -775,18 +775,18 @@ export default function App() {
           </div>
 
           {/* Mobile drawer — visible for ALL users below md */}
-          <div className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${mobileMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
-            <div className="border-t border-outline-variant bg-surface-container-lowest py-3 px-4 sm:px-6 flex flex-col gap-1 shadow-inner">
+          <div className={`md:hidden overflow-hidden transition-all duration-300 ease-out ${mobileMenuOpen ? 'max-h-[560px]' : 'max-h-0'}`}>
+            <div className="border-t border-hairline bg-canvas py-3 px-4 sm:px-6 flex flex-col gap-1">
               {user ? (
                 <>
                   {user.role !== 'super_admin' ? (
                     <>
-                      <button onClick={() => { navigate('/dashboard'); setMobileMenuOpen(false); }} className={`text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg ${isActive('/dashboard') ? 'text-primary bg-primary/5' : 'text-on-surface-variant hover:text-primary'}`}>Workspace</button>
-                      <button onClick={() => { navigate('/scholarships'); setMobileMenuOpen(false); }} className={`text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg ${isActive('/scholarships') ? 'text-primary bg-primary/5' : 'text-on-surface-variant hover:text-primary'}`}>Scholarships</button>
-                      <button onClick={() => { navigate('/vault'); setMobileMenuOpen(false); }} className={`text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg ${isActive('/vault') ? 'text-primary bg-primary/5' : 'text-on-surface-variant hover:text-primary'}`}>Document Vault</button>
-                      <button onClick={() => { navigate('/essays'); setMobileMenuOpen(false); }} className={`text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg ${isActive('/essays') ? 'text-primary bg-primary/5' : 'text-on-surface-variant hover:text-primary'}`}>AI Essay Studio</button>
-                      <button onClick={() => { navigate('/profile'); setMobileMenuOpen(false); }} className={`text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg ${isActive('/profile') ? 'text-primary bg-primary/5' : 'text-on-surface-variant hover:text-primary'}`}>My Profile</button>
-                      <button onClick={() => { navigate('/billing'); setMobileMenuOpen(false); }} className={`text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg ${isActive('/billing') ? 'text-primary bg-primary/5' : 'text-on-surface-variant hover:text-primary'}`}>Premium Plans</button>
+                      <button onClick={() => { navigate('/dashboard'); setMobileMenuOpen(false); }} className={`text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg ${isActive('/dashboard') ? 'text-cream bg-cream/[0.06]' : 'text-on-surface-variant hover:text-primary'}`}>Workspace</button>
+                      <button onClick={() => { navigate('/scholarships'); setMobileMenuOpen(false); }} className={`text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg ${isActive('/scholarships') ? 'text-cream bg-cream/[0.06]' : 'text-on-surface-variant hover:text-primary'}`}>Scholarships</button>
+                      <button onClick={() => { navigate('/vault'); setMobileMenuOpen(false); }} className={`text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg ${isActive('/vault') ? 'text-cream bg-cream/[0.06]' : 'text-on-surface-variant hover:text-primary'}`}>Document Vault</button>
+                      <button onClick={() => { navigate('/essays'); setMobileMenuOpen(false); }} className={`text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg ${isActive('/essays') ? 'text-cream bg-cream/[0.06]' : 'text-on-surface-variant hover:text-primary'}`}>AI Essay Studio</button>
+                      <button onClick={() => { navigate('/profile'); setMobileMenuOpen(false); }} className={`text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg ${isActive('/profile') ? 'text-cream bg-cream/[0.06]' : 'text-on-surface-variant hover:text-primary'}`}>My Profile</button>
+                      <button onClick={() => { navigate('/billing'); setMobileMenuOpen(false); }} className={`text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg ${isActive('/billing') ? 'text-cream bg-cream/[0.06]' : 'text-on-surface-variant hover:text-primary'}`}>Premium Plans</button>
                     </>
                   ) : null}
                   {user.role === 'super_admin' && (
@@ -801,14 +801,14 @@ export default function App() {
                 </>
               ) : (
                 <>
-                  <button onClick={() => { navigate('/scholarships'); setMobileMenuOpen(false); }} className={`text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg ${isActive('/scholarships') ? 'text-primary bg-primary/5' : 'text-on-surface-variant hover:text-primary'}`}>Scholarships</button>
+                  <button onClick={() => { navigate('/scholarships'); setMobileMenuOpen(false); }} className={`text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg ${isActive('/scholarships') ? 'text-cream bg-cream/[0.06]' : 'text-on-surface-variant hover:text-primary'}`}>Scholarships</button>
                   <button onClick={() => { navigate('/about'); setMobileMenuOpen(false); }} className="text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg text-on-surface-variant hover:text-primary">About</button>
                   <button onClick={() => { navigate('/how-it-works'); setMobileMenuOpen(false); }} className="text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg text-on-surface-variant hover:text-primary">How It Works</button>
                   <button onClick={() => { navigate('/faq'); setMobileMenuOpen(false); }} className="text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg text-on-surface-variant hover:text-primary">FAQ</button>
                   <button onClick={() => { navigate('/contact'); setMobileMenuOpen(false); }} className="text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg text-on-surface-variant hover:text-primary">Contact</button>
                   <div className="border-t border-outline-variant/30 my-2 pt-3 flex flex-col gap-2">
-                    <button onClick={() => { setShowAuth(true); setMobileMenuOpen(false); }} className="w-full bg-primary text-on-primary font-bold text-xs py-3 rounded-xl shadow-sm transition-colors cursor-pointer">Sign In</button>
-                    <button onClick={() => { setShowAuth(true); setMobileMenuOpen(false); }} className="w-full bg-surface text-on-surface border border-outline-variant font-bold text-xs py-3 rounded-xl transition-colors cursor-pointer">Create Account</button>
+                    <button onClick={() => { setShowAuth(true); setMobileMenuOpen(false); }} className="btn-gradient-stroke w-full text-cream font-semibold text-xs py-3 rounded-full transition-all hover:brightness-110 cursor-pointer">Sign In</button>
+                    <button onClick={() => { setShowAuth(true); setMobileMenuOpen(false); }} className="w-full bg-transparent text-cream border border-cream/60 hover:border-cream hover:bg-cream/[0.04] font-semibold text-xs py-3 rounded-full transition-colors cursor-pointer">Create Account</button>
                   </div>
                 </>
               )}
@@ -885,11 +885,11 @@ export default function App() {
 
       {/* Footer */}
       {!hideHeaderFooter && (
-        <footer className="bg-surface-container border-t border-outline-variant/50 pt-8 md:pt-12 pb-24 md:pb-8 px-4 sm:px-6">
+        <footer className="bg-off-black border-t border-hairline pt-10 md:pt-14 pb-24 md:pb-10 px-4 sm:px-6">
           <div className="max-w-[1280px] w-full mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 text-on-surface-variant font-light text-xs items-start">
             <div className="flex flex-col gap-3">
               <h4 className="font-display font-black text-primary text-sm tracking-tight flex items-center gap-2">
-                <div className="w-6 h-6 rounded-lg bg-primary flex items-center justify-center text-white font-black text-xs shrink-0">Z</div>
+                <div className="w-6 h-6 rounded-md ring-1 ring-cream/40 flex items-center justify-center text-cream font-black text-xs shrink-0">Z</div>
                 Zawadi
               </h4>
               <p className="leading-relaxed">Matching African students to scholarships they actually qualify for. No spam. No data selling.</p>
@@ -906,7 +906,7 @@ export default function App() {
               <button onClick={() => navigate('/contact')} className="block hover:text-primary text-left cursor-pointer">Contact Us</button>
               <button onClick={() => navigate('/privacy')} className="block hover:text-primary text-left cursor-pointer">Privacy Policy</button>
               <button onClick={() => navigate('/terms')} className="block hover:text-primary text-left cursor-pointer">Terms of Service</button>
-              <p className="text-[10px] text-outline font-semibold mt-4">&copy; 2026 Zawadi. All rights reserved.</p>
+              <p className="text-[10px] text-muted mt-4">&copy; 2026 Zawadi. All rights reserved.</p>
             </div>
           </div>
         </footer>
@@ -914,7 +914,7 @@ export default function App() {
 
       {/* Mobile Bottom Nav Bar */}
       {!hideHeaderFooter && !user && (
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-surface-container-lowest/95 backdrop-blur-md border-t border-outline-variant/60 px-2 py-1.5 flex items-center justify-around safe-area-bottom">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-off-black/95 backdrop-blur-xl border-t border-hairline px-2 py-1.5 flex items-center justify-around safe-area-bottom">
           <a href="/" className="flex flex-col items-center gap-0.5 text-primary py-1 px-3">
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
             <span className="text-[9px] font-bold uppercase tracking-wide">Home</span>
