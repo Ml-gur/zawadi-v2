@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation, useParams, Link } from 'react-router-dom';
 import { Scholarship, UserProfile, ApplicationTracker as TrackerType, DocumentVaultItem, EssayStudioGeneration, BotQueueIngestion, AuditLogItem } from './types';
 import PWAInstallPrompt from './components/PWAInstallPrompt';
+import { Logo } from './components/Logo';
 import ProfileSetupWizard from './components/ProfileSetupWizard';
 import toast, { Toaster } from 'react-hot-toast';
 import { AFRICAN_COUNTRIES } from './config/matching-config';
@@ -706,7 +707,7 @@ export default function App() {
 
             <div className="flex items-center gap-2 sm:gap-6">
               <Link to={user ? '/dashboard' : '/'} className="flex items-center gap-1.5 sm:gap-2.5 cursor-pointer hover:opacity-90">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg ring-1 ring-cream/40 flex items-center justify-center text-cream font-display font-black text-sm sm:text-base">Z</div>
+                <Logo size={40} />
                 <div className="hidden sm:block">
                   <span className="font-display text-lg font-black text-primary tracking-tight whitespace-nowrap">Techsari Zawadi</span>
                   <span className="text-[9px] bg-cream/[0.06] text-muted px-1.5 py-0.5 rounded font-bold uppercase block w-max mt-0.5 tracking-wider">African Scholars</span>
@@ -889,7 +890,7 @@ export default function App() {
           <div className="max-w-[1280px] w-full mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 text-on-surface-variant font-light text-xs items-start">
             <div className="flex flex-col gap-3">
               <h4 className="font-display font-black text-primary text-sm tracking-tight flex items-center gap-2">
-                <div className="w-6 h-6 rounded-md ring-1 ring-cream/40 flex items-center justify-center text-cream font-black text-xs shrink-0">Z</div>
+                <span className="shrink-0"><Logo size={24} /></span>
                 Zawadi
               </h4>
               <p className="leading-relaxed">Matching African students to scholarships they actually qualify for. No spam. No data selling.</p>

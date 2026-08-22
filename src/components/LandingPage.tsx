@@ -1,9 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { motion, useScroll, useTransform, useSpring, useMotionValue } from 'motion/react';
 import { ArrowForward } from './Icons';
 import { SEO } from './SEO';
 import { supabase } from '../lib/supabase';
 import type { Scholarship } from '../types';
+import {
+  EASE, FadeUp, CountUp, SpotlightCard, Magnetic, Orb, Marquee, ScoreRing,
+  DoodleSquiggle, DoodleCircleArrow, DoodleSpark, HeroBadge,
+} from './landing/primitives';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -17,7 +22,6 @@ const websiteSchema = {
   "@type": "WebSite",
   "name": "Zawadi",
   "url": "https://techsari.online",
-  "description": "Scholarship matching platform for African students using strict eligibility filtering across all 54 African countries",
 };
 
 const organizationSchema = {
@@ -25,142 +29,44 @@ const organizationSchema = {
   "@type": "Organization",
   "name": "Zawadi",
   "url": "https://techsari.online",
-  "description": "AI-powered scholarship matching built exclusively for African students."
 };
 
-/* ── Inline stroked icons (1.5px, cream) ── */
+const PROGRAMS = [
+  'Rhodes Scholarship', 'Chevening', 'DAAD EPOS', 'Fulbright', 'Mastercard Foundation',
+  'Erasmus Mundus', 'Commonwealth', 'MEXT', 'Schwarzman Scholars', 'McCall MacBain',
+];
 
-const ShieldCheckIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-  </svg>
-);
+const FAQS = [
+  {
+    q: 'Do I need IELTS to apply through Zawadi?',
+    a: 'No. The No-IELTS filter surfaces scholarships that accept a Medium-of-Instruction certificate or the $60 Duolingo English Test.',
+  },
+  {
+    q: 'Is Zawadi free for students?',
+    a: 'Matching, filtering and application tracking are free on the Explorer plan. Your data is never sold — that is written into our terms, not just promised.',
+  },
+  {
+    q: 'How does matching actually work?',
+    a: 'A deterministic engine checks your nationality, degree level, field of study and GPA against every listing\'s exact criteria. No generative guessing — if it says you qualify, you qualify.',
+  },
+  {
+    q: 'How fast do I see my first matches?',
+    a: 'Under three minutes. Complete the profile wizard and your ranked matches appear immediately.',
+  },
+];
 
-const LightningIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-  </svg>
-);
-
-const MapPinIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
-  </svg>
-);
-
-const DatabaseCheckIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 5.625c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75l1.5 1.5L14.25 10.5" />
-  </svg>
-);
-
-const SearchIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-  </svg>
-);
-
-const ClipboardCheckIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M10.125 2.25h-4.5c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125v-9M10.125 2.25h.375a9 9 0 019 9v.375M10.125 2.25A3.375 3.375 0 0113.5 5.625v1.5c0 .621.504 1.125 1.125 1.125h1.5a3.375 3.375 0 013.375 3.375M9 15l2.25 2.25L15 12" />
-  </svg>
-);
-
-const SparklesAIIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z" />
-  </svg>
-);
-
-const LockIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-  </svg>
-);
-
-const GlobeIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
-  </svg>
-);
-
-const BadgeCheckIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
-  </svg>
-);
-
-const StarIcon: React.FC<{ className?: string }> = ({ className = 'w-5 h-5' }) => (
-  <svg className={className} fill="currentColor" viewBox="0 0 20 20">
-    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-  </svg>
-);
-
-const QuoteMark = ({ className = 'w-8 h-8' }: { className?: string }) => (
-  <span className={`font-display font-semibold leading-none select-none ${className}`}>{'"'}</span>
-);
-
-function useScrollReveal(threshold = 0.15) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [threshold]);
-  return { ref, isVisible };
-}
-
-function Reveal({ children, className = '', delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
-  const { ref, isVisible } = useScrollReveal();
+/* ── Section eyebrow ── */
+function Eyebrow({ text }: { text: string }) {
   return (
-    <div
-      ref={ref}
-      style={{ transitionDelay: `${delay}ms` }}
-      className={`transition-[opacity,transform] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-      } ${className}`}
-    >
-      {children}
-    </div>
-  );
-}
-
-/* ── Shared card shells ── */
-
-const panelBase = 'bg-off-black border border-hairline/70 rounded-lg';
-
-const Chip: React.FC<{ children: React.ReactNode; tone?: 'cream' | 'orange' | 'pink' | 'green' | 'blue' | 'lilac' }> = ({ children, tone = 'cream' }) => {
-  const tones = {
-    cream: 'border-hairline text-muted',
-    orange: 'border-accent-orange/40 text-accent-orange',
-    pink: 'border-accent-pink/40 text-accent-pink',
-    green: 'border-accent-green/40 text-accent-green',
-    blue: 'border-accent-blue/40 text-accent-blue',
-    lilac: 'border-accent-lilac/40 text-accent-lilac',
-  };
-  return (
-    <span className={`px-2 py-0.5 rounded-full border text-[10px] md:text-xs font-medium ${tones[tone]}`}>
-      {children}
-    </span>
+    <p className="text-base md:text-lg text-cream">
+      <span className="text-muted">{'{'}</span> {text} <span className="text-muted">{'}'}</span>
+    </p>
   );
 }
 
 export default function LandingPage({ onGetStarted, onLogin, countries, onViewAllFAQs }: LandingPageProps) {
   const [openFaq, setOpenFaq] = useState<string | null>(null);
-  const [featuredScholarships, setFeaturedScholarships] = useState<Scholarship[]>([]);
+  const [featured, setFeatured] = useState<Scholarship[]>([]);
   const [featuredLoading, setFeaturedLoading] = useState(true);
 
   useEffect(() => {
@@ -170,18 +76,33 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
       .select('id, name, provider, host_region, host_institution, funding_type, deadline, no_ielts, degree_levels, countries, fields_of_study, urgency, iso2, published, description, eligibility, amount, required_documents, apply_url, source_url, slug, created_at')
       .eq('published', true)
       .order('id', { ascending: false })
-      .limit(3)
+      .limit(6)
       .then(({ data, error }) => {
-        if (!cancelled && !error && data) {
-          setFeaturedScholarships(data as unknown as Scholarship[]);
-        }
+        if (!cancelled && !error && data) setFeatured(data as unknown as Scholarship[]);
         if (!cancelled) setFeaturedLoading(false);
       });
     return () => { cancelled = true; };
   }, []);
 
+  /* Hero mouse-parallax (springs smooth the raw values) */
+  const rawMx = useMotionValue(0);
+  const rawMy = useMotionValue(0);
+  const smx = useSpring(rawMx, { stiffness: 50, damping: 20 });
+  const smy = useSpring(rawMy, { stiffness: 50, damping: 20 });
+
+  /* Hero scroll parallax */
+  const heroRef = useRef<HTMLElement>(null);
+  const { scrollYProgress: heroProg } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
+  const heroY = useTransform(heroProg, [0, 1], [0, 130]);
+  const heroOpacity = useTransform(heroProg, [0, 0.8], [1, 0]);
+
+  /* Journey scroll-linked rail */
+  const journeyRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress: journeyProg } = useScroll({ target: journeyRef, offset: ['start 85%', 'end 45%'] });
+  const journeyX = useSpring(journeyProg, { stiffness: 90, damping: 26 });
+
   return (
-    <div className="bg-canvas text-cream min-h-[100dvh]">
+    <div className="bg-canvas text-cream min-h-[100dvh] relative">
       <SEO
         title="Zawadi — Scholarship Matching for African Students"
         description="Find scholarships you are eligible to win across all 54 African countries. Strict eligibility filtering removes scholarships you do not qualify for. No IELTS required options included."
@@ -193,84 +114,166 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
         schema={[websiteSchema, organizationSchema]}
       />
 
-      {/* ═══ Hero ═══ */}
-      <section className="relative min-h-[100dvh] flex items-center overflow-hidden bg-grid-pattern px-4 sm:px-6 pt-24 pb-16">
-        {/* Decorative gradient shapes — overlap the type, lit from within */}
-        <div aria-hidden className="absolute top-[8%] right-[-12%] w-[420px] h-[420px] md:w-[640px] md:h-[640px] rounded-full pointer-events-none bg-[radial-gradient(circle_at_35%_35%,rgba(254,197,251,0.16)_0%,rgba(0,186,226,0.07)_45%,transparent_70%)]" />
-        <div aria-hidden className="absolute bottom-[-18%] left-[-14%] w-[380px] h-[380px] md:w-[560px] md:h-[560px] rounded-full pointer-events-none bg-[radial-gradient(circle_at_60%_40%,rgba(10,228,72,0.10)_0%,rgba(171,255,132,0.05)_50%,transparent_72%)]" />
+      {/* ═══ HERO ═══ */}
+      <section
+        ref={heroRef}
+        onMouseMove={e => {
+          const r = e.currentTarget.getBoundingClientRect();
+          rawMx.set((e.clientX - (r.left + r.width / 2)) / r.width);
+          rawMy.set((e.clientY - (r.top + r.height / 2)) / r.height);
+        }}
+        className="relative min-h-[100dvh] flex flex-col justify-center overflow-hidden px-4 sm:px-6 pt-24 pb-16"
+      >
+        {/* Parallax orbs (static gradients, mouse-driven only) */}
+        <Orb className="w-[560px] h-[560px] md:w-[840px] md:h-[840px] -top-[20%] -right-[18%] bg-[radial-gradient(circle_at_38%_38%,rgba(254,197,251,0.15)_0%,rgba(0,186,226,0.07)_48%,transparent_70%)]" parallax={38} mx={smx} my={smy} />
+        <Orb className="w-[500px] h-[500px] md:w-[720px] md:h-[720px] bottom-[-26%] left-[-16%] bg-[radial-gradient(circle_at_60%_35%,rgba(10,228,72,0.14)_0%,rgba(171,255,132,0.05)_52%,transparent_72%)]" parallax={-28} mx={smx} my={smy} />
 
-        <div className="max-w-[1280px] mx-auto w-full z-10">
-          <Reveal>
-            <p className="text-base md:text-lg text-cream mb-5 md:mb-7">{'{'} Scholarships, matched honestly {'}'}</p>
-          </Reveal>
+        {/* Floating match-card */}
+        <motion.aside
+          aria-hidden
+          initial={{ opacity: 0, y: 56 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, ease: EASE, delay: 1 }}
+          data-reveal="" className="hidden lg:block absolute right-[5%] top-[22%] w-[300px] z-0 pointer-events-none"
+          style={{ x: useTransform(smx, v => v * 42), y: useTransform(smy, v => v * 30) }}
+        >
+          <div className="spotlight-card bg-off-black/80 border border-hairline rounded-lg p-5">
+            <p className="text-[10px] uppercase tracking-wider text-muted mb-3">Match found</p>
+            <div className="flex items-center gap-4">
+              <ScoreRing value={98} />
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-cream leading-snug line-clamp-2">MSc Renewable Energy — TU Munich</p>
+                <p className="text-xs text-muted mt-1">Full funding · No IELTS</p>
+              </div>
+            </div>
+            <div className="flex gap-1.5 mt-4">
+              <span className="px-2 py-0.5 rounded-full border border-accent-green/40 text-accent-green text-[10px]">Eligible</span>
+              <span className="px-2 py-0.5 rounded-full border border-hairline text-muted text-[10px]">Deadline Jun 12</span>
+            </div>
+          </div>
+          <FadeUp delay={1.8}>
+            <div className="relative mt-5 ml-[-12px] inline-flex bg-canvas border border-hairline rounded-full px-4 py-2">
+              <DoodleCircleArrow className="absolute -top-7 left-2 w-[92px] h-[52px]" />
+              <span className="text-xs font-mono text-accent-green tabular-nums">+128</span>
+              <span className="text-xs text-muted ml-2">matches this week</span>
+            </div>
+          </FadeUp>
+        </motion.aside>
 
-          <Reveal delay={80}>
-            <h1 className="text-heading-lg lg:text-display font-semibold text-cream max-w-none lg:max-w-[12ch]">
-              Animate your future<span className="text-accent-green">.</span>
-            </h1>
-          </Reveal>
+        {/* Content */}
+        <motion.div style={{ y: heroY, opacity: heroOpacity }} className="max-w-[1280px] mx-auto w-full relative z-10">
+          <FadeUp delay={0.05}>
+            <HeroBadge>Now matching across all {countries.length || 54} African countries</HeroBadge>
+          </FadeUp>
 
-          <Reveal delay={160}>
-            <p className="text-body md:text-body-lg text-muted mt-5 md:mt-7 max-w-[52ch] leading-relaxed">
-              Zawadi matches African students to scholarships they are 100% eligible for — verified daily, no spam.
+          <h1 className="mt-7 md:mt-9 text-display font-semibold tracking-tight max-w-[10ch] relative">
+            <FadeUp delay={0.14}>Your potential.</FadeUp>
+            <FadeUp delay={0.26}>
+              <span className="relative inline-block">
+                <span className="text-brand-gradient">Funded.</span>
+                <DoodleSpark className="absolute -right-9 -top-2 w-6 h-6" />
+                <DoodleSquiggle />
+              </span>
+            </FadeUp>
+          </h1>
+
+          <FadeUp delay={0.45}>
+            <p className="text-body-lg text-muted leading-relaxed max-w-[46ch] mt-7 md:mt-8">
+              Zawadi matches African students to scholarships they are 100%
+              eligible for — verified daily, no spam, no data selling.
             </p>
-          </Reveal>
+          </FadeUp>
 
-          <Reveal delay={240}>
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-8 md:mt-10">
-              <button
-                onClick={onGetStarted}
-                className="btn-gradient-stroke inline-flex items-center justify-center gap-2 rounded-full px-7 py-3 min-h-[48px] text-base md:text-lg font-semibold text-cream transition-all duration-200 hover:brightness-110 active:scale-[0.98] cursor-pointer"
-              >
-                Start free
-                <ArrowForward className="w-4 h-4" />
-              </button>
+          <FadeUp delay={0.58}>
+            <div className="flex flex-col sm:flex-row gap-4 mt-9">
+              <Magnetic>
+                <button
+                  onClick={onGetStarted}
+                  className="btn-gradient-stroke btn-shine inline-flex items-center justify-center gap-2 rounded-full px-9 min-h-[54px] text-lg font-semibold text-cream transition-transform active:scale-[0.98] cursor-pointer group"
+                >
+                  Start free
+                  <ArrowForward className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+                </button>
+              </Magnetic>
               <Link
                 to="/scholarships/browse"
-                className="inline-flex items-center justify-center gap-2 rounded-full px-7 py-3 min-h-[48px] text-base md:text-lg font-semibold text-cream border border-cream/60 hover:border-cream hover:bg-cream/[0.04] transition-all duration-200 active:scale-[0.98]"
+                className="inline-flex items-center justify-center rounded-full px-9 min-h-[54px] text-lg font-semibold text-cream border border-cream/60 hover:border-cream hover:bg-cream/[0.04] active:scale-[0.98] transition-all"
               >
                 Browse scholarships
               </Link>
             </div>
-          </Reveal>
+          </FadeUp>
 
-          <Reveal delay={320}>
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-8 md:mt-12 text-sm text-muted">
-              <span className="flex items-center gap-1.5">
-                <ShieldCheckIcon className="w-4 h-4" />
-                No data selling
-              </span>
-              <span className="flex items-center gap-1.5">
-                <GlobeIcon className="w-4 h-4" />
-                {countries.length || 54} African countries
-              </span>
-              <span className="flex items-center gap-1.5">
-                <BadgeCheckIcon className="w-4 h-4" />
-                Human-vetted listings
-              </span>
-              <button onClick={onLogin} className="underline underline-offset-4 decoration-hairline hover:decoration-cream cursor-pointer text-left">
-                Already have an account? Sign in
-              </button>
+          {/* Trust bento strip */}
+          <FadeUp delay={0.72}>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-11 max-w-[720px]">
+              {[
+                ['100% eligibility', 'hard-gate checks, no guesses'],
+                ['$0 forever plan', 'matching is always free'],
+                ['No-IELTS paths', 'MOI & Duolingo accepted'],
+              ].map(([t, d]) => (
+                <div key={t} className="rounded-lg border border-hairline/70 bg-off-black/50 px-4 py-3">
+                  <p className="text-sm font-semibold text-cream">{t}</p>
+                  <p className="text-xs text-muted mt-0.5">{d}</p>
+                </div>
+              ))}
             </div>
-          </Reveal>
+          </FadeUp>
+
+          <FadeUp delay={0.85}>
+            <button onClick={onLogin} className="mt-8 text-sm text-muted underline underline-offset-4 decoration-hairline hover:text-cream hover:decoration-cream transition-colors cursor-pointer">
+              Already have an account? Sign in
+            </button>
+          </FadeUp>
+        </motion.div>
+      </section>
+
+      {/* ═══ PROGRAM TICKER ═══ */}
+      <div id="stats" className="hairline py-5 scroll-mt-24">
+        <Marquee items={PROGRAMS} />
+      </div>
+
+      {/* ═══ STATS BAND ═══ */}
+      <section className="hairline">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-14 md:py-20 grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-6">
+          {[
+            { v: 54, s: '', label: 'African countries covered', tone: 'text-cream' },
+            { v: 2500, s: '+', label: 'Verified live listings', tone: 'text-accent-orange' },
+            { v: 3, s: ' min', label: 'Profile to first matches', tone: 'text-accent-lilac' },
+            { v: 100, s: '%', label: 'Deterministic eligibility', tone: 'text-accent-green' },
+          ].map((st, i) => (
+            <FadeUp key={st.label} delay={i * 0.08}>
+              <div className={`font-mono text-4xl md:text-5xl font-medium tabular-nums ${st.tone}`}>
+                <CountUp to={st.v} suffix={st.s} />
+              </div>
+              <p className="text-sm text-muted mt-2">{st.label}</p>
+            </FadeUp>
+          ))}
         </div>
       </section>
 
-      {/* ═══ Featured scholarships ═══ */}
+      {/* ═══ FEATURED SCHOLARSHIPS ═══ */}
       <section className="hairline">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-16 md:py-24">
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-8 md:mb-12">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-9 md:mb-12">
             <div>
-              <p className="text-accent-orange font-semibold mb-2"><span className="text-cream">{'{'}</span> Open now <span className="text-cream">{'}'}</span></p>
-              <h2 className="text-subheading font-semibold text-cream tracking-tight">Explore active scholarships</h2>
+              <FadeUp><Eyebrow text="Open now" /></FadeUp>
+              <h2 className="text-subheading md:text-heading font-semibold text-cream tracking-tight max-w-[16ch] mt-3">
+                Active opportunities, refreshed daily.
+              </h2>
             </div>
-            <p className="text-muted text-sm md:text-base max-w-[38ch]">Hand-picked opportunities currently open to African students. Updated daily.</p>
+            <FadeUp>
+              <Link to="/scholarships" className="group inline-flex items-center gap-2 text-sm font-semibold text-accent-green underline-offset-4 hover:underline">
+                View database
+                <ArrowForward className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
+            </FadeUp>
           </div>
 
           {featuredLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {[0, 1, 2].map((i) => (
-                <div key={i} className={`${panelBase} p-6 animate-pulse`}>
+              {[0, 1, 2].map(i => (
+                <div key={i} className="bg-off-black border border-hairline/60 rounded-lg p-6 animate-pulse">
                   <div className="h-4 w-3/4 bg-hairline/40 rounded mb-3" />
                   <div className="h-3 w-1/2 bg-hairline/30 rounded mb-6" />
                   <div className="flex gap-2">
@@ -280,348 +283,283 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
                 </div>
               ))}
             </div>
-          ) : featuredScholarships.length === 0 ? (
-            <div className={`${panelBase} text-center py-14 px-6`}>
-              <SearchIcon className="w-7 h-7 text-muted mx-auto mb-3" />
-              <p className="text-cream font-medium mb-1">No featured scholarships right now</p>
-              <p className="text-muted text-sm">New opportunities are added daily. Check back soon or browse all scholarships.</p>
-            </div>
+          ) : featured.length === 0 ? (
+            <SpotlightCard className="text-center py-14 px-6">
+              <p className="text-cream font-medium mb-1">No featured listings right now</p>
+              <p className="text-muted text-sm">New opportunities are added daily. Check back soon.</p>
+            </SpotlightCard>
           ) : (
             <>
-              {/* Mobile: horizontal snap scroll */}
               <div className="flex md:hidden gap-4 overflow-x-auto snap-x snap-mandatory hide-scrollbar -mx-4 px-4 pb-1">
-                {featuredScholarships.map(s => (
-                  <Link
-                    key={s.id}
-                    to={`/scholarships`}
-                    className={`snap-start shrink-0 w-[280px] ${panelBase} p-5 flex flex-col gap-3 hover:border-hairline`}
-                  >
-                    <ScholarshipCardBody s={s} />
+                {featured.slice(0, 3).map(s => (
+                  <Link key={s.id} to="/scholarships" className="snap-start shrink-0 w-[280px]">
+                    <SpotlightCard className="p-5 h-full flex flex-col gap-3">
+                      <MiniCard s={s} />
+                    </SpotlightCard>
                   </Link>
                 ))}
               </div>
-              {/* Desktop: grid */}
-              <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-5">
-                {featuredScholarships.map(s => (
-                  <Link key={s.id} to={`/scholarships`} className={`${panelBase} p-6 flex flex-col gap-3 transition-colors duration-200 hover:border-muted`}>
-                    <ScholarshipCardBody s={s} />
-                  </Link>
+              <div className="hidden md:grid grid-cols-3 gap-5">
+                {featured.slice(0, 3).map((s, i) => (
+                  <FadeUp key={s.id} delay={i * 0.09}>
+                    <Link to="/scholarships" className="block h-full">
+                      <SpotlightCard className="p-6 h-full flex flex-col gap-3 group">
+                        <MiniCard s={s} />
+                        <span className="inline-flex items-center gap-2 text-xs font-semibold text-cream opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 mt-auto pt-2">
+                          View details <ArrowForward className="w-3 h-3" />
+                        </span>
+                      </SpotlightCard>
+                    </Link>
+                  </FadeUp>
                 ))}
               </div>
             </>
           )}
-
-          <div className="mt-8 md:mt-10">
-            <Link
-              to="/scholarships"
-              className="inline-flex items-center gap-2 rounded-full px-6 py-3 min-h-[44px] text-sm font-semibold text-cream border border-cream/60 hover:border-cream hover:bg-cream/[0.04] transition-all duration-200"
-            >
-              View all scholarships
-              <ArrowForward className="w-3.5 h-3.5" />
-            </Link>
-          </div>
         </div>
       </section>
 
-      {/* ═══ Why Zawadi — stat bento ═══ */}
+      {/* ═══ WHY — asymmetric bento ═══ */}
       <section className="hairline">
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-16 md:py-24">
-          <Reveal>
-            <h2 className="text-subheading md:text-heading font-semibold text-cream tracking-tight max-w-[22ch] mb-10 md:mb-14">
-              The system isn't built for us. So we built our own.
-            </h2>
-          </Reveal>
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-16 md:py-28">
+          <FadeUp><Eyebrow text="Why Zawadi" /></FadeUp>
+          <h2 className="text-subheading md:text-heading font-semibold text-cream tracking-tight max-w-[22ch] mt-3 mb-10 md:mb-14">
+            Built for how applications actually happen.
+          </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-            <Reveal className="sm:col-span-2">
-              <div className={`${panelBase} relative overflow-hidden p-6 md:p-8 h-full bg-[radial-gradient(circle_at_85%_15%,rgba(10,228,72,0.08)_0%,transparent_55%)]`}>
-                <p className="text-xs uppercase tracking-wider text-muted mb-4">Matching engine</p>
-                <div className="font-mono text-5xl md:text-6xl font-medium tabular-nums text-accent-green">100%</div>
-                <h3 className="font-semibold text-cream text-lg md:text-xl mt-3 mb-2">Deterministic eligibility</h3>
-                <p className="text-sm text-muted leading-relaxed max-w-md">
-                  Every listing is checked against your nationality, degree level, field of study and GPA.
-                  If it says you qualify, you qualify.
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-5">
+            <FadeUp className="md:col-span-7" delay={0}>
+              <SpotlightCard className="p-6 md:p-8 h-full bg-[radial-gradient(circle_at_88%_12%,rgba(10,228,72,0.09)_0%,transparent_55%)]">
+                <p className="text-xs uppercase tracking-wider text-muted mb-5">Matching engine</p>
+                <div className="font-mono text-6xl md:text-7xl font-medium tabular-nums text-accent-green">100%</div>
+                <h3 className="font-semibold text-cream text-xl md:text-2xl mt-4 mb-2">Deterministic eligibility</h3>
+                <p className="text-sm md:text-base text-muted leading-relaxed max-w-md">
+                  Nationality, degree level, field of study, GPA — cross-checked against each
+                  scholarship's exact requirements. Zero hallucination, zero wasted applications.
                 </p>
-                <div className="flex flex-wrap gap-2 mt-5">
-                  <Chip tone="green">54 countries</Chip>
-                  <Chip>Daily refresh</Chip>
-                  <Chip>No hallucinations</Chip>
+              </SpotlightCard>
+            </FadeUp>
+
+            <FadeUp className="md:col-span-5" delay={0.08}>
+              <SpotlightCard className="p-6 md:p-8 h-full flex flex-col">
+                <p className="text-xs uppercase tracking-wider text-muted mb-auto pb-8">Setup</p>
+                <div className="font-mono text-5xl md:text-6xl font-medium tabular-nums text-accent-lilac"><CountUp to={3} suffix=" min" /></div>
+                <h3 className="font-medium text-cream mt-4">From zero to matches</h3>
+                <p className="text-sm text-muted mt-2 leading-relaxed">One profile. Every opportunity you can actually win, ranked.</p>
+              </SpotlightCard>
+            </FadeUp>
+
+            <FadeUp className="md:col-span-5" delay={0.12}>
+              <SpotlightCard className="p-6 md:p-8 h-full flex flex-col">
+                <p className="text-xs uppercase tracking-wider text-muted mb-auto pb-8">Deadlines</p>
+                <div className="font-mono text-5xl md:text-6xl font-medium tabular-nums text-accent-pink"><CountUp to={30} prefix="-" suffix="d" /></div>
+                <h3 className="font-medium text-cream mt-4">Never miss one again</h3>
+                <p className="text-sm text-muted mt-2 leading-relaxed">Timezone-aware reminders before each window closes.</p>
+              </SpotlightCard>
+            </FadeUp>
+
+            <FadeUp className="md:col-span-7" delay={0.16}>
+              <SpotlightCard className="p-6 md:p-8 h-full bg-[radial-gradient(circle_at_10%_90%,rgba(0,186,226,0.08)_0%,transparent_55%)]">
+                <p className="text-xs uppercase tracking-wider text-muted mb-5">Data quality</p>
+                <div className="flex flex-wrap items-baseline gap-x-4 gap-y-2">
+                  <span className="font-mono text-5xl md:text-6xl font-medium tabular-nums text-accent-blue"><CountUp to={2500} suffix="+" /></span>
+                  <span className="text-sm text-muted max-w-[26ch]">verified listings — no dead links, no expired deadlines.</span>
                 </div>
-              </div>
-            </Reveal>
-
-            <Reveal delay={80}>
-              <div className={`${panelBase} p-6 h-full flex flex-col gap-3`}>
-                <LightningIcon className="w-5 h-5 text-accent-light-green" />
-                <div className="font-mono text-3xl tabular-nums text-cream mt-auto pt-6">3 min</div>
-                <h3 className="font-medium text-cream text-sm">Profile to matches</h3>
-                <p className="text-xs text-muted leading-relaxed">Set up once. No endless scrolling — just scholarships you can actually win.</p>
-              </div>
-            </Reveal>
-
-            <Reveal delay={140}>
-              <div className={`${panelBase} p-6 h-full flex flex-col gap-3`}>
-                <MapPinIcon className="w-5 h-5 text-accent-orange" />
-                <div className="font-mono text-3xl tabular-nums text-cream mt-auto pt-6">4-step</div>
-                <h3 className="font-medium text-cream text-sm">Guided path</h3>
-                <p className="text-xs text-muted leading-relaxed">Profile, matches, essays, submission — with AI and human support at each stage.</p>
-              </div>
-            </Reveal>
-
-            <Reveal delay={200} className="sm:col-span-2 lg:col-span-4">
-              <div className={`${panelBase} p-6 md:p-8 flex flex-col md:flex-row md:items-center gap-4 md:gap-8`}>
-                <DatabaseCheckIcon className="w-5 h-5 text-accent-blue shrink-0" />
-                <div className="font-mono text-3xl md:text-4xl tabular-nums text-cream shrink-0">2,500+</div>
-                <p className="text-sm text-muted leading-relaxed">
-                  verified listings kept current — no dead links, no expired deadlines, no recycled spam.
-                </p>
-              </div>
-            </Reveal>
+                <div className="mt-6 h-px w-full bg-hairline/60 relative overflow-hidden">
+                  <motion.span
+                    className="absolute inset-y-0 left-0 w-1/3 bg-accent-blue/60"
+                    initial={{ x: '-120%' }}
+                    whileInView={{ x: ['0%', '220%'] }}
+                    viewport={{ once: false, margin: '-20%' }}
+                    transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut', repeatDelay: 1.2 }}
+                  />
+                </div>
+              </SpotlightCard>
+            </FadeUp>
           </div>
         </div>
       </section>
 
-      {/* ═══ Features ═══ */}
-      <section id="features" className="hairline scroll-mt-24">
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-16 md:py-24">
-          <Reveal>
-            <h2 className="text-subheading md:text-heading font-semibold text-cream tracking-tight max-w-[24ch] mb-10 md:mb-14">
-              Built for how applications actually happen.
-            </h2>
-          </Reveal>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
-            <FeatureCard
-              icon={<ClipboardCheckIcon className="w-5 h-5 text-accent-pink" />}
-              title="Track every application"
-              body="A visual pipeline showing exactly where each application stands."
-              accent={<PipelineBars />}
-            />
-            <FeatureCard
-              icon={<SparklesAIIcon className="w-5 h-5 text-accent-lilac" />}
-              title="AI + human review"
-              body="The AI learns your writing voice for personal statements; a real mentor reviews every essay before you submit."
-              foot={
-                <span className="flex items-center gap-2 text-xs font-medium text-accent-green">
-                  <BadgeCheckIcon className="w-4 h-4" />
-                  Human-reviewed on every plan
-                </span>
-              }
-            />
-            <FeatureCard
-              icon={<LockIcon className="w-5 h-5 text-accent-blue" />}
-              title="Secure document vault"
-              body="Upload transcripts, references and certificates once — we surface the right document for every application."
-            />
-            <FeatureCard
-              icon={<GlobeIcon className="w-5 h-5 text-status-success" />}
-              title="Alternative English pathways"
-              body="Filter for scholarships that accept a Medium-of-Instruction certificate or the $60 Duolingo test."
-              foot={
-                <div className="flex flex-wrap gap-1.5">
-                  <Chip tone="green">No IELTS</Chip>
-                  <Chip tone="green">MOI accepted</Chip>
-                  <Chip tone="green">Duolingo $60</Chip>
-                </div>
-              }
-            />
-            <Reveal delay={120} className="md:col-span-2">
-              <div className={`${panelBase} p-6 md:p-8 h-full flex flex-col justify-between gap-6 bg-[radial-gradient(circle_at_15%_85%,rgba(0,186,226,0.06)_0%,transparent_55%)]`}>
-                <div>
-                  <h3 className="font-semibold text-cream text-lg md:text-xl mb-2">Deadlines that find you first</h3>
-                  <p className="text-sm text-muted leading-relaxed max-w-lg">
-                    Deadline tracking with reminders calibrated to each scholarship's timezone and requirements,
-                    so no opportunity lapses because of a date you missed.
-                  </p>
-                </div>
-                <div className="font-mono text-muted text-sm tabular-nums flex items-center gap-3">
-                  <span className="text-accent-pink">●</span> rolling · seasonal · fixed deadlines tracked
-                </div>
+      {/* ═══ JOURNEY — scroll-linked rail ═══ */}
+      <section ref={journeyRef} className="hairline">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-16 md:py-28">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-10">
+            <div>
+              <FadeUp><Eyebrow text="The path" /></FadeUp>
+              <FadeUp delay={0.08}><h2 className="text-subheading md:text-heading font-semibold text-cream tracking-tight max-w-[14ch] mt-3">
+                Four steps. One system.
+              </h2></FadeUp>
+            </div>
+            <div className="relative">
+              <div className="absolute left-0 right-0 top-[13px] h-px bg-hairline" />
+              <motion.div
+                className="absolute left-0 right-0 top-[13px] h-px bg-accent-green origin-left"
+                style={{ scaleX: journeyX }}
+              />
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-y-10">
+                {[
+                  ['01', 'Profile', 'Three minutes of facts about you'],
+                  ['02', 'Matches', 'Only what you fully qualify for'],
+                  ['03', 'Essays', 'AI drafts, human mentors refine'],
+                  ['04', 'Submit', 'Tracked to the deadline, reminded twice'],
+                ].map(([n, t, d], i) => (
+                  <FadeUp key={n} delay={i * 0.1} className="pt-0">
+                    <span className={`block w-[27px] h-[27px] rounded-full border text-[10px] font-mono flex items-center justify-center ${i === 1 ? 'border-accent-green text-accent-green' : 'border-hairline text-muted bg-canvas'}`}>
+                      {n}
+                    </span>
+                    <h3 className="font-medium text-cream mt-4">{t}</h3>
+                    <p className="text-xs text-muted mt-1 leading-relaxed max-w-[20ch]">{d}</p>
+                  </FadeUp>
+                ))}
               </div>
-            </Reveal>
-          </div>
-
-          <div className="flex justify-center mt-8 md:mt-10">
-            <div className="inline-flex items-center gap-2 border border-hairline rounded-full px-5 py-2.5">
-              <BadgeCheckIcon className="w-4 h-4 text-accent-green" />
-              <span className="text-xs text-muted">Human-vetted accuracy — every listing verified by our research team</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ═══ Testimonials ═══ */}
+      {/* ═══ TESTIMONIALS ═══ */}
       <section className="hairline">
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-16 md:py-24">
-          <Reveal>
-            <p className="text-base md:text-lg text-cream mb-4">{'{'} Proof, not promises {'}'}</p>
-            <h2 className="text-subheading md:text-heading font-semibold text-cream tracking-tight max-w-[24ch] mb-10 md:mb-14">
-              Scholars already there.
-            </h2>
-          </Reveal>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
-            <Reveal className="md:col-span-2">
-              <figure className={`${panelBase} relative overflow-hidden p-6 md:p-8 h-full flex flex-col gap-5`}>
-                <QuoteMark className="absolute top-5 right-6 text-6xl text-hairline/50" />
-                <blockquote className="text-base md:text-xl leading-relaxed text-cream max-w-[52ch]">
-                  "Zawadi showed me twelve opportunities I was 100% eligible for within minutes.
-                  I secured a fully-funded Master's in Germany."
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-16 md:py-28">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+            <FadeUp className="md:col-span-7">
+              <figure className="relative bg-off-black border border-hairline rounded-lg p-7 md:p-10 h-full overflow-hidden">
+                <span aria-hidden className="absolute -top-4 left-6 font-display text-[140px] leading-none text-hairline/40 select-none">&ldquo;</span>
+                <blockquote className="relative text-xl md:text-3xl font-medium text-cream leading-snug max-w-[30ch] pt-8">
+                  Twelve opportunities I was 100% eligible for, in minutes.
+                  Fully-funded Master's in Germany by semester's end.
                 </blockquote>
-                <figcaption className="mt-auto flex items-center gap-4">
-                  <span className="w-12 h-12 md:w-14 md:h-14 rounded-lg ring-1 ring-hairline flex items-center justify-center font-mono text-cream">AK</span>
-                  <span className="flex flex-col gap-0.5">
-                    <span className="font-medium text-cream text-sm">Amina Kouyaté</span>
-                    <span className="flex items-center gap-1.5 text-xs text-muted">
-                      <MapPinIcon className="w-3.5 h-3.5" /> Mali → Germany · MSc Renewable Energy
-                    </span>
-                    <span className="flex items-center gap-0.5 text-accent-green">
-                      {[1, 2, 3, 4, 5].map(i => <StarIcon key={i} className="w-3.5 h-3.5" />)}
-                    </span>
+                <figcaption className="mt-8 flex items-center gap-4">
+                  <span className="w-12 h-12 rounded-lg ring-1 ring-hairline flex items-center justify-center font-mono text-cream">AK</span>
+                  <span>
+                    <span className="block text-sm font-medium text-cream">Amina Kouyaté</span>
+                    <span className="block text-xs text-muted mt-0.5">Mali → Germany · MSc Renewable Energy</span>
                   </span>
                 </figcaption>
               </figure>
-            </Reveal>
-
-            <Reveal delay={100}>
-              <figure className={`${panelBase} p-6 h-full flex flex-col gap-4`}>
-                <div className="flex items-center gap-3">
-                  <span className="w-10 h-10 md:w-12 md:h-12 rounded-lg ring-1 ring-hairline flex items-center justify-center font-mono text-cream text-sm">CN</span>
-                  <span className="flex flex-col">
-                    <span className="font-medium text-cream text-sm">Chidi Nnamdi</span>
-                    <span className="text-xs text-muted">Nigeria → Canada</span>
-                  </span>
+            </FadeUp>
+            <div className="md:col-span-5 flex flex-col gap-5">
+              <FadeUp delay={0.1}>
+                <figure className="bg-off-black border border-hairline rounded-lg p-6">
+                  <blockquote className="text-base text-cream leading-relaxed">
+                    "The No-IELTS filter saved me $250 and months of prep."
+                  </blockquote>
+                  <figcaption className="mt-4 text-xs text-muted">Chidi Nnamdi · Nigeria → Canada</figcaption>
+                </figure>
+              </FadeUp>
+              <FadeUp delay={0.18}>
+                <figure className="bg-off-black border border-hairline rounded-lg p-6">
+                  <blockquote className="text-base text-cream leading-relaxed">
+                    "My mentor's feedback made the difference. Medicine at King's College London."
+                  </blockquote>
+                  <figcaption className="mt-4 text-xs text-muted">Faith Muthoni · Kenya → UK</figcaption>
+                </figure>
+              </FadeUp>
+              <FadeUp delay={0.26} className="mt-auto">
+                <div className="rounded-lg border border-accent-green/30 p-6 flex items-center justify-between gap-4 bg-[radial-gradient(circle_at_85%_50%,rgba(10,228,72,0.07)_0%,transparent_60%)]">
+                  <p className="text-cream font-medium">Write your own story.</p>
+                  <button
+                    onClick={onGetStarted}
+                    className="btn-gradient-stroke shrink-0 inline-flex items-center gap-2 rounded-full px-5 py-2.5 min-h-[44px] text-sm font-semibold text-cream hover:brightness-110 active:scale-[0.98] cursor-pointer transition-all"
+                  >
+                    Start free <ArrowForward className="w-3.5 h-3.5" />
+                  </button>
                 </div>
-                <blockquote className="text-sm text-muted leading-relaxed">
-                  "The No-IELTS filter saved me $250 and months of prep. MOI certificate, full ride at Toronto."
-                </blockquote>
-                <span className="flex items-center gap-0.5 mt-auto text-accent-green">
-                  {[1, 2, 3, 4, 5].map(i => <StarIcon key={i} className="w-3 h-3" />)}
-                </span>
-              </figure>
-            </Reveal>
-
-            <Reveal delay={60}>
-              <figure className={`${panelBase} p-6 h-full flex flex-col gap-4`}>
-                <div className="flex items-center gap-3">
-                  <span className="w-10 h-10 md:w-12 md:h-12 rounded-lg ring-1 ring-hairline flex items-center justify-center font-mono text-cream text-sm">FM</span>
-                  <span className="flex flex-col">
-                    <span className="font-medium text-cream text-sm">Faith Muthoni</span>
-                    <span className="text-xs text-muted">Kenya → UK</span>
-                  </span>
-                </div>
-                <blockquote className="text-sm text-muted leading-relaxed">
-                  "My mentor's feedback made the difference. Now studying Medicine at King's College London."
-                </blockquote>
-                <span className="flex items-center gap-0.5 mt-auto text-accent-green">
-                  {[1, 2, 3, 4, 5].map(i => <StarIcon key={i} className="w-3 h-3" />)}
-                </span>
-              </figure>
-            </Reveal>
-
-            <Reveal delay={120} className="md:col-span-2">
-              <div className={`${panelBase} p-6 md:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-5`}>
-                <p className="font-medium text-cream text-lg md:text-xl max-w-[28ch]">Ready to write your own story?</p>
-                <button
-                  onClick={onGetStarted}
-                  className="btn-gradient-stroke inline-flex items-center gap-2 rounded-full px-6 py-3 min-h-[48px] font-semibold text-cream transition-all duration-200 hover:brightness-110 active:scale-[0.98] cursor-pointer shrink-0"
-                >
-                  Start free
-                  <ArrowForward className="w-4 h-4" />
-                </button>
-              </div>
-            </Reveal>
+              </FadeUp>
+            </div>
           </div>
         </div>
       </section>
 
       {/* ═══ FAQ ═══ */}
-      <section id="faq" className="hairline scroll-mt-24">
+      <section className="hairline">
         <div className="max-w-[800px] mx-auto px-4 sm:px-6 py-16 md:py-24">
           <script type="application/ld+json">
             {JSON.stringify({
               "@context": "https://schema.org",
               "@type": "FAQPage",
-              "mainEntity": landingFaqs.map(faq => ({
-                "@type": "Question",
-                "name": faq.q,
-                "acceptedAnswer": { "@type": "Answer", "text": faq.a }
-              }))
+              "mainEntity": FAQS.map(f => ({
+                "@type": "Question", name: f.q,
+                acceptedAnswer: { "@type": "Answer", text: f.a },
+              })),
             })}
           </script>
-
-          <Reveal>
-            <h2 className="text-subheading font-semibold text-cream tracking-tight mb-2">Frequently asked</h2>
-            <p className="text-muted text-sm mb-8">Everything about finding scholarships with Zawadi.</p>
-          </Reveal>
-
+          <FadeUp><Eyebrow text="Questions" /></FadeUp>
+          <h2 className="text-subheading font-semibold text-cream tracking-tight mt-3 mb-8">Asked often.</h2>
           <div className="space-y-2">
-            {landingFaqs.map((faq, idx) => {
+            {FAQS.map((faq, idx) => {
               const faqId = `lf-${idx}`;
               const isOpen = openFaq === faqId;
               return (
-                <div key={faqId} className={`border rounded-lg transition-colors duration-200 overflow-hidden ${isOpen ? 'border-hairline bg-off-black' : 'border-hairline/60 bg-transparent hover:border-hairline'}`}>
-                  <button
-                    onClick={() => setOpenFaq(isOpen ? null : faqId)}
-                    className="w-full flex justify-between items-center gap-4 p-4 md:p-5 text-left cursor-pointer"
-                    aria-expanded={isOpen}
-                  >
-                    <span className={`text-sm md:text-base transition-colors ${isOpen ? 'text-accent-green' : 'text-cream'}`}>{faq.q}</span>
-                    <svg
-                      className={`w-4 h-4 shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180 text-accent-green' : 'text-muted'}`}
-                      fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}
+                <FadeUp key={faqId} delay={idx * 0.06}>
+                  <div className={`border rounded-lg transition-colors duration-200 ${isOpen ? 'border-hairline bg-off-black' : 'border-hairline/60 hover:border-hairline'}`}>
+                    <button
+                      onClick={() => setOpenFaq(isOpen ? null : faqId)}
+                      className="w-full flex justify-between items-center gap-4 p-4 md:p-5 text-left cursor-pointer"
+                      aria-expanded={isOpen}
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </button>
-                  <div className={`transition-all duration-300 ease-out ${isOpen ? 'max-h-[400px]' : 'max-h-0'}`}>
-                    <p className="px-4 md:px-5 pb-5 text-sm text-muted leading-relaxed">{faq.a}</p>
+                      <span className={`text-sm md:text-base transition-colors ${isOpen ? 'text-accent-green' : 'text-cream'}`}>{faq.q}</span>
+                      <svg
+                        className={`w-4 h-4 shrink-0 transition-transform duration-300 ${isOpen ? 'rotate-180 text-accent-green' : 'text-muted'}`}
+                        fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    <div className={`transition-all duration-300 ease-out ${isOpen ? 'max-h-[300px]' : 'max-h-0'} overflow-hidden`}>
+                      <p className="px-4 md:px-5 pb-5 text-sm text-muted leading-relaxed">{faq.a}</p>
+                    </div>
                   </div>
-                </div>
+                </FadeUp>
               );
             })}
           </div>
-
           {onViewAllFAQs && (
-            <div className="mt-8">
+            <FadeUp delay={0.2}>
               <button
                 onClick={onViewAllFAQs}
-                className="inline-flex items-center gap-2 text-sm font-semibold text-accent-green hover:brightness-110 cursor-pointer underline underline-offset-4 decoration-accent-green/40 hover:decoration-accent-green transition-all"
+                className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-accent-green underline underline-offset-4 decoration-accent-green/40 hover:decoration-accent-green cursor-pointer transition-all"
               >
-                View all FAQs
-                <ArrowForward className="w-3.5 h-3.5" />
+                All FAQs <ArrowForward className="w-3.5 h-3.5" />
               </button>
-            </div>
+            </FadeUp>
           )}
         </div>
       </section>
 
-      {/* ═══ Final CTA ═══ */}
+      {/* ═══ FINAL CTA ═══ */}
       <section className="hairline relative overflow-hidden">
-        <div aria-hidden className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_50%_120%,rgba(10,228,72,0.10)_0%,transparent_60%)]" />
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-20 md:py-32 relative">
-          <Reveal>
-            <h2 className="text-heading md:text-heading-lg font-semibold text-cream tracking-tight max-w-[18ch]">
-              Your scholarship is out there.
-            </h2>
-            <button
-              onClick={onGetStarted}
-              className="btn-gradient-stroke inline-flex items-center gap-2 rounded-full px-8 py-3.5 min-h-[52px] text-lg font-semibold text-cream transition-all duration-200 hover:brightness-110 active:scale-[0.98] cursor-pointer mt-8 md:mt-10"
-            >
-              Start for free
-              <ArrowForward className="w-4 h-4" />
-            </button>
+        <motion.div
+          aria-hidden
+          className="absolute inset-0 pointer-events-none"
+          style={{ y: useTransform(heroProg, [1, 0], [0, 80]) }}
+        >
+          <div className="absolute bottom-[-60%] left-1/2 -translate-x-1/2 w-[900px] h-[900px] rounded-full bg-[radial-gradient(circle,rgba(10,228,72,0.12)_0%,rgba(171,255,132,0.04)_45%,transparent_68%)]" />
+        </motion.div>
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-24 md:py-36 relative">
+          <FadeUp><Eyebrow text="Begin" /></FadeUp>
+          <h2 className="text-heading md:text-display font-semibold tracking-tight max-w-[14ch] mt-4">
+            Your scholarship<br />is out there<span className="text-accent-green">.</span>
+          </h2>
+          <FadeUp delay={0.2}>
+            <Magnetic>
+              <button
+                onClick={onGetStarted}
+                className="btn-gradient-stroke btn-shine inline-flex items-center gap-3 rounded-full pl-8 pr-3 py-2 min-h-[60px] text-xl font-semibold text-cream transition-transform active:scale-[0.98] cursor-pointer group mt-9 md:mt-12"
+              >
+                Start for free
+                <span className="w-11 h-11 rounded-full bg-cream/[0.08] ring-1 ring-cream/15 inline-flex items-center justify-center transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-0.5">
+                  <ArrowForward className="w-4 h-4" />
+                </span>
+              </button>
+            </Magnetic>
             <p className="mt-5 text-sm text-muted">Create your profile in three minutes. No credit card required.</p>
-          </Reveal>
+          </FadeUp>
         </div>
       </section>
     </div>
   );
 }
 
-/* ── Sub-components ── */
-
-function ScholarshipCardBody({ s }: { s: Scholarship }) {
+function MiniCard({ s }: { s: Scholarship }) {
   return (
     <>
       <div className="flex items-start justify-between gap-3">
@@ -636,70 +574,16 @@ function ScholarshipCardBody({ s }: { s: Scholarship }) {
         {s.provider}{s.host_institution ? ` \u00B7 ${s.host_institution}` : ''}
       </p>
       <div className="flex flex-wrap gap-1.5 mt-auto pt-2">
-        {s.funding_type && <Chip>{s.funding_type}</Chip>}
-        {s.degree_levels?.slice(0, 2).map((d: string) => <Chip key={d}>{d}</Chip>)}
-        {s.deadline && <Chip tone="pink">{s.deadline}</Chip>}
+        {s.funding_type && (
+          <span className="px-2 py-0.5 rounded-full border border-hairline text-muted text-[10px]">{s.funding_type}</span>
+        )}
+        {s.degree_levels?.slice(0, 2).map(d => (
+          <span key={d} className="px-2 py-0.5 rounded-full border border-hairline text-muted text-[10px]">{d}</span>
+        ))}
+        {s.deadline && (
+          <span className="px-2 py-0.5 rounded-full border border-accent-pink/40 text-accent-pink text-[10px]">{s.deadline}</span>
+        )}
       </div>
     </>
   );
 }
-
-function PipelineBars() {
-  return (
-    <div className="flex items-center gap-1 mt-1" aria-hidden>
-      {[
-        ['Draft', 'bg-hairline'],
-        ['Submitted', 'bg-accent-blue/50'],
-        ['Review', 'bg-status-warning/50'],
-        ['Awarded', 'bg-accent-green/60'],
-      ].map(([stage, color], i) => (
-        <React.Fragment key={stage}>
-          <div className={`h-1.5 flex-1 rounded-full ${color}`} title={stage} />
-          {i < 3 && <div className="w-1" />}
-        </React.Fragment>
-      ))}
-    </div>
-  );
-}
-
-function FeatureCard({ icon, title, body, foot, accent, delay = 0 }: {
-  icon: React.ReactNode;
-  title: string;
-  body: string;
-  foot?: React.ReactNode;
-  accent?: React.ReactNode;
-  delay?: number;
-}) {
-  return (
-    <Reveal delay={delay} className="h-full">
-      <div className={`${panelBase} p-6 h-full flex flex-col gap-3 transition-colors duration-200 hover:border-muted`}>
-        {icon}
-        <h3 className="font-medium text-cream text-base">{title}</h3>
-        <p className="text-sm text-muted leading-relaxed">{body}</p>
-        {accent}
-        {foot && <div className="mt-auto pt-3">{foot}</div>}
-      </div>
-    </Reveal>
-  );
-}
-
-/* ── Landing Page FAQs ── */
-
-const landingFaqs = [
-  {
-    q: "Do I need to take the IELTS to apply for scholarships on Zawadi?",
-    a: "No. Zawadi has a No-IELTS filter that shows you scholarships accepting a Medium of Instruction certificate from your secondary school or university, or the Duolingo English Test which costs $60."
-  },
-  {
-    q: "Is Zawadi free for students?",
-    a: "The core matching, filtering, and application tracking features are free on the Explorer plan. We will never sell your personal data to third parties."
-  },
-  {
-    q: "How does Zawadi decide which scholarships to show me?",
-    a: "Our matching engine checks your nationality, degree level, field of study, and GPA against the exact eligibility requirements of every scholarship in our database. You only see scholarships where you meet 100 percent of the criteria."
-  },
-  {
-    q: "How long does it take to set up a profile and see my first matches?",
-    a: "Under three minutes. As soon as you complete the profile wizard your match results appear."
-  }
-];
