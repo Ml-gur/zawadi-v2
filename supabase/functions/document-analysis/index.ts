@@ -201,11 +201,11 @@ function extractGPA(text: string): GpaMatch {
 // ─── Year extraction ───────────────────────────────────────────
 
 const YEAR_PATTERNS: { pattern: RegExp; confidence: number }[] = [
-  { pattern: /(?:graduation|award|conferral|completion|programme end|date of award)[^\d]*(\d{4})/i, confidence: 0.90 },
-  { pattern: /(?:awarded|graduated|completed|finished|conferred)\s+(?:in\s+)?(?:\w+\s+)?(\d{4})/i, confidence: 0.85 },
-  { pattern: /(?:expected|anticipated|projected)\s+(?:year|date|graduation)[:\s]*(\d{4})/i, confidence: 0.80 },
-  { pattern: /(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{4})/i, confidence: 0.70 },
-  { pattern: /\b(?:session|academic year|academic session)[:\s]*(\d{4})\s*[-–/]\s*(\d{4})\b/i, confidence: 0.65 },
+  { pattern: /(?:graduation|award|conferral|completion|programme end|date of award)[^\d]*(\d{4})/gi, confidence: 0.90 },
+  { pattern: /(?:awarded|graduated|completed|finished|conferred)\s+(?:\w+\s+)?(\d{4})/gi, confidence: 0.85 },
+  { pattern: /(?:expected|anticipated|projected)\s+(?:year|date|graduation)[:\s]*(\d{4})/gi, confidence: 0.80 },
+  { pattern: /(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{4})/gi, confidence: 0.70 },
+  { pattern: /\b(?:session|academic year|academic session)[:\s]*(\d{4})\s*[-–/]\s*(\d{4})\b/gi, confidence: 0.65 },
 ]
 
 function extractGraduationYear(text: string): { value: number | null; confidence: number } {
