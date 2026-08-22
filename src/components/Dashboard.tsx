@@ -76,24 +76,24 @@ export default function Dashboard({
     <div className="space-y-8 animate-sweep">
       
       {/* Top Banner Quick CTAs */}
-      <div className="flex flex-wrap gap-4 bg-surface-container-lowest/80 backdrop-blur-md p-5 rounded-2xl border border-outline-variant/40 shadow-sm">
+      <div className="flex flex-wrap gap-4 bg-canvas/80 backdrop-blur-md p-5 rounded-lg border border-hairline/40">
         <button 
           onClick={() => onNavigateToTab('vault')}
-          className="flex items-center gap-2 px-5 py-3 bg-primary text-on-primary rounded-xl font-bold hover:bg-primary-container transition-all shadow-sm cursor-pointer"
+          className="flex items-center gap-2 px-5 py-3 bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream rounded-lg font-bold hover:bg-primary-container transition-all cursor-pointer"
         >
           <span className="material-symbols-outlined text-lg">upload_file</span>
           Upload Document
         </button>
         <button 
           onClick={onTriggerQuickDraft}
-          className="flex items-center gap-2 px-5 py-3 bg-secondary text-on-secondary rounded-xl font-bold hover:bg-opacity-90 transition-all shadow-sm cursor-pointer"
+          className="flex items-center gap-2 px-5 py-3 bg-secondary text-on-secondary rounded-lg font-bold hover:bg-opacity-90 transition-all cursor-pointer"
         >
           <span className="material-symbols-outlined text-lg">auto_awesome</span>
           Generate Essay
         </button>
         <button 
           onClick={() => onNavigateToTab('scholarships')}
-          className="flex items-center gap-2 px-5 py-3 bg-surface-container-lowest text-primary border border-outline-variant/60 rounded-xl font-bold hover:bg-surface-container-low transition-all shadow-xs cursor-pointer"
+          className="flex items-center gap-2 px-5 py-3 bg-canvas text-primary border border-hairline/60 rounded-lg font-bold hover:bg-off-black transition-all cursor-pointer"
         >
           <span className="material-symbols-outlined text-lg">search</span>
           Find Scholarships
@@ -102,30 +102,30 @@ export default function Dashboard({
 
       {/* Bento Grid Analytics */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <div onClick={() => onNavigateToTab('tracker')} className="premium-glass p-4 rounded-xl border-l-4 border-primary cursor-pointer hover:shadow-md transition-shadow">
-          <p className="text-[10px] font-bold text-on-surface-variant uppercase mb-1">Total Apps</p>
+        <div onClick={() => onNavigateToTab('tracker')} className="premium-glass p-4 rounded-lg border-l-4 border-primary cursor-pointer transition-shadow">
+          <p className="text-[10px] font-bold text-muted uppercase mb-1">Total Apps</p>
           <p className="text-2xl font-extrabold text-primary">{totalApps}</p>
         </div>
-        <div onClick={() => onNavigateToTab('tracker')} className="premium-glass p-4 rounded-xl border-l-4 border-status-success cursor-pointer hover:shadow-md transition-shadow">
-          <p className="text-[10px] font-bold text-on-surface-variant uppercase mb-1">Applied</p>
+        <div onClick={() => onNavigateToTab('tracker')} className="premium-glass p-4 rounded-lg border-l-4 border-status-success cursor-pointer transition-shadow">
+          <p className="text-[10px] font-bold text-muted uppercase mb-1">Applied</p>
           <p className="text-2xl font-extrabold text-primary">{appliedCount}</p>
         </div>
-        <div onClick={() => onNavigateToTab('tracker')} className="premium-glass p-4 rounded-xl border-l-4 border-status-info cursor-pointer hover:shadow-md transition-shadow">
-          <p className="text-[10px] font-bold text-on-surface-variant uppercase mb-1">Drafting</p>
+        <div onClick={() => onNavigateToTab('tracker')} className="premium-glass p-4 rounded-lg border-l-4 border-status-info cursor-pointer transition-shadow">
+          <p className="text-[10px] font-bold text-muted uppercase mb-1">Drafting</p>
           <p className="text-2xl font-extrabold text-primary">{draftingCount}</p>
         </div>
-        <div onClick={() => onNavigateToTab('tracker')} className="premium-glass p-4 rounded-xl border-l-4 border-status-urgent cursor-pointer hover:shadow-md transition-shadow">
-          <p className="text-[10px] font-bold text-on-surface-variant uppercase mb-1">Urgent (&lt;30d)</p>
+        <div onClick={() => onNavigateToTab('tracker')} className="premium-glass p-4 rounded-lg border-l-4 border-status-urgent cursor-pointer transition-shadow">
+          <p className="text-[10px] font-bold text-muted uppercase mb-1">Urgent (&lt;30d)</p>
           <p className="text-2xl font-extrabold text-primary">{urgentCount}</p>
         </div>
-        <div onClick={() => onNavigateToTab('scholarships')} className="premium-glass p-4 rounded-xl border-l-4 border-secondary cursor-pointer hover:shadow-md transition-shadow">
-          <p className="text-[10px] font-bold text-on-surface-variant uppercase mb-1">Strong Matches</p>
+        <div onClick={() => onNavigateToTab('scholarships')} className="premium-glass p-4 rounded-lg border-l-4 border-secondary cursor-pointer transition-shadow">
+          <p className="text-[10px] font-bold text-muted uppercase mb-1">Strong Matches</p>
           <p className="text-2xl font-extrabold text-primary">{strongMatchCount}</p>
         </div>
       </div>
 
       {/* Dynamic Academic Subscription Status Row */}
-      <div className="premium-glass p-5 rounded-2xl border border-outline-variant/40 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="premium-glass p-5 rounded-lg border border-hairline/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <span className="material-symbols-outlined text-primary text-xl">
             {user?.plan === 'explorer' ? 'explore' : user?.plan === 'institutional' ? 'business' : 'stars'}
@@ -138,7 +138,7 @@ export default function Dashboard({
               {user?.plan === 'institutional' && 'Institutional access active'}
               {!user?.plan && 'Exploring your options'}
             </h4>
-            <p className="text-[11px] text-on-surface-variant mt-0.5">
+            <p className="text-[11px] text-muted mt-0.5">
               {user?.plan === 'explorer' && 'You have 3 essay drafts and 1 mentor review available today. Upgrade to Scholar Plus for $5 to unlock 10 daily drafts and 2 monthly mentor reviews.'}
               {user?.plan === 'plus' && 'You have 10 essay drafts per day and 2 mentor reviews this month.'}
               {user?.plan === 'pro' && 'Unlimited essays and 4 mentor reviews this month.'}
@@ -149,7 +149,7 @@ export default function Dashboard({
         </div>
         <button
           onClick={() => onNavigateToTab('billing')}
-          className="px-4 py-2 bg-primary text-on-primary hover:bg-opacity-95 rounded-xl text-xs font-black shrink-0 transition-all cursor-pointer shadow-3xs self-start sm:self-auto"
+          className="px-4 py-2 bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream hover:bg-opacity-95 rounded-lg text-xs font-black shrink-0 transition-all cursor-pointer shadow-3xs self-start sm:self-auto"
         >
           {user?.plan && user.plan.toLowerCase() !== 'explorer' ? "Subscription Status" : "Explore Premium Plans"}
         </button>
@@ -158,15 +158,15 @@ export default function Dashboard({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* Readiness Level (Spans 4) */}
-        <div className="col-span-12 lg:col-span-4 premium-glass rounded-3xl p-6 relative overflow-hidden flex flex-col justify-between min-h-[220px]">
+        <div className="col-span-12 lg:col-span-4 premium-glass rounded-lg p-6 relative overflow-hidden flex flex-col justify-between min-h-[220px]">
           <div className="absolute -right-10 -top-10 w-40 h-40 bg-secondary-container/10 rounded-full z-0"></div>
           
           <div className="relative z-10 flex justify-between items-start">
             <div>
               <h3 className="text-xs font-bold text-secondary uppercase tracking-widest mb-1">Global Readiness</h3>
-              <p className="text-sm text-on-surface-variant font-medium">Profile Score</p>
+              <p className="text-sm text-muted font-medium">Profile Score</p>
             </div>
-            <span className="material-symbols-outlined text-outline-variant">info</span>
+            <span className="material-symbols-outlined text-muted-variant">info</span>
           </div>
 
           <div className="relative z-10 flex items-center gap-6 mt-4">
@@ -190,7 +190,7 @@ export default function Dashboard({
               </div>
             </div>
             <div className="flex-1">
-              <p className="text-xs text-on-surface-variant leading-relaxed">
+              <p className="text-xs text-muted leading-relaxed">
                 {profileStrength > 75 
                   ? "Outstanding! Your profile displays high alignment with international scholarship requirements."
                   : "Good start. Add missing preferences and documents to elevate your eligibility probability."
@@ -204,11 +204,11 @@ export default function Dashboard({
         </div>
 
         {/* Pipeline Stepper (Spans 8) */}
-        <div className="col-span-12 lg:col-span-8 premium-glass rounded-3xl p-6 flex flex-col justify-between">
+        <div className="col-span-12 lg:col-span-8 premium-glass rounded-lg p-6 flex flex-col justify-between">
           <div className="flex justify-between items-center mb-6">
             <div>
               <h3 className="font-display text-lg font-bold text-primary">Application Journey Tracking</h3>
-              <p className="text-xs text-on-surface-variant mt-0.5">Summary of how your scholarships sit across stage limits</p>
+              <p className="text-xs text-muted mt-0.5">Summary of how your scholarships sit across stage limits</p>
             </div>
             <button 
               onClick={() => onNavigateToTab('tracker')}
@@ -218,34 +218,34 @@ export default function Dashboard({
             </button>
           </div>
 
-          <div className="relative flex-1 flex items-center justify-between mt-4 px-2 lg:px-8 bg-surface-container-low/40 rounded-xl p-4 border border-outline-variant/10">
+          <div className="relative flex-1 flex items-center justify-between mt-4 px-2 lg:px-8 bg-off-black/40 rounded-lg p-4 border border-hairline/10">
             <div className="absolute left-8 right-8 top-1/2 -translate-y-1/2 h-1 bg-outline-variant/30 rounded-full">
               <div className="h-full bg-secondary transition-all duration-300" style={{ width: `${Math.min(100, (appliedCount + awardedCount) / Math.max(1, savedCount + draftingCount + appliedCount + awardedCount) * 100)}%` }}></div>
             </div>
 
             <div className="relative z-10 flex flex-col items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-surface-container-lowest border-2 border-outline-variant flex items-center justify-center font-bold text-sm text-primary">
+              <div className="w-10 h-10 rounded-full bg-canvas border-2 border-hairline flex items-center justify-center font-bold text-sm text-primary">
                 {savedCount}
               </div>
-              <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Saved</span>
+              <span className="text-[10px] font-bold text-muted uppercase tracking-wider">Saved</span>
             </div>
 
             <div className="relative z-10 flex flex-col items-center gap-2">
-              <div className="w-12 h-12 rounded-full bg-surface-container-lowest border-4 border-status-info flex items-center justify-center font-extrabold text-base text-status-info shadow-sm">
+              <div className="w-12 h-12 rounded-full bg-canvas border-4 border-status-info flex items-center justify-center font-extrabold text-base text-status-info">
                 {draftingCount}
               </div>
               <span className="text-[10px] font-bold text-status-info uppercase tracking-wider">Drafting</span>
             </div>
 
             <div className="relative z-10 flex flex-col items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-primary border-2 border-surface-container-lowest flex items-center justify-center font-bold text-sm text-white shadow-sm">
+              <div className="w-10 h-10 rounded-full bg-primary border-2 border-surface-container-lowest flex items-center justify-center font-bold text-sm text-white">
                 {appliedCount}
               </div>
               <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Applied</span>
             </div>
 
             <div className="relative z-10 flex flex-col items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-status-success border-2 border-surface-container-lowest flex items-center justify-center text-white shadow-sm">
+              <div className="w-10 h-10 rounded-full bg-status-success border-2 border-surface-container-lowest flex items-center justify-center text-white">
                 <span className="material-symbols-outlined text-[18px]">workspace_premium</span>
               </div>
               <span className="text-[10px] font-bold text-status-success uppercase tracking-wider">Awarded ({awardedCount})</span>
@@ -254,10 +254,10 @@ export default function Dashboard({
         </div>
 
         {/* Profile Completion Warnings (Spans 4) */}
-        <div className="col-span-12 md:col-span-6 lg:col-span-4 premium-glass rounded-3xl p-6 flex flex-col justify-between">
+        <div className="col-span-12 md:col-span-6 lg:col-span-4 premium-glass rounded-lg p-6 flex flex-col justify-between">
           <div className="flex justify-between items-start mb-4">
             <h3 className="text-xs font-bold text-secondary uppercase tracking-widest">Onboarding Guide</h3>
-            <span className="text-xs text-on-surface-variant font-bold">
+            <span className="text-xs text-muted font-bold">
               {mvspMissing.length === 0
                 ? `${enrichMissing.length ? `${enrichMissing.length} to enhance` : 'Complete ✓'}`
                 : `${mvspMissing.length} left`}
@@ -279,11 +279,11 @@ export default function Dashboard({
 
             {mvspMissing.length === 0 && enrichMissing.length > 0 && (
               <>
-                <div className="bg-secondary-container/23 border border-secondary/20 rounded-xl p-3 text-center flex flex-col items-center justify-center mb-3">
+                <div className="bg-secondary-container/23 border border-secondary/20 rounded-lg p-3 text-center flex flex-col items-center justify-center mb-3">
                   <span className="material-symbols-outlined text-secondary text-2xl mb-1">check_circle</span>
                   <p className="text-[11px] font-medium text-primary">MVSP complete — matches ready!</p>
                 </div>
-                <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2">Enhance your profile:</p>
+                <p className="text-[10px] font-bold text-muted uppercase tracking-wider mb-2">Enhance your profile:</p>
                 {enrichMissing.map((f, id) => (
                   <div key={id} className="flex items-start gap-2 text-secondary text-xs font-medium bg-secondary-container/10 p-2 rounded-lg border border-secondary/10">
                     <span className="material-symbols-outlined text-sm mt-0.5">add</span>
@@ -294,7 +294,7 @@ export default function Dashboard({
             )}
 
             {mvspMissing.length === 0 && enrichMissing.length === 0 && (
-              <div className="bg-secondary-container/23 border border-secondary/20 rounded-xl p-4 text-center mt-2 flex flex-col items-center justify-center">
+              <div className="bg-secondary-container/23 border border-secondary/20 rounded-lg p-4 text-center mt-2 flex flex-col items-center justify-center">
                 <span className="material-symbols-outlined text-secondary text-3xl mb-2">check_circle</span>
                 <p className="text-xs font-medium text-primary">Your onboarding profile has been optimized. You are ready to generate custom matched letters!</p>
               </div>
@@ -312,13 +312,13 @@ export default function Dashboard({
         </div>
 
         {/* Urgent Deadlines (Spans 8) */}
-        <div className="col-span-12 md:col-span-6 lg:col-span-8 premium-glass rounded-3xl p-6 flex flex-col justify-between">
+        <div className="col-span-12 md:col-span-6 lg:col-span-8 premium-glass rounded-lg p-6 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-primary">schedule</span>
               <h4 className="font-bold text-sm text-primary uppercase">Scholarships Nearing Deadline</h4>
             </div>
-            <span className="text-[10px] text-on-surface-variant font-semibold bg-surface-container px-2 py-1 rounded">Action Required</span>
+            <span className="text-[10px] text-muted font-semibold bg-off-black px-2 py-1 rounded">Action Required</span>
           </div>
 
           <div className="divide-y divide-outline-variant/30 overflow-y-auto max-h-[200px] pr-1">
@@ -331,7 +331,7 @@ export default function Dashboard({
                 .slice(0, 8);
               if (sorted.length === 0) {
                 return (
-                  <div className="text-center py-8 text-on-surface-variant text-xs">
+                  <div className="text-center py-8 text-muted text-xs">
                     No scholarships with approaching deadlines at the moment.
                   </div>
                 );
@@ -344,7 +344,7 @@ export default function Dashboard({
                   <div
                     key={s.id}
                     onClick={() => onViewScholarship(s)}
-                    className="py-2.5 flex justify-between items-center bg-surface-container-lowest/45 px-3 rounded-lg border border-outline-variant/20 mb-2 cursor-pointer hover:bg-surface-container-lowest transition-colors"
+                    className="py-2.5 flex justify-between items-center bg-canvas/45 px-3 rounded-lg border border-hairline/20 mb-2 cursor-pointer hover:bg-canvas transition-colors"
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
@@ -356,13 +356,13 @@ export default function Dashboard({
                           {s._daysLeft}d left
                         </span>
                         {appStatus && (
-                          <span className="text-[9px] text-on-surface-variant">• {appStatus}</span>
+                          <span className="text-[9px] text-muted">• {appStatus}</span>
                         )}
                       </div>
                     </div>
                     <div className="text-right shrink-0 ml-3">
                       <span className={`text-xs font-black ${isUrgent ? 'text-status-urgent' : 'text-status-warning'}`}>{s.deadline}</span>
-                      <p className="text-[9px] text-on-surface-variant uppercase tracking-wider truncate max-w-[120px]">{s.provider}</p>
+                      <p className="text-[9px] text-muted uppercase tracking-wider truncate max-w-[120px]">{s.provider}</p>
                     </div>
                   </div>
                 );
@@ -382,11 +382,11 @@ export default function Dashboard({
               Live-Matched opportunities
             </span>
             <h3 className="font-display text-2xl font-black text-primary">Curated For Africa-Excellence</h3>
-            <p className="text-sm text-on-surface-variant">Top programs with direct application lines that fit your academic persona</p>
+            <p className="text-sm text-muted">Top programs with direct application lines that fit your academic persona</p>
           </div>
           <button 
             onClick={() => onNavigateToTab('scholarships')}
-            className="text-xs font-bold text-secondary hover:text-primary transition-colors flex items-center gap-1 bg-surface py-2 px-4 rounded-full border border-outline-variant/50"
+            className="text-xs font-bold text-secondary hover:text-primary transition-colors flex items-center gap-1 bg-off-black py-2 px-4 rounded-full border border-hairline/50"
           >
             Explore Database
             <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
@@ -394,12 +394,12 @@ export default function Dashboard({
         </div>
 
         {matchedScholarships.length === 0 && (
-          <div className="text-center py-12 bg-surface-container-lowest rounded-3xl border border-outline-variant/30">
-            <span className="material-symbols-outlined text-4xl text-outline-variant mb-3">search</span>
-            <p className="text-sm text-on-surface-variant font-medium">
+          <div className="text-center py-12 bg-canvas rounded-lg border border-hairline/30">
+            <span className="material-symbols-outlined text-4xl text-muted-variant mb-3">search</span>
+            <p className="text-sm text-muted font-medium">
               Complete your academic profile to unlock personalized scholarship matches.
             </p>
-            <button onClick={() => onNavigateToTab('profile')} className="mt-4 px-6 py-2.5 bg-primary text-on-primary text-xs font-bold rounded-xl hover:bg-primary-container transition-colors cursor-pointer">
+            <button onClick={() => onNavigateToTab('profile')} className="mt-4 px-6 py-2.5 bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream text-xs font-bold rounded-lg hover:bg-primary-container transition-colors cursor-pointer">
               Complete Profile
             </button>
           </div>
@@ -414,12 +414,12 @@ export default function Dashboard({
             return (
               <div 
                 key={s.id}
-                className="premium-glass rounded-3xl p-6 flex flex-col justify-between group relative overflow-hidden"
+                className="premium-glass rounded-lg p-6 flex flex-col justify-between group relative overflow-hidden"
               >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-secondary-container/10 rounded-bl-full -z-10 transition-transform group-hover:scale-105 pointer-events-none"></div>
                 <div>
                   <div className="flex justify-between items-start mb-4">
-                    <span className="bg-secondary-container/80 text-on-secondary-container border border-secondary/20 font-label-sm text-[10px] px-3 py-1 rounded-full uppercase tracking-wider font-extrabold shadow-sm backdrop-blur-md flex items-center gap-1">
+                    <span className="bg-secondary-container/80 text-on-secondary-container border border-secondary/20 font-label-sm text-[10px] px-3 py-1 rounded-full uppercase tracking-wider font-extrabold backdrop-blur-md flex items-center gap-1">
                       <span className="material-symbols-outlined text-[12px]">star</span> {score}% Match
                     </span>
                     <div className="flex items-center gap-1.5">
@@ -434,12 +434,12 @@ export default function Dashboard({
                     </div>
                   </div>
                   <h4 className="font-display text-lg font-black text-primary mb-1 group-hover:text-secondary transition-colors truncate">{s.name}</h4>
-                  <p className="text-xs text-on-surface-variant mb-4 font-bold">{s.provider} • {s.host}</p>
+                  <p className="text-xs text-muted mb-4 font-bold">{s.provider} • {s.host}</p>
                   <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="bg-surface-container-lowest text-on-surface-variant text-[11px] px-2.5 py-1 rounded-lg border border-outline-variant/30 flex items-center gap-1 font-semibold">
+                    <span className="bg-canvas text-muted text-[11px] px-2.5 py-1 rounded-lg border border-hairline/30 flex items-center gap-1 font-semibold">
                       <span className="material-symbols-outlined text-[14px]">public</span> {s.country?.[0] || 'Global'}
                     </span>
-                    <span className="bg-surface-container-lowest text-on-surface-variant text-[11px] px-2.5 py-1 rounded-lg border border-outline-variant/30 flex items-center gap-1 font-semibold">
+                    <span className="bg-canvas text-muted text-[11px] px-2.5 py-1 rounded-lg border border-hairline/30 flex items-center gap-1 font-semibold">
                       <span className="material-symbols-outlined text-[14px]">payments</span> {s.funding_type} Funding
                     </span>
                   </div>
@@ -447,7 +447,7 @@ export default function Dashboard({
                 </div>
                 <button 
                   onClick={() => onViewScholarship(s)}
-                  className="w-full py-3 bg-surface-container-lowest border-2 border-outline-variant/30 text-primary rounded-xl font-bold hover:bg-primary hover:border-primary hover:text-white transition-all shadow-sm group-hover:shadow-md cursor-pointer"
+                  className="w-full py-3 bg-canvas border-2 border-hairline/30 text-primary rounded-lg font-bold hover:bg-primary hover:border-primary hover:text-white transition-all group- cursor-pointer"
                 >
                   Review & Apply
                 </button>

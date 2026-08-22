@@ -213,7 +213,7 @@ export default function Scholarships({
         />
 
         {/* Guest Banner */}
-        <div className="bg-[#001736] rounded-2xl p-6 md:p-8 border border-[#002b6b]/60 shadow-sm">
+        <div className="bg-[#001736] rounded-lg p-6 md:p-8 border border-[#002b6b]/60">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex-1">
               <h2 className="font-display font-black text-lg text-white mb-1">You are viewing scholarships as a guest</h2>
@@ -224,13 +224,13 @@ export default function Scholarships({
             <div className="flex items-center gap-3 shrink-0">
               <button
                 onClick={() => { setShowAuthModal(false); handleAuthAction(); }}
-                className="px-5 py-2.5 bg-[#22c55e] text-white font-bold rounded-xl hover:bg-[#16a34a] transition-colors cursor-pointer text-xs shadow-sm"
+                className="px-5 py-2.5 bg-[#22c55e] text-white font-bold rounded-lg hover:bg-[#16a34a] transition-colors cursor-pointer text-xs"
               >
                 Create Free Account
               </button>
               <button
                 onClick={() => { setShowAuthModal(false); handleAuthAction(); }}
-                className="px-5 py-2.5 bg-transparent border border-white/40 text-white font-bold rounded-xl hover:bg-white/10 transition-colors cursor-pointer text-xs"
+                className="px-5 py-2.5 bg-transparent border border-white/40 text-white font-bold rounded-lg hover:bg-white/10 transition-colors cursor-pointer text-xs"
               >
                 Log In
               </button>
@@ -239,21 +239,21 @@ export default function Scholarships({
         </div>
 
         {/* Filter Bar */}
-        <div className="bg-surface-container-lowest/95 border border-outline-variant/60 rounded-2xl p-4 shadow-xs">
+        <div className="bg-canvas/95 border border-hairline/60 rounded-lg p-4">
           <div className="flex flex-wrap items-center gap-3">
             <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-on-surface-variant/50" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted/50" />
               <input
                 value={publicSearch}
                 onChange={(e) => setPublicSearch(e.target.value)}
                 placeholder="Search scholarships..."
-                className="w-full pl-9 pr-3 py-2 border border-outline-variant/70 rounded-lg text-xs bg-surface text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                className="w-full pl-9 pr-3 py-2 border border-hairline/70 rounded-lg text-xs bg-off-black text-cream placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
               />
             </div>
             <select
               value={publicCountry}
               onChange={(e) => setPublicCountry(e.target.value)}
-              className="bg-surface border border-outline-variant/70 rounded-lg px-3 py-2 text-xs font-bold text-on-surface-variant focus:outline-none focus:border-primary cursor-pointer"
+              className="bg-off-black border border-hairline/70 rounded-lg px-3 py-2 text-xs font-bold text-muted focus:outline-none focus:border-primary cursor-pointer"
             >
               <option value="">All countries</option>
               {AFRICAN_COUNTRIES.map(c => (
@@ -266,21 +266,21 @@ export default function Scholarships({
             <select
               value={publicDegree}
               onChange={(e) => setPublicDegree(e.target.value)}
-              className="bg-surface border border-outline-variant/70 rounded-lg px-3 py-2 text-xs font-bold text-on-surface-variant focus:outline-none focus:border-primary cursor-pointer"
+              className="bg-off-black border border-hairline/70 rounded-lg px-3 py-2 text-xs font-bold text-muted focus:outline-none focus:border-primary cursor-pointer"
             >
               <option value="">All levels</option>
               {['Bachelors', 'Masters', 'PhD', 'Doctorate', 'Postdoctoral'].map(d => <option key={d} value={d}>{d}</option>)}
             </select>
-            <label className="flex items-center gap-1.5 text-xs text-on-surface font-bold bg-surface border border-outline-variant/70 px-3 py-2 rounded-lg cursor-pointer hover:bg-surface-variant/45 transition-colors">
+            <label className="flex items-center gap-1.5 text-xs text-cream font-bold bg-off-black border border-hairline/70 px-3 py-2 rounded-lg cursor-pointer hover:bg-surface-variant/45 transition-colors">
               <input
                 type="checkbox"
                 checked={publicNoIelts}
                 onChange={(e) => setPublicNoIelts(e.target.checked)}
-                className="rounded text-secondary border-outline-variant/80 accent-secondary cursor-pointer w-3.5 h-3.5"
+                className="rounded text-secondary border-hairline/80 accent-secondary cursor-pointer w-3.5 h-3.5"
               />
               <span>No IELTS</span>
             </label>
-            <span className="text-[10px] text-outline font-medium italic"><button onClick={() => handleShowAuth()} className="text-secondary font-bold underline cursor-pointer">Log in</button> for advanced filters</span>
+            <span className="text-[10px] text-muted font-medium italic"><button onClick={() => handleShowAuth()} className="text-secondary font-bold underline cursor-pointer">Log in</button> for advanced filters</span>
             {(publicSearch || publicCountry || publicDegree || publicNoIelts) && (
               <button
                 onClick={() => { setPublicSearch(''); setPublicCountry(''); setPublicDegree(''); setPublicNoIelts(false); }}
@@ -294,10 +294,10 @@ export default function Scholarships({
 
         {/* Results count */}
         <div className="flex items-center justify-between px-1">
-          <span className="text-xs font-extrabold text-on-surface-variant uppercase tracking-wider bg-surface-container/40 px-3 py-1.5 rounded-lg border border-outline-variant/30">
+          <span className="text-xs font-extrabold text-muted uppercase tracking-wider bg-off-black/40 px-3 py-1.5 rounded-lg border border-hairline/30">
             Showing {filteredPublic.length} of {publicTotalCount} scholarships
           </span>
-          <span className="text-[10px] text-on-surface-variant/60 font-medium">
+          <span className="text-[10px] text-muted/60 font-medium">
             <button onClick={() => handleShowAuth()} className="text-secondary font-bold underline cursor-pointer">Sign up free</button> to see all and get matched
           </span>
           {publicError && (
@@ -311,7 +311,7 @@ export default function Scholarships({
         {publicLoading && publicScholarships.length === 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[1, 2, 3, 4, 5, 6].map(i => (
-              <div key={i} className="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-5 animate-pulse">
+              <div key={i} className="bg-canvas border border-hairline/60 rounded-lg p-5 animate-pulse">
                 <div className="h-4 bg-outline-variant/30 rounded w-3/4 mb-3" />
                 <div className="h-3 bg-outline-variant/20 rounded w-1/2 mb-4" />
                 <div className="flex gap-2 mb-3">
@@ -329,7 +329,7 @@ export default function Scholarships({
               {filteredPublic.map(s => {
                 const urgency = (() => {
                   if (!s.deadline || s.deadline.toLowerCase().includes('varies'))
-                    return { label: 'Varies', color: 'text-on-surface-variant/50', bg: 'bg-surface-container-high' };
+                    return { label: 'Varies', color: 'text-muted/50', bg: 'bg-off-black' };
                   const days = Math.ceil((new Date(s.deadline).getTime() - Date.now()) / 86400000);
                   if (days < 0) return { label: 'Deadline Passed', color: 'text-status-error', bg: 'bg-status-error/10' };
                   if (days <= 30) return { label: `${days} days left`, color: 'text-status-error', bg: 'bg-status-error/10' };
@@ -344,7 +344,7 @@ export default function Scholarships({
                   <div
                     key={s.id}
                     onClick={() => setSelectedSchol(s)}
-                    className="group bg-surface-container-lowest border border-outline-variant/60 rounded-2xl hover:border-primary/30 hover:shadow-lg transition-all duration-200 cursor-pointer flex flex-col overflow-hidden"
+                    className="group bg-canvas border border-hairline/60 rounded-lg hover:border-primary/30 transition-all duration-200 cursor-pointer flex flex-col overflow-hidden"
                   >
                     {/* Accent bar */}
                     <div className={`h-1.5 w-full ${
@@ -362,13 +362,13 @@ export default function Scholarships({
                           {s.name}
                         </h3>
                         {s.provider && (
-                          <p className="text-[11px] text-on-surface-variant/70 mt-0.5 font-medium">{s.provider}</p>
+                          <p className="text-[11px] text-muted/70 mt-0.5 font-medium">{s.provider}</p>
                         )}
                       </div>
 
                       {/* Host institution / region */}
                       {hostInfo && (
-                        <p className="text-[10px] text-on-surface-variant/50 flex items-center gap-1">
+                        <p className="text-[10px] text-muted/50 flex items-center gap-1">
                           <GraduationCap className="w-3 h-3 shrink-0" />
                           {hostInfo}
                         </p>
@@ -383,7 +383,7 @@ export default function Scholarships({
                             </span>
                           ))}
                           {(s.countries || s.country || []).length > 3 && (
-                            <span className="text-[9px] text-on-surface-variant/50 font-medium">
+                            <span className="text-[9px] text-muted/50 font-medium">
                               +{((s.countries || s.country || []).length - 3)} more
                             </span>
                           )}
@@ -425,9 +425,9 @@ export default function Scholarships({
                       </div>
 
                       {/* Share + Sign-up prompt */}
-                      <div className="flex items-center justify-between pt-2 border-t border-outline-variant/20 mt-1">
+                      <div className="flex items-center justify-between pt-2 border-t border-hairline/20 mt-1">
                         <ShareButton url={`/scholarships/browse/${s.slug}`} iconOnly size="sm" />
-                        <div className="flex items-center gap-1.5 text-on-surface-variant/50">
+                        <div className="flex items-center gap-1.5 text-muted/50">
                           <Lock className="w-3 h-3" />
                           <span className="text-[9px] font-medium">Sign up for match score</span>
                         </div>
@@ -450,7 +450,7 @@ export default function Scholarships({
                 <button
                   onClick={handleLoadMore}
                   disabled={publicLoading}
-                  className="px-8 py-3 bg-primary text-on-primary font-bold rounded-full hover:bg-primary-container hover:text-on-primary-container transition-all duration-200 shadow-md text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
+                  className="px-8 py-3 bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream font-bold rounded-full hover:bg-primary-container hover:text-on-primary-container transition-all duration-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
                 >
                   {publicLoading ? (
                     <>
@@ -468,10 +468,10 @@ export default function Scholarships({
             )}
           </>
         ) : (
-          <div className="text-center py-20 bg-surface-container-lowest border border-outline-variant/60 rounded-2xl">
-            <Search className="w-8 h-8 text-outline-variant mx-auto mb-3" />
-            <p className="text-sm text-on-surface-variant font-medium">No scholarships match your filters.</p>
-            <p className="text-xs text-on-surface-variant/50 mt-1">Try adjusting your search criteria or check back later.</p>
+          <div className="text-center py-20 bg-canvas border border-hairline/60 rounded-lg">
+            <Search className="w-8 h-8 text-muted-variant mx-auto mb-3" />
+            <p className="text-sm text-muted font-medium">No scholarships match your filters.</p>
+            <p className="text-xs text-muted/50 mt-1">Try adjusting your search criteria or check back later.</p>
             <div className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 bg-primary/5 border border-primary/20 rounded-full">
               <Lock className="w-3.5 h-3.5 text-primary" />
               <button onClick={() => handleShowAuth()} className="text-xs font-bold text-primary hover:text-secondary transition-colors cursor-pointer">
@@ -485,12 +485,12 @@ export default function Scholarships({
         {selectedSchol && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setSelectedSchol(null)}>
             <div
-              className="bg-surface-container-lowest rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+              className="bg-canvas rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close button */}
-              <div className="sticky top-0 bg-surface-container-lowest/90 backdrop-blur-sm flex items-center justify-between p-4 border-b border-outline-variant/20 z-10">
-                <button onClick={() => setSelectedSchol(null)} className="flex items-center gap-1.5 text-xs font-bold text-on-surface-variant hover:text-primary transition-colors cursor-pointer">
+              <div className="sticky top-0 bg-canvas/90 backdrop-blur-sm flex items-center justify-between p-4 border-b border-hairline/20 z-10">
+                <button onClick={() => setSelectedSchol(null)} className="flex items-center gap-1.5 text-xs font-bold text-muted hover:text-primary transition-colors cursor-pointer">
                   <ArrowLeft className="w-3.5 h-3.5" /> Back
                 </button>
                 {selectedSchol.slug && (
@@ -521,15 +521,15 @@ export default function Scholarships({
                     )}
                   </div>
                   <h2 className="text-xl font-display font-black text-primary mb-1">{selectedSchol.name}</h2>
-                  <p className="text-sm text-on-surface-variant font-medium">{selectedSchol.provider} {selectedSchol.host_institution ? `• ${selectedSchol.host_institution}` : ''}</p>
+                  <p className="text-sm text-muted font-medium">{selectedSchol.provider} {selectedSchol.host_institution ? `• ${selectedSchol.host_institution}` : ''}</p>
                 </div>
 
                 {(selectedSchol.countries || selectedSchol.country) && (selectedSchol.countries || selectedSchol.country).length > 0 && (
                   <div>
-                    <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">Eligible Countries</h4>
+                    <h4 className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1.5">Eligible Countries</h4>
                     <div className="flex flex-wrap gap-1">
                       {(selectedSchol.countries || selectedSchol.country || []).map((c: string) => (
-                        <span key={c} className="text-[11px] px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant font-medium">{c}</span>
+                        <span key={c} className="text-[11px] px-2 py-0.5 rounded-full bg-off-black text-muted font-medium">{c}</span>
                       ))}
                     </div>
                   </div>
@@ -537,21 +537,21 @@ export default function Scholarships({
 
                 {selectedSchol.description && (
                   <div>
-                    <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">Description</h4>
-                    <p className="text-xs text-on-surface-variant/80 leading-relaxed line-clamp-6">{selectedSchol.description}</p>
+                    <h4 className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1.5">Description</h4>
+                    <p className="text-xs text-muted/80 leading-relaxed line-clamp-6">{selectedSchol.description}</p>
                   </div>
                 )}
 
                 {selectedSchol.eligibility && (
                   <div>
-                    <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">Basic Requirements</h4>
-                    <p className="text-xs text-on-surface-variant/80 leading-relaxed line-clamp-4">{selectedSchol.eligibility}</p>
+                    <h4 className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1.5">Basic Requirements</h4>
+                    <p className="text-xs text-muted/80 leading-relaxed line-clamp-4">{selectedSchol.eligibility}</p>
                   </div>
                 )}
 
                 {(selectedSchol.degree_levels || []).length > 0 && (
                   <div>
-                    <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">Degree Levels</h4>
+                    <h4 className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1.5">Degree Levels</h4>
                     <div className="flex flex-wrap gap-1">
                       {(selectedSchol.degree_levels || []).map((d: string) => (
                         <span key={d} className="text-[11px] px-2 py-0.5 rounded-full bg-primary-fixed/15 text-primary font-semibold">{d}</span>
@@ -561,36 +561,36 @@ export default function Scholarships({
                 )}
 
                 {/* Soft gate - blurred bottom section */}
-                <div className="relative mt-8 rounded-2xl overflow-hidden">
+                <div className="relative mt-8 rounded-lg overflow-hidden">
                   {/* Blurred content preview */}
                   <div className="p-6 blur-sm select-none space-y-4">
                     <div className="h-4 bg-outline-variant/30 rounded w-3/4" />
                     <div className="h-4 bg-outline-variant/30 rounded w-1/2" />
                     <div className="h-4 bg-outline-variant/30 rounded w-5/6" />
                     <div className="grid grid-cols-2 gap-3 mt-4">
-                      <div className="h-20 bg-outline-variant/20 rounded-xl" />
-                      <div className="h-20 bg-outline-variant/20 rounded-xl" />
+                      <div className="h-20 bg-outline-variant/20 rounded-lg" />
+                      <div className="h-20 bg-outline-variant/20 rounded-lg" />
                     </div>
-                    <div className="h-12 bg-primary/10 rounded-xl" />
+                    <div className="h-12 bg-primary/10 rounded-lg" />
                   </div>
 
                   {/* Gate overlay */}
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/70 backdrop-blur-[2px] p-6 text-center">
                     <Lock className="w-8 h-8 text-primary mb-3" />
                     <h3 className="text-base font-display font-black text-primary mb-2">Unlock Full Details</h3>
-                    <p className="text-xs text-on-surface-variant mb-4 max-w-sm">
+                    <p className="text-xs text-muted mb-4 max-w-sm">
                       Create a free account to see your full eligibility breakdown, required documents, and match score.
                     </p>
                     <div className="flex items-center gap-3">
                       <button
                         onClick={() => handleShowAuth()}
-                        className="px-5 py-2.5 bg-primary text-on-primary font-bold rounded-xl hover:bg-primary-container transition-colors cursor-pointer text-xs"
+                        className="px-5 py-2.5 bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream font-bold rounded-lg hover:bg-primary-container transition-colors cursor-pointer text-xs"
                       >
                         Sign Up Free
                       </button>
                       <button
                         onClick={() => handleShowAuth()}
-                        className="px-5 py-2.5 bg-transparent border border-outline-variant text-primary font-bold rounded-xl hover:bg-surface-container transition-colors cursor-pointer text-xs"
+                        className="px-5 py-2.5 bg-transparent border border-hairline text-primary font-bold rounded-lg hover:bg-off-black transition-colors cursor-pointer text-xs"
                       >
                         Log In
                       </button>
@@ -606,31 +606,31 @@ export default function Scholarships({
         {showTrackModal && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowTrackModal(false)}>
             <div
-              className="bg-surface-container-lowest rounded-2xl shadow-2xl max-w-sm w-full p-8 text-center"
+              className="bg-canvas rounded-lg max-w-sm w-full p-8 text-center"
               onClick={(e) => e.stopPropagation()}
             >
               <Bookmark className="w-12 h-12 text-primary mx-auto mb-4" />
               <h3 className="text-lg font-display font-black text-primary mb-2">Save Scholarships</h3>
-              <p className="text-xs text-on-surface-variant mb-6 leading-relaxed">
+              <p className="text-xs text-muted mb-6 leading-relaxed">
                 You need a free account to save scholarships and track your applications.
                 It takes under two minutes to set up.
               </p>
               <div className="flex flex-col gap-2">
                 <button
                   onClick={() => { setShowTrackModal(false); handleAuthAction(); }}
-                  className="w-full px-5 py-3 bg-primary text-on-primary font-bold rounded-xl hover:bg-primary-container transition-colors cursor-pointer text-sm"
+                  className="w-full px-5 py-3 bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream font-bold rounded-lg hover:bg-primary-container transition-colors cursor-pointer text-sm"
                 >
                   Create Free Account
                 </button>
                 <button
                   onClick={() => { setShowTrackModal(false); handleAuthAction(); }}
-                  className="w-full px-5 py-2.5 bg-transparent border border-outline-variant/60 text-primary font-bold rounded-xl hover:bg-surface-container transition-colors cursor-pointer text-sm"
+                  className="w-full px-5 py-2.5 bg-transparent border border-hairline/60 text-primary font-bold rounded-lg hover:bg-off-black transition-colors cursor-pointer text-sm"
                 >
                   Log In
                 </button>
                 <button
                   onClick={() => setShowTrackModal(false)}
-                  className="w-full mt-1 text-xs font-bold text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
+                  className="w-full mt-1 text-xs font-bold text-muted hover:text-primary transition-colors cursor-pointer"
                 >
                   Continue Browsing
                 </button>
@@ -643,30 +643,30 @@ export default function Scholarships({
         {showAuthModal && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowAuthModal(false)}>
             <div
-              className="bg-surface-container-lowest rounded-2xl shadow-2xl max-w-sm w-full p-8 text-center"
+              className="bg-canvas rounded-lg max-w-sm w-full p-8 text-center"
               onClick={(e) => e.stopPropagation()}
             >
               <GraduationCap className="w-12 h-12 text-primary mx-auto mb-4" />
               <h3 className="text-lg font-display font-black text-primary mb-2">Welcome to Zawadi</h3>
-              <p className="text-xs text-on-surface-variant mb-6 leading-relaxed">
+              <p className="text-xs text-muted mb-6 leading-relaxed">
                 Create a free profile to see your eligibility score for each scholarship, track applications, and get matched to opportunities you qualify for.
               </p>
               <div className="flex flex-col gap-2">
                 <button
                   onClick={() => { setShowAuthModal(false); handleAuthAction(); }}
-                  className="w-full px-5 py-3 bg-primary text-on-primary font-bold rounded-xl hover:bg-primary-container transition-colors cursor-pointer text-sm"
+                  className="w-full px-5 py-3 bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream font-bold rounded-lg hover:bg-primary-container transition-colors cursor-pointer text-sm"
                 >
                   Create Free Account
                 </button>
                 <button
                   onClick={() => { setShowAuthModal(false); handleAuthAction(); }}
-                  className="w-full px-5 py-2.5 bg-transparent border border-outline-variant/60 text-primary font-bold rounded-xl hover:bg-surface-container transition-colors cursor-pointer text-sm"
+                  className="w-full px-5 py-2.5 bg-transparent border border-hairline/60 text-primary font-bold rounded-lg hover:bg-off-black transition-colors cursor-pointer text-sm"
                 >
                   Log In
                 </button>
                 <button
                   onClick={() => setShowAuthModal(false)}
-                  className="w-full mt-1 text-xs font-bold text-on-surface-variant hover:text-primary transition-colors cursor-pointer"
+                  className="w-full mt-1 text-xs font-bold text-muted hover:text-primary transition-colors cursor-pointer"
                 >
                   Continue Browsing
                 </button>
@@ -876,7 +876,7 @@ export default function Scholarships({
         <div className="animate-sweep space-y-6">
           
           {/* Breadcrumb / Back button */}
-          <div className="flex items-center justify-between text-on-surface-variant font-semibold text-xs py-2">
+          <div className="flex items-center justify-between text-muted font-semibold text-xs py-2">
             <div className="flex items-center gap-2 min-w-0">
               <button 
                 onClick={() => setSelectedSchol(null)}
@@ -906,13 +906,13 @@ export default function Scholarships({
             <div className="lg:col-span-8 flex flex-col gap-6">
               
               {/* Detail Hero banner */}
-              <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-6 md:p-8 shadow-sm relative overflow-hidden">
+              <div className="bg-canvas border border-hairline/60 rounded-lg p-6 md:p-8 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-primary-fixed rounded-full opacity-10 -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
                 
                 <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
-                      <span className="bg-surface-container text-on-surface font-semibold text-[10px] px-2.5 py-1 rounded uppercase tracking-wider border border-outline-variant">
+                      <span className="bg-off-black text-cream font-semibold text-[10px] px-2.5 py-1 rounded uppercase tracking-wider border border-hairline">
                         {selectedSchol.degree_levels?.[0] || "Graduate"}
                       </span>
                       <span className="bg-secondary-fixed text-on-secondary-fixed font-semibold text-[10px] px-2.5 py-1 rounded uppercase tracking-wider flex items-center gap-1">
@@ -928,24 +928,24 @@ export default function Scholarships({
                     <h1 className="text-2xl md:text-3xl lg:text-4xl font-display font-black text-primary mb-2">
                       {selectedSchol.name}
                     </h1>
-                    <p className="text-sm font-semibold text-on-surface-variant mb-6">
+                    <p className="text-sm font-semibold text-muted mb-6">
                       {selectedSchol.provider} • {selectedSchol.host_institution || selectedSchol.host}
                     </p>
 
                     <div className="flex flex-wrap gap-4 text-xs mt-4">
-                      <div className="flex items-center gap-2 bg-background p-3 rounded-xl border border-outline-variant">
+                      <div className="flex items-center gap-2 bg-background p-3 rounded-lg border border-hairline">
                         <span className="material-symbols-outlined text-primary text-lg">payments</span>
                         <div>
-                          <p className="text-[10px] text-on-surface-variant font-bold uppercase">Funding Value</p>
-                          <p className="font-bold text-on-surface text-xs">{selectedSchol.amount || "Full tuition expenses"}</p>
+                          <p className="text-[10px] text-muted font-bold uppercase">Funding Value</p>
+                          <p className="font-bold text-cream text-xs">{selectedSchol.amount || "Full tuition expenses"}</p>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 bg-background p-3 rounded-xl border border-outline-variant">
+                      <div className="flex items-center gap-2 bg-background p-3 rounded-lg border border-hairline">
                         <span className="material-symbols-outlined text-status-warning text-lg">calendar_today</span>
                         <div>
-                          <p className="text-[10px] text-on-surface-variant font-bold uppercase">Target Deadline</p>
-                          <p className="font-bold text-on-surface text-xs">
+                          <p className="text-[10px] text-muted font-bold uppercase">Target Deadline</p>
+                          <p className="font-bold text-cream text-xs">
                             {selectedSchol.deadline} 
                             <span className="text-status-warning font-normal text-[10px] ml-1.5">
                               {(() => {
@@ -959,17 +959,17 @@ export default function Scholarships({
                     </div>
 
                     {selectedSchol.no_ielts === true && (
-                      <div className="bg-status-success/10 border border-status-success/30 rounded-xl p-3 mt-3">
+                      <div className="bg-status-success/10 border border-status-success/30 rounded-lg p-3 mt-3">
                         <p className="text-xs font-bold text-status-success">No IELTS Required. IELTS alternatives accepted.</p>
                       </div>
                     )}
                   </div>
 
                   {/* Circle Match percentage */}
-                  <div className="flex flex-col items-center justify-center bg-background p-4 rounded-xl border border-outline-variant shadow-sm min-w-[140px] shrink-0">
+                  <div className="flex flex-col items-center justify-center bg-background p-4 rounded-lg border border-hairline min-w-[140px] shrink-0">
                     {selectedSchol.match ? (
                       <>
-                        <p className="text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-2">My compatibility</p>
+                        <p className="text-[10px] font-extrabold text-muted uppercase tracking-wider mb-2">My compatibility</p>
                         <div className="relative w-16 h-16 flex items-center justify-center">
                           <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                             <path className="text-surface-container-high" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3"></path>
@@ -980,9 +980,9 @@ export default function Scholarships({
                       </>
                     ) : (
                       <>
-                        <p className="text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-2">Compatibility</p>
-                        <div className="w-16 h-16 flex items-center justify-center bg-surface-container-high rounded-full">
-                          <span className="material-symbols-outlined text-2xl text-outline">person_edit</span>
+                        <p className="text-[10px] font-extrabold text-muted uppercase tracking-wider mb-2">Compatibility</p>
+                        <div className="w-16 h-16 flex items-center justify-center bg-off-black rounded-full">
+                          <span className="material-symbols-outlined text-2xl text-muted">person_edit</span>
                         </div>
                         <button onClick={() => window.dispatchEvent(new CustomEvent('open-profile-setup'))} className="mt-2 text-[8px] font-black text-primary hover:underline uppercase tracking-wider">
                           Set up profile
@@ -997,29 +997,29 @@ export default function Scholarships({
               </div>
 
               {/* Overview Details tabs */}
-              <div className="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-sm overflow-hidden text-sm">
-                <div className="flex border-b border-outline-variant bg-surface-admin px-4 overflow-x-auto hide-scrollbar">
+              <div className="bg-canvas border border-hairline rounded-lg overflow-hidden text-sm">
+                <div className="flex border-b border-hairline bg-surface-admin px-4 overflow-x-auto hide-scrollbar">
                   <button className="px-6 py-4 font-bold text-primary border-b-2 border-primary">Overview</button>
-                  <button className="px-6 py-4 text-on-surface-variant hover:text-primary">Eligible Regions</button>
+                  <button className="px-6 py-4 text-muted hover:text-primary">Eligible Regions</button>
                 </div>
                 <div className="p-6 md:p-8 space-y-6">
                   <div>
                     <h3 className="text-lg font-extrabold text-primary mb-3">About the Scholarship</h3>
-                    <p className="text-on-surface-variant leading-relaxed font-light">
+                    <p className="text-muted leading-relaxed font-light">
                       {selectedSchol.description}
                     </p>
                   </div>
                   <div>
                     <h3 className="text-lg font-extrabold text-primary mb-3">Eligibility Requirements</h3>
-                    <p className="text-on-surface-variant leading-relaxed font-light mb-4">
+                    <p className="text-muted leading-relaxed font-light mb-4">
                       {selectedSchol.eligibility}
                     </p>
                     <ul className="space-y-2">
-                      <li className="flex items-start gap-2.5 text-on-surface font-light">
+                      <li className="flex items-start gap-2.5 text-cream font-light">
                         <span className="material-symbols-outlined text-secondary text-sm mt-0.5">check_circle</span>
                         Citizen of: {(selectedSchol.countries || selectedSchol.country || []).join(', ')}
                       </li>
-                      <li className="flex items-start gap-2.5 text-on-surface font-light">
+                      <li className="flex items-start gap-2.5 text-cream font-light">
                         <span className="material-symbols-outlined text-secondary text-sm mt-0.5">check_circle</span>
                         Course topics: {(selectedSchol.fields || []).join(', ')}
                       </li>
@@ -1027,14 +1027,14 @@ export default function Scholarships({
 
                     {/* Match Reasons */}
                     {selectedSchol.match && selectedSchol.match.reasons.length > 0 && (
-                      <div className="mt-6 bg-status-success/5 border border-status-success/15 rounded-xl p-4">
+                      <div className="mt-6 bg-status-success/5 border border-status-success/15 rounded-lg p-4">
                         <h4 className="text-xs font-black text-status-success uppercase tracking-wider mb-2 flex items-center gap-1.5">
                           <span className="material-symbols-outlined text-sm">auto_awesome</span>
                           Why this scholarship fits you
                         </h4>
                         <ul className="space-y-1.5">
                           {(selectedSchol.match?.reasons || []).map((r, i) => (
-                            <li key={i} className="text-xs text-on-surface-variant flex items-start gap-2">
+                            <li key={i} className="text-xs text-muted flex items-start gap-2">
                               <span className="text-status-success mt-0.5">✓</span>
                               {r}
                             </li>
@@ -1045,7 +1045,7 @@ export default function Scholarships({
 
                     {/* Requirements Section */}
                     {(selectedSchol.work_experience_required || selectedSchol.age_limit_masters || selectedSchol.age_limit_phd || selectedSchol.no_ielts) && (
-                      <div className="mt-6 bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-5">
+                      <div className="mt-6 bg-canvas border border-hairline/60 rounded-lg p-5">
                         <h4 className="font-bold text-xs text-primary mb-3">Requirements</h4>
                         <div className="space-y-2 text-xs">
                           {selectedSchol.work_experience_required && <p className="font-semibold text-on-surface">{selectedSchol.work_experience_required} years of professional work experience required</p>}
@@ -1059,11 +1059,11 @@ export default function Scholarships({
               </div>
 
               {/* Vault matching Checklist */}
-              <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 md:p-8 shadow-sm">
+              <div className="bg-canvas border border-hairline rounded-lg p-6 md:p-8">
                 <div className="flex justify-between items-end mb-6">
                   <div>
                     <h3 className="text-lg font-black text-primary mb-1">Required Documents Checklist</h3>
-                    <p className="text-xs text-on-surface-variant">Validated in real-time against your Document Vault</p>
+                    <p className="text-xs text-muted">Validated in real-time against your Document Vault</p>
                   </div>
                 </div>
 
@@ -1073,7 +1073,7 @@ export default function Scholarships({
                     return (
                       <div 
                         key={docName} 
-                        className={`flex items-center justify-between p-4 border rounded-xl shadow-xs ${isDocStored ? 'border-status-success/30 bg-status-success/5' : 'border-status-warning/30 bg-status-warning/5'}`}
+                        className={`flex items-center justify-between p-4 border rounded-lg ${isDocStored ? 'border-status-success/30 bg-status-success/5' : 'border-status-warning/30 bg-status-warning/5'}`}
                       >
                         <div className="flex items-center gap-3">
                           <div className={`w-10 h-10 rounded flex-shrink-0 flex items-center justify-center font-bold ${isDocStored ? 'bg-status-success/10 text-status-success' : 'bg-status-warning/10 text-status-warning'}`}>
@@ -1117,13 +1117,13 @@ export default function Scholarships({
             <div className="lg:col-span-4 flex flex-col gap-6">
               
               {/* Application CTA widget */}
-              <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-6 shadow-sm">
+              <div className="bg-canvas border border-hairline rounded-lg p-6">
                 <div className="flex flex-col gap-3 mb-6">
                   <a 
                     href={selectedSchol.apply_url} 
                     target="_blank" 
                     rel="noreferrer"
-                    className="bg-primary text-on-primary font-bold text-center text-sm rounded-lg py-3 w-full flex items-center justify-center gap-2 hover:bg-primary-container transition-colors shadow-sm"
+                    className="bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream font-bold text-center text-sm rounded-lg py-3 w-full flex items-center justify-center gap-2 hover:bg-primary-container transition-colors"
                   >
                     Apply Now (Official Site)
                     <span className="material-symbols-outlined text-xs">open_in_new</span>
@@ -1132,7 +1132,7 @@ export default function Scholarships({
                   <div className="grid grid-cols-2 gap-3">
                     <button 
                       onClick={() => handleToggleSave(selectedSchol.id)}
-                      className={`font-bold text-xs rounded-lg py-2.5 px-4 flex items-center justify-center gap-1.5 border transition-all cursor-pointer ${isSaved(selectedSchol.id) ? 'bg-secondary-container border-secondary/30 text-on-secondary-container' : 'bg-surface border-outline-variant hover:bg-surface-variant text-on-surface'}`}
+                      className={`font-bold text-xs rounded-lg py-2.5 px-4 flex items-center justify-center gap-1.5 border transition-all cursor-pointer ${isSaved(selectedSchol.id) ? 'bg-secondary-container border-secondary/30 text-on-secondary-container' : 'bg-off-black border-hairline hover:bg-surface-variant text-on-surface'}`}
                     >
                       <span className="material-symbols-outlined text-sm">
                         {isSaved(selectedSchol.id) ? 'check' : 'bookmark_border'}
@@ -1162,7 +1162,7 @@ export default function Scholarships({
                   </div>
                 </div>
 
-                <hr className="border-outline-variant/50 mb-6" />
+                <hr className="border-hairline/50 mb-6" />
 
                 {/* Tracker widget */}
                 <h4 className="font-bold text-xs text-primary uppercase tracking-wider mb-4 flex items-center gap-2">
@@ -1172,14 +1172,14 @@ export default function Scholarships({
 
                 <div className="space-y-4">
                   <div>
-                    <label className="text-[10px] font-bold text-on-surface-variant uppercase mb-1 block">Tracking Stage</label>
+                    <label className="text-[10px] font-bold text-muted uppercase mb-1 block">Tracking Stage</label>
                     {(() => {
                       const currentStatus = getApplicationForSchol(selectedSchol.id)?.status || 'not_started';
-                      let selectBgStyle = "bg-surface border-outline-variant text-on-surface";
+                      let selectBgStyle = "bg-off-black border-hairline text-on-surface";
                       if (currentStatus === 'Applied') {
                         selectBgStyle = "bg-secondary text-white border-secondary font-black";
                       } else if (currentStatus === 'Drafting' || currentStatus === 'Essay Drafting') {
-                        selectBgStyle = "bg-primary text-white border-primary font-black animate-pulse";
+                        selectBgStyle = "border-accent-green bg-accent-green/15 text-accent-green font-semibold animate-pulse";
                       } else if (currentStatus === 'Saved') {
                         selectBgStyle = "bg-secondary/15 text-secondary border-secondary/30 font-extrabold";
                       }
@@ -1187,25 +1187,25 @@ export default function Scholarships({
                         <select 
                           value={currentStatus}
                           onChange={(e) => onTrackScholarship(selectedSchol.id, e.target.value, getApplicationForSchol(selectedSchol.id)?.notes || '', getApplicationForSchol(selectedSchol.id)?.priority || 'Normal')}
-                          className={`w-full p-2.5 text-xs rounded-xl focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary cursor-pointer font-bold transition-all border ${selectBgStyle}`}
+                          className={`w-full p-2.5 text-xs rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary cursor-pointer font-bold transition-all border ${selectBgStyle}`}
                         >
-                          <option value="not_started" className="bg-surface text-on-surface font-semibold">Not Tracked (Disable)</option>
-                          <option value="Saved" className="bg-surface text-secondary font-semibold">Saved</option>
-                          <option value="Drafting" className="bg-surface text-primary font-semibold">Drafting</option>
-                          <option value="Preparing Documents" className="bg-surface text-on-surface font-semibold">Preparing Documents</option>
-                          <option value="Essay Drafting" className="bg-surface text-on-surface font-semibold">Essay Drafting</option>
-                          <option value="Ready to Submit" className="bg-surface text-on-surface font-semibold">Ready to Submit</option>
-                          <option value="Applied" className="bg-surface text-secondary font-semibold">Applied</option>
-                          <option value="Interview" className="bg-surface text-on-surface font-semibold">Interview</option>
-                          <option value="Awarded" className="bg-surface text-status-success font-semibold">Awarded</option>
-                          <option value="Rejected" className="bg-surface text-status-urgent font-semibold">Rejected</option>
+                          <option value="not_started" className="bg-off-black text-cream font-semibold">Not Tracked (Disable)</option>
+                          <option value="Saved" className="bg-off-black text-secondary font-semibold">Saved</option>
+                          <option value="Drafting" className="bg-off-black text-primary font-semibold">Drafting</option>
+                          <option value="Preparing Documents" className="bg-off-black text-cream font-semibold">Preparing Documents</option>
+                          <option value="Essay Drafting" className="bg-off-black text-cream font-semibold">Essay Drafting</option>
+                          <option value="Ready to Submit" className="bg-off-black text-cream font-semibold">Ready to Submit</option>
+                          <option value="Applied" className="bg-off-black text-secondary font-semibold">Applied</option>
+                          <option value="Interview" className="bg-off-black text-cream font-semibold">Interview</option>
+                          <option value="Awarded" className="bg-off-black text-status-success font-semibold">Awarded</option>
+                          <option value="Rejected" className="bg-off-black text-status-urgent font-semibold">Rejected</option>
                         </select>
                       );
                     })()}
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold text-on-surface-variant uppercase mb-1 block">Priority Level</label>
+                    <label className="text-[10px] font-bold text-muted uppercase mb-1 block">Priority Level</label>
                     <div className="flex gap-2">
                       {['Low', 'Normal', 'High'].map((p) => (
                         <button
@@ -1222,7 +1222,7 @@ export default function Scholarships({
                           className={`flex-1 text-center py-2 border rounded font-bold text-[11px] transition-all cursor-pointer ${
                             (getApplicationForSchol(selectedSchol.id)?.priority || 'Normal') === p 
                               ? 'bg-primary-fixed border-primary text-primary font-black scale-102' 
-                              : 'border-outline-variant/60 bg-surface hover:bg-surface-variant text-on-surface-variant'
+                              : 'border-hairline/60 bg-off-black hover:bg-surface-variant text-muted'
                           }`}
                         >
                           {p}
@@ -1232,7 +1232,7 @@ export default function Scholarships({
                   </div>
 
                   <div>
-                    <label className="text-[10px] font-bold text-on-surface-variant uppercase mb-1 block">Personal Application Notes</label>
+                    <label className="text-[10px] font-bold text-muted uppercase mb-1 block">Personal Application Notes</label>
                     <textarea 
                       value={getApplicationForSchol(selectedSchol.id)?.notes || ''}
                       onChange={(e) => {
@@ -1246,14 +1246,14 @@ export default function Scholarships({
                       }}
                       placeholder="Add personal checklists, ideas, essay prompts or references..."
                       rows={3}
-                      className="w-full bg-surface border border-outline-variant rounded-lg p-2 text-xs text-on-surface focus:outline-none focus:border-primary resize-none placeholder:opacity-50"
+                      className="w-full bg-off-black border border-hairline rounded-lg p-2 text-xs text-cream focus:outline-none focus:border-primary resize-none placeholder:opacity-50"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Match breakdown metrics */}
-              <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-sm space-y-4">
+              <div className="bg-canvas border border-hairline rounded-lg p-5 space-y-4">
                 <h4 className="font-bold text-xs text-primary uppercase">Compatibility Breakdown</h4>
                 
                 <div className="space-y-3">
@@ -1291,7 +1291,7 @@ export default function Scholarships({
               </div>
 
               {/* Source & Verification */}
-              <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-5">
+              <div className="bg-canvas border border-hairline/60 rounded-lg p-5">
                 <h4 className="font-bold text-xs text-primary mb-3">Source & Verification</h4>
                 <div className="space-y-2 text-xs">
                   {selectedSchol.source_url && (
@@ -1299,14 +1299,14 @@ export default function Scholarships({
                       <ExternalLink className="w-3 h-3" /> View Original Listing
                     </a>
                   )}
-                  {selectedSchol.verified_at && <p className="text-on-surface-variant">Verified: {new Date(selectedSchol.verified_at).toLocaleDateString()}</p>}
-                  <p className="text-on-surface-variant">Data source: {selectedSchol.pipeline_source === 'pipeline' ? 'Pipeline' : 'Manual Admin Entry'}</p>
+                  {selectedSchol.verified_at && <p className="text-muted">Verified: {new Date(selectedSchol.verified_at).toLocaleDateString()}</p>}
+                  <p className="text-muted">Data source: {selectedSchol.pipeline_source === 'pipeline' ? 'Pipeline' : 'Manual Admin Entry'}</p>
                   {selectedSchol.apply_url ? (
-                    <a href={selectedSchol.apply_url} target="_blank" rel="noopener noreferrer" className="inline-block mt-2 px-4 py-2 bg-primary text-white rounded-xl font-bold text-xs hover:bg-primary-container transition-all">
+                    <a href={selectedSchol.apply_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 mt-2 px-5 py-2.5 rounded-full btn-gradient-stroke text-cream font-semibold text-xs transition-all hover:brightness-110 active:scale-[0.98]">
                       Apply Now
                     </a>
                   ) : selectedSchol.source_url ? (
-                    <a href={selectedSchol.source_url} target="_blank" rel="noopener noreferrer" className="inline-block mt-2 px-4 py-2 bg-surface-container text-on-surface rounded-xl font-bold text-xs hover:bg-surface-container-high transition-all border border-outline-variant/40">
+                    <a href={selectedSchol.source_url} target="_blank" rel="noopener noreferrer" className="inline-block mt-2 px-4 py-2 bg-off-black text-cream rounded-lg font-bold text-xs hover:bg-off-black transition-all border border-hairline/40">
                       Find Application Link
                     </a>
                   ) : null}
@@ -1333,7 +1333,7 @@ export default function Scholarships({
             <div className="flex items-center gap-2 flex-wrap">
               <button 
                 onClick={() => setShowAlertsModal(true)}
-                className="relative flex items-center gap-1.5 px-3 py-2 bg-surface-container-lowest hover:bg-surface-container border border-outline-variant/50 rounded-xl text-xs font-bold text-on-surface cursor-pointer shadow-3xs transition-all"
+                className="relative flex items-center gap-1.5 px-3 py-2 bg-canvas hover:bg-off-black border border-hairline/50 rounded-lg text-xs font-bold text-cream cursor-pointer shadow-3xs transition-all"
               >
                 <span className="material-symbols-outlined text-[16px] text-amber-500 font-bold">notifications</span>
                 <span>Alerts</span>
@@ -1349,28 +1349,28 @@ export default function Scholarships({
                   alert("Syncing all tracked opportunities with your active application pipeline...");
                   window.location.reload();
                 }}
-                className="flex items-center gap-1.5 px-3 py-2 bg-surface-container-lowest hover:bg-surface-container border border-outline-variant/50 rounded-xl text-xs font-bold text-on-surface cursor-pointer shadow-3xs transition-all"
+                className="flex items-center gap-1.5 px-3 py-2 bg-canvas hover:bg-off-black border border-hairline/50 rounded-lg text-xs font-bold text-cream cursor-pointer shadow-3xs transition-all"
               >
-                <span className="material-symbols-outlined text-[16px] text-on-surface-variant font-bold">sync</span>
+                <span className="material-symbols-outlined text-[16px] text-muted font-bold">sync</span>
                 <span>Sync</span>
               </button>
             </div>
           </div>
 
           {/* Premium Filter System Container */}
-          <div className="bg-surface-container-lowest/95 border border-outline-variant/60 rounded-2xl p-5 shadow-xs space-y-4">
+          <div className="bg-canvas/95 border border-hairline/60 rounded-lg p-5 space-y-4">
             <h3 className="text-xs font-black text-primary/70 uppercase tracking-widest">Premium filter system</h3>
             
             {/* Horizontal Filter Layout Row 1 */}
             <div className="flex flex-wrap items-center gap-3">
               {/* Keyword Search */}
               <div className="relative flex-1 min-w-[260px]">
-                <span className="material-symbols-outlined absolute left-3 top-2.5 text-on-surface-variant text-[16px] font-bold">search</span>
+                <span className="material-symbols-outlined absolute left-3 top-2.5 text-muted text-[16px] font-bold">search</span>
                 <input 
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search scholarship, school, country, field"
-                  className="w-full pl-10 pr-4 py-2 border border-outline-variant/70 rounded-lg text-xs bg-surface text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="w-full pl-10 pr-4 py-2 border border-hairline/70 rounded-lg text-xs bg-off-black text-cream placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                   type="text"
                 />
               </div>
@@ -1379,7 +1379,7 @@ export default function Scholarships({
               <select 
                 value={countryFilter}
                 onChange={(e) => setCountryFilter(e.target.value)}
-                className="bg-surface border border-outline-variant/70 rounded-lg px-3 py-2 text-xs font-bold text-on-surface-variant focus:outline-none focus:border-primary cursor-pointer w-max"
+                className="bg-off-black border border-hairline/70 rounded-lg px-3 py-2 text-xs font-bold text-muted focus:outline-none focus:border-primary cursor-pointer w-max"
               >
                 <option value="">All countries</option>
                 {AFRICAN_COUNTRIES.map(c => (
@@ -1394,7 +1394,7 @@ export default function Scholarships({
               <select 
                 value={degree}
                 onChange={(e) => setDegree(e.target.value)}
-                className="bg-surface border border-outline-variant/70 rounded-lg px-3 py-2 text-xs font-bold text-on-surface-variant focus:outline-none focus:border-primary cursor-pointer w-max"
+                className="bg-off-black border border-hairline/70 rounded-lg px-3 py-2 text-xs font-bold text-muted focus:outline-none focus:border-primary cursor-pointer w-max"
               >
                 <option value="">All levels</option>
                 {degrees.map(d => <option key={d} value={d}>{d}</option>)}
@@ -1404,7 +1404,7 @@ export default function Scholarships({
               <select 
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="bg-surface border border-outline-variant/70 rounded-lg px-3 py-2 text-xs font-bold text-on-surface-variant focus:outline-none focus:border-primary cursor-pointer w-max"
+                className="bg-off-black border border-hairline/70 rounded-lg px-3 py-2 text-xs font-bold text-muted focus:outline-none focus:border-primary cursor-pointer w-max"
               >
                 <option value="">All statuses</option>
                 <option value="not_started">Not started</option>
@@ -1423,7 +1423,7 @@ export default function Scholarships({
               <select 
                 value={funding}
                 onChange={(e) => setFunding(e.target.value)}
-                className="bg-surface border border-outline-variant/70 rounded-lg px-3 py-2 text-xs font-bold text-on-surface-variant focus:outline-none focus:border-primary cursor-pointer w-max"
+                className="bg-off-black border border-hairline/70 rounded-lg px-3 py-2 text-xs font-bold text-muted focus:outline-none focus:border-primary cursor-pointer w-max"
               >
                 <option value="">All funding</option>
                 <option value="Full">Fully funded</option>
@@ -1434,7 +1434,7 @@ export default function Scholarships({
               <select
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value)}
-                className="bg-surface border border-outline-variant/70 rounded-lg px-3 py-2 text-xs font-bold text-on-surface-variant focus:outline-none focus:border-primary cursor-pointer w-max"
+                className="bg-off-black border border-hairline/70 rounded-lg px-3 py-2 text-xs font-bold text-muted focus:outline-none focus:border-primary cursor-pointer w-max"
               >
                 <option value="">All types</option>
                 <option value="Government">Government</option>
@@ -1447,7 +1447,7 @@ export default function Scholarships({
               <select 
                 value={accessFilter}
                 onChange={(e) => setAccessFilter(e.target.value)}
-                className="bg-surface border border-outline-variant/70 rounded-lg px-3 py-2 text-xs font-bold text-on-surface-variant focus:outline-none focus:border-primary cursor-pointer w-max"
+                className="bg-off-black border border-hairline/70 rounded-lg px-3 py-2 text-xs font-bold text-muted focus:outline-none focus:border-primary cursor-pointer w-max"
               >
                 <option value="">Any access</option>
                 <option value="Direct">Direct portal access</option>
@@ -1456,34 +1456,34 @@ export default function Scholarships({
             </div>
 
             {/* Horizontal Filter Layout Row 2 */}
-            <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-outline-variant/30">
+            <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-hairline/30">
               {/* School host text filter */}
               <input 
                 value={schoolFilter}
                 onChange={(e) => setSchoolFilter(e.target.value)}
                 placeholder="School"
-                className="bg-surface border border-outline-variant/70 rounded-lg px-3 py-2 text-xs font-semibold text-on-surface placeholder:text-on-surface-variant/40 focus:outline-none focus:border-primary w-28"
+                className="bg-off-black border border-hairline/70 rounded-lg px-3 py-2 text-xs font-semibold text-cream placeholder:text-muted/40 focus:outline-none focus:border-primary w-28"
                 type="text"
               />
 
               {/* Docs Ready Checkbox */}
-              <label className="flex items-center gap-1.5 text-xs text-on-surface font-bold bg-surface border border-outline-variant/70 px-3 py-2 rounded-lg cursor-pointer hover:bg-surface-variant/45 transition-colors">
+              <label className="flex items-center gap-1.5 text-xs text-cream font-bold bg-off-black border border-hairline/70 px-3 py-2 rounded-lg cursor-pointer hover:bg-surface-variant/45 transition-colors">
                 <input 
                   type="checkbox"
                   checked={docsReadyFilter}
                   onChange={(e) => setDocsReadyFilter(e.target.checked)}
-                  className="rounded text-primary border-outline-variant/80 accent-primary cursor-pointer w-3.5 h-3.5"
+                  className="rounded text-primary border-hairline/80 accent-primary cursor-pointer w-3.5 h-3.5"
                 />
                 <span>Docs ready</span>
               </label>
 
               {/* Amount Shown Checkbox */}
-              <label className="flex items-center gap-1.5 text-xs text-on-surface font-bold bg-surface border border-outline-variant/70 px-3 py-2 rounded-lg cursor-pointer hover:bg-surface-variant/45 transition-colors">
+              <label className="flex items-center gap-1.5 text-xs text-cream font-bold bg-off-black border border-hairline/70 px-3 py-2 rounded-lg cursor-pointer hover:bg-surface-variant/45 transition-colors">
                 <input 
                   type="checkbox"
                   checked={amountShownFilter}
                   onChange={(e) => setAmountShownFilter(e.target.checked)}
-                  className="rounded text-primary border-outline-variant/80 accent-primary cursor-pointer w-3.5 h-3.5"
+                  className="rounded text-primary border-hairline/80 accent-primary cursor-pointer w-3.5 h-3.5"
                 />
                 <span>Amount shown</span>
               </label>
@@ -1492,7 +1492,7 @@ export default function Scholarships({
               <select
                 value={matchSortFilter}
                 onChange={(e) => setMatchSortFilter(e.target.value as any)}
-                className="bg-surface border border-outline-variant/70 rounded-lg px-3 py-2 text-xs font-bold text-on-surface-variant focus:outline-none focus:border-primary cursor-pointer w-max"
+                className="bg-off-black border border-hairline/70 rounded-lg px-3 py-2 text-xs font-bold text-muted focus:outline-none focus:border-primary cursor-pointer w-max"
               >
                 <option value="default">match</option>
                 <option value="high">Score &gt;= 90%</option>
@@ -1501,7 +1501,7 @@ export default function Scholarships({
 
               {/* No-IELTS toggle with tooltip */}
               <div className="relative">
-                <label className="flex items-center gap-1.5 text-xs text-on-surface font-bold bg-surface border border-outline-variant/70 px-3 py-2 rounded-lg cursor-pointer hover:bg-surface-variant/45 transition-colors">
+                <label className="flex items-center gap-1.5 text-xs text-cream font-bold bg-off-black border border-hairline/70 px-3 py-2 rounded-lg cursor-pointer hover:bg-surface-variant/45 transition-colors">
                   <input 
                     type="checkbox"
                     checked={noIeltsFilter}
@@ -1513,38 +1513,38 @@ export default function Scholarships({
                         setShowNoIeltsTooltip(false);
                       }
                     }}
-                    className="rounded text-secondary border-outline-variant/80 accent-secondary cursor-pointer w-3.5 h-3.5"
+                    className="rounded text-secondary border-hairline/80 accent-secondary cursor-pointer w-3.5 h-3.5"
                   />
                   <span>No IELTS</span>
                 </label>
                 {showNoIeltsTooltip && (
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-surface-container-high text-on-surface text-[10px] rounded-lg p-3 shadow-lg border border-outline-variant z-50 pointer-events-none">
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-off-black text-cream text-[10px] rounded-lg p-3 border border-hairline z-50 pointer-events-none">
                     <div className="flex items-start gap-2">
                       <span className="material-symbols-outlined text-secondary text-base shrink-0">info</span>
                       <span>Removing the destination filter will show you more No-IELTS opportunities across all regions.</span>
                     </div>
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-surface-container-high border-r border-b border-outline-variant rotate-45 -mt-1"></div>
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-off-black border-r border-b border-hairline rotate-45 -mt-1"></div>
                   </div>
                 )}
               </div>
 
               {/* Urgency filter dropdown */}
               <select value={urgencyFilter} onChange={e => setUrgencyFilter(e.target.value)}
-                      className="py-2.5 px-4 bg-surface-container-low border border-outline-variant/40 text-xs font-semibold rounded-xl outline-none">
+                      className="py-2.5 px-4 bg-off-black border border-hairline/40 text-xs font-semibold rounded-lg outline-none">
                 <option value="">Urgency: All</option>
                 <option value="Closing Soon">Closing Soon (≤30 days)</option>
                 <option value="Closing in 60">Closing in 60 days</option>
                 <option value="Open All">Open All Deadlines</option>
               </select>
               <select value={hostRegionFilter} onChange={e => setHostRegionFilter(e.target.value)}
-                      className="py-2.5 px-4 bg-surface-container-low border border-outline-variant/40 text-xs font-semibold rounded-xl outline-none">
+                      className="py-2.5 px-4 bg-off-black border border-hairline/40 text-xs font-semibold rounded-lg outline-none">
                 <option value="">Region: All</option>
                 {['West Africa hubs','East Africa hubs','Southern Africa hubs','North Africa hubs','Central Africa hubs','United Kingdom and Ireland','United States and Canada','Australia and New Zealand','Commonwealth Africa','Commonwealth Global','France and Belgium','Francophone destinations','Lusophone destinations','Germany, Austria, Switzerland (German-speaking)','Nordic countries','Netherlands and Belgium','Rest of Europe','China and East Asia','Japan and South Korea','Southeast Asia','Middle East and Gulf states','Intra-African'].map(r => (
                   <option key={r} value={r}>{r}</option>
                 ))}
               </select>
               <select value={sponsorTypeFilter} onChange={e => setSponsorTypeFilter(e.target.value)}
-                      className="py-2.5 px-4 bg-surface-container-low border border-outline-variant/40 text-xs font-semibold rounded-xl outline-none">
+                      className="py-2.5 px-4 bg-off-black border border-hairline/40 text-xs font-semibold rounded-lg outline-none">
                 <option value="">Sponsor: All</option>
                 {['Government', 'Foundation', 'University', 'Corporate', 'UN'].map(t => (
                   <option key={t} value={t}>{t}</option>
@@ -1583,13 +1583,13 @@ export default function Scholarships({
 
           {/* Table Counts Subheader Bar */}
           <div className="flex items-center justify-between px-1">
-            <span className="text-xs font-extrabold text-on-surface-variant uppercase tracking-wider bg-surface-container/40 px-3 py-1.5 rounded-lg border border-outline-variant/30">
+            <span className="text-xs font-extrabold text-muted uppercase tracking-wider bg-off-black/40 px-3 py-1.5 rounded-lg border border-hairline/30">
               {filteredList.length} Opportunities Located
             </span>
 
             <button 
               onClick={handleExportCSV}
-              className="flex items-center gap-1.5 px-4 py-2 border border-outline-variant/60 rounded-xl text-xs font-bold text-on-surface bg-surface-container-lowest hover:bg-surface-container transition-all cursor-pointer shadow-3xs"
+              className="flex items-center gap-1.5 px-4 py-2 border border-hairline/60 rounded-lg text-xs font-bold text-cream bg-canvas hover:bg-off-black transition-all cursor-pointer shadow-3xs"
             >
               <span className="material-symbols-outlined text-sm font-bold">download</span>
               <span>Export</span>
@@ -1597,11 +1597,11 @@ export default function Scholarships({
           </div>
 
           {/* Main Opportunities List Table Container */}
-          <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl shadow-sm overflow-hidden">
+          <div className="bg-canvas border border-hairline/60 rounded-lg overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse min-w-[1200px]">
                 <thead>
-                  <tr className="border-b border-outline-variant text-[10px] uppercase font-bold text-on-surface-variant tracking-wider bg-surface-container-low/80">
+                  <tr className="border-b border-hairline text-[10px] uppercase font-bold text-muted tracking-wider bg-off-black/80">
                     <th className="py-4 px-5">Match</th>
                     <th className="py-4 px-5">Scholarship</th>
                     <th className="py-4 px-5">Country and school</th>
@@ -1617,8 +1617,8 @@ export default function Scholarships({
                   {filteredList.length === 0 ? (
                     <tr>
                       <td colSpan={9} className="py-16 text-center">
-                        <span className="material-symbols-outlined text-4xl text-outline-variant mb-3">search</span>
-                        <p className="text-sm text-on-surface-variant font-medium">No scholarships match your current filters. Try removing some filters or updating your profile details. New opportunities are added daily through our automated discovery pipeline.</p>
+                        <span className="material-symbols-outlined text-4xl text-muted-variant mb-3">search</span>
+                        <p className="text-sm text-muted font-medium">No scholarships match your current filters. Try removing some filters or updating your profile details. New opportunities are added daily through our automated discovery pipeline.</p>
                       </td>
                     </tr>
                   ) : filteredList.map((s) => {
@@ -1633,17 +1633,17 @@ export default function Scholarships({
                     );
 
                     // Dynamic colors for the tracking stage select dropdown inside table
-                    let trackingStageBg = "bg-surface border-outline-variant/80 text-on-surface";
+                    let trackingStageBg = "bg-off-black border-hairline/80 text-on-surface";
                     if (currentStatus === 'Applied') {
                       trackingStageBg = "bg-secondary text-white border-secondary font-black";
                     } else if (currentStatus === 'Drafting' || currentStatus === 'Essay Drafting') {
-                      trackingStageBg = "bg-primary text-white border-primary font-black animate-pulse";
+                      trackingStageBg = "border-accent-green bg-accent-green/15 text-accent-green font-semibold animate-pulse";
                     } else if (currentStatus === 'Saved') {
                       trackingStageBg = "bg-secondary/15 text-secondary border-secondary/30 font-bold";
                     }
 
                     return (
-                      <tr key={s.id} className="hover:bg-surface-container-low/40 transition-colors duration-150 align-top">
+                      <tr key={s.id} className="hover:bg-off-black/40 transition-colors duration-150 align-top">
                         
                         {/* Column 1: Match Score Gauge & Checkbox flag */}
                         <td className="py-5 px-5 shrink-0 max-w-[100px]">
@@ -1651,13 +1651,13 @@ export default function Scholarships({
                             {matchScore > 0 ? (
                               <>
                                 {/* SVG Radial compatibility ring charts */}
-                                <div className="relative w-11 h-11 flex items-center justify-center bg-surface-container-low/30 rounded-full select-none">
+                                <div className="relative w-11 h-11 flex items-center justify-center bg-off-black/30 rounded-full select-none">
                                   <svg className="absolute w-11 h-11 transform -rotate-90">
                                     <circle
                                       cx="22"
                                       cy="22"
                                       r="18"
-                                      className="text-outline-variant/20"
+                                      className="text-muted-variant/20"
                                       strokeWidth="3.5"
                                       stroke="currentColor"
                                       fill="transparent"
@@ -1684,7 +1684,7 @@ export default function Scholarships({
                                     <span className="text-[8px] text-status-success font-black uppercase tracking-wider cursor-help border border-status-success/20 rounded px-1 py-0.5 bg-status-success/5">
                                       why match?
                                     </span>
-                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 w-48 bg-surface-container-high text-on-surface text-[9px] rounded-lg p-2 shadow-lg border border-outline-variant opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 pointer-events-none whitespace-normal text-left">
+                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 w-48 bg-off-black text-cream text-[9px] rounded-lg p-2 border border-hairline opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 pointer-events-none whitespace-normal text-left">
                                       <ul className="list-disc list-inside space-y-0.5">
                                         {(s.match?.reasons || []).slice(0, 3).map((r, i) => (
                                           <li key={i}>{r}</li>
@@ -1699,8 +1699,8 @@ export default function Scholarships({
                               </>
                             ) : (
                               <div className="flex flex-col items-center gap-1">
-                                <div className="w-11 h-11 flex items-center justify-center bg-surface-container-high rounded-full">
-                                  <span className="material-symbols-outlined text-sm text-outline">person_edit</span>
+                                <div className="w-11 h-11 flex items-center justify-center bg-off-black rounded-full">
+                                  <span className="material-symbols-outlined text-sm text-muted">person_edit</span>
                                 </div>
                                 <button
                                   onClick={() => window.dispatchEvent(new CustomEvent('open-profile-setup'))}
@@ -1726,7 +1726,7 @@ export default function Scholarships({
                                 onChange={() => handleToggleSave(s.id)}
                                 className="w-3 h-3 rounded text-secondary border-outline accent-secondary cursor-pointer"
                               />
-                              <span className={`text-[9px] font-bold ${currentStatus !== 'not_started' ? 'text-secondary font-black' : 'text-on-surface-variant/70'}`}>
+                              <span className={`text-[9px] font-bold ${currentStatus !== 'not_started' ? 'text-secondary font-black' : 'text-muted/70'}`}>
                                 {currentStatus !== 'not_started' ? (currentStatus === 'Applied' ? 'Applied ✓' : currentStatus) : 'Not applied'}
                               </span>
                             </label>
@@ -1751,14 +1751,14 @@ export default function Scholarships({
                             >
                               {s.name}
                             </h4>
-                            <p className="text-[10px] text-on-surface-variant/90 leading-snug font-medium">
+                            <p className="text-[10px] text-muted/90 leading-snug font-medium">
                               {s.provider}
                             </p>
                             {s.host_institution && s.host_institution !== s.provider && (
-                              <p className="text-[10px] text-on-surface-variant">{s.host_institution}</p>
+                              <p className="text-[10px] text-muted">{s.host_institution}</p>
                             )}
                             {s.sponsor_type && (
-                              <p className="text-[10px] text-outline font-medium">{s.sponsor_type}</p>
+                              <p className="text-[10px] text-muted font-medium">{s.sponsor_type}</p>
                             )}
                             
                             {/* Course/Subject chips in light blue */}
@@ -1798,10 +1798,10 @@ export default function Scholarships({
                         {/* Column 3: Country and School Host */}
                         <td className="py-5 px-5 max-w-[200px]">
                           <div className="space-y-1">
-                            <div className="font-extrabold text-xs text-on-surface whitespace-normal leading-snug">
+                            <div className="font-extrabold text-xs text-cream whitespace-normal leading-snug">
                               {(s.countries || s.country || []).join(', ')}
                             </div>
-                            <div className="text-[10px] text-on-surface-variant/90 leading-relaxed font-normal">
+                            <div className="text-[10px] text-muted/90 leading-relaxed font-normal">
                               {s.host_institution || s.host || ''}
                             </div>
                             <div className="text-[9px] font-bold text-primary bg-primary/5 border border-primary/10 rounded px-1.5 py-0.5 w-max">
@@ -1813,10 +1813,10 @@ export default function Scholarships({
                         {/* Column 4: Amount & Financial coverage */}
                         <td className="py-5 px-5 max-w-[150px]">
                           <div className="space-y-1">
-                            <div className="font-extrabold text-xs text-on-surface italic">
+                            <div className="font-extrabold text-xs text-cream italic">
                               {s.funding_type === 'Full' ? 'Fully Funded' : 'Partially Funded'}
                             </div>
-                            <div className="text-[10px] text-on-surface-variant/95 leading-normal font-medium">
+                            <div className="text-[10px] text-muted/95 leading-normal font-medium">
                               {s.amount}
                             </div>
                           </div>
@@ -1824,7 +1824,7 @@ export default function Scholarships({
 
                         {/* Column 5: Eligibility Criteria */}
                         <td className="py-5 px-5 max-w-[200px]">
-                          <p className="text-[10px] text-on-surface-variant/90 leading-relaxed font-normal line-clamp-4">
+                          <p className="text-[10px] text-muted/90 leading-relaxed font-normal line-clamp-4">
                             {s.eligibility}
                           </p>
                         </td>
@@ -1838,7 +1838,7 @@ export default function Scholarships({
                             
                             {/* Interactive Document Matching Alerts */}
                             {missingDocs.length > 0 ? (
-                              <div className="bg-status-warning/5 border border-status-warning/15 text-[9px] p-2 rounded-lg text-on-surface-variant">
+                              <div className="bg-status-warning/5 border border-status-warning/15 text-[9px] p-2 rounded-lg text-muted">
                                 <span className="font-extrabold text-status-warning tracking-tight">Missing: </span>
                                 {missingDocs.join(', ')}
                               </div>
@@ -1916,20 +1916,20 @@ export default function Scholarships({
       {/* Premium Notification Alerts Modal */}
       {showAlertsModal && (
         <div id="alerts_system_modal" className="fixed inset-0 bg-black/60 backdrop-blur-xs flex justify-end z-50 animate-fade-in">
-          <div className="w-full max-w-md bg-surface-container-lowest h-full shadow-2xl flex flex-col justify-between border-l border-outline-variant/40 animate-slide-in-right">
+          <div className="w-full max-w-md bg-canvas h-full flex flex-col justify-between border-l border-hairline/40 animate-slide-in-right">
             
             {/* Header */}
-            <div className="p-6 border-b border-outline-variant/40 flex items-center justify-between">
+            <div className="p-6 border-b border-hairline/40 flex items-center justify-between">
               <div className="flex items-center gap-2 font-display">
                 <span className="material-symbols-outlined text-amber-500 font-bold">notifications_active</span>
                 <div>
                   <h3 className="font-display font-black text-primary text-base">Scholarship Alert Center</h3>
-                  <p className="text-[10px] text-on-surface-variant uppercase font-bold tracking-wider">Live deadlines & updates</p>
+                  <p className="text-[10px] text-muted uppercase font-bold tracking-wider">Live deadlines & updates</p>
                 </div>
               </div>
               <button 
                 onClick={() => setShowAlertsModal(false)}
-                className="w-8 h-8 rounded-full hover:bg-surface-variant flex items-center justify-center cursor-pointer text-on-surface-variant transition-colors"
+                className="w-8 h-8 rounded-full hover:bg-surface-variant flex items-center justify-center cursor-pointer text-muted transition-colors"
               >
                 <span className="material-symbols-outlined text-lg">close</span>
               </button>
@@ -1939,14 +1939,14 @@ export default function Scholarships({
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
               {systemAlerts.length === 0 ? (
                 <div className="text-center py-12">
-                  <span className="material-symbols-outlined text-4xl text-outline-variant mb-2">notifications_off</span>
-                  <p className="text-xs font-bold text-on-surface-variant">No pending alerts or deadlines found.</p>
+                  <span className="material-symbols-outlined text-4xl text-muted-variant mb-2">notifications_off</span>
+                  <p className="text-xs font-bold text-muted">No pending alerts or deadlines found.</p>
                 </div>
               ) : (
                 systemAlerts.map(alert => (
                   <div 
                     key={alert.id}
-                    className={`p-4 border rounded-2xl space-y-3 transition-all ${
+                    className={`p-4 border rounded-lg space-y-3 transition-all ${
                       alert.severity === 'urgent' 
                         ? 'bg-status-urgent/5 border-status-urgent/25 hover:border-status-urgent/45' 
                         : 'bg-status-info/5 border-status-info/25 hover:border-status-info/45'
@@ -1967,22 +1967,22 @@ export default function Scholarships({
                           }`}>
                             {alert.severity === 'urgent' ? 'Urgent' : 'Opportunity'}
                           </span>
-                          <span className="text-[9px] font-bold text-on-surface-variant/70">{alert.date}</span>
+                          <span className="text-[9px] font-bold text-muted/70">{alert.date}</span>
                         </div>
-                        <h4 className="font-extrabold text-xs text-on-surface mt-1.5 leading-normal">{alert.title}</h4>
-                        <p className="text-[11px] text-on-surface-variant/85 mt-1 leading-relaxed">
+                        <h4 className="font-extrabold text-xs text-cream mt-1.5 leading-normal">{alert.title}</h4>
+                        <p className="text-[11px] text-muted/85 mt-1 leading-relaxed">
                           {alert.description}
                         </p>
                       </div>
                     </div>
                     
-                    <div className="flex justify-end gap-2 pt-1 border-t border-outline-variant/10">
+                    <div className="flex justify-end gap-2 pt-1 border-t border-hairline/10">
                       <button
                         onClick={() => {
                           setSelectedSchol(alert.sourceSchol);
                           setShowAlertsModal(false);
                         }}
-                        className="px-3 py-1.5 bg-surface text-primary border border-outline-variant hover:bg-surface-variant rounded-lg text-[10px] font-black cursor-pointer transition-colors"
+                        className="px-3 py-1.5 bg-off-black text-primary border border-hairline hover:bg-surface-variant rounded-lg text-[10px] font-black cursor-pointer transition-colors"
                       >
                         Explore Opportunity
                       </button>
@@ -1993,10 +1993,10 @@ export default function Scholarships({
             </div>
 
             {/* Footer */}
-            <div className="p-6 border-t border-outline-variant/40 bg-surface-container-low/50">
+            <div className="p-6 border-t border-hairline/40 bg-off-black/50">
               <button
                 onClick={() => setShowAlertsModal(false)}
-                className="w-full py-2.5 bg-primary hover:bg-primary/95 text-white font-extrabold text-xs rounded-xl cursor-pointer transition-all shadow-sm text-center"
+                className="w-full py-2.5 bg-primary hover:bg-primary/95 text-white font-extrabold text-xs rounded-lg cursor-pointer transition-all text-center"
               >
                 Got it, Thanks
               </button>

@@ -109,18 +109,18 @@ export default function ApplicationTracker({
       {/* Header */}
       <div>
         <h2 className="font-display text-2xl font-black text-primary">Application Tracker pipeline</h2>
-        <p className="text-xs text-on-surface-variant mt-0.5">Track your pipeline status, update priority categories or write inline notes.</p>
+        <p className="text-xs text-muted mt-0.5">Track your pipeline status, update priority categories or write inline notes.</p>
       </div>
 
       {/* Filter toolbar */}
-      <div className="bg-surface-container-lowest border border-outline-variant/50 p-4 rounded-xl shadow-sm flex flex-col md:flex-row gap-4 md:items-center justify-between">
+      <div className="bg-canvas border border-hairline/50 p-4 rounded-lg flex flex-col md:flex-row gap-4 md:items-center justify-between">
         <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-xs font-bold text-on-surface-variant uppercase mr-2">Filter Stage:</span>
+          <span className="text-xs font-bold text-muted uppercase mr-2">Filter Stage:</span>
           {statuses.map((st) => (
             <button
               key={st}
               onClick={() => setFilterStatus(st)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${filterStatus === st ? 'bg-primary text-on-primary' : 'bg-surface hover:bg-surface-container text-on-surface-variant'}`}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${filterStatus === st ? 'bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream' : 'bg-off-black hover:bg-off-black text-muted'}`}
             >
               {st}
             </button>
@@ -129,7 +129,7 @@ export default function ApplicationTracker({
         
         {/* Sorting selection drop-down */}
         <div className="flex items-center gap-2 self-start md:self-auto">
-          <span className="text-xs font-bold text-on-surface-variant uppercase whitespace-nowrap">Sort Pipeline:</span>
+          <span className="text-xs font-bold text-muted uppercase whitespace-nowrap">Sort Pipeline:</span>
           <select
             value={`${sortBy}-${sortOrder}`}
             onChange={(e) => {
@@ -141,7 +141,7 @@ export default function ApplicationTracker({
                 setSortOrder(valOrder as any);
               }
             }}
-            className="text-xs bg-surface border border-outline-variant rounded-lg p-2 text-on-surface focus:outline-none focus:border-primary cursor-pointer font-semibold"
+            className="text-xs bg-off-black border border-hairline rounded-lg p-2 text-cream focus:outline-none focus:border-primary cursor-pointer font-semibold"
           >
             <option value="none-asc">Default Order</option>
             <option value="priority-desc">Priority: High to Low</option>
@@ -153,14 +153,14 @@ export default function ApplicationTracker({
       </div>
 
       {/* Pipeline List Table container */}
-      <div className="bg-surface-container-lowest border border-outline-variant/50 rounded-xl shadow-sm overflow-hidden">
+      <div className="bg-canvas border border-hairline/50 rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[800px]">
-            <thead className="bg-surface-container-low border-b border-outline-variant">
+            <thead className="bg-off-black border-b border-hairline">
               <tr>
                 <th 
                   onClick={() => handleSort('deadline')}
-                  className="py-3.5 px-6 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold cursor-pointer select-none hover:bg-surface-container-high transition-colors"
+                  className="py-3.5 px-6 font-label-sm text-label-sm text-muted uppercase tracking-wider font-semibold cursor-pointer select-none hover:bg-off-black transition-colors"
                   title="Click to sort by Scholarship deadline date"
                 >
                   <div className="flex items-center gap-1.5">
@@ -170,13 +170,13 @@ export default function ApplicationTracker({
                         {sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward'}
                       </span>
                     ) : (
-                      <span className="material-symbols-outlined text-[16px] text-on-surface-variant/40 hover:text-on-surface-variant">unfold_more</span>
+                      <span className="material-symbols-outlined text-[16px] text-muted/40 hover:text-muted">unfold_more</span>
                     )}
                   </div>
                 </th>
                 <th 
                   onClick={() => handleSort('priority')}
-                  className="py-3.5 px-6 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold cursor-pointer select-none hover:bg-surface-container-high transition-colors"
+                  className="py-3.5 px-6 font-label-sm text-label-sm text-muted uppercase tracking-wider font-semibold cursor-pointer select-none hover:bg-off-black transition-colors"
                   title="Click to sort by priority levels"
                 >
                   <div className="flex items-center gap-1.5">
@@ -186,25 +186,25 @@ export default function ApplicationTracker({
                         {sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward'}
                       </span>
                     ) : (
-                      <span className="material-symbols-outlined text-[16px] text-on-surface-variant/40 hover:text-on-surface-variant">unfold_more</span>
+                      <span className="material-symbols-outlined text-[16px] text-muted/40 hover:text-muted">unfold_more</span>
                     )}
                   </div>
                 </th>
-                <th className="py-3.5 px-6 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Tracking Stage</th>
-                <th className="py-3.5 px-6 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">My Notes</th>
-                <th className="py-3.5 px-6 font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold text-right">Actions</th>
+                <th className="py-3.5 px-6 font-label-sm text-label-sm text-muted uppercase tracking-wider font-semibold">Tracking Stage</th>
+                <th className="py-3.5 px-6 font-label-sm text-label-sm text-muted uppercase tracking-wider font-semibold">My Notes</th>
+                <th className="py-3.5 px-6 font-label-sm text-label-sm text-muted uppercase tracking-wider font-semibold text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-outline-variant/40 bg-surface-container-lowest">
+            <tbody className="divide-y divide-outline-variant/40 bg-canvas">
               {sortedApps.map((app) => (
-                <tr key={app.id} className="hover:bg-surface-container-low/40 transition-colors">
+                <tr key={app.id} className="hover:bg-off-black/40 transition-colors">
                   
                   {/* Scholarship Name & Sponsor */}
                   <td className="py-4 px-6 min-w-[250px]">
                     <div className="font-bold text-primary truncate max-w-[220px]">
                       {getScholarshipName(app.scholarship_id)}
                     </div>
-                    <div className="text-xs text-on-surface-variant mt-0.5 flex items-center gap-1.5">
+                    <div className="text-xs text-muted mt-0.5 flex items-center gap-1.5">
                       <span>{getScholarshipSponsor(app.scholarship_id)}</span>
                       <span>•</span>
                       <span className="flex items-center gap-1">
@@ -242,21 +242,21 @@ export default function ApplicationTracker({
                         app.status === 'Applied' 
                           ? 'bg-secondary text-white border-secondary' 
                           : (app.status === 'Drafting' || app.status === 'Essay Drafting')
-                          ? 'bg-primary text-white border-primary'
+                          ? 'border-accent-green bg-accent-green/15 text-accent-green'
                           : app.status === 'Saved'
                           ? 'bg-secondary/15 text-secondary border-secondary/25 font-black'
-                          : 'bg-surface border-outline-variant text-on-surface'
+                          : 'bg-off-black border-hairline text-on-surface'
                       }`}
                     >
-                      <option value="Saved" className="bg-surface text-secondary font-bold">Saved</option>
-                      <option value="Drafting" className="bg-surface text-primary font-bold">Drafting</option>
-                      <option value="Preparing Documents" className="bg-surface text-on-surface">Preparing Documents</option>
-                      <option value="Essay Drafting" className="bg-surface text-on-surface">Essay Drafting</option>
-                      <option value="Ready to Submit" className="bg-surface text-on-surface">Ready to Submit</option>
-                      <option value="Applied" className="bg-surface text-secondary font-bold">Applied</option>
-                      <option value="Interview" className="bg-surface text-on-surface">Interview</option>
-                      <option value="Awarded" className="bg-surface text-on-surface">Awarded</option>
-                      <option value="Rejected" className="bg-surface text-on-surface">Rejected</option>
+                      <option value="Saved" className="bg-off-black text-secondary font-bold">Saved</option>
+                      <option value="Drafting" className="bg-off-black text-primary font-bold">Drafting</option>
+                      <option value="Preparing Documents" className="bg-off-black text-on-surface">Preparing Documents</option>
+                      <option value="Essay Drafting" className="bg-off-black text-on-surface">Essay Drafting</option>
+                      <option value="Ready to Submit" className="bg-off-black text-on-surface">Ready to Submit</option>
+                      <option value="Applied" className="bg-off-black text-secondary font-bold">Applied</option>
+                      <option value="Interview" className="bg-off-black text-on-surface">Interview</option>
+                      <option value="Awarded" className="bg-off-black text-on-surface">Awarded</option>
+                      <option value="Rejected" className="bg-off-black text-on-surface">Rejected</option>
                     </select>
                   </td>
 
@@ -267,7 +267,7 @@ export default function ApplicationTracker({
                         <input 
                           value={editingNotes}
                           onChange={(e) => setEditingNotes(e.target.value)}
-                          className="p-1.5 border border-outline-variant rounded text-xs w-full bg-surface"
+                          className="p-1.5 border border-hairline rounded text-xs w-full bg-off-black"
                           type="text"
                         />
                         <button 
@@ -280,10 +280,10 @@ export default function ApplicationTracker({
                     ) : (
                       <div 
                         onClick={() => handleStartEditNotes(app)}
-                        className="text-xs text-on-surface-variant truncate text-left hover:underline cursor-pointer flex items-center justify-between group"
+                        className="text-xs text-muted truncate text-left hover:underline cursor-pointer flex items-center justify-between group"
                       >
                         <span className="truncate flex-1 pr-4">{app.notes || "(Click to write first-hand notes)"}</span>
-                        <span className="material-symbols-outlined text-[14px] text-outline opacity-0 group-hover:opacity-100 transition-opacity">edit</span>
+                        <span className="material-symbols-outlined text-[14px] text-muted opacity-0 group-hover:opacity-100 transition-opacity">edit</span>
                       </div>
                     )}
                   </td>
@@ -292,7 +292,7 @@ export default function ApplicationTracker({
                   <td className="py-4 px-6 text-right">
                     <button 
                       onClick={() => setDeleteConfirmId(app.id)}
-                      className="text-on-surface-variant hover:text-status-urgent p-2 rounded-full hover:bg-surface-container-high transition-colors cursor-pointer"
+                      className="text-muted hover:text-status-urgent p-2 rounded-full hover:bg-off-black transition-colors cursor-pointer"
                       title="Untrack scholarship"
                     >
                       <span className="material-symbols-outlined text-[18px]">delete</span>
@@ -305,12 +305,12 @@ export default function ApplicationTracker({
               {sortedApps.length === 0 && (
                 <tr>
                   <td colSpan={5} className="py-20 text-center">
-                    <span className="material-symbols-outlined text-4xl text-outline mb-4">analytics</span>
-                    <h4 className="font-semibold text-on-surface mb-1">Pipeline is clean</h4>
-                    <p className="text-xs text-on-surface-variant mb-4">No active applications currently set in this tracking stage.</p>
+                    <span className="material-symbols-outlined text-4xl text-muted mb-4">analytics</span>
+                    <h4 className="font-semibold text-cream mb-1">Pipeline is clean</h4>
+                    <p className="text-xs text-muted mb-4">No active applications currently set in this tracking stage.</p>
                     <button 
                       onClick={() => onNavigateToTab('scholarships')}
-                      className="bg-primary text-on-primary text-xs font-semibold px-4 py-2 rounded-lg hover:opacity-90 cursor-pointer"
+                      className="bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream text-xs font-semibold px-4 py-2 rounded-lg hover:opacity-90 cursor-pointer"
                     >
                       Discover Scholarships
                     </button>

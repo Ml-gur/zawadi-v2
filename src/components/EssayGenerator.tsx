@@ -343,20 +343,20 @@ export default function EssayGenerator({
   };
 
   return (
-    <div className="flex-1 flex flex-col lg:flex-row overflow-hidden gap-6 bg-surface animate-sweep">
+    <div className="flex-1 flex flex-col lg:flex-row overflow-hidden gap-6 bg-off-black animate-sweep">
 
       {/* Chat Panel */}
-      <div className="w-full lg:w-[420px] flex flex-col bg-surface-container-lowest rounded-xl border border-outline-variant/60 shadow-sm overflow-hidden shrink-0">
-        <div className="flex border-b border-outline-variant">
+      <div className="w-full lg:w-[420px] flex flex-col bg-canvas rounded-lg border border-hairline/60 overflow-hidden shrink-0">
+        <div className="flex border-b border-hairline">
           <button
             onClick={() => setActiveTab('chat')}
-            className={`flex-1 py-4 font-bold text-xs select-none outline-none border-b-2 uppercase tracking-wider ${activeTab === 'chat' ? 'text-primary border-primary bg-surface-bright' : 'text-on-surface-variant hover:bg-surface-container-low'}`}
+            className={`flex-1 py-4 font-bold text-xs select-none outline-none border-b-2 uppercase tracking-wider ${activeTab === 'chat' ? 'text-primary border-primary bg-surface-bright' : 'text-muted hover:bg-off-black'}`}
           >
             Chat
           </button>
           <button
             onClick={() => setActiveTab('history')}
-            className={`flex-1 py-4 font-bold text-xs select-none outline-none border-b-2 uppercase tracking-wider ${activeTab === 'history' ? 'text-primary border-primary bg-surface-bright' : 'text-on-surface-variant hover:bg-surface-container-low'}`}
+            className={`flex-1 py-4 font-bold text-xs select-none outline-none border-b-2 uppercase tracking-wider ${activeTab === 'history' ? 'text-primary border-primary bg-surface-bright' : 'text-muted hover:bg-off-black'}`}
           >
             History
           </button>
@@ -367,10 +367,10 @@ export default function EssayGenerator({
             <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-surface-bright/50">
               {messages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div className={`max-w-[85%] p-3 rounded-2xl text-xs leading-relaxed ${
+                  <div className={`max-w-[85%] p-3 rounded-lg text-xs leading-relaxed ${
                     msg.role === 'user'
-                      ? 'bg-primary text-on-primary rounded-br-sm'
-                      : 'bg-surface-container-high text-on-surface rounded-bl-sm'
+                      ? 'bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream rounded-br-sm'
+                      : 'bg-off-black text-cream rounded-bl-sm'
                   }`}>
                     {msg.role === 'ai' && (
                       <div className="flex items-center gap-1.5 mb-1.5">
@@ -385,12 +385,12 @@ export default function EssayGenerator({
               <div ref={chatEndRef} />
             </div>
 
-            <div className="p-3 border-t border-outline-variant bg-surface-container-lowest">
+            <div className="p-3 border-t border-hairline bg-canvas">
               {collectingStep === 'scholarship' && scholarships.length > 0 && (
                 <div className="mb-2">
                   <select
                     onChange={(e) => { if (e.target.value) { setInput(e.target.value); inputRef.current?.focus(); } }}
-                    className="w-full p-2 bg-surface border border-outline-variant rounded-lg text-xs font-bold text-on-surface focus:outline-none focus:border-primary cursor-pointer"
+                    className="w-full p-2 bg-off-black border border-hairline rounded-lg text-xs font-bold text-cream focus:outline-none focus:border-primary cursor-pointer"
                     defaultValue=""
                   >
                     <option value="" disabled>Select a scholarship...</option>
@@ -410,7 +410,7 @@ export default function EssayGenerator({
                     <button
                       key={i}
                       onClick={() => { setInput(s); inputRef.current?.focus(); }}
-                      className="text-[10px] font-bold px-2.5 py-1 rounded-full border border-outline-variant text-on-surface-variant hover:bg-surface-container hover:border-primary transition-colors cursor-pointer"
+                      className="text-[10px] font-bold px-2.5 py-1 rounded-full border border-hairline text-muted hover:bg-off-black hover:border-primary transition-colors cursor-pointer"
                     >
                       {s}
                     </button>
@@ -431,17 +431,17 @@ export default function EssayGenerator({
                       ? 'AI is working...' : 'Type your message...'
                   }
                   disabled={convStage === 'generating_draft' || convStage === 'generating_critique' || convStage === 'generating_polish'}
-                  className="flex-1 p-2.5 rounded-lg border border-outline-variant bg-surface-bright text-xs text-on-surface placeholder:opacity-50 focus:outline-none focus:border-primary disabled:opacity-40"
+                  className="flex-1 p-2.5 rounded-lg border border-hairline bg-surface-bright text-xs text-cream placeholder:opacity-50 focus:outline-none focus:border-primary disabled:opacity-40"
                 />
                 <button
                   onClick={handleSendMessage}
                   disabled={convStage === 'generating_draft' || convStage === 'generating_critique' || convStage === 'generating_polish' || !input.trim()}
-                  className="p-2.5 bg-primary text-on-primary rounded-lg hover:bg-primary-container transition-colors disabled:opacity-40 cursor-pointer"
+                  className="p-2.5 bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream rounded-lg hover:bg-primary-container transition-colors disabled:opacity-40 cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-sm">send</span>
                 </button>
               </div>
-              <p className="text-[9px] text-outline text-center mt-1.5 font-semibold">
+              <p className="text-[9px] text-muted text-center mt-1.5 font-semibold">
                 Daily: {remainingToday}/{dailyLimit} essays remaining
               </p>
             </div>
@@ -466,17 +466,17 @@ export default function EssayGenerator({
                   setActiveTab('chat');
                   setMessages(prev => [...prev, { role: 'ai', content: `Loaded **${e.scholarship_name}** from history. What would you like to do with it?` }]);
                 }}
-                className="p-3 rounded-xl border border-outline-variant bg-surface-container-lowest hover:border-primary cursor-pointer transition-all group"
+                className="p-3 rounded-lg border border-hairline bg-canvas hover:border-primary cursor-pointer transition-all group"
               >
                 <div className="flex justify-between items-start mb-1.5">
                   <span className="bg-primary-fixed text-primary text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wider">{e.essay_type}</span>
                 </div>
                 <h4 className="font-bold text-xs text-primary group-hover:text-secondary truncate">{e.scholarship_name}</h4>
-                <p className="text-[10px] text-on-surface-variant truncate mt-1">{e.final || e.draft}</p>
+                <p className="text-[10px] text-muted truncate mt-1">{e.final || e.draft}</p>
               </div>
             ))}
             {essays.length === 0 && (
-              <div className="text-center py-12 text-outline">
+              <div className="text-center py-12 text-muted">
                 <span className="material-symbols-outlined text-3xl mb-2">history</span>
                 <p className="text-xs">No saved essays yet.</p>
               </div>
@@ -486,13 +486,13 @@ export default function EssayGenerator({
       </div>
 
       {/* Workspace Panel */}
-      <div className="flex-1 flex flex-col bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm overflow-hidden">
-        <div className="px-5 py-3 border-b border-outline-variant bg-surface-bright flex items-center justify-between shrink-0">
+      <div className="flex-1 flex flex-col bg-canvas rounded-lg border border-hairline overflow-hidden">
+        <div className="px-5 py-3 border-b border-hairline bg-surface-bright flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5 text-xs">
               <div className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] ${
-                stage === 'drafting' ? 'bg-primary text-on-primary animate-pulse' :
-                stage === 'ready_draft' || stage === 'critiquing' || stage === 'ready_critique' || stage === 'polishing' || stage === 'ready_polish' ? 'bg-status-success text-white' : 'bg-surface-container-highest text-on-surface-variant'
+                stage === 'drafting' ? 'bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream animate-pulse' :
+                stage === 'ready_draft' || stage === 'critiquing' || stage === 'ready_critique' || stage === 'polishing' || stage === 'ready_polish' ? 'bg-status-success text-white' : 'bg-off-blackest text-muted'
               }`}>
                 {stage === 'ready_draft' || stage === 'critiquing' || stage === 'ready_critique' || stage === 'polishing' || stage === 'ready_polish' ? '✓' : '1'}
               </div>
@@ -501,8 +501,8 @@ export default function EssayGenerator({
             <div className="w-6 h-px bg-outline-variant/40"></div>
             <div className={`flex items-center gap-1.5 text-xs transition-opacity ${stage === 'critiquing' || stage === 'ready_critique' || stage === 'polishing' || stage === 'ready_polish' ? 'opacity-100' : 'opacity-30'}`}>
               <div className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] ${
-                stage === 'critiquing' ? 'bg-primary text-on-primary animate-pulse' :
-                stage === 'ready_critique' || stage === 'polishing' || stage === 'ready_polish' ? 'bg-status-success text-white' : 'bg-surface-container-highest text-on-surface-variant'
+                stage === 'critiquing' ? 'bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream animate-pulse' :
+                stage === 'ready_critique' || stage === 'polishing' || stage === 'ready_polish' ? 'bg-status-success text-white' : 'bg-off-blackest text-muted'
               }`}>
                 {stage === 'ready_polish' || stage === 'polishing' ? '✓' : '2'}
               </div>
@@ -511,8 +511,8 @@ export default function EssayGenerator({
             <div className="w-6 h-px bg-outline-variant/40"></div>
             <div className={`flex items-center gap-1.5 text-xs transition-opacity ${stage === 'polishing' || stage === 'ready_polish' ? 'opacity-100' : 'opacity-30'}`}>
               <div className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] ${
-                stage === 'polishing' ? 'bg-primary text-on-primary animate-pulse' :
-                stage === 'ready_polish' ? 'bg-status-success text-white' : 'bg-surface-container-highest text-on-surface-variant'
+                stage === 'polishing' ? 'bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream animate-pulse' :
+                stage === 'ready_polish' ? 'bg-status-success text-white' : 'bg-off-blackest text-muted'
               }`}>3</div>
               <span className={`font-bold ${stage === 'ready_polish' ? 'text-status-success' : 'text-primary'}`}>Polish</span>
             </div>
@@ -521,7 +521,7 @@ export default function EssayGenerator({
           <div className="flex items-center gap-2">
             {stage.startsWith('ready') && workspaceContent() && (
               <>
-                <button onClick={handleCopy} className="p-1.5 border border-outline-variant hover:bg-surface-container-low text-on-surface-variant rounded-lg transition-colors cursor-pointer" title="Copy">
+                <button onClick={handleCopy} className="p-1.5 border border-hairline hover:bg-off-black text-muted rounded-lg transition-colors cursor-pointer" title="Copy">
                   <span className="material-symbols-outlined text-sm">content_copy</span>
                 </button>
                 <button onClick={handleSaveToVault} className="p-1.5 bg-secondary-container border border-secondary/30 text-on-secondary-container hover:bg-secondary-fixed rounded-lg transition-all cursor-pointer" title="Save to vault">
@@ -536,29 +536,29 @@ export default function EssayGenerator({
               </>
             )}
             {stage !== 'idle' && (
-              <button onClick={handleRestart} className="p-1.5 border border-outline-variant hover:bg-surface-container-low text-on-surface-variant rounded-lg transition-colors cursor-pointer" title="New essay">
+              <button onClick={handleRestart} className="p-1.5 border border-hairline hover:bg-off-black text-muted rounded-lg transition-colors cursor-pointer" title="New essay">
                 <span className="material-symbols-outlined text-sm">add</span>
               </button>
             )}
           </div>
         </div>
 
-        <div className="flex-1 p-6 md:p-10 lg:px-16 overflow-y-auto relative bg-surface-container-lowest">
+        <div className="flex-1 p-6 md:p-10 lg:px-16 overflow-y-auto relative bg-canvas">
           {stage === 'idle' && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-outline">
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-muted">
               <span className="material-symbols-outlined text-5xl mb-4 opacity-40">forum</span>
-              <h3 className="font-display text-lg font-black text-on-surface mb-1">Conversational Essay Studio</h3>
-              <p className="text-xs text-on-surface-variant max-w-sm">Chat with your AI coach to craft compelling scholarship essays. Tell me about the scholarship you're applying for!</p>
+              <h3 className="font-display text-lg font-black text-cream mb-1">Conversational Essay Studio</h3>
+              <p className="text-xs text-muted max-w-sm">Chat with your AI coach to craft compelling scholarship essays. Tell me about the scholarship you're applying for!</p>
             </div>
           )}
 
           {stage !== 'idle' && (
             <div className="max-w-2xl mx-auto space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-outline-variant/30">
+              <div className="flex items-center justify-between pb-3 border-b border-hairline/30">
                 <div>
                   <h2 className="font-display font-black text-primary text-sm">{workspaceTitle()}</h2>
                   {collected.scholarshipName && (
-                    <p className="text-[10px] text-outline font-semibold mt-0.5">{collected.scholarshipName} — {collected.essayType}</p>
+                    <p className="text-[10px] text-muted font-semibold mt-0.5">{collected.scholarshipName} — {collected.essayType}</p>
                   )}
                 </div>
                 {(stage === 'drafting' || stage === 'critiquing' || stage === 'polishing') && (
@@ -568,7 +568,7 @@ export default function EssayGenerator({
                   </span>
                 )}
               </div>
-              <div className="font-body-md text-sm md:text-base text-on-surface leading-relaxed whitespace-pre-wrap font-light py-2">
+              <div className="font-body-md text-sm md:text-base text-cream leading-relaxed whitespace-pre-wrap font-light py-2">
                 {workspaceContent()}
                 {(stage === 'drafting' || stage === 'critiquing' || stage === 'polishing') && (
                   <span className="w-2 h-4 inline-block bg-primary animate-pulse ml-0.5"></span>

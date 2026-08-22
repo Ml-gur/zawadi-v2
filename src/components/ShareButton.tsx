@@ -36,15 +36,15 @@ export default function ShareButton({ url, title, className = '', iconOnly, size
     }
   }, [url, title]);
 
-  const sizeClasses = size === 'md' ? 'w-8 h-8 rounded-xl' : 'w-7 h-7 rounded-lg';
+  const sizeClasses = size === 'md' ? 'w-8 h-8 rounded-lg' : 'w-7 h-7 rounded-lg';
 
   return (
     <button
       onClick={handleShare}
       className={`inline-flex items-center justify-center transition-all cursor-pointer select-none
         ${iconOnly
-          ? `${sizeClasses} ${copied ? 'bg-success/15 text-success' : 'bg-surface-container-high text-on-surface-variant/60 hover:bg-primary/10 hover:text-primary'}`
-          : `gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl ${copied ? 'bg-success/15 text-success' : 'bg-surface-container-high text-on-surface-variant/60 hover:bg-primary/10 hover:text-primary'}`
+          ? `${sizeClasses} ${copied ? 'bg-success/15 text-success' : 'bg-off-black text-muted/60 hover:bg-primary/10 hover:text-primary'}`
+          : `gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg ${copied ? 'bg-success/15 text-success' : 'bg-off-black text-muted/60 hover:bg-primary/10 hover:text-primary'}`
         }
         active:scale-95 ${className}`}
       title={copied ? 'Link copied!' : `Share ${title || 'this scholarship'}`}

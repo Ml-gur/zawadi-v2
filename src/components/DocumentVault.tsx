@@ -235,7 +235,7 @@ export default function DocumentVault({
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="font-display text-2xl font-black text-primary">Document Vault folder</h2>
-          <p className="text-xs text-on-surface-variant mt-0.5">Securely organize, match, and load credentials required for global admissions.</p>
+          <p className="text-xs text-muted mt-0.5">Securely organize, match, and load credentials required for global admissions.</p>
         </div>
         <button
           onClick={async () => {
@@ -243,20 +243,20 @@ export default function DocumentVault({
             await onRefreshDocuments();
             setTimeout(() => setRefreshSpin(false), 600);
           }}
-          className="p-2 border border-outline-variant hover:bg-surface-container-low text-on-surface-variant rounded-lg transition-colors cursor-pointer"
+          className="p-2 border border-hairline hover:bg-off-black text-muted rounded-lg transition-colors cursor-pointer"
           title="Refresh documents"
         >
           <span className={`material-symbols-outlined text-sm ${refreshSpin ? 'animate-spin' : ''}`}>refresh</span>
         </button>
 
-        <div className="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/60 w-full md:w-72 shadow-sm shrink-0">
+        <div className="bg-canvas p-4 rounded-lg border border-hairline/60 w-full md:w-72 shrink-0">
           <div className="flex justify-between items-center mb-2 text-xs">
-            <span className="font-semibold text-on-surface-variant">Storage Slots</span>
+            <span className="font-semibold text-muted">Storage Slots</span>
             <span className="font-black text-primary">
               {currentCount} / {limit === 9999 ? 'Unlimited' : limit} used
             </span>
           </div>
-          <div className="w-full bg-surface-container-high rounded-full h-1.5 mb-2 overflow-hidden">
+          <div className="w-full bg-off-black rounded-full h-1.5 mb-2 overflow-hidden">
             <div
               className={`h-full bg-primary rounded-full transition-all`}
               style={{ width: `${Math.min(100, (currentCount / limit) * 100)}%` }}
@@ -277,23 +277,23 @@ export default function DocumentVault({
       </div>
 
       {errorMsg && (
-        <div className="p-4 bg-error-container/10 border border-error/20 text-error text-xs rounded-xl flex items-center gap-2">
+        <div className="p-4 bg-error-container/10 border border-error/20 text-error text-xs rounded-lg flex items-center gap-2">
           <span className="material-symbols-outlined text-sm">warning</span>
           <span>{errorMsg}</span>
         </div>
       )}
 
       {/* Upload Dropzone Form */}
-      <div className="bg-surface-container-lowest border-2 border-dashed border-outline-variant/60 rounded-xl p-8 flex flex-col items-center justify-center text-center shadow-xs">
+      <div className="bg-canvas border-2 border-dashed border-hairline/60 rounded-lg p-8 flex flex-col items-center justify-center text-center">
         <div className="bg-primary/5 text-primary p-3 rounded-full mb-4">
           <span className="material-symbols-outlined text-3xl">cloud_upload</span>
         </div>
-        <h3 className="font-display text-lg font-bold text-on-surface mb-2">Load Credentials</h3>
-        <p className="text-xs text-on-surface-variant mb-6 max-w-sm">Connect a virtual transcript, personal CV, or scanned ID to matching checklists.</p>
+        <h3 className="font-display text-lg font-bold text-cream mb-2">Load Credentials</h3>
+        <p className="text-xs text-muted mb-6 max-w-sm">Connect a virtual transcript, personal CV, or scanned ID to matching checklists.</p>
 
         <form onSubmit={handleUpload} className="w-full max-w-lg flex flex-col md:flex-row gap-3 items-center justify-center">
           <label className="w-full md:flex-1 cursor-pointer">
-            <span className={`block p-2.5 bg-surface border border-outline-variant/60 rounded-lg text-xs ${selectedFile ? 'text-on-surface font-bold' : 'text-outline'}`}>
+            <span className={`block p-2.5 bg-off-black border border-hairline/60 rounded-lg text-xs ${selectedFile ? 'text-cream font-bold' : 'text-muted'}`}>
               {selectedFile ? selectedFile.name : 'Choose file (PDF, JPG, PNG)'}
             </span>
             <input
@@ -307,7 +307,7 @@ export default function DocumentVault({
           <select
             value={docType}
             onChange={(e) => setDocType(e.target.value)}
-            className="w-full md:w-auto p-2.5 bg-surface border border-outline-variant/60 rounded-lg text-xs text-on-surface focus:outline-none focus:border-primary cursor-pointer"
+            className="w-full md:w-auto p-2.5 bg-off-black border border-hairline/60 rounded-lg text-xs text-cream focus:outline-none focus:border-primary cursor-pointer"
           >
             {docTypes.map((type) => (
               <option key={type} value={type}>{type}</option>
@@ -317,7 +317,7 @@ export default function DocumentVault({
           <button
             type="submit"
             disabled={uploading}
-            className="w-full md:w-auto bg-primary text-on-primary font-bold text-xs py-2.5 px-6 rounded-lg hover:bg-primary-container transition-colors shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap flex items-center gap-2"
+            className="w-full md:w-auto bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream font-bold text-xs py-2.5 px-6 rounded-lg hover:bg-primary-container transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap flex items-center gap-2"
           >
             {uploading ? (
               <>
@@ -334,7 +334,7 @@ export default function DocumentVault({
         {documents.map((doc) => (
           <div
             key={doc.id}
-            className="bg-surface-container-lowest border border-outline-variant/40 rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow relative group"
+            className="bg-canvas border border-hairline/40 rounded-lg p-5 transition-shadow relative group"
           >
             <div className="flex items-start justify-between mb-4">
               <div className="bg-primary/5 text-primary p-3 rounded-lg">
@@ -360,7 +360,7 @@ export default function DocumentVault({
                         toast.error('Could not download file');
                       }
                     }}
-                    className="text-on-surface-variant hover:text-primary transition-colors p-1 rounded-full hover:bg-surface-container-high cursor-pointer"
+                    className="text-muted hover:text-primary transition-colors p-1 rounded-full hover:bg-off-black cursor-pointer"
                     title="Download file"
                   >
                     <span className="material-symbols-outlined text-[18px]">download</span>
@@ -368,14 +368,14 @@ export default function DocumentVault({
                 )}
                 <button
                   onClick={() => setDocToDelete(doc.id)}
-                  className="text-on-surface-variant hover:text-status-urgent transition-colors p-1 rounded-full hover:bg-surface-container-high cursor-pointer"
+                  className="text-muted hover:text-status-urgent transition-colors p-1 rounded-full hover:bg-off-black cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[18px]">delete</span>
                 </button>
               </div>
             </div>
 
-            <h4 className="font-bold text-sm text-on-surface mb-2 truncate" title={doc.name}>{doc.name}</h4>
+            <h4 className="font-bold text-sm text-cream mb-2 truncate" title={doc.name}>{doc.name}</h4>
 
             <div className="flex items-center gap-2 mt-1 mb-2 flex-wrap">
               {doc.ai_extraction_result && doc.analysis_status === 'completed' && (
@@ -421,7 +421,7 @@ export default function DocumentVault({
                     });
                     setManualEntryDoc(doc);
                   }}
-                  className="inline-flex items-center gap-1 bg-surface-container-high text-on-surface-variant text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-outline-variant/40 cursor-pointer hover:bg-primary-fixed/20 hover:text-primary transition-colors"
+                  className="inline-flex items-center gap-1 bg-off-black text-muted text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-hairline/40 cursor-pointer hover:bg-primary-fixed/20 hover:text-primary transition-colors"
                 >
                   <span className="material-symbols-outlined text-[10px]">edit_note</span>
                   Enter manually
@@ -438,7 +438,7 @@ export default function DocumentVault({
                     }
                   }}
                   disabled={aiExtracting === doc.id}
-                  className="inline-flex items-center gap-1 bg-surface-container-high text-on-surface-variant text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-outline-variant/40 cursor-pointer hover:bg-primary-fixed/20 hover:text-primary transition-colors disabled:opacity-50"
+                  className="inline-flex items-center gap-1 bg-off-black text-muted text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border border-hairline/40 cursor-pointer hover:bg-primary-fixed/20 hover:text-primary transition-colors disabled:opacity-50"
                 >
                   {aiExtracting === doc.id ? (
                     <span className="inline-block w-2.5 h-2.5 border-2 border-on-surface-variant border-t-transparent rounded-full animate-spin"></span>
@@ -450,11 +450,11 @@ export default function DocumentVault({
               )}
             </div>
 
-            <div className="flex justify-between items-center mt-2 pt-3 border-t border-outline-variant/10">
-              <span className="bg-surface-container-high text-on-surface-variant text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded">
+            <div className="flex justify-between items-center mt-2 pt-3 border-t border-hairline/10">
+              <span className="bg-off-black text-muted text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded">
                 {doc.type}
               </span>
-              <div className="text-right text-[10px] text-outline font-semibold">
+              <div className="text-right text-[10px] text-muted font-semibold">
                 <p>{doc.size}</p>
                 <p>Uploaded: {doc.uploaded_at}</p>
               </div>
@@ -463,10 +463,10 @@ export default function DocumentVault({
         ))}
 
         {documents.length === 0 && (
-          <div className="col-span-12 text-center py-16 bg-surface-container-lowest border border-outline-variant/40 rounded-3xl">
-            <span className="material-symbols-outlined text-4xl text-outline mb-4">folder_open</span>
-            <h4 className="font-semibold text-on-surface mb-1">Your vault is completely empty</h4>
-            <p className="text-xs text-on-surface-variant">Upload transcripts, motivation drafts, or resumes above to match opportunities.</p>
+          <div className="col-span-12 text-center py-16 bg-canvas border border-hairline/40 rounded-lg">
+            <span className="material-symbols-outlined text-4xl text-muted mb-4">folder_open</span>
+            <h4 className="font-semibold text-cream mb-1">Your vault is completely empty</h4>
+            <p className="text-xs text-muted">Upload transcripts, motivation drafts, or resumes above to match opportunities.</p>
           </div>
         )}
       </div>
@@ -474,25 +474,25 @@ export default function DocumentVault({
       {/* Confirmation Modal */}
       {confirmDoc && confirmData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-sweep">
-          <div className="bg-surface-container-lowest rounded-2xl shadow-2xl border border-outline-variant w-full max-w-lg max-h-[80vh] flex flex-col">
-            <div className="p-5 border-b border-outline-variant/30 flex items-center justify-between">
+          <div className="bg-canvas rounded-lg border border-hairline w-full max-w-lg max-h-[80vh] flex flex-col">
+            <div className="p-5 border-b border-hairline/30 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary text-lg">verified</span>
                 <h3 className="font-display font-black text-primary text-sm">Confirm Extracted Details</h3>
               </div>
-              <button onClick={() => { setConfirmDoc(null); setConfirmData(null); }} className="p-1 hover:bg-surface-container rounded cursor-pointer">
+              <button onClick={() => { setConfirmDoc(null); setConfirmData(null); }} className="p-1 hover:bg-off-black rounded cursor-pointer">
                 <span className="material-symbols-outlined text-lg">close</span>
               </button>
             </div>
             <div className="flex-1 overflow-y-auto p-5 space-y-3">
-              <p className="text-xs text-on-surface-variant mb-2">Review the extracted information below. Fields with high confidence are pre-verified. Correct any errors before saving.</p>
-              <div className="bg-surface rounded-xl p-4 space-y-3 text-xs">
+              <p className="text-xs text-muted mb-2">Review the extracted information below. Fields with high confidence are pre-verified. Correct any errors before saving.</p>
+              <div className="bg-off-black rounded-lg p-4 space-y-3 text-xs">
                 {Object.entries(confirmData).map(([key, val]) => {
                   if (key === 'skills') return null;
                   const displayVal = val ?? '—';
                   return (
                     <div key={key} className="flex items-center justify-between gap-2">
-                      <span className="text-on-surface-variant font-medium capitalize min-w-[120px]">{key.replace(/_/g, ' ')}</span>
+                      <span className="text-muted font-medium capitalize min-w-[120px]">{key.replace(/_/g, ' ')}</span>
                       <div className="flex items-center gap-2 flex-1 justify-end">
                         <input
                           type={key === 'gpa' || key === 'work_experience_years' || key === 'graduation_year' ? 'number' : 'text'}
@@ -503,7 +503,7 @@ export default function DocumentVault({
                             (newData as any)[key] = numVal;
                             setConfirmData(newData);
                           }}
-                          className="w-full max-w-[160px] p-1.5 bg-surface-container-high border border-outline-variant/40 rounded text-right text-on-surface font-bold"
+                          className="w-full max-w-[160px] p-1.5 bg-off-black border border-hairline/40 rounded text-right text-cream font-bold"
                           step={key === 'gpa' ? '0.01' : '1'}
                         />
                       </div>
@@ -511,19 +511,19 @@ export default function DocumentVault({
                   );
                 })}
               </div>
-              <p className="text-[10px] text-on-surface-variant italic">Your confirmed details will update your profile and improve scholarship matching.</p>
+              <p className="text-[10px] text-muted italic">Your confirmed details will update your profile and improve scholarship matching.</p>
             </div>
-            <div className="p-4 border-t border-outline-variant/30 flex justify-end gap-3">
+            <div className="p-4 border-t border-hairline/30 flex justify-end gap-3">
               <button
                 onClick={() => { setConfirmDoc(null); setConfirmData(null); }}
-                className="text-xs font-bold text-on-surface-variant px-4 py-2 rounded-lg hover:bg-surface-container cursor-pointer"
+                className="text-xs font-bold text-muted px-4 py-2 rounded-lg hover:bg-off-black cursor-pointer"
               >
                 Skip for Now
               </button>
               <button
                 onClick={handleSaveConfirmation}
                 disabled={savingConfirm}
-                className="bg-primary text-on-primary font-bold text-xs px-6 py-2 rounded-lg hover:bg-primary-container transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                className="bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream font-bold text-xs px-6 py-2 rounded-lg hover:bg-primary-container transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-2"
               >
                 {savingConfirm ? (
                   <><span className="inline-block w-3 h-3 border-2 border-on-primary border-t-transparent rounded-full animate-spin"></span>Saving...</>
@@ -537,13 +537,13 @@ export default function DocumentVault({
       {/* Manual Entry Modal for unreadable/failed docs */}
       {manualEntryDoc && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-sweep">
-          <div className="bg-surface-container-lowest rounded-2xl shadow-2xl border border-outline-variant w-full max-w-lg max-h-[80vh] flex flex-col">
-            <div className="p-5 border-b border-outline-variant/30 flex items-center justify-between">
+          <div className="bg-canvas rounded-lg border border-hairline w-full max-w-lg max-h-[80vh] flex flex-col">
+            <div className="p-5 border-b border-hairline/30 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary text-lg">edit_note</span>
                 <h3 className="font-display font-black text-primary text-sm">Enter Details Manually</h3>
               </div>
-              <button onClick={() => setManualEntryDoc(null)} className="p-1 hover:bg-surface-container rounded cursor-pointer">
+              <button onClick={() => setManualEntryDoc(null)} className="p-1 hover:bg-off-black rounded cursor-pointer">
                 <span className="material-symbols-outlined text-lg">close</span>
               </button>
             </div>
@@ -552,13 +552,13 @@ export default function DocumentVault({
                 <span className="material-symbols-outlined text-sm">info</span>
                 We could not read the text from your document. This may happen if the file is password-protected or uses an unusual format. Your document is safely stored. Please fill in your details below.
               </p>
-              <div className="bg-surface rounded-xl p-4 space-y-3 text-xs">
+              <div className="bg-off-black rounded-lg p-4 space-y-3 text-xs">
                 {Object.entries(manualForm).map(([key, val]) => {
                   if (key === 'skills') return null;
                   const displayVal = val ?? '';
                   return (
                     <div key={key} className="flex items-center justify-between gap-2">
-                      <span className="text-on-surface-variant font-medium capitalize min-w-[120px]">{key.replace(/_/g, ' ')}</span>
+                      <span className="text-muted font-medium capitalize min-w-[120px]">{key.replace(/_/g, ' ')}</span>
                       <input
                         type={key === 'gpa' || key === 'work_experience_years' ? 'number' : key === 'graduation_year' ? 'number' : 'text'}
                         value={String(displayVal)}
@@ -568,7 +568,7 @@ export default function DocumentVault({
                           (newForm as any)[key] = key === 'gpa' ? (raw ? parseFloat(raw) : null) : key === 'work_experience_years' ? (raw ? parseFloat(raw) : null) : key === 'graduation_year' ? (raw ? parseInt(raw) : null) : raw || null;
                           setManualForm(newForm);
                         }}
-                        className="w-full max-w-[160px] p-1.5 bg-surface-container-high border border-outline-variant/40 rounded text-right text-on-surface font-bold"
+                        className="w-full max-w-[160px] p-1.5 bg-off-black border border-hairline/40 rounded text-right text-cream font-bold"
                         step={key === 'gpa' ? '0.01' : '1'}
                       />
                     </div>
@@ -576,17 +576,17 @@ export default function DocumentVault({
                 })}
               </div>
             </div>
-            <div className="p-4 border-t border-outline-variant/30 flex justify-end gap-3">
+            <div className="p-4 border-t border-hairline/30 flex justify-end gap-3">
               <button
                 onClick={() => setManualEntryDoc(null)}
-                className="text-xs font-bold text-on-surface-variant px-4 py-2 rounded-lg hover:bg-surface-container cursor-pointer"
+                className="text-xs font-bold text-muted px-4 py-2 rounded-lg hover:bg-off-black cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleManualSave}
                 disabled={savingConfirm}
-                className="bg-primary text-on-primary font-bold text-xs px-6 py-2 rounded-lg hover:bg-primary-container transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                className="bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream font-bold text-xs px-6 py-2 rounded-lg hover:bg-primary-container transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-2"
               >
                 {savingConfirm ? (
                   <><span className="inline-block w-3 h-3 border-2 border-on-primary border-t-transparent rounded-full animate-spin"></span>Saving...</>
