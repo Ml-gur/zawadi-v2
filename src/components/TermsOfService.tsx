@@ -7,7 +7,7 @@ interface TermsOfServiceProps {
 
 export default function TermsOfService({ onBack }: TermsOfServiceProps) {
   return (
-    <div className="bg-background text-on-background min-h-screen">
+    <div className="bg-canvas text-cream min-h-screen">
       <SEO
         title="Terms of Service — Techsari Zawadi"
         description="Techsari Zawadi Terms of Service — the terms governing your use of our AI-powered scholarship platform for African students."
@@ -17,16 +17,16 @@ export default function TermsOfService({ onBack }: TermsOfServiceProps) {
         <div className="max-w-[800px] mx-auto">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 text-xs font-bold text-primary hover:text-secondary mb-8 cursor-pointer"
+            className="flex items-center gap-2 text-xs font-bold text-muted hover:text-cream mb-8 cursor-pointer"
           >
             <span className="material-symbols-outlined text-[16px]">arrow_back</span>
             Back to Home
           </button>
 
-          <h1 className="text-3xl md:text-5xl font-display font-black text-primary mb-2">Terms of Service</h1>
-          <p className="text-sm text-on-surface-variant mb-8">Last updated: May 27, 2026</p>
+          <h1 className="text-3xl md:text-5xl font-display font-semibold text-cream tracking-tight mb-2">Terms of Service</h1>
+          <p className="text-sm text-muted mb-8">Last updated: May 27, 2026</p>
 
-          <div className="prose prose-sm max-w-none space-y-8 text-on-surface-variant leading-relaxed">
+          <div className="prose prose-sm max-w-none space-y-8 text-muted leading-relaxed">
 
             <Section title="1. Acceptance of Terms">
               <p>By accessing or using Techsari Zawadi ("the Service"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service.</p>
@@ -137,21 +137,21 @@ export default function TermsOfService({ onBack }: TermsOfServiceProps) {
             </Section>
 
             <Section title="13. Dispute Resolution">
-              <p>Before filing a formal legal claim, we encourage you to contact us at <a href="mailto:legal@techsari.online" className="text-secondary hover:underline">legal@techsari.online</a> to resolve the dispute informally. We will respond within 30 days.</p>
+              <p>Before filing a formal legal claim, we encourage you to contact us at <a href="mailto:legal@techsari.online" className="text-accent-green hover:underline">legal@techsari.online</a> to resolve the dispute informally. We will respond within 30 days.</p>
             </Section>
 
             <Section title="14. Contact">
-              <div className="bg-surface border border-outline-variant/30 rounded-2xl p-4 space-y-1">
+              <div className="bg-off-black border border-hairline/40 rounded-lg p-4 space-y-1">
                 <p><strong>Questions about these terms:</strong></p>
-                <p>Email: <a href="mailto:legal@techsari.online" className="text-secondary hover:underline">legal@techsari.online</a></p>
-                <p>Website: <a href="https://www.techsari.online/contact" className="text-secondary hover:underline">https://www.techsari.online/contact</a></p>
+                <p>Email: <a href="mailto:legal@techsari.online" className="text-accent-green hover:underline">legal@techsari.online</a></p>
+                <p>Website: <a href="https://www.techsari.online/contact" className="text-accent-green hover:underline">https://www.techsari.online/contact</a></p>
               </div>
             </Section>
           </div>
 
-          <div className="mt-12 pt-8 border-t border-outline-variant/20">
-            <p className="text-xs text-on-surface-variant">Last updated: May 27, 2026</p>
-            <p className="text-sm text-on-surface-variant italic mt-2">
+          <div className="mt-12 pt-8 border-t border-hairline">
+            <p className="text-xs text-muted">Last updated: May 27, 2026</p>
+            <p className="text-sm text-muted italic mt-2">
               <em>Techsari Zawadi — Built for African students, by Africans.</em>
             </p>
           </div>
@@ -164,7 +164,7 @@ export default function TermsOfService({ onBack }: TermsOfServiceProps) {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <h2 className="text-xl md:text-2xl font-display font-bold text-primary mb-4">{title}</h2>
+      <h2 className="text-xl md:text-2xl font-display font-semibold text-cream tracking-tight mb-4">{title}</h2>
       <div className="space-y-3 text-sm">{children}</div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { motion } from 'motion/react';
 import { Sparkles, Loader2, CheckCircle, Layers, Brain, FileText, Users } from 'lucide-react';
+import { GhostPillButton } from './ui';
 
 const features = [
   {
@@ -77,19 +78,19 @@ export default function ComingSoonPage() {
         className="w-full max-w-2xl"
       >
         <div className="text-center mb-10">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center mx-auto mb-6 ring-1 ring-primary/10">
-            <Sparkles className="w-8 h-8 text-primary" />
+          <div className="w-16 h-16 rounded-lg bg-accent-green/10 ring-1 ring-hairline flex items-center justify-center mx-auto mb-6">
+            <Sparkles className="w-8 h-8 text-accent-green" />
           </div>
 
-          <h1 className="text-3xl font-black text-primary mb-2 tracking-tight">
-            Meet Your New Scholarship Co-Creator. <span className="text-on-surface-variant/40">(Coming Soon)</span>
+          <h1 className="text-3xl font-semibold text-cream tracking-tight mb-2">
+            Meet Your New Scholarship Co-Creator. <span className="text-muted">(Coming Soon)</span>
           </h1>
 
-          <p className="text-base font-semibold text-on-surface-variant mb-5">
+          <p className="text-base font-semibold text-cream mb-5">
             Overcome writer's block and build applications that stand out.
           </p>
 
-          <p className="text-sm text-on-surface-variant/70 leading-relaxed max-w-lg mx-auto">
+          <p className="text-sm text-muted leading-relaxed max-w-lg mx-auto">
             African students have incredible stories to tell, but formatting those experiences
             to meet the exact expectations of international admissions committees can be
             exhausting. Our upcoming AI Application Studio is designed to act as your personal
@@ -106,14 +107,14 @@ export default function ComingSoonPage() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 * i }}
-              className="flex items-start gap-4 p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/40"
+              className="flex items-start gap-4 p-5 rounded-lg bg-off-black border border-hairline/40"
             >
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
-                <f.icon className="w-5 h-5 text-primary" />
+              <div className="w-10 h-10 rounded-lg bg-accent-lilac/10 flex items-center justify-center shrink-0 mt-0.5">
+                <f.icon className="w-5 h-5 text-accent-lilac" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-primary mb-1">{f.title}</h3>
-                <p className="text-xs text-on-surface-variant/70 leading-relaxed">{f.body}</p>
+                <h3 className="text-sm font-semibold text-cream tracking-tight mb-1">{f.title}</h3>
+                <p className="text-xs text-muted leading-relaxed">{f.body}</p>
               </div>
             </motion.div>
           ))}
@@ -124,14 +125,14 @@ export default function ComingSoonPage() {
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex items-center justify-center gap-2 text-sm font-semibold text-success"
+              className="flex items-center justify-center gap-2 text-sm font-semibold text-status-success"
             >
               <CheckCircle className="w-5 h-5" />
               {message}
             </motion.div>
           ) : (
             <>
-              <p className="text-xs text-on-surface-variant/50 mb-4">
+              <p className="text-xs text-muted mb-4">
                 Join the waitlist to be the first to know when we launch.
               </p>
 
@@ -142,13 +143,15 @@ export default function ComingSoonPage() {
                   onChange={(e) => { setEmail(e.target.value); if (status === 'error' || status === 'duplicate') { setStatus('idle'); setMessage(''); } }}
                   placeholder="Enter your email"
                   disabled={status === 'loading'}
-                  className="flex-1 p-3 bg-surface border border-outline-variant/60 rounded-xl text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors disabled:opacity-50"
+                  className="flex-1 min-h-[44px] p-3 bg-off-black border border-hairline rounded-lg text-sm text-cream placeholder:text-muted focus:border-accent-green focus:ring-1 focus:ring-accent-green/40 outline-none transition-colors disabled:opacity-50"
                   required
                 />
-                <button
+                <GhostPillButton
                   type="submit"
+                  variant="gradient"
+                  size="sm"
                   disabled={status === 'loading'}
-                  className="px-5 py-3 bg-primary text-on-primary font-bold rounded-xl hover:bg-primary-container transition-colors cursor-pointer disabled:opacity-50 whitespace-nowrap text-sm"
+                  className="whitespace-nowrap"
                 >
                   {status === 'loading' ? (
                     <span className="flex items-center gap-1.5">
@@ -158,7 +161,7 @@ export default function ComingSoonPage() {
                   ) : (
                     'Notify Me When It\'s Live'
                   )}
-                </button>
+                </GhostPillButton>
               </form>
 
               {(status === 'error' || status === 'duplicate') && message && (

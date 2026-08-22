@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
 import { SEO } from './SEO';
+import { GhostPillButton } from './ui';
 
 const contactSchema = {
   "@context": "https://schema.org",
@@ -62,7 +63,7 @@ export default function ContactPage({ onBack }: { onBack: () => void }) {
   };
 
   return (
-    <div className="min-h-screen bg-background text-on-background">
+    <div className="min-h-screen bg-canvas text-cream">
 <SEO
   title="Contact Zawadi — Get Help or Partner With Us"
   description="Contact the Zawadi team for student support, scholarship provider listings, institutional partnerships, or press inquiries."
@@ -73,13 +74,13 @@ export default function ContactPage({ onBack }: { onBack: () => void }) {
 />
 
       <div className="max-w-[960px] mx-auto px-6 py-16 md:py-24">
-        <button onClick={onBack} className="flex items-center gap-1.5 text-xs font-bold text-on-surface-variant hover:text-primary mb-8 cursor-pointer transition-colors">
+        <button onClick={onBack} className="flex items-center gap-1.5 text-xs font-bold text-muted hover:text-cream mb-8 cursor-pointer transition-colors">
           <span className="material-symbols-outlined text-sm">arrow_back</span>
           Back
         </button>
 
-        <h1 className="font-display text-3xl md:text-4xl font-black text-primary mb-3">Get in Touch</h1>
-        <p className="text-sm text-on-surface-variant max-w-2xl mb-12 leading-relaxed">
+        <h1 className="font-display text-3xl md:text-4xl font-semibold text-cream tracking-tight mb-3">Get in Touch</h1>
+        <p className="text-sm text-muted max-w-2xl mb-12 leading-relaxed">
           Whether you are a student with a question, a scholarship provider who wants to list on Zawadi, or an organization interested in partnering with us, we want to hear from you.
         </p>
 
@@ -87,28 +88,28 @@ export default function ContactPage({ onBack }: { onBack: () => void }) {
           {/* Form */}
           <div className="lg:col-span-3">
             {sent ? (
-              <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/60 p-8 text-center">
+              <div className="bg-off-black rounded-lg border border-hairline/60 p-8 text-center">
                 <span className="material-symbols-outlined text-5xl text-status-success mb-4">check_circle</span>
-                <h3 className="font-display font-black text-lg text-primary mb-2">Message Sent!</h3>
-                <p className="text-sm text-on-surface-variant">Thank you for reaching out. Our team typically responds within 24 hours on business days.</p>
-                <button onClick={() => setSent(false)} className="mt-6 text-xs font-bold text-primary hover:text-secondary underline cursor-pointer">Send another message</button>
+                <h3 className="font-display font-semibold text-lg text-cream tracking-tight mb-2">Message Sent!</h3>
+                <p className="text-sm text-muted">Thank you for reaching out. Our team typically responds within 24 hours on business days.</p>
+                <button onClick={() => setSent(false)} className="mt-6 text-xs font-bold text-cream hover:text-accent-green underline cursor-pointer">Send another message</button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="bg-surface-container-lowest rounded-2xl border border-outline-variant/60 p-6 md:p-8 space-y-5">
+              <form onSubmit={handleSubmit} className="bg-off-black rounded-lg border border-hairline/60 p-6 md:p-8 space-y-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-on-surface mb-1.5 uppercase tracking-wider">Name <span className="text-status-error">*</span></label>
-                    <input value={name} onChange={(e) => setName(e.target.value)} required placeholder="Your full name" className="w-full p-3 rounded-lg border border-outline-variant bg-surface-bright text-xs text-on-surface placeholder:opacity-50 focus:outline-none focus:border-primary" />
+                    <label className="block text-xs font-bold text-cream mb-1.5 uppercase tracking-wider">Name <span className="text-status-error">*</span></label>
+                    <input value={name} onChange={(e) => setName(e.target.value)} required placeholder="Your full name" className="w-full p-3 rounded-lg border border-hairline bg-canvas text-xs text-cream placeholder:text-muted focus:outline-none focus:border-accent-green focus-visible:ring-1 focus-visible:ring-accent-green/40" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-on-surface mb-1.5 uppercase tracking-wider">Email <span className="text-status-error">*</span></label>
-                    <input value={email} onChange={(e) => setEmail(e.target.value)} required type="email" placeholder="you@example.com" className="w-full p-3 rounded-lg border border-outline-variant bg-surface-bright text-xs text-on-surface placeholder:opacity-50 focus:outline-none focus:border-primary" />
+                    <label className="block text-xs font-bold text-cream mb-1.5 uppercase tracking-wider">Email <span className="text-status-error">*</span></label>
+                    <input value={email} onChange={(e) => setEmail(e.target.value)} required type="email" placeholder="you@example.com" className="w-full p-3 rounded-lg border border-hairline bg-canvas text-xs text-cream placeholder:text-muted focus:outline-none focus:border-accent-green focus-visible:ring-1 focus-visible:ring-accent-green/40" />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-on-surface mb-1.5 uppercase tracking-wider">Subject <span className="text-status-error">*</span></label>
-                  <select value={subject} onChange={(e) => setSubject(e.target.value)} className="w-full p-3 rounded-lg border border-outline-variant bg-surface-bright text-xs text-on-surface focus:outline-none focus:border-primary cursor-pointer">
+                  <label className="block text-xs font-bold text-cream mb-1.5 uppercase tracking-wider">Subject <span className="text-status-error">*</span></label>
+                  <select value={subject} onChange={(e) => setSubject(e.target.value)} className="w-full p-3 rounded-lg border border-hairline bg-canvas text-xs text-cream focus:outline-none focus:border-accent-green focus-visible:ring-1 focus-visible:ring-accent-green/40 cursor-pointer">
                     {SUBJECTS.map((s) => (
                       <option key={s.value} value={s.value}>{s.label}</option>
                     ))}
@@ -116,15 +117,15 @@ export default function ContactPage({ onBack }: { onBack: () => void }) {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-on-surface mb-1.5 uppercase tracking-wider">Message <span className="text-status-error">*</span></label>
-                  <textarea value={message} onChange={(e) => setMessage(e.target.value)} required rows={6} placeholder="Tell us how we can help you..." className="w-full p-3 rounded-lg border border-outline-variant bg-surface-bright text-xs text-on-surface placeholder:opacity-50 focus:outline-none focus:border-primary resize-y min-h-[120px]" />
-                  <p className="text-[9px] text-outline text-right mt-1 font-semibold">{message.length} / 20 min characters</p>
+                  <label className="block text-xs font-bold text-cream mb-1.5 uppercase tracking-wider">Message <span className="text-status-error">*</span></label>
+                  <textarea value={message} onChange={(e) => setMessage(e.target.value)} required rows={6} placeholder="Tell us how we can help you..." className="w-full p-3 rounded-lg border border-hairline bg-canvas text-xs text-cream placeholder:text-muted focus:outline-none focus:border-accent-green focus-visible:ring-1 focus-visible:ring-accent-green/40 resize-y min-h-[120px]" />
+                  <p className="text-[9px] text-muted text-right mt-1 font-semibold">{message.length} / 20 min characters</p>
                 </div>
 
-                <button type="submit" disabled={sending} className="w-full bg-primary text-on-primary font-bold text-xs py-3.5 rounded-xl hover:bg-primary-container transition-colors shadow-sm flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50">
+                <GhostPillButton type="submit" variant="gradient" fullWidth disabled={sending}>
                   {sending ? (
                     <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-4 h-4 border-2 border-accent-green border-t-transparent rounded-full animate-spin"></div>
                       Sending...
                     </>
                   ) : (
@@ -133,37 +134,37 @@ export default function ContactPage({ onBack }: { onBack: () => void }) {
                       Send Message
                     </>
                   )}
-                </button>
+                </GhostPillButton>
               </form>
             )}
           </div>
 
           {/* Contact Cards */}
           <div className="lg:col-span-2 space-y-4">
-            <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/60 p-6">
-              <div className="w-10 h-10 rounded-xl bg-primary-fixed/20 text-primary flex items-center justify-center mb-3">
+            <div className="bg-off-black rounded-lg border border-hairline/60 p-6">
+              <div className="w-10 h-10 rounded-lg bg-accent-blue/10 text-accent-blue flex items-center justify-center mb-3">
                 <span className="material-symbols-outlined text-lg">mail</span>
               </div>
-              <h3 className="font-display font-black text-xs text-primary uppercase tracking-wider mb-1">Email</h3>
-              <p className="text-sm font-medium text-on-surface">support@zawadi.app</p>
-              <p className="text-[10px] text-outline mt-1 font-semibold">We aim to respond within 24 hours</p>
+              <h3 className="font-display font-semibold text-xs text-cream uppercase tracking-wider mb-1">Email</h3>
+              <p className="text-sm font-medium text-cream">support@zawadi.app</p>
+              <p className="text-[10px] text-muted mt-1">We aim to respond within 24 hours</p>
             </div>
 
-            <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/60 p-6">
-              <div className="w-10 h-10 rounded-xl bg-status-warning/10 text-status-warning flex items-center justify-center mb-3">
+            <div className="bg-off-black rounded-lg border border-hairline/60 p-6">
+              <div className="w-10 h-10 rounded-lg bg-accent-pink/10 text-accent-pink flex items-center justify-center mb-3">
                 <span className="material-symbols-outlined text-lg">schedule</span>
               </div>
-              <h3 className="font-display font-black text-xs text-primary uppercase tracking-wider mb-1">Response Time</h3>
-              <p className="text-sm font-medium text-on-surface">We respond within 24 hours on business days</p>
+              <h3 className="font-display font-semibold text-xs text-cream uppercase tracking-wider mb-1">Response Time</h3>
+              <p className="text-sm font-medium text-cream">We respond within 24 hours on business days</p>
             </div>
 
-            <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/60 p-6">
-              <div className="w-10 h-10 rounded-xl bg-secondary-container/30 text-secondary flex items-center justify-center mb-3">
+            <div className="bg-off-black rounded-lg border border-hairline/60 p-6">
+              <div className="w-10 h-10 rounded-lg bg-accent-orange/10 text-accent-orange flex items-center justify-center mb-3">
                 <span className="material-symbols-outlined text-lg">business</span>
               </div>
-              <h3 className="font-display font-black text-xs text-primary uppercase tracking-wider mb-1">For Scholarship Providers</h3>
-              <p className="text-sm text-on-surface mb-3">Want to list your scholarship on Zawadi and reach qualified African students?</p>
-              <button onClick={() => window.open('https://www.techsari.online/for-providers', '_blank')} className="text-xs font-bold text-secondary hover:text-primary underline cursor-pointer">Visit For Providers →</button>
+              <h3 className="font-display font-semibold text-xs text-cream uppercase tracking-wider mb-1">For Scholarship Providers</h3>
+              <p className="text-sm text-cream mb-3">Want to list your scholarship on Zawadi and reach qualified African students?</p>
+              <button onClick={() => window.open('https://www.techsari.online/for-providers', '_blank')} className="text-xs font-bold text-accent-green hover:text-cream underline cursor-pointer">Visit For Providers →</button>
             </div>
           </div>
         </div>

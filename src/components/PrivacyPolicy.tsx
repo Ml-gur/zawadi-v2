@@ -7,7 +7,7 @@ interface PrivacyPolicyProps {
 
 export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
   return (
-    <div className="bg-background text-on-background min-h-screen">
+    <div className="bg-canvas text-cream min-h-screen">
       <SEO
         title="Privacy Policy — Techsari Zawadi"
         description="Techsari Zawadi Privacy Policy — how we collect, use, and protect your data as an African student using our scholarship platform."
@@ -17,26 +17,26 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
         <div className="max-w-[800px] mx-auto">
           <button
             onClick={onBack}
-            className="flex items-center gap-2 text-xs font-bold text-primary hover:text-secondary mb-8 cursor-pointer"
+            className="flex items-center gap-2 text-xs font-bold text-muted hover:text-cream mb-8 cursor-pointer"
           >
             <span className="material-symbols-outlined text-[16px]">arrow_back</span>
             Back to Home
           </button>
 
-          <h1 className="text-3xl md:text-5xl font-display font-black text-primary mb-2">Privacy Policy</h1>
-          <p className="text-sm text-on-surface-variant mb-2">Last updated: May 27, 2026</p>
-          <p className="text-sm text-on-surface-variant mb-8">Effective date: May 27, 2026</p>
+          <h1 className="text-3xl md:text-5xl font-display font-semibold text-cream tracking-tight mb-2">Privacy Policy</h1>
+          <p className="text-sm text-muted mb-2">Last updated: May 27, 2026</p>
+          <p className="text-sm text-muted mb-8">Effective date: May 27, 2026</p>
 
-          <div className="prose prose-sm max-w-none space-y-8 text-on-surface-variant leading-relaxed">
+          <div className="prose prose-sm max-w-none space-y-8 text-muted leading-relaxed">
 
             <Section title="1. Who We Are">
               <p>
                 <strong>Techsari Zawadi</strong> ("we," "our," "us") is a scholarship discovery and application management platform operated by Techsari, serving African students worldwide.
               </p>
-              <div className="bg-surface border border-outline-variant/30 rounded-2xl p-4 space-y-1">
+              <div className="bg-off-black border border-hairline/40 rounded-lg p-4 space-y-1">
                 <p><strong>Contact:</strong></p>
-                <p>Email: <a href="mailto:privacy@techsari.online" className="text-secondary hover:underline">privacy@techsari.online</a></p>
-                <p>Website: <a href="https://www.techsari.online" className="text-secondary hover:underline">https://www.techsari.online</a></p>
+                <p>Email: <a href="mailto:privacy@techsari.online" className="text-accent-green hover:underline">privacy@techsari.online</a></p>
+                <p>Website: <a href="https://www.techsari.online" className="text-accent-green hover:underline">https://www.techsari.online</a></p>
               </div>
             </Section>
 
@@ -44,22 +44,22 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
               <div className="overflow-x-auto">
                 <table className="w-full text-xs border-collapse">
                   <thead>
-                    <tr className="bg-surface border-b border-outline-variant/30">
-                      <th className="text-left p-3 font-bold text-primary">Data</th>
-                      <th className="text-left p-3 font-bold text-primary">When Collected</th>
-                      <th className="text-left p-3 font-bold text-primary">Purpose</th>
+                    <tr className="bg-off-black border-b border-hairline/40">
+                      <th className="text-left p-3 font-bold text-cream">Data</th>
+                      <th className="text-left p-3 font-bold text-cream">When Collected</th>
+                      <th className="text-left p-3 font-bold text-cream">Purpose</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="border-b border-outline-variant/10"><td className="p-3">Full name</td><td className="p-3">Registration</td><td className="p-3">Account identification; essay personalization</td></tr>
-                    <tr className="border-b border-outline-variant/10"><td className="p-3">Email address</td><td className="p-3">Registration</td><td className="p-3">Account login; password reset; service notifications</td></tr>
-                    <tr className="border-b border-outline-variant/10"><td className="p-3">Password (hashed)</td><td className="p-3">Registration</td><td className="p-3">Account authentication (we never see your password)</td></tr>
-                    <tr className="border-b border-outline-variant/10"><td className="p-3">Country</td><td className="p-3">Registration</td><td className="p-3">Scholarship eligibility filtering; localized pricing</td></tr>
-                    <tr className="border-b border-outline-variant/10"><td className="p-3">Application tracking data</td><td className="p-3">Platform usage</td><td className="p-3">Scholarship management; match score improvement</td></tr>
-                    <tr className="border-b border-outline-variant/10"><td className="p-3">Uploaded documents</td><td className="p-3">User upload</td><td className="p-3">Document vault for application support</td></tr>
-                    <tr className="border-b border-outline-variant/10"><td className="p-3">Essay prompts and content</td><td className="p-3">Essay generator usage</td><td className="p-3">AI essay generation</td></tr>
-                    <tr className="border-b border-outline-variant/10"><td className="p-3">Payment transaction references</td><td className="p-3">Payment checkout</td><td className="p-3">Subscription management; receipts</td></tr>
-                    <tr className="border-b border-outline-variant/10"><td className="p-3">Usage analytics</td><td className="p-3">Platform interaction</td><td className="p-3">Product improvement (aggregated, anonymized)</td></tr>
+                    <tr className="border-b border-hairline/30"><td className="p-3">Full name</td><td className="p-3">Registration</td><td className="p-3">Account identification; essay personalization</td></tr>
+                    <tr className="border-b border-hairline/30"><td className="p-3">Email address</td><td className="p-3">Registration</td><td className="p-3">Account login; password reset; service notifications</td></tr>
+                    <tr className="border-b border-hairline/30"><td className="p-3">Password (hashed)</td><td className="p-3">Registration</td><td className="p-3">Account authentication (we never see your password)</td></tr>
+                    <tr className="border-b border-hairline/30"><td className="p-3">Country</td><td className="p-3">Registration</td><td className="p-3">Scholarship eligibility filtering; localized pricing</td></tr>
+                    <tr className="border-b border-hairline/30"><td className="p-3">Application tracking data</td><td className="p-3">Platform usage</td><td className="p-3">Scholarship management; match score improvement</td></tr>
+                    <tr className="border-b border-hairline/30"><td className="p-3">Uploaded documents</td><td className="p-3">User upload</td><td className="p-3">Document vault for application support</td></tr>
+                    <tr className="border-b border-hairline/30"><td className="p-3">Essay prompts and content</td><td className="p-3">Essay generator usage</td><td className="p-3">AI essay generation</td></tr>
+                    <tr className="border-b border-hairline/30"><td className="p-3">Payment transaction references</td><td className="p-3">Payment checkout</td><td className="p-3">Subscription management; receipts</td></tr>
+                    <tr className="border-b border-hairline/30"><td className="p-3">Usage analytics</td><td className="p-3">Platform interaction</td><td className="p-3">Product improvement (aggregated, anonymized)</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -74,7 +74,7 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
                 <li><strong>To process payments:</strong> Facilitate Paystack subscription payments (we never see your card details)</li>
                 <li><strong>To comply with legal obligations:</strong> Tax records, regulatory requirements</li>
               </ul>
-              <p className="text-secondary font-bold">We do NOT sell, rent, or share your personal data with third parties for their marketing purposes.</p>
+              <p className="text-accent-green font-semibold">We do NOT sell, rent, or share your personal data with third parties for their marketing purposes.</p>
             </Section>
 
             <Section title="4. Legal Basis for Processing">
@@ -101,16 +101,16 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
               <div className="overflow-x-auto">
                 <table className="w-full text-xs border-collapse">
                   <thead>
-                    <tr className="bg-surface border-b border-outline-variant/30">
-                      <th className="text-left p-3 font-bold text-primary">Data</th>
-                      <th className="text-left p-3 font-bold text-primary">How Long We Keep It</th>
+                    <tr className="bg-off-black border-b border-hairline/40">
+                      <th className="text-left p-3 font-bold text-cream">Data</th>
+                      <th className="text-left p-3 font-bold text-cream">How Long We Keep It</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="border-b border-outline-variant/10"><td className="p-3">Active account data</td><td className="p-3">Until you delete your account</td></tr>
-                    <tr className="border-b border-outline-variant/10"><td className="p-3">Inactive account (12+ months no login)</td><td className="p-3">12 months, then anonymized or deleted</td></tr>
-                    <tr className="border-b border-outline-variant/10"><td className="p-3">Payment records</td><td className="p-3">7 years (tax compliance)</td></tr>
-                    <tr className="border-b border-outline-variant/10"><td className="p-3">Deleted account data</td><td className="p-3">Purged within 30 days of deletion request</td></tr>
+                    <tr className="border-b border-hairline/30"><td className="p-3">Active account data</td><td className="p-3">Until you delete your account</td></tr>
+                    <tr className="border-b border-hairline/30"><td className="p-3">Inactive account (12+ months no login)</td><td className="p-3">12 months, then anonymized or deleted</td></tr>
+                    <tr className="border-b border-hairline/30"><td className="p-3">Payment records</td><td className="p-3">7 years (tax compliance)</td></tr>
+                    <tr className="border-b border-hairline/30"><td className="p-3">Deleted account data</td><td className="p-3">Purged within 30 days of deletion request</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -126,7 +126,7 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
                 <li><strong>Withdraw consent:</strong> Opt out of non-essential communications</li>
                 <li><strong>Complain:</strong> Lodge a complaint with your local data protection authority</li>
               </ul>
-              <p>To exercise any of these rights, email <a href="mailto:privacy@techsari.online" className="text-secondary hover:underline">privacy@techsari.online</a>. We will respond within 30 days.</p>
+              <p>To exercise any of these rights, email <a href="mailto:privacy@techsari.online" className="text-accent-green hover:underline">privacy@techsari.online</a>. We will respond within 30 days.</p>
               <p>For Kenya residents: You may also contact the Office of the Data Protection Commissioner (ODPC) at info@odpc.go.ke.</p>
               <p>For Nigeria residents: You may contact the Nigeria Data Protection Commission (NDPC) at info@ndpc.gov.ng.</p>
             </Section>
@@ -136,16 +136,16 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
               <div className="overflow-x-auto">
                 <table className="w-full text-xs border-collapse">
                   <thead>
-                    <tr className="bg-surface border-b border-outline-variant/30">
-                      <th className="text-left p-3 font-bold text-primary">Cookie</th>
-                      <th className="text-left p-3 font-bold text-primary">Purpose</th>
-                      <th className="text-left p-3 font-bold text-primary">Duration</th>
-                      <th className="text-left p-3 font-bold text-primary">Type</th>
+                    <tr className="bg-off-black border-b border-hairline/40">
+                      <th className="text-left p-3 font-bold text-cream">Cookie</th>
+                      <th className="text-left p-3 font-bold text-cream">Purpose</th>
+                      <th className="text-left p-3 font-bold text-cream">Duration</th>
+                      <th className="text-left p-3 font-bold text-cream">Type</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="border-b border-outline-variant/10"><td className="p-3"><code>sb-access-token</code></td><td className="p-3">Authentication (Supabase)</td><td className="p-3">Session</td><td className="p-3">Essential</td></tr>
-                    <tr className="border-b border-outline-variant/10"><td className="p-3"><code>sb-refresh-token</code></td><td className="p-3">Session renewal (Supabase)</td><td className="p-3">30 days</td><td className="p-3">Essential</td></tr>
+                    <tr className="border-b border-hairline/30"><td className="p-3"><code>sb-access-token</code></td><td className="p-3">Authentication (Supabase)</td><td className="p-3">Session</td><td className="p-3">Essential</td></tr>
+                    <tr className="border-b border-hairline/30"><td className="p-3"><code>sb-refresh-token</code></td><td className="p-3">Session renewal (Supabase)</td><td className="p-3">30 days</td><td className="p-3">Essential</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -156,18 +156,18 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
               <div className="overflow-x-auto">
                 <table className="w-full text-xs border-collapse">
                   <thead>
-                    <tr className="bg-surface border-b border-outline-variant/30">
-                      <th className="text-left p-3 font-bold text-primary">Service</th>
-                      <th className="text-left p-3 font-bold text-primary">Purpose</th>
-                      <th className="text-left p-3 font-bold text-primary">Data Shared</th>
-                      <th className="text-left p-3 font-bold text-primary">Privacy Policy</th>
+                    <tr className="bg-off-black border-b border-hairline/40">
+                      <th className="text-left p-3 font-bold text-cream">Service</th>
+                      <th className="text-left p-3 font-bold text-cream">Purpose</th>
+                      <th className="text-left p-3 font-bold text-cream">Data Shared</th>
+                      <th className="text-left p-3 font-bold text-cream">Privacy Policy</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="border-b border-outline-variant/10"><td className="p-3">Supabase</td><td className="p-3">Database, auth, file storage</td><td className="p-3">All platform data</td><td className="p-3"><a href="https://supabase.com/privacy" className="text-secondary hover:underline">supabase.com/privacy</a></td></tr>
-                    <tr className="border-b border-outline-variant/10"><td className="p-3">Paystack</td><td className="p-3">Payment processing</td><td className="p-3">Payment references, amounts</td><td className="p-3"><a href="https://paystack.com/privacy" className="text-secondary hover:underline">paystack.com/privacy</a></td></tr>
-                    <tr className="border-b border-outline-variant/10"><td className="p-3">Vercel</td><td className="p-3">Hosting</td><td className="p-3">All platform data</td><td className="p-3"><a href="https://vercel.com/legal/privacy-policy" className="text-secondary hover:underline">vercel.com/legal/privacy-policy</a></td></tr>
-                    <tr className="border-b border-outline-variant/10"><td className="p-3">OpenRouter (DeepSeek)</td><td className="p-3">AI essay generation</td><td className="p-3">Essay prompts (transient)</td><td className="p-3"><a href="https://openrouter.ai/privacy" className="text-secondary hover:underline">openrouter.ai/privacy</a></td></tr>
+                    <tr className="border-b border-hairline/30"><td className="p-3">Supabase</td><td className="p-3">Database, auth, file storage</td><td className="p-3">All platform data</td><td className="p-3"><a href="https://supabase.com/privacy" className="text-accent-green hover:underline">supabase.com/privacy</a></td></tr>
+                    <tr className="border-b border-hairline/30"><td className="p-3">Paystack</td><td className="p-3">Payment processing</td><td className="p-3">Payment references, amounts</td><td className="p-3"><a href="https://paystack.com/privacy" className="text-accent-green hover:underline">paystack.com/privacy</a></td></tr>
+                    <tr className="border-b border-hairline/30"><td className="p-3">Vercel</td><td className="p-3">Hosting</td><td className="p-3">All platform data</td><td className="p-3"><a href="https://vercel.com/legal/privacy-policy" className="text-accent-green hover:underline">vercel.com/legal/privacy-policy</a></td></tr>
+                    <tr className="border-b border-hairline/30"><td className="p-3">OpenRouter (DeepSeek)</td><td className="p-3">AI essay generation</td><td className="p-3">Essay prompts (transient)</td><td className="p-3"><a href="https://openrouter.ai/privacy" className="text-accent-green hover:underline">openrouter.ai/privacy</a></td></tr>
                   </tbody>
                 </table>
               </div>
@@ -195,18 +195,18 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             </Section>
 
             <Section title="14. Contact Us">
-              <div className="bg-surface border border-outline-variant/30 rounded-2xl p-4 space-y-2">
-                <p><strong>Privacy inquiries:</strong> <a href="mailto:privacy@techsari.online" className="text-secondary hover:underline">privacy@techsari.online</a> — Response within 30 days</p>
-                <p><strong>Security vulnerabilities:</strong> <a href="mailto:security@techsari.online" className="text-secondary hover:underline">security@techsari.online</a> — Response within 48 hours</p>
+              <div className="bg-off-black border border-hairline/40 rounded-lg p-4 space-y-2">
+                <p><strong>Privacy inquiries:</strong> <a href="mailto:privacy@techsari.online" className="text-accent-green hover:underline">privacy@techsari.online</a> — Response within 30 days</p>
+                <p><strong>Security vulnerabilities:</strong> <a href="mailto:security@techsari.online" className="text-accent-green hover:underline">security@techsari.online</a> — Response within 48 hours</p>
               </div>
             </Section>
           </div>
 
-          <div className="mt-12 pt-8 border-t border-outline-variant/20">
-            <p className="text-xs text-on-surface-variant">
+          <div className="mt-12 pt-8 border-t border-hairline">
+            <p className="text-xs text-muted">
               <strong>Last updated:</strong> May 27, 2026 &middot; <strong>Effective date:</strong> May 27, 2026
             </p>
-            <p className="text-sm text-on-surface-variant italic mt-2">
+            <p className="text-sm text-muted italic mt-2">
               <em>Techsari Zawadi — Your data is yours. We protect it accordingly.</em>
             </p>
           </div>
@@ -219,7 +219,7 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <h2 className="text-xl md:text-2xl font-display font-bold text-primary mb-4">{title}</h2>
+      <h2 className="text-xl md:text-2xl font-display font-semibold text-cream tracking-tight mb-4">{title}</h2>
       <div className="space-y-3 text-sm">{children}</div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { SEO } from '../../components/SEO';
+import { GhostPillButton } from '../../components/ui';
 import { ExternalLink, Clock, Globe, GraduationCap, Loader2 } from 'lucide-react';
 import ShareButton from '../../components/ShareButton';
 
@@ -55,15 +56,15 @@ function truncateCountries(countries: string[]): string {
 
 function SkeletonCard() {
   return (
-    <div className="rounded-2xl bg-surface-container-lowest border border-outline-variant/40 p-5 animate-pulse">
-      <div className="h-5 bg-outline-variant/30 rounded-lg w-3/4 mb-3" />
-      <div className="h-3 bg-outline-variant/20 rounded w-1/2 mb-4" />
+    <div className="rounded-lg bg-off-black border border-hairline/40 p-5 animate-pulse">
+      <div className="h-5 bg-hairline/30 rounded-lg w-3/4 mb-3" />
+      <div className="h-3 bg-hairline/20 rounded w-1/2 mb-4" />
       <div className="flex gap-2 mb-3">
-        <div className="h-5 bg-outline-variant/20 rounded-full w-16" />
-        <div className="h-5 bg-outline-variant/20 rounded-full w-20" />
+        <div className="h-5 bg-hairline/20 rounded-full w-16" />
+        <div className="h-5 bg-hairline/20 rounded-full w-20" />
       </div>
-      <div className="h-3 bg-outline-variant/20 rounded w-full mb-2" />
-      <div className="h-3 bg-outline-variant/20 rounded w-2/3" />
+      <div className="h-3 bg-hairline/20 rounded w-full mb-2" />
+      <div className="h-3 bg-hairline/20 rounded w-2/3" />
     </div>
   );
 }
@@ -84,7 +85,7 @@ export default function PublicScholarshipList() {
   }, [page]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-canvas text-cream">
       <SEO
         title="Open Scholarships for African Students | Zawadi"
         description={`Browse ${data?.total || 'available'} open scholarships for African students. Find opportunities you're 100% eligible for, powered by AI matching.`}
@@ -94,27 +95,24 @@ export default function PublicScholarshipList() {
       <div className="max-w-[1000px] mx-auto px-4 py-10">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-black text-primary mb-2">Open Scholarships</h1>
-          <p className="text-sm text-on-surface-variant/70">
+          <h1 className="text-3xl font-semibold text-cream tracking-tight mb-2">Open Scholarships</h1>
+          <p className="text-sm text-muted">
             {data ? `${data.total} open scholarship${data.total !== 1 ? 's' : ''} found` : 'Browse open scholarships'}
           </p>
         </div>
 
         {/* Signup Banner */}
-        <div className="mb-8 p-4 rounded-2xl bg-primary/5 border border-primary/10 text-center">
-          <p className="text-sm text-on-surface-variant font-medium mb-3">
+        <div className="mb-8 p-4 rounded-lg bg-[radial-gradient(circle_at_50%_0%,rgba(10,228,72,0.08),transparent_65%)] border border-hairline/40 text-center">
+          <p className="text-sm text-muted font-medium mb-3">
             Create a free account to see full details, eligibility requirements, and application links for all scholarships.
           </p>
           <div className="flex items-center justify-center gap-3">
-            <button
-              onClick={() => navigate('/')}
-              className="px-5 py-2.5 bg-primary text-on-primary font-bold rounded-xl hover:bg-primary-container transition-colors cursor-pointer text-sm"
-            >
+            <GhostPillButton variant="gradient" size="sm" onClick={() => navigate('/')}>
               Sign Up Free
-            </button>
+            </GhostPillButton>
             <button
               onClick={() => navigate('/')}
-              className="px-5 py-2.5 bg-transparent text-primary font-bold rounded-xl hover:bg-primary/5 transition-colors cursor-pointer text-sm"
+              className="px-5 py-2.5 min-h-[44px] bg-transparent text-cream font-semibold rounded-full border border-cream/60 hover:border-cream hover:bg-cream/[0.04] transition-colors cursor-pointer text-sm"
             >
               Log In
             </button>
@@ -134,30 +132,30 @@ export default function PublicScholarshipList() {
                 return (
                   <div
                     key={s.id}
-                    className="rounded-2xl bg-surface-container-lowest border border-outline-variant/40 p-5 hover:border-primary/30 transition-colors"
+                    className="rounded-lg bg-off-black border border-hairline/40 p-5 hover:border-hairline transition-colors"
                   >
                     <div className="flex items-start justify-between gap-4 mb-2">
                       <div className="min-w-0">
-                        <Link to={`/scholarships/browse/${s.slug}`} className="text-base font-bold text-primary hover:underline truncate block">
+                        <Link to={`/scholarships/browse/${s.slug}`} className="text-base font-semibold text-cream tracking-tight hover:underline truncate block">
                           {s.name}
                         </Link>
                         {s.provider && (
-                          <p className="text-xs text-on-surface-variant/60 mt-0.5">{s.provider}</p>
+                          <p className="text-xs text-muted mt-0.5">{s.provider}</p>
                         )}
                       </div>
                       <span className={`shrink-0 text-[11px] font-bold px-2.5 py-1 rounded-full ${
                         closingSoon
-                          ? 'bg-error/10 text-error'
-                          : 'bg-success/10 text-success'
+                          ? 'bg-status-urgent/10 text-status-urgent'
+                          : 'bg-status-success/10 text-status-success'
                       }`}>
                         {closingSoon ? 'Closing Soon' : 'Open'}
                       </span>
                     </div>
 
-                    <div className="flex flex-wrap gap-4 text-xs text-on-surface-variant/70 mb-3">
+                    <div className="flex flex-wrap gap-4 text-xs text-muted mb-3">
                       {s.amount && (
                         <span className="flex items-center gap-1">
-                          <span className="font-medium">{s.amount}</span>
+                          <span className="font-medium text-cream">{s.amount}</span>
                         </span>
                       )}
                       <span className="flex items-center gap-1">
@@ -179,15 +177,15 @@ export default function PublicScholarshipList() {
                     </div>
 
                     <div className="flex flex-wrap items-center gap-2 mb-3">
-                      {s.no_ielts && <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">No IELTS</span>}
-                      {s.targets_financial_need && <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">Financial Need</span>}
-                      {s.is_intra_african && <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-green-50 text-green-700 border border-green-200">Intra-African</span>}
+                      {s.no_ielts && <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-accent-orange/10 text-accent-orange border border-accent-orange/25">No IELTS</span>}
+                      {s.targets_financial_need && <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-accent-blue/10 text-accent-blue border border-accent-blue/25">Financial Need</span>}
+                      {s.is_intra_african && <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-accent-green/10 text-accent-green border border-accent-green/25">Intra-African</span>}
                     </div>
 
                     <div className="flex items-center gap-2">
                       <Link
                         to={`/scholarships/browse/${s.slug}`}
-                        className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:underline"
+                        className="inline-flex items-center gap-1.5 text-xs font-bold text-cream hover:text-accent-green transition-colors"
                       >
                         View Details <ExternalLink className="w-3 h-3" />
                       </Link>
@@ -208,17 +206,17 @@ export default function PublicScholarshipList() {
                 <button
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="px-4 py-2 text-xs font-bold rounded-xl bg-surface border border-outline-variant/40 hover:bg-surface-container transition-colors disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed"
+                  className="px-4 py-2 min-h-[44px] text-xs font-bold rounded-full bg-transparent border border-cream/60 text-cream hover:border-cream hover:bg-cream/[0.04] transition-colors disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
                 >
                   Previous
                 </button>
-                <span className="text-xs text-on-surface-variant/60">
+                <span className="text-xs text-muted">
                   Page {page} of {Math.ceil(data.total / limit)}
                 </span>
                 <button
                   onClick={() => setPage(p => p + 1)}
                   disabled={!data.hasMore}
-                  className="px-4 py-2 text-xs font-bold rounded-xl bg-surface border border-outline-variant/40 hover:bg-surface-container transition-colors disabled:opacity-30 cursor-pointer disabled:cursor-not-allowed"
+                  className="px-4 py-2 min-h-[44px] text-xs font-bold rounded-full bg-transparent border border-cream/60 text-cream hover:border-cream hover:bg-cream/[0.04] transition-colors disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
                 >
                   Next
                 </button>
@@ -227,7 +225,7 @@ export default function PublicScholarshipList() {
           </>
         ) : (
           <div className="text-center py-20">
-            <p className="text-sm text-on-surface-variant/50">No open scholarships found. Check back soon.</p>
+            <p className="text-sm text-muted">No open scholarships found. Check back soon.</p>
           </div>
         )}
       </div>
