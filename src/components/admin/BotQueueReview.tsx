@@ -208,7 +208,7 @@ export default function BotQueueReview() {
     const confidenceColor = confidence >= 0.8 ? 'bg-status-success' : confidence >= 0.5 ? 'bg-status-warning' : 'bg-status-urgent';
 
     return (
-      <div key={item.id} className="bg-surface-container-lowest border border-outline-variant/70 rounded-2xl shadow-xs p-5 hover:shadow-sm transition-all">
+      <div key={item.id} className="bg-canvas border border-outline-variant/70 rounded-lg p-5 transition-all">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
           {/* Left panel: summary */}
           <div className="lg:col-span-5 space-y-3">
@@ -265,7 +265,7 @@ export default function BotQueueReview() {
 
           {/* Right panel: editable fields */}
           {!isHistory && (
-            <div className="lg:col-span-7 space-y-3 bg-surface-container-low/30 border border-outline-variant/30 rounded-xl p-4">
+            <div className="lg:col-span-7 space-y-3 bg-surface-container-low/30 border border-outline-variant/30 rounded-lg p-4">
               {hasScamFlags && (
                 <div className="bg-error/5 border border-error/30 rounded-lg p-3 space-y-1">
                   <p className="text-[10px] font-black text-error uppercase flex items-center gap-1">
@@ -281,12 +281,12 @@ export default function BotQueueReview() {
                 <div>
                   <label className="text-[9px] font-bold text-on-surface-variant uppercase">Name</label>
                   <input value={getEditValue(item, 'name')} onChange={e => updateEditField(item.id, 'name', e.target.value)}
-                         className="w-full bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-2 text-xs outline-none focus:border-primary" />
+                         className="w-full bg-canvas border border-outline-variant/40 rounded-lg p-2 text-xs outline-none focus:border-primary" />
                 </div>
                 <div>
                   <label className="text-[9px] font-bold text-on-surface-variant uppercase">Provider</label>
                   <input value={getEditValue(item, 'provider')} onChange={e => updateEditField(item.id, 'provider', e.target.value)}
-                         className="w-full bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-2 text-xs outline-none focus:border-primary" />
+                         className="w-full bg-canvas border border-outline-variant/40 rounded-lg p-2 text-xs outline-none focus:border-primary" />
                 </div>
               </div>
 
@@ -294,12 +294,12 @@ export default function BotQueueReview() {
                 <div>
                   <label className="text-[9px] font-bold text-on-surface-variant uppercase">Host Institution</label>
                   <input value={getEditValue(item, 'host_institution')} onChange={e => updateEditField(item.id, 'host_institution', e.target.value)}
-                         className="w-full bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-2 text-xs outline-none focus:border-primary" />
+                         className="w-full bg-canvas border border-outline-variant/40 rounded-lg p-2 text-xs outline-none focus:border-primary" />
                 </div>
                 <div>
                   <label className="text-[9px] font-bold text-on-surface-variant uppercase">Funding Type</label>
                   <select value={getEditValue(item, 'funding_type')} onChange={e => updateEditField(item.id, 'funding_type', e.target.value)}
-                          className="w-full bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-2 text-xs outline-none focus:border-primary">
+                          className="w-full bg-canvas border border-outline-variant/40 rounded-lg p-2 text-xs outline-none focus:border-primary">
                     <option value="">None</option>
                     {FUNDING_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
                   </select>
@@ -316,7 +316,7 @@ export default function BotQueueReview() {
                       {f.label}
                     </label>
                     <input type={f.type} value={getEditValue(item, f.key)} onChange={e => updateEditField(item.id, f.key, e.target.value)}
-                           className={`w-full bg-surface-container-lowest border rounded-lg p-2 text-xs outline-none focus:border-primary ${f.warn ? 'border-status-warning/40' : 'border-outline-variant/40'}`} />
+                           className={`w-full bg-canvas border rounded-lg p-2 text-xs outline-none focus:border-primary ${f.warn ? 'border-status-warning/40' : 'border-outline-variant/40'}`} />
                   </div>
                 ))}
               </div>
@@ -325,12 +325,12 @@ export default function BotQueueReview() {
                 <div>
                   <label className="text-[9px] font-bold text-on-surface-variant uppercase">Eligibility</label>
                   <textarea value={getEditValue(item, 'eligibility')} onChange={e => updateEditField(item.id, 'eligibility', e.target.value)} rows={2}
-                            className="w-full bg-surface-container-lowest border border-status-warning/40 rounded-lg p-2 text-xs outline-none focus:border-primary resize-none" />
+                            className="w-full bg-canvas border border-status-warning/40 rounded-lg p-2 text-xs outline-none focus:border-primary resize-none" />
                 </div>
                 <div>
                   <label className="text-[9px] font-bold text-on-surface-variant uppercase">Description</label>
                   <textarea value={getEditValue(item, 'description')} onChange={e => updateEditField(item.id, 'description', e.target.value)} rows={2}
-                            className="w-full bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-2 text-xs outline-none focus:border-primary resize-none" />
+                            className="w-full bg-canvas border border-outline-variant/40 rounded-lg p-2 text-xs outline-none focus:border-primary resize-none" />
                 </div>
               </div>
 
@@ -358,7 +358,7 @@ export default function BotQueueReview() {
                   <label className="text-[9px] font-bold text-on-surface-variant uppercase">Work Exp (yrs)</label>
                   <input type="number" value={getEditValue(item, 'work_experience_required') ?? ''}
                          onChange={e => updateEditField(item.id, 'work_experience_required', e.target.value ? parseInt(e.target.value) : null)}
-                         className="w-full bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-2 text-xs outline-none focus:border-primary" />
+                         className="w-full bg-canvas border border-outline-variant/40 rounded-lg p-2 text-xs outline-none focus:border-primary" />
                 </div>
                 <div>
                   <label className="text-[9px] font-bold text-on-surface-variant uppercase">No IELTS</label>
@@ -374,7 +374,7 @@ export default function BotQueueReview() {
                 <div>
                   <label className="text-[9px] font-bold text-on-surface-variant uppercase">Host Region</label>
                   <select value={getEditValue(item, 'host_region')} onChange={e => updateEditField(item.id, 'host_region', e.target.value)}
-                          className="w-full bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-2 text-xs outline-none focus:border-primary">
+                          className="w-full bg-canvas border border-outline-variant/40 rounded-lg p-2 text-xs outline-none focus:border-primary">
                     <option value="">None</option>
                     {HOST_REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
                   </select>
@@ -382,7 +382,7 @@ export default function BotQueueReview() {
                 <div>
                   <label className="text-[9px] font-bold text-on-surface-variant uppercase">ISO2</label>
                   <input value={getEditValue(item, 'iso2')} onChange={e => updateEditField(item.id, 'iso2', e.target.value)}
-                         className="w-full bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-2 text-xs outline-none focus:border-primary" />
+                         className="w-full bg-canvas border border-outline-variant/40 rounded-lg p-2 text-xs outline-none focus:border-primary" />
                 </div>
               </div>
 
@@ -391,13 +391,13 @@ export default function BotQueueReview() {
                   <label className="text-[9px] font-bold text-on-surface-variant uppercase">Age Limit (Masters)</label>
                   <input type="number" value={getEditValue(item, 'age_limit_masters') ?? ''}
                          onChange={e => updateEditField(item.id, 'age_limit_masters', e.target.value ? parseInt(e.target.value) : null)}
-                         className="w-full bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-2 text-xs outline-none focus:border-primary" />
+                         className="w-full bg-canvas border border-outline-variant/40 rounded-lg p-2 text-xs outline-none focus:border-primary" />
                 </div>
                 <div>
                   <label className="text-[9px] font-bold text-on-surface-variant uppercase">Age Limit (PhD)</label>
                   <input type="number" value={getEditValue(item, 'age_limit_phd') ?? ''}
                          onChange={e => updateEditField(item.id, 'age_limit_phd', e.target.value ? parseInt(e.target.value) : null)}
-                         className="w-full bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-2 text-xs outline-none focus:border-primary" />
+                         className="w-full bg-canvas border border-outline-variant/40 rounded-lg p-2 text-xs outline-none focus:border-primary" />
                 </div>
               </div>
 
@@ -405,7 +405,7 @@ export default function BotQueueReview() {
                 <div>
                   <label className="text-[9px] font-bold text-on-surface-variant uppercase">Sponsor Type</label>
                   <select value={getEditValue(item, 'sponsor_type')} onChange={e => updateEditField(item.id, 'sponsor_type', e.target.value)}
-                          className="w-full bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-2 text-xs outline-none focus:border-primary">
+                          className="w-full bg-canvas border border-outline-variant/40 rounded-lg p-2 text-xs outline-none focus:border-primary">
                     <option value="">None</option>
                     {SPONSOR_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
@@ -415,19 +415,19 @@ export default function BotQueueReview() {
                   <textarea value={Array.isArray(getEditValue(item, 'countries')) ? getEditValue(item, 'countries').join('\n') : ''}
                             onChange={e => updateEditField(item.id, 'countries', e.target.value.split('\n').map((s: string) => s.trim()).filter(Boolean))}
                             rows={2} placeholder="One per line or All African Countries"
-                            className="w-full bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-2 text-xs outline-none focus:border-primary resize-none" />
+                            className="w-full bg-canvas border border-outline-variant/40 rounded-lg p-2 text-xs outline-none focus:border-primary resize-none" />
                 </div>
               </div>
 
               {/* Action buttons */}
               <div className="flex gap-2 pt-2 border-t border-outline-variant/30">
                 <button onClick={() => handleApprove(item.id)}
-                        className={`flex-1 py-2 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition-all ${hasScamFlags ? 'bg-error text-white hover:bg-error-fixed' : 'bg-status-success/10 text-status-success border border-status-success/20 hover:bg-status-success/20'}`}>
+                        className={`flex-1 py-2 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition-all ${hasScamFlags ? 'bg-error text-white hover:bg-error-fixed' : 'bg-status-success/10 text-status-success border border-status-success/20 hover:bg-status-success/20'}`}>
                   <ThumbsUp className="w-3.5 h-3.5" />
                   {hasScamFlags ? 'Approve with Flags' : 'Approve'}
                 </button>
                 <button onClick={() => setRejectModal(item.id)}
-                        className="flex-1 py-2 px-3 rounded-xl font-bold text-xs bg-error/5 text-error border border-error/20 hover:bg-error/10 flex items-center justify-center gap-1.5 cursor-pointer transition-all">
+                        className="flex-1 py-2 px-3 rounded-lg font-bold text-xs bg-error/5 text-error border border-error/20 hover:bg-error/10 flex items-center justify-center gap-1.5 cursor-pointer transition-all">
                   <ThumbsDown className="w-3.5 h-3.5" /> Reject
                 </button>
                 <button onClick={() => {
@@ -438,7 +438,7 @@ export default function BotQueueReview() {
                     return moved;
                   });
                 }}
-                        className="flex-1 py-2 px-3 rounded-xl font-bold text-xs bg-surface-container text-on-surface-variant border border-outline-variant/40 hover:bg-surface-container-low flex items-center justify-center gap-1.5 cursor-pointer transition-all">
+                        className="flex-1 py-2 px-3 rounded-lg font-bold text-xs bg-surface-container text-on-surface-variant border border-outline-variant/40 hover:bg-off-black flex items-center justify-center gap-1.5 cursor-pointer transition-all">
                   <X className="w-3.5 h-3.5" /> Skip
                 </button>
               </div>
@@ -447,7 +447,7 @@ export default function BotQueueReview() {
 
           {/* History view: read-only */}
           {isHistory && (
-            <div className="lg:col-span-7 space-y-2 bg-surface-container-low/30 border border-outline-variant/30 rounded-xl p-4">
+            <div className="lg:col-span-7 space-y-2 bg-surface-container-low/30 border border-outline-variant/30 rounded-lg p-4">
               <div className="flex items-center gap-2">
                 <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${item.status === 'approved' ? 'bg-status-success/10 text-status-success' : 'bg-error/10 text-error'}`}>
                   {item.status === 'approved' ? 'Approved' : 'Rejected'}
@@ -455,7 +455,7 @@ export default function BotQueueReview() {
                 {item.reviewed_by && <span className="text-[10px] text-on-surface-variant">by {item.reviewed_by}</span>}
                 {item.reviewed_at && <span className="text-[10px] text-on-surface-variant">{new Date(item.reviewed_at).toLocaleString()}</span>}
               </div>
-              {item.review_notes && <p className="text-xs text-on-surface bg-surface-container-low rounded-lg p-2">{item.review_notes}</p>}
+              {item.review_notes && <p className="text-xs text-on-surface bg-off-black rounded-lg p-2">{item.review_notes}</p>}
               {hostRegion && <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-primary-container/20 text-primary">{hostRegion}</span>}
               {degreeLevels.map((d: string) => (
                 <span key={d} className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-surface-container text-on-surface-variant">{d}</span>
@@ -473,20 +473,20 @@ export default function BotQueueReview() {
   return (
     <div className="space-y-6 animate-sweep">
       {toast && (
-        <div className={`fixed bottom-6 right-6 ${toast.type === 'error' ? 'bg-error' : 'bg-primary'} text-white border border-outline-variant/50 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 z-50 animate-sweep text-xs font-bold`}>
+        <div className={`fixed bottom-6 right-6 ${toast.type === 'error' ? 'bg-error' : 'bg-primary'} text-white border border-outline-variant/50 px-4 py-3 rounded-lg flex items-center gap-2 z-50 animate-sweep text-xs font-bold`}>
           <CheckCircle className="w-4 h-4 text-secondary shrink-0" />
           {toast.msg}
         </div>
       )}
 
       {/* Pipeline stats bar */}
-      <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-4 shadow-xs">
+      <div className="bg-canvas border border-outline-variant/60 rounded-lg p-4">
         <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
           <h2 className="font-display text-lg font-black text-primary flex items-center gap-2">
             <Bot className="w-5 h-5" /> Pipeline Review Queue
           </h2>
           <button onClick={handleRunPipeline} disabled={runningPipeline}
-                  className="text-xs font-bold bg-primary hover:bg-primary-container text-white py-2 px-4 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50">
+                  className="text-xs font-bold bg-transparent text-cream border border-cream/60 hover:border-cream hover:bg-cream/[0.04] py-2 px-4 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50">
             {runningPipeline ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
             {runningPipeline ? 'Running...' : 'Run Pipeline Now'}
           </button>
@@ -501,7 +501,7 @@ export default function BotQueueReview() {
             { label: 'Last Run', value: stats?.last_pipeline_run ? new Date(stats.last_pipeline_run).toLocaleDateString() : 'Never', color: 'text-on-surface-variant' },
             { label: 'Total Live', value: stats?.published_scholarships ?? 0, color: 'text-on-surface' },
           ].map(s => (
-            <div key={s.label} className="bg-surface-container-low/50 rounded-xl p-2.5 text-center">
+            <div key={s.label} className="bg-surface-container-low/50 rounded-lg p-2.5 text-center">
               <p className={`text-lg font-black ${s.color}`}>{typeof s.value === 'number' ? s.value : s.value}</p>
               <p className="text-[9px] text-on-surface-variant font-medium">{s.label}</p>
             </div>
@@ -527,16 +527,16 @@ export default function BotQueueReview() {
           <Search className="w-4 h-4 text-on-surface-variant/75 absolute left-3 top-2.5" />
           <input value={search} onChange={e => setSearch(e.target.value)}
                  placeholder="Search by name..."
-                 className="w-full bg-surface-container-low text-on-surface text-xs pl-9 pr-4 py-2 rounded-xl border border-outline-variant/20 focus:border-primary/50 outline-none" />
+                 className="w-full bg-off-black text-on-surface text-xs pl-9 pr-4 py-2 rounded-lg border border-outline-variant/20 focus:border-primary/50 outline-none" />
         </div>
         {['all', 'high', 'medium', 'low'].map(t => (
           <button key={t} onClick={() => setConfidenceFilter(t)}
-                  className={`px-3 py-1.5 rounded-xl text-[10px] font-bold border cursor-pointer transition-all ${confidenceFilter === t ? 'bg-primary text-on-primary border-primary' : 'bg-surface-container-low text-on-surface-variant border-outline-variant/40 hover:bg-surface-container'}`}>
+                  className={`px-3 py-1.5 rounded-lg text-[10px] font-bold border cursor-pointer transition-all ${confidenceFilter === t ? 'bg-primary text-on-primary border-primary' : 'bg-off-black text-on-surface-variant border-outline-variant/40 hover:bg-surface-container'}`}>
             {t === 'all' ? 'All' : t === 'high' ? 'High (>0.8)' : t === 'medium' ? 'Needs Review' : 'Low (<0.5)'}
           </button>
         ))}
         <button onClick={() => setScamFilterOnly(!scamFilterOnly)}
-                className={`px-3 py-1.5 rounded-xl text-[10px] font-bold border cursor-pointer transition-all ${scamFilterOnly ? 'bg-error text-white border-error' : 'bg-surface-container-low text-on-surface-variant border-outline-variant/40'}`}>
+                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold border cursor-pointer transition-all ${scamFilterOnly ? 'bg-error text-white border-error' : 'bg-off-black text-on-surface-variant border-outline-variant/40'}`}>
           Scam Flagged
         </button>
       </div>
@@ -545,7 +545,7 @@ export default function BotQueueReview() {
       <div className="space-y-4">
         {loading && <div className="text-center py-8 text-on-surface-variant text-xs"><Loader2 className="w-5 h-5 animate-spin mx-auto mb-2" />Loading...</div>}
         {!loading && list.length === 0 && (
-          <div className="bg-surface-container-lowest border border-outline-variant/55 rounded-2xl py-16 text-center text-outline">
+          <div className="bg-canvas border border-outline-variant/55 rounded-lg py-16 text-center text-outline">
             <Bot className="w-8 h-8 mx-auto text-outline/50 mb-2" />
             <p className="font-bold text-xs">Queue is empty.</p>
             <p className="text-[10px] mt-0.5 font-light">Run the pipeline above to discover new scholarships.</p>
@@ -557,14 +557,14 @@ export default function BotQueueReview() {
       {/* Reject modal */}
       {rejectModal && (
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
-          <div className="bg-surface-container-lowest rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl border border-outline-variant/30">
+          <div className="bg-canvas rounded-lg p-6 max-w-md w-full mx-4 border border-outline-variant/30">
             <h3 className="font-bold text-sm text-primary mb-3">Reject Scholarship</h3>
             <textarea value={rejectReason} onChange={e => setRejectReason(e.target.value)}
                       placeholder="Reason for rejection (optional)"
-                      className="w-full bg-surface-container-low border border-outline-variant/40 rounded-xl p-3 text-xs outline-none focus:border-primary resize-none" rows={3} />
+                      className="w-full bg-off-black border border-outline-variant/40 rounded-lg p-3 text-xs outline-none focus:border-primary resize-none" rows={3} />
             <div className="flex gap-2 mt-4">
-              <button onClick={handleReject} className="flex-1 py-2 bg-error text-white rounded-xl font-bold text-xs cursor-pointer">Confirm Reject</button>
-              <button onClick={() => { setRejectModal(null); setRejectReason(''); }} className="flex-1 py-2 bg-surface-container text-on-surface rounded-xl font-bold text-xs cursor-pointer">Cancel</button>
+              <button onClick={handleReject} className="flex-1 py-2 bg-error text-white rounded-lg font-bold text-xs cursor-pointer">Confirm Reject</button>
+              <button onClick={() => { setRejectModal(null); setRejectReason(''); }} className="flex-1 py-2 bg-surface-container text-on-surface rounded-lg font-bold text-xs cursor-pointer">Cancel</button>
             </div>
           </div>
         </div>

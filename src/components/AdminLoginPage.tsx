@@ -65,40 +65,40 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-6">
+    <div className="min-h-screen flex items-center justify-center bg-canvas p-6">
       <div className="w-full max-w-sm">
-        <form onSubmit={handleSubmit} className="bg-surface-container-lowest border border-outline-variant/50 rounded-2xl p-8 shadow-xl space-y-5">
+        <form onSubmit={handleSubmit} className="bg-off-black border border-hairline rounded-lg p-8 space-y-5">
           <div className="text-center">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white font-black text-sm mx-auto mb-3">Z</div>
-            <h3 className="text-lg font-bold text-primary">Sign in</h3>
-            <p className="text-xs text-on-surface-variant mt-1">Enter your credentials to continue</p>
+            <div className="w-10 h-10 rounded-lg border border-hairline flex items-center justify-center font-mono font-bold text-sm text-accent-green mx-auto mb-3">Z</div>
+            <h3 className="text-lg font-bold text-cream">Sign in</h3>
+            <p className="text-xs text-muted mt-1">Enter your credentials to continue</p>
           </div>
 
           {error && (
-            <div className="p-3 bg-error-container/10 border border-error/20 text-error text-xs rounded-lg text-center">{error}</div>
+            <div className="p-3 border border-status-urgent/40 text-status-urgent text-xs rounded-lg text-center">{error}</div>
           )}
 
           <div>
-            <label className="block text-xs font-bold text-on-surface-variant uppercase mb-1.5">Email</label>
+            <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full p-3 bg-surface border border-outline-variant/60 rounded-xl text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+              className="w-full p-3 bg-canvas border border-hairline rounded-lg text-sm text-cream placeholder:text-muted focus:border-accent-green outline-none transition-colors"
               autoComplete="email"
               required
             />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-on-surface-variant uppercase mb-1.5">Password</label>
+            <label className="block text-xs font-semibold text-muted uppercase tracking-wider mb-1.5">Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter password"
-              className="w-full p-3 bg-surface border border-outline-variant/60 rounded-xl text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+              className="w-full p-3 bg-canvas border border-hairline rounded-lg text-sm text-cream placeholder:text-muted focus:border-accent-green outline-none transition-colors"
               autoComplete="current-password"
               required
             />
@@ -107,7 +107,7 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-primary text-on-primary font-bold rounded-xl hover:bg-primary-container transition-colors cursor-pointer disabled:opacity-50"
+            className="btn-gradient-stroke w-full py-3 text-cream font-semibold rounded-full transition-all cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
           >
             {loading ? 'Signing in...' : 'Sign in'}
           </button>

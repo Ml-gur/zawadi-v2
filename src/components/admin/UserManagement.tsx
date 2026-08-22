@@ -93,7 +93,7 @@ export default function UserManagement({
       
       {/* Visual Toast Notification inside user dashboard */}
       {showToast && (
-        <div className="fixed bottom-6 right-6 bg-primary text-white border border-outline-variant/50 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 z-50 animate-sweep text-xs font-bold">
+        <div className="fixed bottom-6 right-6 text-accent-green border border-accent-green/40 bg-canvas px-4 py-3 rounded-full flex items-center gap-2 z-50 animate-sweep text-xs font-bold">
           <span className="text-secondary">✓</span>
           {showToast}
         </div>
@@ -103,7 +103,7 @@ export default function UserManagement({
       <div className="lg:col-span-8 flex flex-col gap-4">
         
         {/* filter bar & heading */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-4 shadow-xs">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-canvas border border-outline-variant/60 rounded-lg p-4">
           <div className="relative flex-1 w-full">
             <Search className="w-4 h-4 text-on-surface-variant/70 absolute left-3.5 top-2.5" />
             <input 
@@ -111,14 +111,14 @@ export default function UserManagement({
               placeholder="Search by name, email, or ID..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-surface-container-low text-on-surface text-xs pl-10 pr-4 py-2 rounded-xl border border-outline-variant/20 focus:border-primary/50 outline-none"
+              className="w-full bg-off-black text-on-surface text-xs pl-10 pr-4 py-2 rounded-lg border border-outline-variant/20 focus:border-primary/50 outline-none"
             />
           </div>
           <div className="flex gap-2 w-full sm:w-auto self-stretch sm:self-auto shrink-0">
             <select
               value={selectedPlanFilter}
               onChange={(e) => setSelectedPlanFilter(e.target.value)}
-              className="flex-1 sm:flex-none py-2 px-3 bg-surface border border-outline-variant text-[11px] font-bold rounded-xl outline-none"
+              className="flex-1 sm:flex-none py-2 px-3 bg-surface border border-outline-variant text-[11px] font-bold rounded-lg outline-none"
             >
               <option value="all">All Plans</option>
               <option value="explorer">Explorer</option>
@@ -128,7 +128,7 @@ export default function UserManagement({
             </select>
             <button 
               onClick={handleExportUsers}
-              className="bg-primary hover:bg-primary-container text-white py-2 px-4 rounded-xl text-xs font-bold cursor-pointer flex items-center gap-1.5 shadow-xs border border-primary-fixed/10"
+              className="bg-transparent text-cream border border-cream/60 hover:border-cream hover:bg-cream/[0.04] py-2 px-4 rounded-lg text-xs font-bold cursor-pointer flex items-center gap-1.5 border border-primary-fixed/10"
             >
               <Download className="w-3.5 h-3.5" />
               Export CSV
@@ -137,11 +137,11 @@ export default function UserManagement({
         </div>
 
         {/* User list grid table container */}
-        <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl shadow-xs overflow-hidden">
+        <div className="bg-canvas border border-outline-variant/60 rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-surface-container-low text-on-surface-variant border-b border-outline-variant/50 font-bold uppercase tracking-wider text-[9px]">
+                <tr className="bg-off-black text-on-surface-variant border-b border-outline-variant/50 font-bold uppercase tracking-wider text-[9px]">
                   <th className="px-5 py-3">User</th>
                   <th className="px-5 py-3">Location</th>
                   <th className="px-5 py-3">Plan & Status</th>
@@ -159,7 +159,7 @@ export default function UserManagement({
                     >
                       <td className="px-5 py-3.5 font-medium">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-primary-container text-on-primary-fixed font-black text-xs flex items-center justify-center uppercase shadow-xs">
+                          <div className="w-8 h-8 rounded-full bg-primary-container text-on-primary-fixed font-black text-xs flex items-center justify-center uppercase">
                             {u.name.substring(0, 2)}
                           </div>
                           <div>
@@ -196,7 +196,7 @@ export default function UserManagement({
               </tbody>
             </table>
           </div>
-          <div className="bg-surface-container-low px-5 py-3 text-[10px] text-on-surface-variant font-semibold select-none flex justify-between items-center border-t border-outline-variant/40">
+          <div className="bg-off-black px-5 py-3 text-[10px] text-on-surface-variant font-semibold select-none flex justify-between items-center border-t border-outline-variant/40">
             <span>Showing 1 to {filteredUsers.length} of {usersList.length} users</span>
           </div>
         </div>
@@ -206,12 +206,12 @@ export default function UserManagement({
       {/* Right User detail card (4 cols or ~35% on screens lg) */}
       <div className="lg:col-span-4">
         {selectedUser ? (
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-md overflow-hidden flex flex-col justify-between p-5 space-y-6 sticky top-4">
+          <div className="bg-canvas border border-outline-variant rounded-lg overflow-hidden flex flex-col justify-between p-5 space-y-6 sticky top-4">
             
             {/* Header with avatar photo & msg button */}
             <div className="flex justify-between items-start gap-3">
               <div className="flex gap-3.5">
-                <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center text-white font-black text-sm uppercase shadow-md">
+                <div className="w-12 h-12 rounded-lg ring-1 ring-hairline flex items-center justify-center text-cream font-mono text-sm uppercase">
                   {selectedUser.name.substring(0, 2)}
                 </div>
                 <div>
@@ -228,7 +228,7 @@ export default function UserManagement({
               {/* Message button */}
               <a 
                 href={`mailto:${selectedUser.email}?subject=Zawadi%20Support%20Oversight`}
-                className="p-2 border border-outline-variant bg-surface hover:bg-surface-container hover:text-primary transition-all rounded-xl text-on-surface-variant"
+                className="p-2 border border-outline-variant bg-surface hover:bg-surface-container hover:text-primary transition-all rounded-lg text-on-surface-variant"
                 title="Email User"
               >
                 <Mail className="w-4 h-4" />
@@ -236,7 +236,7 @@ export default function UserManagement({
             </div>
 
             {/* User Meta specifications list */}
-            <div className="bg-background border border-outline-variant/60 rounded-xl p-3.5 text-xs space-y-2">
+            <div className="bg-background border border-outline-variant/60 rounded-lg p-3.5 text-xs space-y-2">
               <div className="flex justify-between">
                 <span className="text-on-surface-variant font-medium">Email</span>
                 <span className="font-semibold text-primary font-mono">{selectedUser.email}</span>
@@ -255,18 +255,18 @@ export default function UserManagement({
             <div className="space-y-3">
               <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest block">Platform Analytics Usage</span>
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-surface-container border border-outline-variant/50 rounded-xl p-3 text-center">
+                <div className="bg-surface-container border border-outline-variant/50 rounded-lg p-3 text-center">
                   <p className="text-xl font-black text-primary">{selectedUser.appCount}</p>
                   <p className="text-[9px] text-on-surface-variant font-bold uppercase mt-0.5">Tracked Apps</p>
                 </div>
-                <div className="bg-surface-container border border-outline-variant/50 rounded-xl p-3 text-center">
+                <div className="bg-surface-container border border-outline-variant/50 rounded-lg p-3 text-center">
                   <p className="text-xl font-black text-primary">{selectedUser.essayCount}</p>
                   <p className="text-[9px] text-on-surface-variant font-bold uppercase mt-0.5">Essays Generated</p>
                 </div>
               </div>
               
               {/* Document stats */}
-              <div className="bg-surface-container border border-outline-variant/50 rounded-xl p-3 flex justify-between items-center text-xs">
+              <div className="bg-surface-container border border-outline-variant/50 rounded-lg p-3 flex justify-between items-center text-xs">
                 <div className="flex items-center gap-2">
                   <span className="text-primary font-bold">📂</span>
                   <div>
@@ -289,7 +289,7 @@ export default function UserManagement({
                 <select 
                   value={selectedUser.plan}
                   onChange={handlePlanChange}
-                  className="w-full py-2 px-3 bg-surface border border-outline-variant text-xs font-bold rounded-xl outline-none focus:border-primary"
+                  className="w-full py-2 px-3 bg-surface border border-outline-variant text-xs font-bold rounded-lg outline-none focus:border-primary"
                 >
                   <option value="explorer">Explorer (Free)</option>
                   <option value="plus">Scholar Plus ($5/mo)</option>
@@ -302,7 +302,7 @@ export default function UserManagement({
               <div className="grid grid-cols-2 gap-2 pt-2">
                 <button 
                   onClick={handleToggleSuspension}
-                  className={`py-2 px-3 text-[10px] font-bold rounded-xl border flex items-center justify-center gap-1.5 cursor-pointer transition-all ${selectedUser.status === 'active' ? 'bg-status-warning/10 border-status-warning/30 text-status-warning hover:bg-status-warning/15' : 'bg-status-success/10 border-status-success/30 text-status-success hover:bg-status-success/15'}`}
+                  className={`py-2 px-3 text-[10px] font-bold rounded-lg border flex items-center justify-center gap-1.5 cursor-pointer transition-all ${selectedUser.status === 'active' ? 'bg-status-warning/10 border-status-warning/30 text-status-warning hover:bg-status-warning/15' : 'bg-status-success/10 border-status-success/30 text-status-success hover:bg-status-success/15'}`}
                 >
                   <Ban className="w-3.5 h-3.5" />
                   {selectedUser.status === 'active' ? 'Suspend Account' : 'Reactivate User'}
@@ -315,7 +315,7 @@ export default function UserManagement({
                       triggerToast('User registration file hard-purged.');
                     }
                   }}
-                  className="py-2 px-3 text-[10px] font-bold rounded-xl border border-error/30 bg-error/5 hover:bg-error/10 text-error flex items-center justify-center gap-1.5 cursor-pointer transition-all"
+                  className="py-2 px-3 text-[10px] font-bold rounded-lg border border-error/30 bg-error/5 hover:bg-error/10 text-error flex items-center justify-center gap-1.5 cursor-pointer transition-all"
                 >
                   <span>🗑</span>
                   Delete profile
@@ -326,7 +326,7 @@ export default function UserManagement({
 
           </div>
         ) : (
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-xs py-12 text-center text-outline text-xs">
+          <div className="bg-canvas border border-outline-variant rounded-lg py-12 text-center text-outline text-xs">
             Select a candidate profile from the left directory to audit logs details.
           </div>
         )}

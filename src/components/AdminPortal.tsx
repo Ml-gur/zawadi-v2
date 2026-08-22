@@ -811,12 +811,12 @@ export default function AdminPortal({
     <div className="flex flex-col lg:flex-row gap-6 min-h-[85vh] text-[13px] bg-background">
       
       {/* PERSISTENT SYSTEM SIDEBAR - EXACT COLOURS AND LAYOUT MATCH */}
-      <div className="w-full lg:w-64 bg-surface-container-lowest border border-outline-variant/60 rounded-3xl p-5 shrink-0 flex flex-col justify-between shadow-xs">
+      <div className="w-full lg:w-64 bg-canvas border border-outline-variant/60 rounded-lg p-5 shrink-0 flex flex-col justify-between">
         <div className="space-y-6">
           
           {/* Top Logo branding block header */}
           <div className="flex items-center gap-3 border-b border-outline-variant/40 pb-4">
-            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white font-extrabold shadow-sm">
+            <div className="w-9 h-9 rounded-lg ring-1 ring-cream/40 flex items-center justify-center text-cream font-extrabold">
               🎓
             </div>
             <div>
@@ -831,7 +831,7 @@ export default function AdminPortal({
             {/* Nav 1: Dashboard */}
             <button 
               onClick={() => setActiveAdminSubTab('dashboard')}
-              className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-xl font-bold text-xs tracking-tight transition-all text-left outline-none ${activeAdminSubTab === 'dashboard' ? 'bg-secondary-container text-on-secondary-container shadow-xs' : 'text-on-surface-variant hover:bg-surface-container hover:text-primary'}`}
+              className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-lg font-bold text-xs tracking-tight transition-all text-left outline-none ${activeAdminSubTab === 'dashboard' ? 'bg-secondary-container text-on-secondary-container' : 'text-on-surface-variant hover:bg-surface-container hover:text-primary'}`}
             >
               <Layers className="w-4 h-4 shrink-0" />
               Dashboard Overview
@@ -840,7 +840,7 @@ export default function AdminPortal({
             {/* Nav 2: Active listings */}
             <button 
               onClick={() => setActiveAdminSubTab('scholarships')}
-              className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-xl font-bold text-xs tracking-tight transition-all text-left outline-none ${activeAdminSubTab === 'scholarships' ? 'bg-secondary-container text-on-secondary-container shadow-xs' : 'text-on-surface-variant hover:bg-surface-container hover:text-primary'}`}
+              className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-lg font-bold text-xs tracking-tight transition-all text-left outline-none ${activeAdminSubTab === 'scholarships' ? 'bg-secondary-container text-on-secondary-container' : 'text-on-surface-variant hover:bg-surface-container hover:text-primary'}`}
             >
               <BookOpen className="w-4 h-4 shrink-0" />
               Manage Scholarships
@@ -849,7 +849,7 @@ export default function AdminPortal({
             {/* Nav 3: Bot Queue */}
             <button 
               onClick={() => setActiveAdminSubTab('bot_queue')}
-              className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-xl font-bold text-xs tracking-tight transition-all text-left outline-none relative ${activeAdminSubTab === 'bot_queue' ? 'bg-secondary-container text-on-secondary-container shadow-xs' : 'text-on-surface-variant hover:bg-surface-container hover:text-primary'}`}
+              className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-lg font-bold text-xs tracking-tight transition-all text-left outline-none relative ${activeAdminSubTab === 'bot_queue' ? 'bg-secondary-container text-on-secondary-container' : 'text-on-surface-variant hover:bg-surface-container hover:text-primary'}`}
             >
               <Bot className="w-4 h-4 shrink-0" />
               Bot Queue (Ingestion)
@@ -863,7 +863,7 @@ export default function AdminPortal({
             {/* Nav 4: Mentor Queue */}
             <button 
               onClick={() => { setActiveAdminSubTab('mentor_queue'); fetchMentorQueue(); }}
-              className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-xl font-bold text-xs tracking-tight transition-all text-left outline-none relative ${activeAdminSubTab === 'mentor_queue' ? 'bg-secondary-container text-on-secondary-container shadow-xs' : 'text-on-surface-variant hover:bg-surface-container hover:text-primary'}`}
+              className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-lg font-bold text-xs tracking-tight transition-all text-left outline-none relative ${activeAdminSubTab === 'mentor_queue' ? 'bg-secondary-container text-on-secondary-container' : 'text-on-surface-variant hover:bg-surface-container hover:text-primary'}`}
             >
               <MessageSquare className="w-4 h-4 shrink-0" />
               Mentor Queue
@@ -877,7 +877,7 @@ export default function AdminPortal({
             {/* Nav 5: Users registry */}
             <button 
               onClick={() => setActiveAdminSubTab('users')}
-              className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-xl font-bold text-xs tracking-tight transition-all text-left outline-none ${activeAdminSubTab === 'users' ? 'bg-secondary-container text-on-secondary-container shadow-xs' : 'text-on-surface-variant hover:bg-surface-container hover:text-primary'}`}
+              className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-lg font-bold text-xs tracking-tight transition-all text-left outline-none ${activeAdminSubTab === 'users' ? 'bg-secondary-container text-on-secondary-container' : 'text-on-surface-variant hover:bg-surface-container hover:text-primary'}`}
             >
               <Users className="w-4 h-4 shrink-0" />
               User Accounts
@@ -886,7 +886,7 @@ export default function AdminPortal({
             {/* Nav 5: Audit trail */}
             <button 
               onClick={() => setActiveAdminSubTab('audit_log')}
-              className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-xl font-bold text-xs tracking-tight transition-all text-left outline-none ${activeAdminSubTab === 'audit_log' ? 'bg-secondary-container text-on-secondary-container shadow-xs' : 'text-on-surface-variant hover:bg-surface-container hover:text-primary'}`}
+              className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-lg font-bold text-xs tracking-tight transition-all text-left outline-none ${activeAdminSubTab === 'audit_log' ? 'bg-secondary-container text-on-secondary-container' : 'text-on-surface-variant hover:bg-surface-container hover:text-primary'}`}
             >
               <ShieldAlert className="w-4 h-4 shrink-0" />
               Security Audit Trails
@@ -895,7 +895,7 @@ export default function AdminPortal({
             {/* Nav 6: AI Config */}
             <button 
               onClick={() => setActiveAdminSubTab('ai_config')}
-              className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-xl font-bold text-xs tracking-tight transition-all text-left outline-none ${activeAdminSubTab === 'ai_config' ? 'bg-secondary-container text-on-secondary-container shadow-xs' : 'text-on-surface-variant hover:bg-surface-container hover:text-primary'}`}
+              className={`w-full flex items-center gap-3 py-2.5 px-4 rounded-lg font-bold text-xs tracking-tight transition-all text-left outline-none ${activeAdminSubTab === 'ai_config' ? 'bg-secondary-container text-on-secondary-container' : 'text-on-surface-variant hover:bg-surface-container hover:text-primary'}`}
             >
               <Brain className="w-4 h-4 shrink-0" />
               AI Configuration
@@ -909,7 +909,7 @@ export default function AdminPortal({
           
           <button 
             onClick={handleOpenCreate}
-            className="w-full bg-primary hover:bg-primary-container text-white py-2.5 px-4 rounded-xl text-xs font-bold transition-transform active:scale-98 flex items-center justify-center gap-2 shadow-sm cursor-pointer border border-primary-fixed/15"
+            className="w-full inline-flex justify-center items-center gap-2 rounded-full border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream py-2.5 px-4 text-xs font-semibold transition-colors active:scale-[0.98] cursor-pointer"
           >
             <Plus className="w-4 h-4 shrink-0 text-secondary" />
             New Scholarship
@@ -918,7 +918,7 @@ export default function AdminPortal({
           <div className="flex flex-col gap-0.5 mt-2">
             <a 
               href="mailto:support@zawadi.app" 
-              className="px-4 py-2 text-xs text-on-surface-variant hover:text-primary font-semibold flex items-center gap-2.5 rounded-lg hover:bg-surface-container-low transition-colors"
+              className="px-4 py-2 text-xs text-on-surface-variant hover:text-primary font-semibold flex items-center gap-2.5 rounded-lg hover:bg-off-black transition-colors"
             >
               <HelpCircle className="w-3.5 h-3.5 text-on-surface-variant/70" />
               Oversight Support
@@ -939,7 +939,7 @@ export default function AdminPortal({
       <div className="flex-1 space-y-6 flex flex-col justify-between">
         
         {/* Dynamic header / Title banner */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-surface-container-lowest border border-outline-variant/50 rounded-3xl p-6 shadow-xs">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-canvas border border-outline-variant/50 rounded-lg p-6">
           <div>
             <span className="text-[10px] text-outline uppercase tracking-wider font-extrabold flex items-center gap-1">
               Zawadi Control Unit
@@ -1013,7 +1013,7 @@ export default function AdminPortal({
               </div>
 
               {mentorQueueError && (
-                <div className="p-4 bg-status-urgent/5 border border-status-urgent/20 rounded-xl text-xs text-status-urgent font-semibold">
+                <div className="p-4 bg-status-urgent/5 border border-status-urgent/20 rounded-lg text-xs text-status-urgent font-semibold">
                   {mentorQueueError}
                 </div>
               )}
@@ -1028,7 +1028,7 @@ export default function AdminPortal({
               ) : (
                 <div className="space-y-3">
                   {mentorQueueItems.map((item: any) => (
-                    <div key={item.id} className="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-5 shadow-xs">
+                    <div key={item.id} className="bg-canvas border border-outline-variant/60 rounded-lg p-5">
                       <div className="flex items-start justify-between mb-3">
                         <div>
                           <div className="flex items-center gap-2 mb-1">
@@ -1153,7 +1153,7 @@ export default function AdminPortal({
             <div className="space-y-6 animate-sweep">
               
               {/* filter bar database manager */}
-              <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3 bg-surface-container-lowest border border-outline-variant/60 rounded-3xl p-4 shadow-xs">
+              <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-3 bg-canvas border border-outline-variant/60 rounded-lg p-4">
                 
                 <div className="relative flex-1">
                   <Search className="w-4 h-4 text-on-surface-variant absolute left-3.5 top-2.5" />
@@ -1162,7 +1162,7 @@ export default function AdminPortal({
                     placeholder="Search scholarships database by title, provider, or university country..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-surface-container-low text-on-surface text-xs pl-10 pr-4 py-2 rounded-xl border border-outline-variant/20 focus:border-primary/50 outline-none"
+                    className="w-full bg-off-black text-on-surface text-xs pl-10 pr-4 py-2 rounded-lg border border-outline-variant/20 focus:border-primary/50 outline-none"
                   />
                 </div>
 
@@ -1170,7 +1170,7 @@ export default function AdminPortal({
                   {selectedScholIds.length > 0 && (
                     <button 
                       onClick={handleBulkDelete}
-                      className="bg-error hover:bg-opacity-90 text-white py-2 px-4 rounded-xl text-xs font-bold cursor-pointer flex items-center gap-1.5 shadow-xs border border-error/20"
+                      className="bg-error hover:bg-opacity-90 text-white py-2 px-4 rounded-lg text-xs font-bold cursor-pointer flex items-center gap-1.5 border border-error/20"
                       title="Bulk delete selected scholarship records permanently"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -1181,7 +1181,7 @@ export default function AdminPortal({
                   <select
                     value={filterPublishStatus}
                     onChange={(e) => setFilterPublishStatus(e.target.value as any)}
-                    className="py-2 px-3 bg-surface border border-outline-variant text-[11px] font-bold rounded-xl outline-none"
+                    className="py-2 px-3 bg-surface border border-outline-variant text-[11px] font-bold rounded-lg outline-none"
                   >
           <option value="all">All Statuses</option>
           <option value="published">Published</option>
@@ -1193,7 +1193,7 @@ export default function AdminPortal({
                   <select
                     value={filterRegion}
                     onChange={(e) => setFilterRegion(e.target.value)}
-                    className="py-2 px-3 bg-surface border border-outline-variant text-[11px] font-bold rounded-xl outline-none"
+                    className="py-2 px-3 bg-surface border border-outline-variant text-[11px] font-bold rounded-lg outline-none"
                   >
                     <option value="all">All Regions</option>
                     <option value="global">Global Focus</option>
@@ -1210,7 +1210,7 @@ export default function AdminPortal({
                   <select
                     value={filterCategory}
                     onChange={(e) => setFilterCategory(e.target.value)}
-                    className="py-2 px-3 bg-surface border border-outline-variant text-[11px] font-bold rounded-xl outline-none max-w-[200px]"
+                    className="py-2 px-3 bg-surface border border-outline-variant text-[11px] font-bold rounded-lg outline-none max-w-[200px]"
                   >
                     <option value="all">All Categories</option>
                     {SCHOLARSHIP_CATEGORIES.map(cat => (
@@ -1220,7 +1220,7 @@ export default function AdminPortal({
 
                   <button 
                     onClick={handleExportCSV}
-                    className="bg-primary hover:bg-primary-container text-white py-2 px-4 rounded-xl text-xs font-bold cursor-pointer flex items-center gap-1.5 shadow-xs border border-primary-fixed/10"
+                    className="bg-transparent text-cream border border-cream/60 hover:border-cream hover:bg-cream/[0.04] py-2 px-4 rounded-lg text-xs font-bold cursor-pointer flex items-center gap-1.5 border border-primary-fixed/10"
                     title="Bulk database export as CSV spreadsheet"
                   >
                     <Download className="w-3.5 h-3.5" />
@@ -1232,7 +1232,7 @@ export default function AdminPortal({
 
               {/* Auto-unpublished banner */}
               {showAutoUnpublishedBanner && autoUnpublishedCount > 0 && (
-                <div className="bg-status-warning/10 border border-status-warning/30 rounded-2xl p-4 flex items-center justify-between gap-3">
+                <div className="bg-status-warning/10 border border-status-warning/30 rounded-lg p-4 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-full bg-status-warning/20 flex items-center justify-center shrink-0">
                       <AlertTriangle className="w-5 h-5 text-status-warning" />
@@ -1265,11 +1265,11 @@ export default function AdminPortal({
               )}
 
               {/* Main scholarships table grid */}
-              <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-3xl shadow-xs overflow-hidden">
+              <div className="bg-canvas border border-outline-variant/60 rounded-lg overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="bg-surface-container-low text-on-surface-variant border-b border-outline-variant/50 font-bold uppercase tracking-wider text-[9px]">
+                      <tr className="bg-off-black text-on-surface-variant border-b border-outline-variant/50 font-bold uppercase tracking-wider text-[9px]">
                         <th className="px-4 py-3.5 w-[45px] text-center">
                           <input 
                             type="checkbox"
@@ -1410,7 +1410,7 @@ export default function AdminPortal({
                   </table>
                 </div>
                 
-                <div className="bg-surface-container-low px-6 py-3 text-[10px] text-on-surface-variant font-semibold select-none flex justify-between items-center border-t border-outline-variant/45">
+                <div className="bg-off-black px-6 py-3 text-[10px] text-on-surface-variant font-semibold select-none flex justify-between items-center border-t border-outline-variant/45">
                   <span>Showing 1 to {filteredScholarships.length} of {scholarships.length} scholarships</span>
                 </div>
               </div>
@@ -1446,17 +1446,17 @@ export default function AdminPortal({
             className="fixed inset-0 bg-primary/30 backdrop-blur-xs transition-opacity"
             onClick={() => setSelectedPreviewSchol(null)}
           />
-          <div className="bg-surface-container-lowest border-l border-outline-variant w-full max-w-2xl h-screen shadow-2xl overflow-y-auto relative z-10 flex flex-col justify-between">
+          <div className="border-l border-hairline w-full max-w-2xl h-[100dvh] overflow-y-auto relative z-10 flex flex-col justify-between">
             
             {/* Top header row */}
-            <div className="sticky top-0 bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant/40 px-6 py-4 flex justify-between items-center z-10">
+            <div className="sticky top-0 bg-canvas/90 backdrop-blur-md border-b border-outline-variant/40 px-6 py-4 flex justify-between items-center z-10">
               <div>
                 <span className="text-[10px] text-secondary font-extrabold uppercase tracking-widest bg-secondary-container/10 py-1 px-2.5 rounded border border-secondary/20">Client Visual Simulation</span>
                 <h3 className="font-display font-black text-primary text-base mt-1.5 leading-none">Scholarship Live Mockup</h3>
               </div>
               <button 
                 onClick={() => setSelectedPreviewSchol(null)}
-                className="p-2 border border-outline-variant hover:bg-surface-container rounded-xl cursor-pointer"
+                className="p-2 border border-outline-variant hover:bg-surface-container rounded-lg cursor-pointer"
               >
                 <X className="w-4 h-4 text-on-surface-variant" />
               </button>
@@ -1466,7 +1466,7 @@ export default function AdminPortal({
             <div className="p-6 space-y-6 flex-grow">
               
               {/* Box 1: Core visual */}
-              <div className="bg-primary hover:bg-primary-container text-white rounded-3xl p-5 shadow-lg space-y-3">
+              <div className="bg-transparent text-cream border border-cream/60 hover:border-cream hover:bg-cream/[0.04] rounded-lg p-5 space-y-3">
                 <div className="flex justify-between items-start gap-3">
                   <span className="bg-secondary text-white font-extrabold text-[9px] uppercase px-2 py-0.5 rounded tracking-wider">{selectedPreviewSchol.funding_type} Funding</span>
                   <span className="text-[11px] font-mono opacity-80 font-bold">📆 Deadline: {selectedPreviewSchol.deadline || 'Continuous'}</span>
@@ -1481,7 +1481,7 @@ export default function AdminPortal({
               {/* Grid 2 Column detail rows */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold text-primary">
                 
-                <div className="bg-surface-container-low border border-outline-variant/50 rounded-2xl p-4 space-y-2">
+                <div className="bg-off-black border border-outline-variant/50 rounded-lg p-4 space-y-2">
                   <span className="text-[9px] uppercase text-outline font-black block">Eligible African Regions</span>
                   {Array.isArray(selectedPreviewSchol.country) && selectedPreviewSchol.country[0] === 'ALL' ? (
                     <p className="flex items-center gap-1"><span className="text-[11px]">🌍</span> Pan-African Comprehensive (All 54 States)</p>
@@ -1494,7 +1494,7 @@ export default function AdminPortal({
                   )}
                 </div>
 
-                <div className="bg-surface-container-low border border-outline-variant/50 rounded-2xl p-4 space-y-2">
+                <div className="bg-off-black border border-outline-variant/50 rounded-lg p-4 space-y-2">
                   <span className="text-[9px] uppercase text-outline font-black block">Degree Level Matchers</span>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {(selectedPreviewSchol.degree_levels || []).map(d => (
@@ -1506,7 +1506,7 @@ export default function AdminPortal({
               </div>
 
               {/* Box 3: Matching score details */}
-              <div className="bg-background border border-outline p-4 rounded-2xl text-xs space-y-2">
+              <div className="bg-background border border-outline p-4 rounded-lg text-xs space-y-2">
                 <span className="text-[9px] uppercase text-outline font-black block">Eligible Study Fields</span>
                 <div className="flex flex-wrap gap-1">
                   {(selectedPreviewSchol.fields || []).map(f => (
@@ -1528,7 +1528,7 @@ export default function AdminPortal({
               </div>
 
               {/* Requirement Checklist docs list */}
-              <div className="bg-surface-container-low border border-outline-variant p-4.5 rounded-2xl space-y-3">
+              <div className="bg-off-black border border-outline-variant p-4.5 rounded-lg space-y-3">
                 <h4 className="font-display font-black text-primary text-xs uppercase">Cascading Document Verification Requirements</h4>
                 <div className="grid grid-cols-2 gap-2 text-xs text-on-surface">
                   {selectedPreviewSchol.required_documents?.map(doc => (
@@ -1543,13 +1543,13 @@ export default function AdminPortal({
             </div>
 
             {/* Bottom action bar */}
-            <div className="sticky bottom-0 bg-surface-container-low border-t border-outline-variant/60 px-6 py-4 flex justify-between items-center bg-surface-container-low">
+            <div className="sticky bottom-0 bg-off-black border-t border-outline-variant/60 px-6 py-4 flex justify-between items-center bg-surface-container-low">
               <span className="text-[10px] font-mono text-outline font-semibold">Verified at: {selectedPreviewSchol.verified_at || 'Recently checked'}</span>
               <a 
                 href={selectedPreviewSchol.apply_url}
                 target="_blank"
                 rel="noreferrer"
-                className="bg-primary text-white font-bold text-xs py-2 px-5 rounded-xl block flex items-center gap-1.5 cursor-pointer shadow-md"
+                className="inline-flex bg-transparent text-accent-green border border-accent-green/50 hover:bg-accent-green/10 font-semibold text-xs py-2 px-5 rounded-full items-center gap-1.5 cursor-pointer"
               >
                 Access Official Portal Page
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -1569,11 +1569,11 @@ export default function AdminPortal({
           />
           <form 
             onSubmit={handleFormSubmit}
-            className="bg-surface-container-lowest border-l border-outline-variant w-full max-w-2xl h-screen shadow-2xl overflow-y-auto relative z-10 flex flex-col justify-between"
+            className="border-l border-hairline w-full max-w-2xl h-[100dvh] overflow-y-auto relative z-10 flex flex-col justify-between"
           >
             
             {/* Top drawer header */}
-            <div className="sticky top-0 bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant/60 px-6 py-4 flex justify-between items-center z-10">
+            <div className="sticky top-0 bg-canvas/90 backdrop-blur-md border-b border-outline-variant/60 px-6 py-4 flex justify-between items-center z-10">
               <div>
                 <span className="text-[9px] uppercase tracking-widest text-secondary font-black bg-secondary-container/10 border border-secondary/20 py-1 px-2 rounded">
                   {editingId ? 'Database Update Registry' : 'Manual Index Record'}
@@ -1585,14 +1585,14 @@ export default function AdminPortal({
               <button 
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="p-2 border border-outline-variant hover:bg-surface-container rounded-xl cursor-pointer"
+                className="p-2 border border-outline-variant hover:bg-surface-container rounded-lg cursor-pointer"
               >
                 <X className="w-4 h-4 text-on-surface-variant" />
               </button>
             </div>
 
             {formPipelineSource === 'pipeline' && (
-                <div className="bg-primary-fixed/5 border border-primary-fixed/20 rounded-xl p-4 space-y-2 mb-4">
+                <div className="bg-primary-fixed/5 border border-primary-fixed/20 rounded-lg p-4 space-y-2 mb-4">
                   <div className="flex flex-wrap gap-2 items-center">
                     <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-primary text-on-primary">Pipeline</span>
                     {formQualityScore != null && (
@@ -1627,7 +1627,7 @@ export default function AdminPortal({
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
                     placeholder="e.g. Oxford Reach Global Leaders Scholarship"
-                    className="w-full bg-surface-container text-on-surface py-2 px-3 rounded-xl border border-outline-variant/65 outline-none focus:border-primary text-xs"
+                    className="w-full bg-surface-container text-on-surface py-2 px-3 rounded-lg border border-outline-variant/65 outline-none focus:border-primary text-xs"
                   />
                 </div>
 
@@ -1640,7 +1640,7 @@ export default function AdminPortal({
                     value={formProvider}
                     onChange={(e) => setFormProvider(e.target.value)}
                     placeholder="e.g. Mastercard Foundation or British Council"
-                    className="w-full bg-surface-container text-on-surface py-2 px-3 rounded-xl border border-outline-variant/65 outline-none focus:border-primary text-xs"
+                    className="w-full bg-surface-container text-on-surface py-2 px-3 rounded-lg border border-outline-variant/65 outline-none focus:border-primary text-xs"
                   />
                 </div>
 
@@ -1657,7 +1657,7 @@ export default function AdminPortal({
                     value={formHost}
                     onChange={(e) => setFormHost(e.target.value)}
                     placeholder="e.g. University of Edinburgh or UK Universities"
-                    className="w-full bg-surface-container text-on-surface py-2 px-3 rounded-xl border border-outline-variant/65 outline-none focus:border-primary text-xs"
+                    className="w-full bg-surface-container text-on-surface py-2 px-3 rounded-lg border border-outline-variant/65 outline-none focus:border-primary text-xs"
                   />
                 </div>
 
@@ -1669,7 +1669,7 @@ export default function AdminPortal({
                     value={formAmount}
                     onChange={(e) => setFormAmount(e.target.value)}
                     placeholder="e.g. Full tuition, laptop allowance, annual stipend"
-                    className="w-full bg-surface-container text-on-surface py-2 px-3 rounded-xl border border-outline-variant/65 outline-none focus:border-primary text-xs"
+                    className="w-full bg-surface-container text-on-surface py-2 px-3 rounded-lg border border-outline-variant/65 outline-none focus:border-primary text-xs"
                   />
                 </div>
 
@@ -1681,7 +1681,7 @@ export default function AdminPortal({
                     required
                     value={formDeadline}
                     onChange={(e) => setFormDeadline(e.target.value)}
-                    className="w-full bg-surface-container text-on-surface py-1.5 px-3 rounded-xl border border-outline-variant/65 outline-none focus:border-primary text-xs font-mono font-bold"
+                    className="w-full bg-surface-container text-on-surface py-1.5 px-3 rounded-lg border border-outline-variant/65 outline-none focus:border-primary text-xs font-mono font-bold"
                   />
                 </div>
 
@@ -1697,7 +1697,7 @@ export default function AdminPortal({
                     value={formApplyUrl}
                     onChange={(e) => setFormApplyUrl(e.target.value)}
                     placeholder="https://oxford.ac.uk/scholarship/apply"
-                    className="w-full bg-surface-container text-on-surface py-2 px-3 rounded-xl border border-outline-variant/65 outline-none focus:border-primary text-xs"
+                    className="w-full bg-surface-container text-on-surface py-2 px-3 rounded-lg border border-outline-variant/65 outline-none focus:border-primary text-xs"
                   />
                   {(formApplyUrl.includes('opportunitiesforafricans') || formApplyUrl.includes('scholarship.com') || formApplyUrl.includes('scholars4dev')) && (
                     <p className="text-[10px] text-error font-extrabold">Alert: Aggregator URL detected. Replace with direct university portal endpoint!</p>
@@ -1711,13 +1711,13 @@ export default function AdminPortal({
                     value={formSourceUrl}
                     onChange={(e) => setFormSourceUrl(e.target.value)}
                     placeholder="https://oxford.ac.uk/announcement"
-                    className="w-full bg-surface-container text-on-surface py-2 px-3 rounded-xl border border-outline-variant/65 outline-none focus:border-primary text-xs"
+                    className="w-full bg-surface-container text-on-surface py-2 px-3 rounded-lg border border-outline-variant/65 outline-none focus:border-primary text-xs"
                   />
                 </div>
               </div>
 
               {/* Funding option, Verified date, and published state */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center bg-background border border-outline-variant p-3.5 rounded-2xl">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center bg-background border border-outline-variant p-3.5 rounded-lg">
                 
                 <div className="space-y-1">
                   <span className="text-[9px] uppercase text-on-surface-variant font-extrabold block">Fulfillment Funding tier</span>
@@ -1786,7 +1786,7 @@ export default function AdminPortal({
               </div>
 
               {/* Host region & countries */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-surface-container-low border border-outline-variant/40 p-3.5 rounded-2xl">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-off-black border border-outline-variant/40 p-3.5 rounded-lg">
                 <div className="space-y-1">
                   <label className="text-[9px] uppercase text-on-surface-variant block font-extrabold">
                     Destination Region
@@ -1794,7 +1794,7 @@ export default function AdminPortal({
                   <select
                     value={formHostRegion}
                     onChange={(e) => setFormHostRegion(e.target.value)}
-                    className="w-full bg-surface-container text-on-surface py-2 px-3 rounded-xl border border-outline-variant/65 outline-none focus:border-primary text-xs"
+                    className="w-full bg-surface-container text-on-surface py-2 px-3 rounded-lg border border-outline-variant/65 outline-none focus:border-primary text-xs"
                   >
                     <option value="">-- Select region --</option>
                     {ALL_DESTINATION_REGIONS.map(region => (
@@ -1813,7 +1813,7 @@ export default function AdminPortal({
                     value={formHostCountry.join(', ')}
                     onChange={(e) => setFormHostCountry(e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
                     placeholder="e.g. united kingdom, ireland"
-                    className="w-full bg-surface-container text-on-surface py-2 px-3 rounded-xl border border-outline-variant/65 outline-none focus:border-primary text-xs"
+                    className="w-full bg-surface-container text-on-surface py-2 px-3 rounded-lg border border-outline-variant/65 outline-none focus:border-primary text-xs"
                   />
                   <p className="text-[9px] text-outline mt-0.5">Comma-separated, lowercase. Overrides region if set.</p>
                 </div>
@@ -1827,7 +1827,7 @@ export default function AdminPortal({
                     value={formIso2}
                     onChange={(e) => { setFormIso2(e.target.value); setIso2Error(''); }}
                     placeholder="e.g. GB, DE, FR, or NG, GH, KE for multi-country"
-                    className={`w-full bg-surface-container text-on-surface py-2 px-3 rounded-xl border outline-none focus:border-primary text-xs ${iso2Error ? 'border-red-500' : 'border-outline-variant/65'}`}
+                    className={`w-full bg-surface-container text-on-surface py-2 px-3 rounded-lg border outline-none focus:border-primary text-xs ${iso2Error ? 'border-red-500' : 'border-outline-variant/65'}`}
                   />
                   {iso2Error ? (
                     <p className="text-[9px] text-red-500 mt-0.5">{iso2Error}</p>
@@ -1844,7 +1844,7 @@ export default function AdminPortal({
                     Work Exp (yrs)
                   </label>
                   <input type="number" value={formWorkExp ?? ''} onChange={e => setFormWorkExp(e.target.value ? parseInt(e.target.value) : null)}
-                         placeholder="e.g. 2" className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl p-2.5 text-xs outline-none focus:border-primary" />
+                         placeholder="e.g. 2" className="w-full bg-off-black border border-outline-variant/30 rounded-lg p-2.5 text-xs outline-none focus:border-primary" />
                 </div>
                 <div>
                   <label className="text-[9px] font-bold text-on-surface-variant uppercase flex items-center gap-1">
@@ -1852,7 +1852,7 @@ export default function AdminPortal({
                     Age Limit (Masters)
                   </label>
                   <input type="number" value={formAgeMasters ?? ''} onChange={e => setFormAgeMasters(e.target.value ? parseInt(e.target.value) : null)}
-                         placeholder="e.g. 35" className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl p-2.5 text-xs outline-none focus:border-primary" />
+                         placeholder="e.g. 35" className="w-full bg-off-black border border-outline-variant/30 rounded-lg p-2.5 text-xs outline-none focus:border-primary" />
                 </div>
                 <div>
                   <label className="text-[9px] font-bold text-on-surface-variant uppercase flex items-center gap-1">
@@ -1860,7 +1860,7 @@ export default function AdminPortal({
                     Age Limit (PhD)
                   </label>
                   <input type="number" value={formAgePhd ?? ''} onChange={e => setFormAgePhd(e.target.value ? parseInt(e.target.value) : null)}
-                         placeholder="e.g. 40" className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl p-2.5 text-xs outline-none focus:border-primary" />
+                         placeholder="e.g. 40" className="w-full bg-off-black border border-outline-variant/30 rounded-lg p-2.5 text-xs outline-none focus:border-primary" />
                 </div>
               </div>
 
@@ -1868,7 +1868,7 @@ export default function AdminPortal({
                 <div>
                   <label className="text-[9px] font-bold text-on-surface-variant uppercase">Sponsor Type</label>
                   <select value={formSponsorType} onChange={e => setFormSponsorType(e.target.value)}
-                          className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl p-2.5 text-xs outline-none focus:border-primary">
+                          className="w-full bg-off-black border border-outline-variant/30 rounded-lg p-2.5 text-xs outline-none focus:border-primary">
                     <option value="">None</option>
                     {['Government', 'Foundation', 'University', 'Corporate', 'UN', 'Other'].map(t => (
                       <option key={t} value={t}>{t}</option>
@@ -1878,7 +1878,7 @@ export default function AdminPortal({
                 <div>
                   <label className="text-[9px] font-bold text-on-surface-variant uppercase">Category</label>
                   <select value={formCategory} onChange={e => setFormCategory(e.target.value)}
-                          className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl p-2.5 text-xs outline-none focus:border-primary">
+                          className="w-full bg-off-black border border-outline-variant/30 rounded-lg p-2.5 text-xs outline-none focus:border-primary">
                     <option value="">Uncategorized</option>
                     {SCHOLARSHIP_CATEGORIES.map(cat => (
                       <option key={cat} value={cat}>{cat}</option>
@@ -1906,14 +1906,14 @@ export default function AdminPortal({
                 <label className="text-[9px] font-bold text-on-surface-variant uppercase">Countries (one per line)</label>
                 <textarea value={formCountries.join('\n')} onChange={e => setFormCountries(e.target.value.split('\n').map(s => s.trim()).filter(Boolean))}
                           placeholder="Kenya&#10;Nigeria&#10;Ghana&#10;or: All African Countries" rows={3}
-                          className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl p-2.5 text-xs outline-none focus:border-primary resize-none" />
+                          className="w-full bg-off-black border border-outline-variant/30 rounded-lg p-2.5 text-xs outline-none focus:border-primary resize-none" />
               </div>
 
               {/* Multi-Selectors Degree level & fields of study */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 
                 {/* Degree checkbox match */}
-                <div className="space-y-1 bg-surface-container-low border border-outline-variant/40 p-3.5 rounded-2xl">
+                <div className="space-y-1 bg-off-black border border-outline-variant/40 p-3.5 rounded-lg">
                   <span className="text-[9px] uppercase text-on-surface-variant block font-extrabold">Eligible Academic Degree Matchers</span>
                   <div className="flex flex-col gap-2 mt-2">
                     {['Undergraduate', 'Masters', 'PhD', 'Diploma', 'Short Course', 'Postdoc'].map((deg) => {
@@ -1937,7 +1937,7 @@ export default function AdminPortal({
                 </div>
 
                 {/* Study field groups select */}
-                <div className="space-y-1 bg-surface-container-low border border-outline-variant/40 p-3.5 rounded-2xl flex flex-col justify-between">
+                <div className="space-y-1 bg-off-black border border-outline-variant/40 p-3.5 rounded-lg flex flex-col justify-between">
                   <div>
                     <span className="text-[9px] uppercase text-on-surface-variant block font-extrabold">Study Field Taxonomy matchers</span>
                     <p className="text-[9.5px] text-outline mt-0.5">Define academic subjects matched in core score algorithms.</p>
@@ -1973,7 +1973,7 @@ export default function AdminPortal({
               </div>
 
               {/* African Country multi-selectors with region preset filters */}
-              <div className="bg-surface-container-low border border-outline-variant p-4.5 rounded-3xl space-y-3">
+              <div className="bg-off-black border border-outline-variant p-4.5 rounded-lg space-y-3">
                 
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
                   <div>
@@ -1999,13 +1999,13 @@ export default function AdminPortal({
                     placeholder="Search countries..."
                     value={countryFilter}
                     onChange={(e) => setCountryFilter(e.target.value)}
-                    className="w-full bg-surface text-on-surface text-[11px] pl-9 pr-3 py-1.5 rounded-xl border border-outline-variant/40 outline-none"
+                    className="w-full bg-surface text-on-surface text-[11px] pl-9 pr-3 py-1.5 rounded-lg border border-outline-variant/40 outline-none"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2 max-h-36 overflow-y-auto pt-1">
                   {/* Select All item */}
-                  <div className="flex items-center gap-1.5 p-1 bg-surface-container-lowest border border-outline-variant/30 rounded">
+                  <div className="flex items-center gap-1.5 p-1 bg-canvas border border-outline-variant/30 rounded">
                     <input 
                       type="checkbox"
                       id="chkCountry_ALL"
@@ -2058,7 +2058,7 @@ export default function AdminPortal({
                     value={formDescription}
                     onChange={(e) => setFormDescription(e.target.value)}
                     placeholder="Enter visual descriptors, eligibility parameters, values, scholarship duration conditions etc..."
-                    className="w-full h-24 bg-surface-container text-on-surface p-3 rounded-xl border border-outline-variant/60 outline-none focus:border-primary text-xs resize-y"
+                    className="w-full h-24 bg-surface-container text-on-surface p-3 rounded-lg border border-outline-variant/60 outline-none focus:border-primary text-xs resize-y"
                   />
                 </div>
 
@@ -2068,14 +2068,14 @@ export default function AdminPortal({
                     value={formEligibility}
                     onChange={(e) => setFormEligibility(e.target.value)}
                     placeholder="Specify conditions in bullet structures. E.g. Must have First Class degree, must be under 35 years of age..."
-                    className="w-full h-24 bg-surface-container text-on-surface p-3 rounded-xl border border-outline-variant/60 outline-none focus:border-primary text-xs resize-y"
+                    className="w-full h-24 bg-surface-container text-on-surface p-3 rounded-lg border border-outline-variant/60 outline-none focus:border-primary text-xs resize-y"
                   />
                 </div>
 
               </div>
 
               {/* Document checklists */}
-              <div className="space-y-1 bg-surface-container-low border border-outline-variant p-3.5 rounded-2xl">
+              <div className="space-y-1 bg-off-black border border-outline-variant p-3.5 rounded-lg">
                 <span className="text-[9.5px] uppercase text-on-surface-variant block font-extrabold">Required documents checkpoints</span>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-2.5">
                   {DOCUMENT_TYPES.map((doc) => {
@@ -2114,7 +2114,7 @@ export default function AdminPortal({
                 ];
                 const missing = requiredFields.filter(f => !f.val || (typeof f.val === 'string' && !f.val.trim()));
                 return (
-                  <div className={`bg-surface-container-low border-2 rounded-3xl p-5 space-y-3.5 ${missing.length > 0 ? 'border-status-warning/40' : 'border-status-success/20'}`}>
+                  <div className={`bg-off-black border-2 rounded-lg p-5 space-y-3.5 ${missing.length > 0 ? 'border-status-warning/40' : 'border-status-success/20'}`}>
                     <div className="flex items-center justify-between">
                       <h4 className="font-bold text-xs text-primary flex items-center gap-2">
                         {missing.length > 0 ? <AlertTriangle className="w-4 h-4 text-status-warning" /> : <CheckCircle className="w-4 h-4 text-status-success" />}
@@ -2143,11 +2143,11 @@ export default function AdminPortal({
             </div>
 
             {/* Sticky form actions footer */}
-            <div className="sticky bottom-0 bg-surface-container-low border-t border-outline-variant/60 px-6 py-4 flex justify-between gap-3 items-center">
+            <div className="sticky bottom-0 bg-off-black border-t border-outline-variant/60 px-6 py-4 flex justify-between gap-3 items-center">
               <button 
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="px-5 py-2.5 border border-outline-variant text-on-surface-variant font-bold text-xs rounded-xl hover:bg-surface-container transition-colors cursor-pointer"
+                className="px-5 py-2.5 border border-outline-variant text-on-surface-variant font-bold text-xs rounded-lg hover:bg-surface-container transition-colors cursor-pointer"
               >
                 Dismiss Changes
               </button>
@@ -2176,7 +2176,7 @@ export default function AdminPortal({
                     localStorage.setItem('zawadi_preview_scholarship', JSON.stringify(previewData));
                     window.open('/', '_blank');
                   }}
-                  className="py-2.5 px-4 bg-surface-container text-on-surface hover:bg-surface-container-high rounded-xl font-bold text-[11px] transition-all cursor-pointer border border-outline-variant/40">
+                  className="py-2.5 px-4 bg-surface-container text-on-surface hover:bg-surface-container-high rounded-lg font-bold text-[11px] transition-all cursor-pointer border border-outline-variant/40">
                     <Eye className="w-3.5 h-3.5 inline mr-1" />
                     Preview as Student
                   </button>
@@ -2185,7 +2185,7 @@ export default function AdminPortal({
                   <button 
                     type="button"
                     onClick={() => { handleFormSubmit({ preventDefault: () => {} } as any, false); }}
-                    className="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer"
+                    className="px-4 py-2.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-lg transition-colors cursor-pointer"
                   >
                     Unpublish
                   </button>
@@ -2194,14 +2194,14 @@ export default function AdminPortal({
                   <button 
                     type="button"
                     onClick={() => { handleFormSubmit({ preventDefault: () => {} } as any, true); }}
-                    className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer"
+                    className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg transition-colors cursor-pointer"
                   >
                     Publish
                   </button>
                 )}
                 <button 
                   type="submit"
-                  className="bg-primary text-white font-black text-xs py-2.5 px-6 rounded-xl transition-all hover:scale-101 active:scale-98 shadow-md flex items-center gap-1.5 cursor-pointer"
+                  className="btn-gradient-stroke inline-flex text-cream font-semibold text-xs py-2.5 px-6 rounded-full transition-all hover:brightness-110 active:scale-[0.98] items-center gap-1.5 cursor-pointer"
                 >
                   <Check className="w-4 h-4 text-secondary" />
                   {editingId ? 'Save & Push Updates' : 'Publish to Database'}

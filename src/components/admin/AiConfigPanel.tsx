@@ -81,7 +81,7 @@ export default function AiConfigPanel() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-green"></div>
       </div>
     );
   }
@@ -90,21 +90,21 @@ export default function AiConfigPanel() {
 
   return (
     <div className="space-y-6">
-      <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-3xl p-6 shadow-xs">
+      <div className="bg-off-black border border-hairline rounded-lg p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-secondary-container flex items-center justify-center">
-              <Brain className="w-5 h-5 text-on-secondary-container" />
+            <div className="w-10 h-10 rounded-lg border border-hairline flex items-center justify-center">
+              <Brain className="w-5 h-5 text-accent-green" />
             </div>
             <div>
-              <h2 className="font-bold text-lg text-on-surface">AI Configuration</h2>
-              <p className="text-sm text-on-surface-variant">Configure AI model used for essay generation</p>
+              <h2 className="font-bold text-lg text-cream">AI Configuration</h2>
+              <p className="text-sm text-muted">Configure AI model used for essay generation</p>
             </div>
           </div>
           {!editMode && (
             <button
               onClick={() => setEditMode(true)}
-              className="px-4 py-2 bg-primary text-on-primary rounded-xl text-sm font-bold transition-all hover:brightness-110"
+              className="px-4 py-2 btn-gradient-stroke text-cream rounded-full text-xs font-semibold transition-all cursor-pointer"
             >
               Edit Configuration
             </button>
@@ -112,13 +112,13 @@ export default function AiConfigPanel() {
         </div>
 
         {saved && (
-          <div className="flex items-center gap-2 px-4 py-3 mb-4 rounded-xl bg-status-success/10 text-status-success text-sm font-medium">
+          <div className="flex items-center gap-2 px-4 py-3 mb-4 rounded-lg border border-status-success/40 text-status-success text-sm font-medium">
             <CheckCircle className="w-4 h-4" />
             Configuration saved successfully
           </div>
         )}
         {error && (
-          <div className="flex items-center gap-2 px-4 py-3 mb-4 rounded-xl bg-error/10 text-error text-sm font-medium">
+          <div className="flex items-center gap-2 px-4 py-3 mb-4 rounded-lg border border-status-urgent/40 text-status-urgent text-sm font-medium">
             <AlertCircle className="w-4 h-4" />
             {error}
           </div>
@@ -126,11 +126,11 @@ export default function AiConfigPanel() {
 
         {!editMode ? (
           <div className="space-y-4">
-            <div className="flex items-center gap-3 p-4 rounded-2xl bg-surface-container/50">
-              <Cpu className="w-5 h-5 text-primary" />
+            <div className="flex items-center gap-3 p-4 rounded-lg border border-hairline/60">
+              <Cpu className="w-5 h-5 text-accent-green" />
               <div>
-                <span className="text-sm text-on-surface-variant">Active Provider:</span>
-                <span className="ml-2 font-bold text-on-surface">{activeProviderLabel}</span>
+                <span className="text-sm text-muted">Active Provider:</span>
+                <span className="ml-2 font-bold text-cream">{activeProviderLabel}</span>
               </div>
             </div>
 
@@ -143,22 +143,22 @@ export default function AiConfigPanel() {
                 return (
                   <div
                     key={p.value}
-                    className={`p-4 rounded-2xl border transition-all ${
+                    className={`p-4 rounded-lg border transition-colors ${
                       isActive
-                        ? 'border-primary bg-primary/5'
-                        : 'border-outline-variant/60 bg-surface-container/30'
+                        ? 'border-accent-green/50 bg-accent-green/[0.04]'
+                        : 'border-hairline/60'
                     }`}
                   >
                     <div className="text-2xl mb-2">{p.icon}</div>
-                    <div className="font-bold text-sm text-on-surface mb-1">{p.label}</div>
+                    <div className="font-bold text-sm text-cream mb-1">{p.label}</div>
                     <div className={`flex items-center gap-1 text-xs ${
-                      hasKey ? 'text-status-success' : 'text-on-surface-variant'
+                      hasKey ? 'text-status-success' : 'text-muted'
                     }`}>
                       <Key className="w-3 h-3" />
                       {hasKey ? 'Key configured' : 'No key set'}
                     </div>
                     {isActive && (
-                      <div className="mt-2 text-xs font-bold text-primary">Active</div>
+                      <div className="mt-2 text-xs font-bold text-accent-green">Active</div>
                     )}
                   </div>
                 );
@@ -168,11 +168,11 @@ export default function AiConfigPanel() {
         ) : (
           <div className="space-y-5">
             <div>
-              <label className="block text-sm font-bold text-on-surface mb-2">AI Provider</label>
+              <label className="block text-sm font-bold text-cream mb-2">AI Provider</label>
               <select
                 value={form.provider}
                 onChange={e => setForm({ ...form, provider: e.target.value })}
-                className="w-full px-4 py-3 rounded-2xl bg-surface-container border border-outline-variant/60 text-on-surface outline-none focus:border-primary transition-all"
+                className="w-full px-4 py-3 rounded-lg bg-canvas border border-hairline text-cream outline-none focus:border-accent-green transition-colors"
               >
                 {PROVIDERS.map(p => (
                   <option key={p.value} value={p.value}>{p.label}</option>
@@ -180,11 +180,11 @@ export default function AiConfigPanel() {
               </select>
             </div>
 
-            <div className="border-t border-outline-variant/20 pt-5">
+            <div className="border-t border-hairline/40 pt-5">
               <div className="flex items-center gap-2 mb-4">
                 <button
                   onClick={() => setShowKeys(!showKeys)}
-                  className="flex items-center gap-2 text-sm text-on-surface-variant hover:text-primary transition-all"
+                  className="flex items-center gap-2 text-sm text-muted hover:text-cream transition-colors"
                 >
                   {showKeys ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   {showKeys ? 'Hide API Keys' : 'Show API Keys'}
@@ -193,38 +193,38 @@ export default function AiConfigPanel() {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-on-surface-variant mb-1">OpenAI API Key</label>
+                  <label className="block text-sm font-medium text-muted mb-1">OpenAI API Key</label>
                   <div className="relative">
                     <input
                       type={showKeys ? 'text' : 'password'}
                       placeholder={config?.has_openai ? '•••••••• (key saved — enter new value to replace)' : 'sk-...'}
                       value={form.openai_key}
                       onChange={e => setForm({ ...form, openai_key: e.target.value })}
-                      className="w-full px-4 py-3 rounded-2xl bg-surface-container border border-outline-variant/60 text-on-surface outline-none focus:border-primary transition-all pr-10"
+                      className="w-full px-4 py-3 rounded-lg bg-canvas border border-hairline text-cream placeholder:text-muted outline-none focus:border-accent-green transition-colors pr-10"
                     />
-                    <Key className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant" />
+                    <Key className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-on-surface-variant mb-1">DeepSeek API Key</label>
+                  <label className="block text-sm font-medium text-muted mb-1">DeepSeek API Key</label>
                   <input
                     type={showKeys ? 'text' : 'password'}
                     placeholder={config?.has_deepseek ? '•••••••• (key saved — enter new value to replace)' : 'sk-...'}
                     value={form.deepseek_key}
                     onChange={e => setForm({ ...form, deepseek_key: e.target.value })}
-                    className="w-full px-4 py-3 rounded-2xl bg-surface-container border border-outline-variant/60 text-on-surface outline-none focus:border-primary transition-all"
+                    className="w-full px-4 py-3 rounded-lg bg-canvas border border-hairline text-cream placeholder:text-muted outline-none focus:border-accent-green transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-on-surface-variant mb-1">Google Gemini API Key</label>
+                  <label className="block text-sm font-medium text-muted mb-1">Google Gemini API Key</label>
                   <input
                     type={showKeys ? 'text' : 'password'}
                     placeholder={config?.has_gemini ? '•••••••• (key saved — enter new value to replace)' : 'AIza...'}
                     value={form.gemini_key}
                     onChange={e => setForm({ ...form, gemini_key: e.target.value })}
-                    className="w-full px-4 py-3 rounded-2xl bg-surface-container border border-outline-variant/60 text-on-surface outline-none focus:border-primary transition-all"
+                    className="w-full px-4 py-3 rounded-lg bg-canvas border border-hairline text-cream placeholder:text-muted outline-none focus:border-accent-green transition-colors"
                   />
                 </div>
               </div>
@@ -234,14 +234,14 @@ export default function AiConfigPanel() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex items-center gap-2 px-6 py-3 bg-primary text-on-primary rounded-2xl text-sm font-bold transition-all hover:brightness-110 disabled:opacity-50"
+                className="btn-gradient-stroke flex items-center gap-2 px-6 py-3 text-cream rounded-full text-sm font-semibold transition-all cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
               >
                 <Save className="w-4 h-4" />
                 {saving ? 'Saving...' : 'Save Configuration'}
               </button>
               <button
                 onClick={() => { setEditMode(false); setError(''); }}
-                className="px-6 py-3 border border-outline-variant/60 rounded-2xl text-sm font-bold text-on-surface-variant transition-all hover:bg-surface-container"
+                className="px-6 py-3 border border-cream/60 rounded-full text-sm font-semibold text-cream hover:border-cream hover:bg-cream/[0.04] transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -250,23 +250,23 @@ export default function AiConfigPanel() {
         )}
       </div>
 
-      <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-3xl p-6 shadow-xs">
-        <h3 className="font-bold text-on-surface mb-3">How it works</h3>
-        <ul className="space-y-2 text-sm text-on-surface-variant">
+      <div className="bg-off-black border border-hairline rounded-lg p-6">
+        <h3 className="font-bold text-cream mb-3">How it works</h3>
+        <ul className="space-y-2 text-sm text-muted">
           <li className="flex items-start gap-2">
-            <span className="text-primary mt-0.5">•</span>
+            <span className="text-accent-green mt-0.5">•</span>
             <span>Essay generation uses the active provider's API key. All three providers are supported.</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-primary mt-0.5">•</span>
+            <span className="text-accent-green mt-0.5">•</span>
             <span>Without any API key configured, essay generation falls back to template-based content — all other site features work normally.</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-primary mt-0.5">•</span>
+            <span className="text-accent-green mt-0.5">•</span>
             <span>Bot pipeline (scholarship crawling and import) runs independently of AI — no API key required.</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-primary mt-0.5">•</span>
+            <span className="text-accent-green mt-0.5">•</span>
             <span>You can switch providers at any time. Keys are stored securely in the database.</span>
           </li>
         </ul>

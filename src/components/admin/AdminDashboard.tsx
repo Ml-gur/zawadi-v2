@@ -80,7 +80,7 @@ export default function AdminDashboard({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         
         {/* Total scholarships card */}
-        <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-5 shadow-xs flex justify-between items-start transition-all hover:shadow-sm">
+        <div className="bg-canvas border border-outline-variant/60 rounded-lg p-5 flex justify-between items-start transition-all">
           <div className="space-y-1">
             <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest block">Scholarships</span>
             <p className="text-3xl font-display font-black text-primary">{scholarshipsCount}</p>
@@ -89,13 +89,13 @@ export default function AdminDashboard({
               <span className="text-on-surface-variant/75">· {scholarshipsCount - publishedCount} drafts</span>
             </div>
           </div>
-          <div className="p-3 bg-primary-fixed rounded-xl text-primary">
+          <div className="p-3 bg-primary-fixed rounded-lg text-primary">
             <Bot className="w-5 h-5 text-primary" />
           </div>
         </div>
 
         {/* Total Users */}
-        <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-5 shadow-xs flex justify-between items-start transition-all hover:shadow-sm">
+        <div className="bg-canvas border border-outline-variant/60 rounded-lg p-5 flex justify-between items-start transition-all">
           <div className="space-y-1">
             <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest block">Users</span>
             <p className="text-3xl font-display font-black text-primary">{usersCount}</p>
@@ -104,13 +104,13 @@ export default function AdminDashboard({
               <span className="text-on-surface-variant/75">· {usersCount - activeUsersCount} inactive</span>
             </div>
           </div>
-          <div className="p-3 bg-primary-fixed rounded-xl text-primary">
+          <div className="p-3 bg-primary-fixed rounded-lg text-primary">
             <Users className="w-5 h-5 text-primary" />
           </div>
         </div>
 
         {/* Active Subscriptions */}
-        <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-5 shadow-xs flex justify-between items-start transition-all hover:shadow-sm">
+        <div className="bg-canvas border border-outline-variant/60 rounded-lg p-5 flex justify-between items-start transition-all">
           <div className="space-y-1">
             <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest block">Subscriptions</span>
             <p className="text-3xl font-display font-black text-primary">{activeSubscriptionsCount}</p>
@@ -119,13 +119,13 @@ export default function AdminDashboard({
               <span className="text-on-surface-variant/75">· {totalApplications} applications</span>
             </div>
           </div>
-          <div className="p-3 bg-primary-fixed rounded-xl text-primary">
+          <div className="p-3 bg-primary-fixed rounded-lg text-primary">
             <CreditCard className="w-5 h-5 text-primary" />
           </div>
         </div>
 
         {/* Engagement */}
-        <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-5 shadow-xs flex justify-between items-start transition-all hover:shadow-sm">
+        <div className="bg-canvas border border-outline-variant/60 rounded-lg p-5 flex justify-between items-start transition-all">
           <div className="space-y-1">
             <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest block">Engagement</span>
             <p className="text-3xl font-display font-black text-primary">{totalEssays}</p>
@@ -134,7 +134,7 @@ export default function AdminDashboard({
               <span className="text-on-surface-variant/75">· {totalEssays} essays</span>
             </div>
           </div>
-          <div className="p-3 bg-primary-fixed rounded-xl text-primary border border-outline-variant/20">
+          <div className="p-3 bg-primary-fixed rounded-lg text-primary border border-outline-variant/20">
             <span className="text-lg">📊</span>
           </div>
         </div>
@@ -151,7 +151,7 @@ export default function AdminDashboard({
           {/* Action 1: Review Bot Queue */}
           <button 
             onClick={() => onNavigateToTab('bot_queue')}
-            className="w-full text-left bg-primary text-on-primary hover:bg-primary-container p-5 rounded-2xl transition-all shadow-xs flex justify-between items-center group cursor-pointer"
+            className="w-full text-left bg-primary text-on-primary hover:bg-primary-container p-5 rounded-lg transition-all flex justify-between items-center group cursor-pointer"
           >
             <div>
               <p className="font-bold text-sm">Review Bot Queue</p>
@@ -165,13 +165,13 @@ export default function AdminDashboard({
           {/* Action 2: Add Manual Scholarship */}
           <button 
             onClick={onOpenCreateModal}
-            className="w-full text-left bg-secondary-container hover:bg-secondary text-primary hover:text-white p-5 rounded-2xl transition-all shadow-xs flex justify-between items-center group cursor-pointer border border-secondary/20"
+            className="w-full text-left bg-secondary-container hover:bg-secondary text-primary hover:text-white p-5 rounded-lg transition-all flex justify-between items-center group cursor-pointer border border-secondary/20"
           >
             <div>
               <p className="font-bold text-sm">Add New Scholarship</p>
               <p className="text-xs opacity-90 mt-1">Manual vetted entry form</p>
             </div>
-            <div className="w-10 h-10 rounded-full bg-surface-container-lowest flex items-center justify-center text-primary group-hover:scale-105 transition-transform">
+            <div className="w-10 h-10 rounded-full bg-canvas flex items-center justify-center text-primary group-hover:scale-105 transition-transform">
               <Plus className="w-5 h-5" />
             </div>
           </button>
@@ -179,7 +179,7 @@ export default function AdminDashboard({
           {/* Action 3: Export Users as CSV */}
           <button 
             onClick={onExportUsersCSV}
-            className="w-full text-left bg-surface-container-lowest border border-outline-variant/80 hover:bg-surface-container-low p-5 rounded-2xl transition-all shadow-xs flex justify-between items-center group cursor-pointer"
+            className="w-full text-left bg-canvas border border-outline-variant/80 hover:bg-off-black p-5 rounded-lg transition-all flex justify-between items-center group cursor-pointer"
           >
             <div>
               <p className="font-bold text-sm text-primary">Export User Data</p>
@@ -193,7 +193,7 @@ export default function AdminDashboard({
         </div>
 
         {/* Middle column (4 cols): User Growth charts */}
-        <div className="lg:col-span-4 bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+        <div className="lg:col-span-4 bg-canvas border border-outline-variant/60 rounded-lg p-5 flex flex-col justify-between">
           <div className="mb-2">
             <h4 className="font-display font-black text-primary text-sm">User Growth</h4>
             <p className="text-[10px] text-on-surface-variant">New user registrations per month</p>
@@ -215,7 +215,7 @@ export default function AdminDashboard({
         </div>
 
         {/* Right column (4 cols): Plan distribution mix chart */}
-        <div className="lg:col-span-4 bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+        <div className="lg:col-span-4 bg-canvas border border-outline-variant/60 rounded-lg p-5 flex flex-col justify-between">
           <div>
             <h4 className="font-display font-black text-primary text-sm">Subscription Mix</h4>
             <p className="text-[10px] text-on-surface-variant">Active user plan distribution</p>
@@ -268,7 +268,7 @@ export default function AdminDashboard({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* Application Status Breakdown */}
-        <div className="lg:col-span-5 bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-5 shadow-xs">
+        <div className="lg:col-span-5 bg-canvas border border-outline-variant/60 rounded-lg p-5">
           <h4 className="font-display font-black text-primary text-sm mb-3">Application Status</h4>
           {Object.keys(appStatusBreakdown).length > 0 ? (
             <div className="space-y-2">
@@ -296,7 +296,7 @@ export default function AdminDashboard({
         </div>
 
         {/* Essay Trend (Last 7 Days) */}
-        <div className="lg:col-span-7 bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-5 shadow-xs">
+        <div className="lg:col-span-7 bg-canvas border border-outline-variant/60 rounded-lg p-5">
           <h4 className="font-display font-black text-primary text-sm mb-3">Essays Created (Last 7 Days)</h4>
           {essayChart.length > 0 ? (
             <div className="h-32 w-full">
@@ -317,7 +317,7 @@ export default function AdminDashboard({
       </div>
 
       {/* Bottom recent ingestions list */}
-      <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl shadow-xs overflow-hidden">
+      <div className="bg-canvas border border-outline-variant/60 rounded-lg overflow-hidden">
         <div className="flex justify-between items-center px-6 py-4 border-b border-outline-variant/60">
           <div>
             <h4 className="font-display font-black text-primary text-sm">Recent Ingestions reviewed</h4>
@@ -335,7 +335,7 @@ export default function AdminDashboard({
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-surface-container-low text-on-surface-variant border-b border-outline-variant/50 font-bold uppercase tracking-wider text-[9px]">
+              <tr className="bg-off-black text-on-surface-variant border-b border-outline-variant/50 font-bold uppercase tracking-wider text-[9px]">
                 <th className="px-6 py-3.5">Scholarship Name</th>
                 <th className="px-6 py-3.5">Source</th>
                 <th className="px-6 py-3.5">Amount</th>

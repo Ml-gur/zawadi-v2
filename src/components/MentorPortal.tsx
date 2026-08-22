@@ -109,10 +109,10 @@ function ParagraphEssay({ content, highlighted, onToggle }: { content: string; h
         <div
           key={i}
           onClick={() => onToggle(i)}
-          className={`p-3 rounded-xl border cursor-pointer transition-colors text-sm leading-relaxed ${
+          className={`p-3 rounded-lg border cursor-pointer transition-colors text-sm leading-relaxed ${
             highlighted.has(i)
               ? 'bg-amber-500/20 border-amber-500/40 text-amber-900 dark:text-amber-100'
-              : 'bg-surface-container-low border-outline-variant/30 hover:border-primary/30'
+              : 'bg-off-black border-outline-variant/30 hover:border-primary/30'
           }`}
         >
           <span className="text-[10px] font-bold text-outline mr-2 select-none">[{i + 1}]</span>
@@ -163,7 +163,7 @@ function RevisedSectionsBuilder({ sections, onChange }: {
         </button>
       </div>
       {sections.map((sec, i) => (
-        <div key={i} className="bg-surface-container-low rounded-xl p-3 border border-outline-variant/30 space-y-2">
+        <div key={i} className="bg-off-black rounded-lg p-3 border border-outline-variant/30 space-y-2">
           <div className="flex items-center justify-between gap-2">
             <input
               value={sec.section}
@@ -383,12 +383,12 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
     return (
       <div
         key={item.id}
-        className="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-5 shadow-xs space-y-3 hover:shadow-md transition-shadow"
+        className="bg-canvas border border-outline-variant/60 rounded-lg p-5 space-y-3 transition-shadow"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] font-mono font-bold text-outline bg-surface-container-low px-2 py-0.5 rounded">
+              <span className="text-[10px] font-mono font-bold text-outline bg-off-black px-2 py-0.5 rounded">
                 {item.request_reference}
               </span>
               {isUrgent && (
@@ -424,7 +424,7 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
 
         <button
           onClick={onClick}
-          className="w-full bg-primary hover:bg-primary-container text-white text-xs font-bold py-2.5 px-4 rounded-xl transition-all hover:scale-[1.01] active:scale-98 cursor-pointer flex items-center justify-center gap-2"
+          className="w-full bg-transparent text-cream border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-xs font-bold py-2.5 px-4 rounded-lg transition-all hover:scale-[1.01] active:scale-98 cursor-pointer flex items-center justify-center gap-2"
         >
           {buttonLabel}
         </button>
@@ -433,10 +433,10 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
   };
 
   const completedCard = (item: QueueItem) => (
-    <div key={item.id} className="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-5 shadow-xs space-y-3">
+    <div key={item.id} className="bg-canvas border border-outline-variant/60 rounded-lg p-5 space-y-3">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <span className="text-[10px] font-mono font-bold text-outline bg-surface-container-low px-2 py-0.5 rounded">
+          <span className="text-[10px] font-mono font-bold text-outline bg-off-black px-2 py-0.5 rounded">
             {item.request_reference}
           </span>
           <h3 className="font-bold text-primary text-sm mt-1">{item.scholarship_name}</h3>
@@ -470,21 +470,21 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
   );
 
   const tabClass = (tab: string) =>
-    `px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+    `px-4 py-2.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
       activeTab === tab
-        ? 'bg-secondary-container text-on-secondary-container shadow-xs'
+        ? 'bg-secondary-container text-on-secondary-container'
         : 'text-on-surface-variant hover:bg-surface-container hover:text-primary'
     }`;
 
   return (
     <div className="space-y-6 animate-sweep">
       {/* Header */}
-      <div className="bg-surface-container-lowest border border-outline-variant/50 rounded-3xl p-6 shadow-xs">
+      <div className="bg-canvas border border-outline-variant/50 rounded-lg p-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={onBack}
-              className="p-2 border border-outline-variant/40 hover:bg-surface-container rounded-xl cursor-pointer"
+              className="p-2 border border-outline-variant/40 hover:bg-surface-container rounded-lg cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4 text-on-surface-variant" />
             </button>
@@ -497,7 +497,7 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
           <div className="relative">
             <button
               onClick={() => setShowNotifications(!showNotifications)}
-              className="relative p-2 border border-outline-variant/40 hover:bg-surface-container rounded-xl cursor-pointer"
+              className="relative p-2 border border-outline-variant/40 hover:bg-surface-container rounded-lg cursor-pointer"
             >
               <MessageSquare className="w-4 h-4 text-on-surface-variant" />
               {notifications.length > 0 && (
@@ -507,7 +507,7 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
               )}
             </button>
             {showNotifications && (
-              <div className="absolute right-0 top-full mt-2 w-80 bg-surface-container-lowest border border-outline-variant/60 rounded-2xl shadow-xl z-50 overflow-hidden">
+              <div className="absolute right-0 top-full mt-2 w-80 bg-canvas border border-outline-variant/60 rounded-lg z-50 overflow-hidden">
                 <div className="p-3 border-b border-outline-variant/30">
                   <h4 className="text-xs font-bold text-on-surface-variant uppercase">Notifications</h4>
                 </div>
@@ -534,12 +534,12 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 overflow-x-auto bg-surface-container-lowest border border-outline-variant/50 rounded-2xl p-2 shadow-xs">
+      <div className="flex gap-2 overflow-x-auto bg-canvas border border-outline-variant/50 rounded-lg p-2">
         <button onClick={() => setActiveTab('queue')} className={tabClass('queue')}>
           My Queue {queue.length > 0 && <span className="ml-1.5 px-1.5 py-0.5 bg-status-urgent text-white rounded-full text-[9px]">{queue.length}</span>}
         </button>
         <button onClick={() => setActiveTab('under_review')} className={tabClass('under_review')}>
-          Under Review {underReview.length > 0 && <span className="ml-1.5 px-1.5 py-0.5 bg-primary text-white rounded-full text-[9px]">{underReview.length}</span>}
+          Under Review {underReview.length > 0 && <span className="ml-1.5 px-1.5 py-0.5 bg-accent-green/15 text-accent-green rounded-full text-[9px] font-mono">{underReview.length}</span>}
         </button>
         <button onClick={() => setActiveTab('completed')} className={tabClass('completed')}>
           Completed
@@ -551,7 +551,7 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
 
       {/* Content Area */}
       {error && (
-        <div className="bg-status-urgent/10 border border-status-urgent/20 rounded-2xl p-4 text-xs text-status-urgent font-bold flex items-center gap-2">
+        <div className="bg-status-urgent/10 border border-status-urgent/20 rounded-lg p-4 text-xs text-status-urgent font-bold flex items-center gap-2">
           <AlertTriangle className="w-4 h-4" /> {error}
           <button onClick={fetchQueue} className="ml-auto flex items-center gap-1 text-xs font-bold hover:underline cursor-pointer">
             <RefreshCw className="w-3 h-3" /> Retry
@@ -612,9 +612,9 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
             );
           case 'profile':
             return (
-              <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-6 shadow-xs space-y-4 max-w-xl">
+              <div className="bg-canvas border border-outline-variant/60 rounded-lg p-6 space-y-4 max-w-xl">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center text-white text-xl font-black">
+            <div className="w-14 h-14 rounded-lg bg-primary flex items-center justify-center text-white text-xl font-black">
               {user.name?.[0] || user.email?.[0] || 'M'}
             </div>
             <div>
@@ -623,19 +623,19 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4 text-xs">
-            <div className="bg-surface-container-low rounded-xl p-3">
+            <div className="bg-off-black rounded-lg p-3">
               <p className="text-outline font-bold uppercase tracking-wider text-[10px]">Plan</p>
               <p className="font-bold text-primary mt-1">{PLAN_LABELS[plan] || plan}</p>
             </div>
-            <div className="bg-surface-container-low rounded-xl p-3">
+            <div className="bg-off-black rounded-lg p-3">
               <p className="text-outline font-bold uppercase tracking-wider text-[10px]">Feedback Type</p>
               <p className="font-bold text-primary mt-1 capitalize">{feedbackType.replace('_', ' ')}</p>
             </div>
-            <div className="bg-surface-container-low rounded-xl p-3">
+            <div className="bg-off-black rounded-lg p-3">
               <p className="text-outline font-bold uppercase tracking-wider text-[10px]">Response Guarantee</p>
               <p className="font-bold text-primary mt-1">{planLimits.response_days_guarantee} day(s)</p>
             </div>
-            <div className="bg-surface-container-low rounded-xl p-3">
+            <div className="bg-off-black rounded-lg p-3">
               <p className="text-outline font-bold uppercase tracking-wider text-[10px]">Reviews / Month</p>
               <p className="font-bold text-primary mt-1">{planLimits.reviews_per_month ?? 'Unlimited'}</p>
             </div>
@@ -651,11 +651,11 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
       {activeReview && (
         <div className="fixed inset-0 z-50 flex flex-col bg-background/95 backdrop-blur-sm">
           {/* Modal Header */}
-          <div className="bg-surface-container-lowest border-b border-outline-variant/60 px-6 py-4 flex items-center justify-between shrink-0">
+          <div className="bg-canvas border-b border-outline-variant/60 px-6 py-4 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setActiveReview(null)}
-                className="p-2 border border-outline-variant/40 hover:bg-surface-container rounded-xl cursor-pointer"
+                className="p-2 border border-outline-variant/40 hover:bg-surface-container rounded-lg cursor-pointer"
               >
                 <X className="w-4 h-4 text-on-surface-variant" />
               </button>
@@ -682,7 +682,7 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
           {/* Modal Content - 3 Panel Layout */}
           <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
             {/* Left: Essay Panel */}
-            <div className="w-full lg:w-2/5 xl:w-[35%] overflow-y-auto border-r border-outline-variant/30 bg-surface-container-lowest/80">
+            <div className="w-full lg:w-2/5 xl:w-[35%] overflow-y-auto border-r border-outline-variant/30 bg-canvas/80">
               <div className="p-4">
                 <div className="flex items-center gap-2 mb-4">
                   <BookOpen className="w-4 h-4 text-primary" />
@@ -707,7 +707,7 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
                 </h4>
 
                 {validationErrors.length > 0 && (
-                  <div className="bg-status-urgent/10 border border-status-urgent/20 rounded-xl p-3 space-y-1">
+                  <div className="bg-status-urgent/10 border border-status-urgent/20 rounded-lg p-3 space-y-1">
                     {validationErrors.map((err, i) => (
                       <p key={i} className="text-xs text-status-urgent font-bold flex items-center gap-1">
                         <AlertTriangle className="w-3 h-3 shrink-0" /> {err}
@@ -730,7 +730,7 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
                         key={opt.value}
                         type="button"
                         onClick={() => setFeedback(prev => ({ ...prev, overall_assessment: opt.value }))}
-                        className={`p-3 rounded-xl text-xs font-bold border text-left transition-all cursor-pointer ${
+                        className={`p-3 rounded-lg text-xs font-bold border text-left transition-all cursor-pointer ${
                           feedback.overall_assessment === opt.value
                             ? 'bg-primary/10 border-primary text-primary'
                             : 'bg-surface border-outline-variant/30 text-on-surface-variant hover:border-primary/30'
@@ -751,7 +751,7 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
                     value={feedback.general_advice}
                     onChange={e => setFeedback(prev => ({ ...prev, general_advice: e.target.value }))}
                     rows={5}
-                    className="w-full bg-surface border border-outline-variant/40 rounded-xl px-4 py-3 text-xs outline-none focus:border-primary resize-y"
+                    className="w-full bg-surface border border-outline-variant/40 rounded-lg px-4 py-3 text-xs outline-none focus:border-primary resize-y"
                     placeholder="Provide your general assessment and advice for the student..."
                   />
                   <p className="text-[10px] text-right text-outline">{feedback.general_advice.length}/100</p>
@@ -782,7 +782,7 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
                           value={(feedback as any)[section.key]}
                           onChange={e => setFeedback(prev => ({ ...prev, [section.key]: e.target.value }))}
                           rows={4}
-                          className="w-full bg-surface border border-outline-variant/40 rounded-xl px-4 py-3 text-xs outline-none focus:border-primary resize-y"
+                          className="w-full bg-surface border border-outline-variant/40 rounded-lg px-4 py-3 text-xs outline-none focus:border-primary resize-y"
                           placeholder={`Feedback on ${section.label.toLowerCase()}...`}
                         />
                       </div>
@@ -822,7 +822,7 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
                           value={feedback.strategy_session_notes}
                           onChange={e => setFeedback(prev => ({ ...prev, strategy_session_notes: e.target.value }))}
                           rows={4}
-                          className="w-full bg-surface border border-outline-variant/40 rounded-xl px-4 py-3 text-xs outline-none focus:border-primary resize-y"
+                          className="w-full bg-surface border border-outline-variant/40 rounded-lg px-4 py-3 text-xs outline-none focus:border-primary resize-y"
                           placeholder="Notes from strategy session..."
                         />
                       </div>
@@ -839,7 +839,7 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
                     value={feedback.private_notes}
                     onChange={e => setFeedback(prev => ({ ...prev, private_notes: e.target.value }))}
                     rows={3}
-                    className="w-full bg-surface border border-outline-variant/40 rounded-xl px-4 py-3 text-xs outline-none focus:border-primary resize-y"
+                    className="w-full bg-surface border border-outline-variant/40 rounded-lg px-4 py-3 text-xs outline-none focus:border-primary resize-y"
                     placeholder="Private notes (not visible to student)..."
                   />
                 </div>
@@ -848,7 +848,7 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
                 <button
                   onClick={handleSubmitReview}
                   disabled={submitting}
-                  className="w-full bg-primary hover:bg-primary-container text-white text-sm font-bold py-3 px-6 rounded-xl transition-all hover:scale-[1.01] active:scale-98 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full bg-transparent text-cream border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-sm font-bold py-3 px-6 rounded-lg transition-all hover:scale-[1.01] active:scale-98 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {submitting ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -861,14 +861,14 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
             </div>
 
             {/* Right: Scholarship Context Panel */}
-            <div className="w-full lg:w-72 xl:w-80 overflow-y-auto border-l border-outline-variant/30 bg-surface-container-lowest/80">
+            <div className="w-full lg:w-72 xl:w-80 overflow-y-auto border-l border-outline-variant/30 bg-canvas/80">
               <div className="p-4 space-y-4">
                 <h4 className="font-bold text-xs text-primary uppercase tracking-wider flex items-center gap-2">
                   <GraduationCap className="w-4 h-4" />
                   Scholarship Context
                 </h4>
 
-                <div className="bg-surface-container-low rounded-xl p-3 space-y-3">
+                <div className="bg-off-black rounded-lg p-3 space-y-3">
                   <div>
                     <p className="text-[10px] text-outline font-bold uppercase tracking-wider">Scholarship</p>
                     <p className="text-xs font-bold text-primary mt-0.5">{activeReview.scholarship_name}</p>
