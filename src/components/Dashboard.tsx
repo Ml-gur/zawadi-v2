@@ -86,7 +86,7 @@ export default function Dashboard({
         </button>
         <button 
           onClick={onTriggerQuickDraft}
-          className="flex items-center gap-2 px-5 py-3 bg-secondary text-on-secondary rounded-lg font-bold hover:bg-opacity-90 transition-all cursor-pointer"
+          className="flex items-center gap-2 px-5 py-3 btn-gradient-stroke text-cream rounded-full font-semibold transition-all hover:brightness-110 active:scale-[0.98] cursor-pointer"
         >
           <span className="material-symbols-outlined text-lg">auto_awesome</span>
           Generate Essay
