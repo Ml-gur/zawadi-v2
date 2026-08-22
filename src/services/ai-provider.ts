@@ -2,9 +2,6 @@ export type AiProvider = 'openai' | 'deepseek' | 'gemini';
 
 export interface AiProviderConfig {
   provider: AiProvider;
-  openaiKey: string;
-  deepseekKey: string;
-  geminiKey: string;
 }
 
 export interface GenerateContentParams {
@@ -24,31 +21,25 @@ export interface AiProviderResult {
   thinking?: string;
 }
 
-let cachedConfig: AiProviderConfig | null = null;
+const DEFAULT_PROVIDER = (import.meta.env.VITE_AI_PROVIDER as AiProvider) || 'gemini';
 
+/**
+ * Provider selection and API keys live server-side in /api/ai-generate.
+ * The client never sees or sends key material — it only names a provider.
+ */
 export function getDefaultConfig(): AiProviderConfig {
-  const env = typeof process !== 'undefined' ? process.env : {} as Record<string, string | undefined>
-  return {
-    provider: (env.AI_PROVIDER as AiProvider) || 'gemini',
-    openaiKey: env.OPENAI_API_KEY || '',
-    deepseekKey: env.DEEPSEEK_API_KEY || '',
-    geminiKey: env.GOOGLE_API_KEY || '',
-  };
+  return { provider: DEFAULT_PROVIDER };
 }
 
-export function hasAnyKey(config?: AiProviderConfig): boolean {
-  const c = config || getDefaultConfig();
-  return !!(c.openaiKey && c.openaiKey !== 'your_api_key_here')
-    || !!(c.deepseekKey && c.deepseekKey !== 'your_deepseek_api_key_from_platform_deepseek_com')
-    || !!(c.geminiKey && c.geminiKey !== 'your_api_key_here');
+export function hasAnyKey(_config?: AiProviderConfig): boolean {
+  // Keys are held by the serverless proxy; availability is discovered per-call.
+  return true;
 }
 
-export function setProviderConfig(config: AiProviderConfig): void {
-  cachedConfig = config;
-}
+export function setProviderConfig(config: Partial<AiProviderConfig>): void {}
 
 export function getProviderConfig(): AiProviderConfig {
-  return cachedConfig || getDefaultConfig();
+  return { provider: DEFAULT_PROVIDER };
 }
 
 const AI_TIMEOUT_MS = 60_000;
@@ -58,141 +49,53 @@ function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
-  return Promise.race([
-    promise,
-    new Promise<T>((_, reject) =>
-      setTimeout(() => reject(new Error(`[AI] ${label} timed out after ${ms}ms`)), ms)
-    ),
-  ]);
-}
-
-async function retryWithBackoff<T>(fn: () => Promise<T>, label: string, maxRetries = MAX_RETRIES): Promise<T> {
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      return await fn();
-    } catch (err: any) {
-      const isRateLimit = err?.status === 429 || (err?.message || '').includes('rate limit');
-      const isServerError = err?.status && err.status >= 500 && err.status < 600;
-      if ((isRateLimit || isServerError) && attempt < maxRetries) {
-        const delay = isRateLimit ? 2000 * Math.pow(2, attempt) : 1000 * Math.pow(2, attempt);
-        console.warn(`[AI] ${label} attempt ${attempt + 1} failed (${err.status || err.message}), retrying in ${delay}ms`);
-        await sleep(delay);
-        continue;
-      }
-      // Re-throw non-retryable or final attempt
+async function postToProxy(params: GenerateContentParams, signalTimeoutMs: number) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), signalTimeoutMs);
+  try {
+    const res = await fetch('/api/ai-generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        provider: params.deepseekModel === 'deepseek-v4-pro' ? 'deepseek' : undefined,
+        systemInstruction: params.systemInstruction,
+        prompt: params.prompt,
+        temperature: params.temperature,
+        maxOutputTokens: params.maxOutputTokens,
+        deepseekModel: params.deepseekModel,
+        reasoningEffort: params.reasoningEffort,
+      }),
+      signal: controller.signal,
+    });
+    if (!res.ok) {
+      const err = new Error(`AI proxy error ${res.status}`) as Error & { status?: number };
+      err.status = res.status;
       throw err;
     }
+    return (await res.json()) as { text: string; provider: AiProvider; thinking?: string };
+  } finally {
+    clearTimeout(timer);
   }
-  // Should never reach here
-  throw new Error(`[AI] ${label} exhausted retries`);
 }
 
 export async function generateContent(params: GenerateContentParams): Promise<AiProviderResult | null> {
-  const config = getProviderConfig();
-
-  if (!hasAnyKey(config)) {
-    console.warn('[AI] No API keys configured — falling back to template generation');
-    return null;
-  }
-
-  const provider = config.provider;
   const timeout = params.timeout ?? AI_TIMEOUT_MS;
 
-  switch (provider) {
-    case 'openai': {
-      const { default: OpenAI } = await import('openai');
-      const client = new OpenAI({ apiKey: config.openaiKey });
-      const messages: any[] = [];
-      if (params.systemInstruction) {
-        messages.push({ role: 'system', content: params.systemInstruction });
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      return await postToProxy(params, timeout);
+    } catch (err: any) {
+      const isRateLimit = err?.status === 429 || (err?.message || '').includes('rate limit');
+      const isServerError = err?.status && err.status >= 500 && err.status < 600;
+      if ((isRateLimit || isServerError) && attempt < MAX_RETRIES) {
+        const delay = isRateLimit ? 2000 * Math.pow(2, attempt) : 1000 * Math.pow(2, attempt);
+        console.warn(`[AI] attempt ${attempt + 1} failed (${err.status || err.message}), retrying in ${delay}ms`);
+        await sleep(delay);
+        continue;
       }
-      messages.push({ role: 'user', content: params.prompt });
-      const response = await withTimeout(
-        retryWithBackoff(() =>
-          client.chat.completions.create({
-            model: 'gpt-4o',
-            messages,
-            temperature: params.temperature ?? 0.8,
-            max_tokens: params.maxOutputTokens ?? 1500,
-          }),
-          'openai'
-        ),
-        timeout,
-        'openai'
-      );
-      return { text: response.choices?.[0]?.message?.content || '', provider: 'openai' };
+      if (err?.name === 'AbortError') throw new Error('[AI] request timed out');
+      throw err;
     }
-
-    case 'deepseek': {
-      const { default: OpenAI } = await import('openai');
-      const client = new OpenAI({
-        baseURL: 'https://api.deepseek.com',
-        apiKey: config.deepseekKey,
-      });
-      const messages: any[] = [];
-      if (params.systemInstruction) {
-        messages.push({ role: 'system', content: params.systemInstruction });
-      }
-      messages.push({ role: 'user', content: params.prompt });
-
-      const model = params.deepseekModel || 'deepseek-v4-flash';
-      const body: any = {
-        model,
-        messages,
-        temperature: params.temperature ?? 0.8,
-        max_tokens: params.maxOutputTokens ?? 1500,
-      };
-
-      // Thinking mode only on deepseek-v4-pro
-      if (params.thinking && model === 'deepseek-v4-pro') {
-        body.thinking = { type: 'enabled' };
-        if (params.reasoningEffort) {
-          body.reasoning_effort = params.reasoningEffort;
-        }
-      }
-
-      const response = await withTimeout(
-        retryWithBackoff(() => client.chat.completions.create(body), 'deepseek'),
-        timeout,
-        'deepseek'
-      );
-      const text = response.choices?.[0]?.message?.content || '';
-      // If thinking mode was used, include thinking content if available
-      const thinkingContent = response.choices?.[0]?.message as any;
-      return {
-        text,
-        provider: 'deepseek',
-        thinking: thinkingContent?.thinking || undefined,
-      };
-    }
-
-    case 'gemini': {
-      const { GoogleGenAI } = await import('@google/genai');
-      const client = new GoogleGenAI({ apiKey: config.geminiKey });
-      const contents = params.systemInstruction
-        ? `System: ${params.systemInstruction}\n\n${params.prompt}`
-        : params.prompt;
-      const response = await withTimeout(
-        retryWithBackoff(() =>
-          client.models.generateContent({
-            model: 'gemini-2.0-flash',
-            contents,
-            config: {
-              temperature: params.temperature ?? 0.8,
-              maxOutputTokens: params.maxOutputTokens ?? 1500,
-            },
-          }),
-          'gemini'
-        ),
-        timeout,
-        'gemini'
-      );
-      return { text: response.text || '', provider: 'gemini' };
-    }
-
-    default:
-      console.warn(`[AI] Unknown provider: ${provider}`);
-      return null;
   }
+  throw new Error('[AI] exhausted retries');
 }
