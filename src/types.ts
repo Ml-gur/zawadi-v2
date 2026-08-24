@@ -33,6 +33,7 @@ export interface Scholarship {
   funding_type: string; // 'Full' | 'Partial'
   amount: string;
   deadline: string;
+  opens_at?: string | null;
   description: string;
   eligibility: string;
   required_documents: string[];

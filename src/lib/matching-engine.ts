@@ -672,10 +672,12 @@ export function computeScholarshipMatch(
   const matchReasons: string[] = [];
   const disqualifyingReasons: string[] = [];
 
-  // Guard: if user or user.nationality is null, return match with null score
-  if (!user || !user.country || !user.degree_level) {
+  // Guard: without the profile fields the engine scores against, a percentage
+  // would be fiction. Return an explicit needs-profile marker instead.
+  if (!user || !user.country || !user.degree_level || !user.field_of_study) {
     return {
       score: null,
+      needs_profile: true,
       reasons: [],
       disqualifying_reasons: [],
       is_eligible: null,
@@ -689,9 +691,19 @@ export function computeScholarshipMatch(
   const eligibleDegreeLevels = schol.degree_levels || [];
   const eligibleFields = schol.fields_of_study || schol.fields || [];
 
-  // Profile Completeness Gate — skip scoring if user has no profile data
-  const hasBasicProfile = !!(user.country || user.field_of_study || user.gpa || user.degree_level);
-  if (!hasBasicProfile) return null;
+  // Profile Completeness Gate — all wizard-critical fields must be present
+  // before any percentage is shown. Partial profiles produce misleading scores.
+  const hasBasicProfile = !!(user.country && user.degree_level && user.field_of_study);
+  if (!hasBasicProfile) {
+    return {
+      score: null,
+      needs_profile: true,
+      reasons: [],
+      disqualifying_reasons: [],
+      is_eligible: null,
+      breakdown: { country: 0, degree: 0, field: 0, gpa: 0, languages: 0, experience: 0, destination: 0, documents: 0 }
+    };
+  }
 
   // Compute user age from date_of_birth if available
   let userAge: number | null = null;

@@ -17,10 +17,12 @@ import {
   School,
   Share2,
   ExternalLink,
-  AlertCircle
+  AlertCircle,
+  FileText
 } from 'lucide-react';
 import ShareButton from '../../components/ShareButton';
 import { flagFor } from '../../lib/flags';
+import { eligibilityInfo } from './browse-shared';
 
 interface ScholarshipDetail {
   id: string;
@@ -45,6 +47,8 @@ interface ScholarshipDetail {
   host_country: string[];
   host_region: string;
   iso2?: string | string[];
+  required_documents: string[];
+  eligibility: string;
   targets_rural_origin: boolean;
   targets_ldc_countries: boolean;
   stem_focus: boolean;
@@ -111,7 +115,7 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
             is_intra_african,updated_at,fields_of_study,instruction_language,host_institution,
             host_country,host_region,iso2,targets_rural_origin,targets_ldc_countries,stem_focus,
             development_focus,min_gpa_normalised,requires_leadership,requires_community,
-            apply_url,source_url,published
+            apply_url,source_url,required_documents,eligibility,published
           `)
           .eq('slug', slug)
           .maybeSingle();
@@ -126,7 +130,7 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
               is_intra_african,updated_at,fields_of_study,instruction_language,host_institution,
               host_country,host_region,iso2,targets_rural_origin,targets_ldc_countries,stem_focus,
               development_focus,min_gpa_normalised,requires_leadership,requires_community,
-              apply_url,source_url,published
+              apply_url,source_url,required_documents,eligibility,published
             `)
             .eq('id', slug)
             .maybeSingle();
@@ -142,7 +146,7 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
               is_intra_african,updated_at,fields_of_study,instruction_language,host_institution,
               host_country,host_region,iso2,targets_rural_origin,targets_ldc_countries,stem_focus,
               development_focus,min_gpa_normalised,requires_leadership,requires_community,
-              apply_url,source_url,published
+              apply_url,source_url,required_documents,eligibility,published
             `)
             .ilike('slug', slug)
             .maybeSingle();
@@ -314,10 +318,10 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
 
           <div className="flex flex-wrap gap-2 pt-2">
             <span className="inline-flex items-center px-3.5 py-1.5 rounded-full border border-ash bg-pure-white font-caption text-caption text-secondary">
-              <span aria-hidden className="mr-1.5 text-base leading-none">{flagFor(scholarship)}</span>
-              {scholarship.countries?.length
-                ? (scholarship.countries.length <= 3 ? scholarship.countries.join(', ') : `${scholarship.countries.slice(0, 3).join(', ')} +${scholarship.countries.length - 3}`)
-                : 'All African countries'}
+              <span aria-hidden className="mr-1.5 text-base leading-none">
+                {eligibilityInfo(scholarship.countries).isBroad ? '🌍' : flagFor(scholarship)}
+              </span>
+              {eligibilityInfo(scholarship.countries).label}
             </span>
             {(scholarship.host_institution || scholarship.host_country?.length) && (
               <span className="inline-flex items-center px-3.5 py-1.5 rounded-full border border-ash bg-pure-white font-caption text-caption text-secondary">
@@ -371,7 +375,7 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
                 <li className="flex items-start gap-3">
                   <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                   <span className="font-body text-base text-secondary">
-                    Open to citizens from: <strong className="text-on-surface">{scholarship.countries?.join(', ') || 'All African Countries'}</strong>.
+                    Open to citizens from: <strong className="text-on-surface">{eligibilityInfo(scholarship.countries).label}</strong>.
                   </span>
                 </li>
                 {scholarship.degree_levels && (
@@ -419,18 +423,48 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
 
             <div className="w-full h-px bg-ash"></div>
 
+            {/* What this scholarship actually requires */}
+            <section className="flex flex-col gap-4">
+              <h2 className="font-headline text-2xl font-medium text-deep-charcoal">What you&rsquo;ll need</h2>
+              {scholarship.required_documents && scholarship.required_documents.length > 0 ? (
+                <ul className="flex flex-col gap-2.5">
+                  {scholarship.required_documents.map(doc => (
+                    <li key={doc} className="flex items-start gap-3 p-4 rounded-xl border border-ash bg-surface-container-lowest">
+                      <FileText className="w-5 h-5 text-primary shrink-0 mt-0.5" aria-hidden />
+                      <span className="font-body text-sm text-on-surface">{doc}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="font-body text-base text-secondary">
+                  The provider does not publish a fixed document list. Prepare transcripts, a CV and a
+                  statement of purpose as a baseline, and confirm specifics on the official portal.
+                </p>
+              )}
+              {scholarship.eligibility && (
+                <div className="p-5 rounded-xl border border-ash bg-parchment">
+                  <h3 className="font-headline text-base font-medium text-deep-charcoal mb-2">Fine print from the provider</h3>
+                  <p className="font-body-sm text-sm text-secondary leading-relaxed whitespace-pre-line">{stripHtml(scholarship.eligibility)}</p>
+                </div>
+              )}
+            </section>
+
+            <div className="w-full h-px bg-ash"></div>
+
             {/* Application Steps */}
             <section className="flex flex-col gap-4">
-              <h2 className="font-headline text-2xl font-medium text-deep-charcoal">Application Steps</h2>
+              <h2 className="font-headline text-2xl font-medium text-deep-charcoal">How to apply</h2>
               <div className="flex flex-col gap-4">
                 <div className="flex gap-4 p-5 rounded-xl border border-ash bg-surface-container-lowest">
                   <div className="flex-shrink-0 w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center font-subheading text-base font-bold text-deep-charcoal">
                     1
                   </div>
                   <div className="flex flex-col">
-                    <h3 className="font-headline text-lg font-medium text-deep-charcoal">Prepare Academic Records & CV</h3>
+                    <h3 className="font-headline text-lg font-medium text-deep-charcoal">Prepare your documents</h3>
                     <p className="font-body-sm text-sm text-secondary mt-1">
-                      Upload your latest transcripts and standard CV to your Document Vault for automated parsing.
+                      {scholarship.required_documents?.length
+                        ? `Gather the ${scholarship.required_documents.length} item${scholarship.required_documents.length === 1 ? '' : 's'} listed above — upload them to your Document Vault and the engine reads them automatically.`
+                        : 'Upload your transcripts and CV to your Document Vault for automated parsing.'}
                     </p>
                   </div>
                 </div>
@@ -440,9 +474,9 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
                     2
                   </div>
                   <div className="flex flex-col">
-                    <h3 className="font-headline text-lg font-medium text-deep-charcoal">Draft Statement of Purpose</h3>
+                    <h3 className="font-headline text-lg font-medium text-deep-charcoal">Draft your statement</h3>
                     <p className="font-body-sm text-sm text-secondary mt-1">
-                      Use the AI Essay Studio to craft a compelling personal statement tailored to this scholarship's values.
+                      Use the AI Essay Studio to craft a personal statement tailored to this scholarship&rsquo;s values, then have a mentor review it.
                     </p>
                   </div>
                 </div>
@@ -452,9 +486,9 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
                     3
                   </div>
                   <div className="flex flex-col">
-                    <h3 className="font-headline text-lg font-medium text-deep-charcoal">Submit Official Application</h3>
+                    <h3 className="font-headline text-lg font-medium text-deep-charcoal">Submit via the official portal</h3>
                     <p className="font-body-sm text-sm text-secondary mt-1">
-                      Submit all required documents directly via the provider portal before the deadline.
+                      Submit everything directly to {scholarship.provider || 'the provider'} before {formatDeadline(scholarship.deadline)} — the official link is in the sidebar.
                     </p>
                   </div>
                 </div>

@@ -3,14 +3,49 @@ import { ArrowRight, Clock, Columns2 } from 'lucide-react';
 import type { FC } from 'react';
 import ShareButton from '../../components/ShareButton';
 import type { ScholarshipTeaser } from './browse-shared';
-import { formatDeadline, isClosingSoon, truncateCountries } from './browse-shared';
+import { formatDeadline, deadlineBadge, eligibilityInfo } from './browse-shared';
 import { flagFor } from '../../lib/flags';
+import type { BadgeTone } from './browse-shared';
 
 interface BrowseCardProps {
   s: ScholarshipTeaser;
   dark?: boolean;
   comparing?: boolean;
   onToggleCompare?: () => void;
+}
+
+const PILL_TONE: Record<BadgeTone, { dark: string; light: string }> = {
+  urgent: {
+    dark: 'bg-electric-lime text-off-black-ink',
+    light: 'bg-electric-lime text-off-black-ink',
+  },
+  normal: {
+    dark: 'border border-stone text-smoke',
+    light: 'border border-ash text-graphite',
+  },
+  opens: {
+    dark: 'border border-electric-lime/60 text-electric-lime',
+    light: 'border border-surface-tint text-primary',
+  },
+  rolling: {
+    dark: 'border border-stone text-smoke',
+    light: 'border border-ash text-graphite',
+  },
+  closed: {
+    dark: 'border border-stone text-stone',
+    light: 'border border-ash text-stone',
+  },
+};
+
+function DeadlinePill({ s, dark }: { s: ScholarshipTeaser; dark?: boolean }) {
+  const badge = deadlineBadge(s.deadline || null, s.urgency, s.opens_at);
+  return (
+    <span
+      className={`shrink-0 rounded-full px-3 py-1 text-ed-caption uppercase ${PILL_TONE[badge.tone][dark ? 'dark' : 'light']}`}
+    >
+      {badge.label}
+    </span>
+  );
 }
 
 function ComparePill({ comparing, onToggleCompare }: { comparing?: boolean; onToggleCompare?: () => void }) {
@@ -37,10 +72,11 @@ function ComparePill({ comparing, onToggleCompare }: { comparing?: boolean; onTo
 }
 
 const BrowseCard: FC<BrowseCardProps> = ({ s, dark, comparing, onToggleCompare }) => {
-  const closing = isClosingSoon(s.deadline || null, s.urgency);
+  const badge = deadlineBadge(s.deadline || null, s.urgency, s.opens_at);
   const href = `/scholarships/browse/${s.slug || s.id}`;
   const category = (s.degree_levels?.[0] || s.funding_type || 'Opportunity').toUpperCase();
   const flag = flagFor(s);
+  const eligibility = eligibilityInfo(s.countries);
 
   if (dark) {
     return (
@@ -48,11 +84,7 @@ const BrowseCard: FC<BrowseCardProps> = ({ s, dark, comparing, onToggleCompare }
         <div>
           <div className="flex items-start justify-between gap-3 mb-4">
             <span className="text-ed-eyebrow uppercase text-smoke pt-1"><span aria-hidden className="mr-1.5 text-base leading-none">{flag}</span>{category}</span>
-            {closing ? (
-              <span className="shrink-0 rounded-full bg-electric-lime px-3 py-1 text-ed-caption uppercase text-off-black-ink">Closing soon</span>
-            ) : (
-              <span className="shrink-0 rounded-full border border-stone px-3 py-1 text-ed-caption uppercase text-smoke">Open</span>
-            )}
+            <DeadlinePill s={s} dark />
           </div>
           <h2 className="text-ed-h2 text-pure-white">
             <Link to={href} className="hover:underline underline-offset-4 decoration-stone">{s.name}</Link>
@@ -68,7 +100,10 @@ const BrowseCard: FC<BrowseCardProps> = ({ s, dark, comparing, onToggleCompare }
         <div className="mt-6 pt-4 border-t border-stone flex items-center justify-between gap-3">
           <span className="flex items-center gap-1.5 text-ed-body-sm text-smoke min-w-0">
             <Clock className="w-3.5 h-3.5 shrink-0" aria-hidden />
-            <span className="truncate">Closes {formatDeadline(s.deadline || null)}</span>
+            <span className="truncate">
+              {badge.tone === 'rolling' ? 'Rolling deadline' : formatDeadline(s.deadline || null)}
+              {!eligibility.isBroad && <span className="hidden md:inline"> · {eligibility.label}</span>}
+            </span>
           </span>
           <span className="flex items-center gap-2 shrink-0">
             <ComparePill comparing={comparing} onToggleCompare={onToggleCompare} />
@@ -87,15 +122,7 @@ const BrowseCard: FC<BrowseCardProps> = ({ s, dark, comparing, onToggleCompare }
       <div>
         <div className="flex items-start justify-between gap-3 mb-4">
           <span className="text-ed-eyebrow uppercase text-graphite pt-1"><span aria-hidden className="mr-1.5 text-base leading-none">{flag}</span>{category}</span>
-          {closing ? (
-            <span className="shrink-0 rounded-full bg-electric-lime px-3 py-1 text-ed-caption uppercase text-off-black-ink">
-              Closing soon
-            </span>
-          ) : (
-            <span className="shrink-0 rounded-full border border-ash px-3 py-1 text-ed-caption uppercase text-graphite">
-              Open
-            </span>
-          )}
+          <DeadlinePill s={s} />
         </div>
 
         <h2 className="text-ed-h2 text-off-black-ink">
@@ -129,8 +156,8 @@ const BrowseCard: FC<BrowseCardProps> = ({ s, dark, comparing, onToggleCompare }
         <span className="flex items-center gap-1.5 text-ed-body-sm text-graphite min-w-0">
           <Clock className="w-3.5 h-3.5 shrink-0" aria-hidden />
           <span className="truncate">
-            Closes {formatDeadline(s.deadline || null)}
-            {s.countries?.length > 0 && <span className="hidden sm:inline"> · {truncateCountries(s.countries)}</span>}
+            {badge.tone === 'rolling' ? 'Rolling deadline' : formatDeadline(s.deadline || null)}
+            {!eligibility.isBroad && <span className="hidden md:inline"> · {eligibility.label}</span>}
           </span>
         </span>
         <span className="flex items-center gap-2 shrink-0">

@@ -64,10 +64,19 @@ export default function PublicScholarshipList({ user }: { user?: any } = {}) {
           const { supabase } = await import('../../lib/supabase');
           const offset = (page - 1) * limit;
           const today = new Date().toISOString().split('T')[0];
-          const [countRes, dataRes] = await Promise.all([
+          const baseColumns = 'id,slug,name,provider,countries,degree_levels,funding_type,amount,deadline,urgency,description,no_ielts,targets_financial_need,targets_first_generation,is_intra_african,fields_of_study,host_region,iso2,opens_at,updated_at';
+          const runQuery = (columns: string) => supabase.from('scholarships').select(columns).eq('published', true).or(`deadline.is.null,deadline.gte.${today}`).order('deadline', { ascending: true, nullsFirst: false }).range(offset, offset + limit - 1);
+          const [countRes, dataRes0] = await Promise.all([
             supabase.from('scholarships').select('id', { count: 'exact', head: true }).eq('published', true).or(`deadline.is.null,deadline.gte.${today}`),
-            supabase.from('scholarships').select('id,slug,name,provider,countries,degree_levels,funding_type,amount,deadline,urgency,description,no_ielts,targets_financial_need,targets_first_generation,is_intra_african,fields_of_study,host_region,iso2,updated_at').eq('published', true).or(`deadline.is.null,deadline.gte.${today}`).order('deadline', { ascending: true, nullsFirst: false }).range(offset, offset + limit - 1),
+            runQuery(baseColumns),
           ]);
+          // migration 015 (opens_at) not applied yet — retry without the column
+          const needsRetry = Boolean(dataRes0.error) && (
+            (dataRes0.error as any)?.code === 'PGRST204' ||
+            (dataRes0.error as any)?.code === '42703' ||
+            /opens_at/.test((dataRes0.error as any)?.message || '')
+          );
+          const dataRes: any = needsRetry ? await runQuery(baseColumns.replace(',opens_at', '')) : dataRes0;
           if (cancelled) return;
           if (dataRes.error) throw dataRes.error;
           const scholarships = (dataRes.data || []).map(s => ({ ...s, description: s.description ? String(s.description).slice(0, 300) : null })) as ScholarshipTeaser[];

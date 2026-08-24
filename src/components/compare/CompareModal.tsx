@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { X } from 'lucide-react';
 import type { Scholarship } from '../../types';
 import { flagFor } from '../../lib/flags';
+import { eligibilityInfo } from '../../pages/public/browse-shared';
 
 interface CompareModalProps {
   open: boolean;
@@ -35,12 +36,25 @@ const ROWS: Array<{ label: string; render: (s: Scholarship) => ReactNode }> = [
   { label: 'Funding type', render: s => s.funding_type || '—' },
   {
     label: 'Open to',
-    render: s => (
-      <span className="inline-flex items-start gap-1.5">
-        <span aria-hidden className="leading-5">{flagFor(s)}</span>
-        <span>{(s.countries || []).length > 0 ? s.countries.join(', ') : 'All African countries'}</span>
-      </span>
-    ),
+    render: s => {
+      const info = eligibilityInfo(s.countries || s.country);
+      // A national flag next to "Pan-African"/global eligibility is misleading —
+      // only pair flags with concrete country lists.
+      if (info.isBroad) {
+        return (
+          <span className="inline-flex items-start gap-1.5">
+            <span aria-hidden className="leading-5">🌍</span>
+            <span>{info.label}</span>
+          </span>
+        );
+      }
+      return (
+        <span className="inline-flex items-start gap-1.5">
+          <span aria-hidden className="leading-5">{flagFor(s)}</span>
+          <span>{info.label}</span>
+        </span>
+      );
+    },
   },
   { label: 'Degree levels', render: s => s.degree_levels?.join(', ') || '—' },
   {

@@ -1,26 +1,63 @@
 import { supabase } from './supabase';
 
 // ─── Scholarships ───
+
+/**
+ * Explicit column list — select('*') ships 423KB per load (dead columns +
+ * long text the finder never renders); this trims ~25% and keeps every field
+ * the matching engine reads. opens_at is new (migration 015) — if the column
+ * is missing the query is retried without it so the finder never breaks.
+ */
+const SCHOLARSHIP_COLUMNS = `
+  id, slug, name, provider, host_institution, countries, degree_levels,
+  fields_of_study, funding_type, amount, deadline, opens_at, description,
+  eligibility, required_documents, apply_url, source_url, published,
+  no_ielts, work_experience_required, age_limit_masters, age_limit_phd,
+  host_region, host_country, iso2, urgency, sponsor_type, category,
+  updated_at, is_intra_african, min_gpa_normalised, instruction_language,
+  min_english_score, min_english_test_type, requires_research,
+  requires_publications, requires_leadership, requires_community,
+  targets_financial_need, targets_first_generation, targets_rural_origin,
+  targets_ldc_countries, stem_focus, development_focus, min_work_years,
+  max_work_years, min_publication_count
+`;
+
 export async function getPublishedScholarships(filters?: {
   country?: string;
   degree?: string;
   no_ielts?: boolean;
 }) {
   const today = new Date().toISOString().split('T')[0];
-  let query = supabase
-    .from('scholarships')
-    .select('*')
-    .eq('published', true)
-    .or(`deadline.is.null,deadline.gte.${today}`);
-  // postgrest-js serialises arrays as Postgres literals ({a,b}); these columns are jsonb and need JSON text
-  if (filters?.country) query = query.contains('countries', JSON.stringify([filters.country]));
-  if (filters?.degree) query = query.contains('degree_levels', JSON.stringify([filters.degree]));
-  if (filters?.no_ielts) query = query.eq('no_ielts', true);
-  return query.order('id', { ascending: false });
+  const build = (columns: string) => {
+    let q = supabase
+      .from('scholarships')
+      .select(columns)
+      .eq('published', true)
+      .or(`deadline.is.null,deadline.gte.${today}`);
+    // postgrest-js serialises arrays as Postgres literals ({a,b}); these columns are jsonb and need JSON text
+    if (filters?.country) q = q.contains('countries', JSON.stringify([filters.country]));
+    if (filters?.degree) q = q.contains('degree_levels', JSON.stringify([filters.degree]));
+    if (filters?.no_ielts) q = q.eq('no_ielts', true);
+    return q.order('deadline', { ascending: true, nullsFirst: false });
+  };
+
+  let result = await build(SCHOLARSHIP_COLUMNS);
+  if (
+    result.error &&
+    (result.error.code === 'PGRST204' ||
+      result.error.code === '42703' ||
+      /opens_at/.test(result.error.message || ''))
+  ) {
+    // opens_at migration not applied yet — degrade gracefully
+    const withoutOpens = SCHOLARSHIP_COLUMNS.replace(', opens_at', '').replace('opens_at, ', '');
+    result = await build(withoutOpens);
+  }
+  return result;
 }
 
 export async function getAllScholarships() {
-  return supabase.from('scholarships').select('*').order('view_count', { ascending: false });
+  const result = await supabase.from('scholarships').select('*').order('view_count', { ascending: false });
+  return result;
 }
 
 export async function upsertScholarship(scholarship: any) {

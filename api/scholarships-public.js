@@ -25,15 +25,24 @@ export default async function handler(req, res) {
       .eq('published', true)
       .or('deadline.is.null,deadline.gte.' + new Date().toISOString().split('T')[0]);
 
-    const dataQuery = supabase
+    const baseColumns = 'id,slug,name,provider,countries,degree_levels,funding_type,amount,deadline,urgency,description,no_ielts,targets_financial_need,targets_first_generation,is_intra_african,fields_of_study,host_region,iso2,opens_at,updated_at';
+    const safeColumns = baseColumns.replace(',opens_at', '');
+
+    const runQuery = (columns) => supabase
       .from('scholarships')
-      .select('id,slug,name,provider,countries,degree_levels,funding_type,amount,deadline,urgency,description,no_ielts,targets_financial_need,targets_first_generation,is_intra_african,fields_of_study,host_region,iso2,updated_at')
+      .select(columns)
       .eq('published', true)
       .or('deadline.is.null,deadline.gte.' + new Date().toISOString().split('T')[0])
       .order('deadline', { ascending: true, nullsLast: true })
       .range(offset, offset + limit - 1);
 
-    const [countResult, dataResult] = await Promise.all([countQuery, dataQuery]);
+    let dataResult = await runQuery(baseColumns);
+    // migration 015 (opens_at) not applied yet — retry without the column
+    if (dataResult.error && (dataResult.error.code === 'PGRST204' || dataResult.error.code === '42703' || /opens_at/.test(dataResult.error.message || ''))) {
+      dataResult = await runQuery(safeColumns);
+    }
+
+    const [countResult] = await Promise.all([countQuery]);
 
     if (countResult.error) {
       return res.status(500).json({ error: 'Failed to fetch scholarships' });

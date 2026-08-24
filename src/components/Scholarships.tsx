@@ -11,6 +11,8 @@ import { supabase } from '../lib/supabase';
 import { SEO } from './SEO';
 import ShareButton from './ShareButton';
 import BrowseCard from '../pages/public/BrowseCard';
+import TrackerTable from './TrackerTable';
+import { LayoutGrid, Rows3 } from 'lucide-react';
 
 interface ScholarshipsProps {
   user?: any;
@@ -160,6 +162,7 @@ export default function Scholarships({
   const [matchSortFilter, setMatchSortFilter] = useState<'default' | 'high' | 'all'>('default');
   const [noIeltsFilter, setNoIeltsFilter] = useState(false);
   const [deadlineSort, setDeadlineSort] = useState(false);
+  const [view, setView] = useState<'grid' | 'table'>('grid');
   const { ids: compareIds, open: compareOpen, setOpen: setCompareOpen, toggle: toggleCompare } = useCompare();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -1119,6 +1122,24 @@ export default function Scholarships({
             </span>
 
             <div className="flex items-center gap-2 ml-auto">
+              <div className="flex items-center gap-1 bg-mist border border-ash/80 rounded-lg p-1 mr-1" role="group" aria-label="View mode">
+                <button
+                  onClick={() => setView('grid')}
+                  aria-pressed={view === 'grid'}
+                  aria-label="Grid view"
+                  className={`p-3 rounded-md transition-colors cursor-pointer inline-flex ${view === 'grid' ? 'bg-pure-white border border-ash text-off-black-ink hover:border-graphite' : 'text-graphite hover:text-off-black-ink'}`}
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setView('table')}
+                  aria-pressed={view === 'table'}
+                  aria-label="Table view"
+                  className={`p-3 rounded-md transition-colors cursor-pointer inline-flex ${view === 'table' ? 'bg-pure-white border border-ash text-off-black-ink hover:border-graphite' : 'text-graphite hover:text-off-black-ink'}`}
+                >
+                  <Rows3 className="w-4 h-4" />
+                </button>
+              </div>
               <button
                 onClick={() => setDeadlineSort(v => !v)}
                 aria-pressed={deadlineSort}
@@ -1146,22 +1167,24 @@ export default function Scholarships({
               <p className="text-ed-sub text-off-black-ink">No scholarships match your current filters.</p>
               <p className="mt-2 text-ed-body text-graphite">Try removing some filters or updating your profile details — new opportunities land daily.</p>
             </div>
+          ) : view === 'table' ? (
+              <TrackerTable items={filteredList} applications={applications} onTrackScholarship={onTrackScholarship} />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
-              {filteredList.map((s, idx) => {
-                const isDark = idx % 3 === 2;
-                return (
-                  <div key={s.id} onClick={() => navigate(`/scholarships/browse/${s.slug || s.id}`)} className={isDark ? 'md:col-span-2 lg:col-span-1 cursor-pointer' : 'cursor-pointer'}>
-                    <BrowseCard
-                      s={s}
-                      dark={isDark}
-                      comparing={compareIds.has(s.id)}
-                      onToggleCompare={() => toggleCompare(s.id)}
-                    />
-                  </div>
-                );
-              })}
-            </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+                {filteredList.map((s, idx) => {
+                  const isDark = idx % 3 === 2;
+                  return (
+                    <div key={s.id} onClick={() => navigate(`/scholarships/browse/${s.slug || s.id}`)} className={isDark ? 'md:col-span-2 lg:col-span-1 cursor-pointer' : 'cursor-pointer'}>
+                      <BrowseCard
+                        s={s}
+                        dark={isDark}
+                        comparing={compareIds.has(s.id)}
+                        onToggleCompare={() => toggleCompare(s.id)}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
           )}
          </div>
 

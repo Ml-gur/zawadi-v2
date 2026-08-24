@@ -200,10 +200,8 @@ export default function App() {
     });
   }, []);
 
-  useEffect(() => {
-    fetchScholarships();
-  }, []);
-
+  // Scholarships load once via fetchUserData after login (or via the public
+  // API for guests) — a second fetch here doubled the payload on every login.
   useEffect(() => {
     if (user?.email) fetchUserData(user.email);
   }, [user?.email]);

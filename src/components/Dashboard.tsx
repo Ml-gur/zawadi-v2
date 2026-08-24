@@ -30,6 +30,7 @@ export default function Dashboard({
   user,
   scholarships,
   applications,
+  documents,
   onNavigateToTab,
   onViewScholarship,
 }: DashboardProps) {
@@ -38,9 +39,23 @@ export default function Dashboard({
   const draftingCount = applications.filter(a => a.status === 'Drafting' || a.status === 'Preparing Documents' || a.status === 'Essay Drafting').length;
   const savedCount = applications.filter(a => a.status === 'Saved').length;
 
+  // Matching only runs when the engine has real criteria to score against.
+  const missingProfileFields = [
+    !user?.country && 'Nationality',
+    !user?.degree_level && 'Degree level',
+    !user?.field_of_study && 'Field of study',
+    !user?.gpa && 'GPA',
+    !user?.date_of_birth && 'Date of birth',
+  ].filter(Boolean) as string[];
+  const profileComplete = missingProfileFields.length === 0;
+
+  const docsPending = (documents || []).filter(d => !d.analysis_status || d.analysis_status === 'pending');
+  const docsReady = (documents || []).filter(d => d.analysis_status === 'completed');
+
   const now = new Date();
   const urgentList = scholarships
     .filter(s => s.published && s.deadline && !s.deadline.toLowerCase().includes('varies') && !s.deadline.toLowerCase().includes('annual'))
+    .filter(s => !s.opens_at || Date.parse(s.opens_at) <= now.getTime())
     .map(s => ({ ...s, _daysLeft: Math.ceil((new Date(s.deadline).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) }))
     .filter(s => s._daysLeft > 0 && s._daysLeft <= 30)
     .sort((a, b) => a._daysLeft - b._daysLeft);
@@ -90,14 +105,72 @@ export default function Dashboard({
             <div>
               <h2 className="text-xl font-medium text-off-black-ink">AI Match Center</h2>
               <p className="text-sm text-graphite">
-                {strongMatchCount > 0
-                  ? `${strongMatchCount} high-eligibility matches found`
-                  : `${scholarships.filter(s => s.published).length} live opportunities ranked for you`}
+                {!profileComplete
+                  ? 'Matching starts once your profile has nationality, degree, field and GPA.'
+                  : strongMatchCount > 0
+                    ? `${strongMatchCount} high-eligibility matches found`
+                    : scholarships.length > 0
+                      ? `${scholarships.filter(s => s.published).length} live opportunities ranked for you`
+                      : 'Live opportunities loading…'}
               </p>
             </div>
           </div>
-          <ArrowRight className="w-5 h-5 text-graphite group-hover:text-off-black-ink transition-transform duration-300 group-hover:translate-x-1.5 hidden sm:block" />
+          {!profileComplete ? (
+            <button
+              onClick={(e) => { e.stopPropagation(); onNavigateToTab('profile'); }}
+              className="inline-flex items-center justify-center rounded-full bg-electric-lime px-6 min-h-[44px] text-ed-body-sm font-medium text-off-black-ink hover:bg-lime-hover active:scale-[0.98] transition-all shrink-0"
+            >
+              Finish profile ({missingProfileFields.length} left)
+            </button>
+          ) : (
+            <ArrowRight className="w-5 h-5 text-graphite group-hover:text-off-black-ink transition-transform duration-300 group-hover:translate-x-1.5 hidden sm:block" />
+          )}
         </div>
+
+        {/* Setup completion panel — shown until profile + documents are genuinely ready */}
+        {(!profileComplete || docsPending.length > 0) && (
+          <div className="col-span-1 md:col-span-12 bg-pure-white border border-ash rounded-ed p-8 md:p-10">
+            <h3 className="text-ed-sub text-off-black-ink tracking-tight">
+              {profileComplete ? 'Your documents are still being processed' : 'Two steps before matching can run'}
+            </h3>
+            <p className="mt-2 text-ed-body-sm text-graphite max-w-[64ch]">
+              {profileComplete
+                ? 'Percentages appear once your documents are analyzed — the engine reads your GPA, research and experience straight from them.'
+                : 'The engine scores you against each scholarship\u2019s real criteria: nationality, degree, field and GPA. Without them, any percentage would be a guess — and we don\u2019t guess.'}
+            </p>
+
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+              {!profileComplete && (
+                <div className="border border-ash rounded-lg p-5">
+                  <p className="text-ed-caption uppercase text-graphite">Step 1 · Profile</p>
+                  <p className="mt-2 text-ed-body-sm text-off-black-ink font-medium">
+                    Missing: {missingProfileFields.join(', ')}
+                  </p>
+                  <button
+                    onClick={() => onNavigateToTab('profile')}
+                    className="mt-4 inline-flex items-center justify-center rounded-full bg-electric-lime px-6 min-h-[44px] text-ed-body-sm font-medium text-off-black-ink hover:bg-lime-hover active:scale-[0.98] transition-all cursor-pointer"
+                  >
+                    Complete profile
+                  </button>
+                </div>
+              )}
+              <div className={`border rounded-lg p-5 ${docsPending.length > 0 ? 'border-electric-lime' : 'border-ash'}`}>
+                <p className="text-ed-caption uppercase text-graphite">{profileComplete ? 'Document status' : 'Step 2 · Documents'}</p>
+                <p className="mt-2 text-ed-body-sm text-off-black-ink font-medium">
+                  {documents.length === 0
+                    ? 'No documents uploaded yet — matching uses your transcripts and CV to verify GPA and experience.'
+                    : `${docsReady.length} analyzed · ${docsPending.length} pending`}
+                </p>
+                <button
+                  onClick={() => onNavigateToTab('vault')}
+                  className="mt-4 inline-flex items-center justify-center rounded-full bg-off-black-ink px-6 min-h-[44px] text-ed-body-sm font-medium text-pure-white hover:bg-black active:scale-[0.98] transition-all cursor-pointer"
+                >
+                  {documents.length === 0 ? 'Open Doc Vault' : 'Review pending documents'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Applied Card */}
         <div
