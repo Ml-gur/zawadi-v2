@@ -45,3 +45,16 @@ USER ACTION: run migrations 013, 014, 015 in Supabase SQL editor; rotate Test@21
 4. scripts/migrate-data-to-new-project.mjs ready — copies published scholarships old→new AFTER migrations run.
 NOTE: dev now points at the EMPTY new project; app shows empty states until migrations + data copy complete.
 SQL ORDER: 001→015 numeric (see final message).
+
+## Session 4 — document pipeline audit (2026-08-24, commit 69e5869)
+ROOT CAUSE of permanently-Pending documents (found via live browser debugging):
+1. CORS: all 7 Edge Functions omitted 'apikey' from Access-Control-Allow-Headers →
+   browser preflight rejected every functions.invoke() → analysis never ran.
+2. Deployed document-analysis predates the bba7fb0 matchAll fix (stale deployment).
+FIXES: standard CORS allow-list on all 7 functions; vault auto-retry (pending >90s,
+once per session); verified repo regexes all global.
+PIPELINE (verified by direct function invoke + code audit): upload → storage → client
+text extraction → document-analysis fn (DEEPSEEK key) → documents.analysis_status=
+completed + profiles.doc_gpa_* enrichment → matching consumes extracted values.
+USER ACTION: supabase functions deploy (all 7) + secrets set on new project; auto-retry
+heals old pending docs on next vault visit after deploy.
