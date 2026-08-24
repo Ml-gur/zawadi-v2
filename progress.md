@@ -37,3 +37,11 @@
 7. Perf: explicit columns (-90KB/payload), removed duplicate fetch on login, deadline-ordered query.
 8. Full e2e: 272 passed / 5 skipped.
 USER ACTION: run migrations 013, 014, 015 in Supabase SQL editor; rotate Test@212 password.
+
+## Session 3 — eligibility specificity + new project env + GA (2026-08-24, commit 4b8308a)
+1. eligibilityInfo v2: regional markers (ECOWAS/EAC/SADC/IGAD/COMESA/CEN-SAD/AMU/ECCAS/Sub-Saharan/Francophone/Lusophone/OIC/Commonwealth) expand to REAL member-country lists via country-graph; only true continent-wide awards say "All African countries".
+2. EligibilityList component: inline "+N more / Show less" — verified live on a 21-country list (Commonwealth Master's).
+3. .env + .env.local → new project raomkgvnkgvbbezffpyb (anon + service-role, gitignored). GA G-TKPPCN8X3S via existing deferred Analytics component (verified gtag.js + dataLayer config fire).
+4. scripts/migrate-data-to-new-project.mjs ready — copies published scholarships old→new AFTER migrations run.
+NOTE: dev now points at the EMPTY new project; app shows empty states until migrations + data copy complete.
+SQL ORDER: 001→015 numeric (see final message).
