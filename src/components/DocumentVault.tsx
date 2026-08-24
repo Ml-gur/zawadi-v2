@@ -418,15 +418,21 @@ export default function DocumentVault({
                   </>
                 )}
                 {doc.analysis_status === 'failed' && (
-                  <span className="inline-flex items-center gap-1 bg-error/10 text-error text-[9px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border border-error/20">
+                  <span
+                    title={doc.analysis_error || 'Analysis failed'}
+                    className="inline-flex items-center gap-1 bg-error/10 text-error text-[9px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border border-error/20 cursor-help"
+                  >
                     <CircleAlert className="w-3 h-3" />
                     Failed
                   </span>
                 )}
                 {doc.analysis_status === 'pending' && (
-                  <span className="inline-flex items-center gap-1 bg-parchment text-graphite text-[9px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border border-ash">
-                    <Clock className="w-3 h-3" />
-                    Pending
+                  <span
+                    title={doc.analysis_error || 'Extracting and matching your document'}
+                    className="inline-flex items-center gap-1 bg-parchment text-graphite text-[9px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border border-ash"
+                  >
+                    <span className="inline-block w-2.5 h-2.5 border-2 border-graphite border-t-transparent rounded-full animate-spin" />
+                    Analyzing…
                   </span>
                 )}
                 {doc.analysis_status === 'completed' && !doc.ai_extraction_result && (
