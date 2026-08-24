@@ -13,3 +13,4 @@ test-results/
 playwright-report/
 .agents/
 skills-lock.json
+perf-mobile-tmp.mjs
