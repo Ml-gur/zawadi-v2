@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ArrowRight, BadgeCheck, CheckCircle2, CircleAlert, Clock, CloudUpload,
   Download, FileSpreadsheet, FileText, FolderOpen, IdCard, Info,
@@ -53,6 +53,23 @@ export default function DocumentVault({
     gpa: null, gpa_scale: null, gpa_system: null,
     graduation_year: null, work_experience_years: null, skills: [],
   });
+
+  // Honest auto-retry: analysis_status 'pending' used to sit there forever with a
+  // claim that it would "retry automatically". Make that true — docs pending for
+  // over 90s get one silent re-analysis attempt per session.
+  const autoRetriedRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    if (!onReanalyzeDocument) return;
+    const stuck = (documents || []).filter(d =>
+      d.analysis_status === 'pending' &&
+      !autoRetriedRef.current.has(d.id) &&
+      Date.parse(d.uploaded_at) < Date.now() - 90_000
+    );
+    for (const doc of stuck.slice(0, 3)) {
+      autoRetriedRef.current.add(doc.id);
+      onReanalyzeDocument(doc).catch(() => {});
+    }
+  }, [documents, onReanalyzeDocument]);
 
   const docTypes = [
     "CV / Resume", "Academic Transcript", "Motivation Letter", "Statement of Purpose",
