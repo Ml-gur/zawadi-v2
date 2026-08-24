@@ -384,9 +384,13 @@ export default function App() {
           if (status !== 'not_started') filtered.push(data as TrackerType);
           return filtered;
         });
+      } else if (error) {
+        console.error("Stage update failed", error);
+        toast.error(error.message || 'Could not update the stage. Try again.');
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error("Error setting scholarship milestone state", e);
+      toast.error(e?.message || 'Could not update the stage. Try again.');
     }
   };
 
@@ -437,10 +441,10 @@ export default function App() {
                 last_analyzed_at: new Date().toISOString(),
               }).eq('id', insertedDoc.id);
             } else {
-              const success = await invokeDocAnalysis(insertedDoc.id, docType, trimmed, user.email);
+              const analysis = await invokeDocAnalysis(insertedDoc.id, docType, trimmed, user.email);
               await supabase.from('documents').update({
-                analysis_status: success ? 'completed' : 'pending',
-                analysis_error: success ? null : 'Analysis will retry automatically.',
+                analysis_status: analysis.ok ? 'completed' : (analysis.retryable ? 'pending' : 'failed'),
+                analysis_error: analysis.ok ? null : (analysis.error || 'Analysis will retry automatically.'),
                 last_analyzed_at: new Date().toISOString(),
               }).eq('id', insertedDoc.id);
             }
@@ -506,7 +510,9 @@ export default function App() {
     }
   };
 
-  async function invokeDocAnalysis(documentId: string, docType: string, textContent: string, userEmail: string): Promise<boolean> {
+  interface DocAnalysisResult { ok: boolean; error?: string; retryable?: boolean }
+
+  async function invokeDocAnalysis(documentId: string, docType: string, textContent: string, userEmail: string): Promise<DocAnalysisResult> {
     const fnUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/document-analysis`;
 
     for (let attempt = 0; attempt < 2; attempt++) {
@@ -525,18 +531,23 @@ export default function App() {
         });
         if (!res.ok) {
           const errBody = await res.json().catch(() => ({}));
+          const errMsg = errBody?.error || `Analysis failed (HTTP ${res.status})`;
           console.error(`[invokeDocAnalysis] HTTP ${res.status}:`, errBody);
-          if (res.status === 401) return false;
-          continue;
+          // 4xx is deterministic (auth/validation/schema) — retrying cannot help
+          if (res.status >= 400 && res.status < 500) return { ok: false, error: errMsg, retryable: false };
+          if (attempt === 0) { await new Promise(r => setTimeout(r, 2000)); continue; }
+          return { ok: false, error: errMsg, retryable: true };
         }
         const result = await res.json();
-        return result?.success === true;
-      } catch (err) {
+        return result?.success === true ? { ok: true } : { ok: false, error: 'Analysis returned no result', retryable: true };
+      } catch (err: any) {
         console.error(`[invokeDocAnalysis] attempt ${attempt + 1} failed:`, err);
-        if (attempt === 0) await new Promise(r => setTimeout(r, 2000));
+        if (attempt === 0) { await new Promise(r => setTimeout(r, 2000)); continue; }
+        const msg = err?.name === 'TimeoutError' ? 'Analysis timed out' : (err?.message || 'Analysis service unreachable');
+        return { ok: false, error: msg, retryable: true };
       }
     }
-    return false;
+    return { ok: false, error: 'Analysis service unreachable', retryable: true };
   }
 
   const handleReanalyzeDocument = async (doc: DocumentVaultItem) => {
@@ -560,9 +571,9 @@ export default function App() {
         }).eq('id', doc.id);
         toast.error('Could not extract enough text from this document');
       } else {
-        const success = await invokeDocAnalysis(doc.id, doc.type, trimmed, user.email);
-        if (!success) {
-          toast.error('Document analysis service is temporarily unavailable. The document will be retried automatically.');
+        const analysis = await invokeDocAnalysis(doc.id, doc.type, trimmed, user.email);
+        if (!analysis.ok) {
+          toast.error(analysis.error || 'Document analysis failed. The document will be retried automatically.');
         } else {
           toast.success('Document analyzed successfully!');
         }
