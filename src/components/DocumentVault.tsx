@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  ArrowRight, BadgeCheck, CheckCircle2, CircleAlert, Clock, CloudUpload,
+  ArrowRight, BadgeCheck, CheckCircle2, CircleAlert, CloudUpload,
   Download, FileSpreadsheet, FileText, FolderOpen, IdCard, Info,
   MessageSquareText, Pencil, RotateCcw, Trash2, TriangleAlert, X,
 } from 'lucide-react';
