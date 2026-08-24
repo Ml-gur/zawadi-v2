@@ -65,7 +65,7 @@ export default defineConfig(() => {
               }
             },
             {
-              urlPattern: /^https?:\/\/localhost:3000\/api\/.*/i,
+              urlPattern: /\/api\/.*/i,
               handler: 'NetworkFirst',
               options: {
                 cacheName: 'api-cache',
@@ -88,7 +88,9 @@ export default defineConfig(() => {
             if (id.includes('node_modules/lucide-react')) return 'vendor-icons';
             if (id.includes('node_modules/@supabase')) return 'vendor-supabase';
             if (id.includes('node_modules/pdfjs-dist')) return 'vendor-pdf';
-            if (id.includes('node_modules/react-dom')) return 'vendor-react';
+            if (id.includes('node_modules/recharts') || id.includes('node_modules/d3-')) return 'vendor-charts';
+            if (id.includes('node_modules/motion') || id.includes('node_modules/framer-motion')) return 'vendor-motion';
+            if (id.includes('node_modules/react-dom') || id.includes('node_modules/react-router')) return 'vendor-react';
             if (id.includes('node_modules/react')) return 'vendor-react';
           }
         }

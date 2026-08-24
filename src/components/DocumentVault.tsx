@@ -1,9 +1,18 @@
 import React, { useState } from 'react';
+import {
+  ArrowRight, BadgeCheck, CheckCircle2, CircleAlert, Clock, CloudUpload,
+  Download, FileSpreadsheet, FileText, FolderOpen, IdCard, Info,
+  MessageSquareText, Pencil, RotateCcw, Trash2, TriangleAlert, X,
+} from 'lucide-react';
+import { SEO } from './SEO';
+import type { LucideIcon } from 'lucide-react';
 import { DocumentVaultItem, ExtractionConfirmationData } from '../types';
 import ConfirmationDialog from './ConfirmationDialog';
 import { downloadDocument } from '../lib/supabase-queries';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
+
+const helperCls = 'text-ed-caption normal-case tracking-normal text-graphite';
 
 interface DocumentVaultProps {
   user: any;
@@ -93,11 +102,11 @@ export default function DocumentVault({
     }
   };
 
-  const getDocIcon = (type: string) => {
-    if (type.includes('CV') || type.includes('Resume')) return 'badge';
-    if (type.includes('Transcript')) return 'table_chart';
-    if (type.includes('Letter') || type.includes('SOP') || type.includes('Purpose')) return 'description';
-    return 'article';
+  const getDocIcon = (type: string): LucideIcon => {
+    if (type.includes('CV') || type.includes('Resume')) return IdCard;
+    if (type.includes('Transcript')) return FileSpreadsheet;
+    if (type.includes('Letter') || type.includes('SOP') || type.includes('Purpose')) return FileText;
+    return FileText;
   };
 
   const getExtractionBadge = (doc: DocumentVaultItem) => {
@@ -105,9 +114,9 @@ export default function DocumentVault({
     if (!method || doc.analysis_status !== 'completed') return null;
 
     const badges: Record<string, { label: string; cls: string; tip: string }> = {
-      pattern: { label: 'P', cls: 'bg-green-100 text-green-700 border-green-200', tip: 'Extracted by pattern matching — no AI used' },
-      ai: { label: 'AI', cls: 'bg-purple-100 text-purple-700 border-purple-200', tip: 'Extracted by DeepSeek AI' },
-      hybrid: { label: 'H', cls: 'bg-status-warning/10 text-status-warning border-amber-200', tip: 'Hybrid — pattern matching with AI fallback' },
+      pattern: { label: 'P', cls: 'bg-parchment text-graphite border-ash', tip: 'Extracted by pattern matching — no AI used' },
+      ai: { label: 'AI', cls: 'bg-deep-charcoal text-pure-white border-deep-charcoal', tip: 'Extracted by DeepSeek AI' },
+      hybrid: { label: 'H', cls: 'bg-electric-lime/40 text-off-black-ink border-off-black-ink/20', tip: 'Hybrid — pattern matching with AI fallback' },
     };
 
     const b = badges[method] || badges.hybrid;
@@ -223,396 +232,395 @@ export default function DocumentVault({
 
   const confidenceIcon = (val: any, conf?: number) => {
     if (conf === undefined) return null;
-    if (conf >= 0.85) return <span title="High confidence" className="text-green-600 text-xs">&#10003;</span>;
-    if (conf >= 0.7) return <span title="Medium confidence — verify" className="text-amber-500 text-xs">&#9679;</span>;
-    return <span title="Low confidence — please verify" className="text-red-500 text-xs">&#9671;</span>;
+    if (conf >= 0.85) return <span title="High confidence" className="text-off-black-ink text-xs">&#10003;</span>;
+    if (conf >= 0.7) return <span title="Medium confidence — verify" className="text-stone text-xs">&#9679;</span>;
+    return <span title="Low confidence — please verify" className="text-error text-xs">&#9671;</span>;
   };
 
   return (
-    <div className="space-y-6 animate-sweep">
+    <div className="bg-pure-white text-off-black-ink max-w-[1200px] mx-auto px-4 sm:px-6 py-14 md:py-20">
+      <SEO title="Document Vault | Techsari" description="Store transcripts, MOI letters and recommendations once — reuse them across every application." path="/documentvault" noindex />
 
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h2 className="font-display text-2xl font-black text-primary">Document Vault folder</h2>
-          <p className="text-xs text-muted mt-0.5">Securely organize, match, and load credentials required for global admissions.</p>
-        </div>
-        <button
-          onClick={async () => {
-            setRefreshSpin(true);
-            await onRefreshDocuments();
-            setTimeout(() => setRefreshSpin(false), 600);
-          }}
-          className="p-2 border border-hairline hover:bg-off-black text-muted rounded-lg transition-colors cursor-pointer"
-          title="Refresh documents"
-        >
-          <span className={`material-symbols-outlined text-sm ${refreshSpin ? 'animate-spin' : ''}`}>refresh</span>
-        </button>
+      <div className="space-y-8 animate-sweep">
 
-        <div className="bg-canvas p-4 rounded-lg border border-hairline/60 w-full md:w-72 shrink-0">
-          <div className="flex justify-between items-center mb-2 text-xs">
-            <span className="font-semibold text-muted">Storage Slots</span>
-            <span className="font-black text-primary">
-              {currentCount} / {limit === 9999 ? 'Unlimited' : limit} used
-            </span>
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h2 className="text-ed-sub font-medium text-off-black-ink">Document Vault folder</h2>
+            <p className={helperCls + ' mt-0.5'}>Securely organize, match, and load credentials required for global admissions.</p>
           </div>
-          <div className="w-full bg-off-black rounded-full h-1.5 mb-2 overflow-hidden">
-            <div
-              className={`h-full bg-primary rounded-full transition-all`}
-              style={{ width: `${Math.min(100, (currentCount / limit) * 100)}%` }}
-            ></div>
-          </div>
-          <div className="flex justify-between items-center text-[10px] font-bold text-secondary mt-1 px-1">
-            <span>Tier: {userPlan.toUpperCase()}</span>
-            {userPlan === 'explorer' && (
-              <button
-                onClick={() => onNavigateToTab('billing')}
-                className="text-amber-500 hover:underline flex items-center gap-0.5 cursor-pointer"
-              >
-                Upgrade <span className="material-symbols-outlined text-[10px]">arrow_forward</span>
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {errorMsg && (
-        <div className="p-4 bg-error-container/10 border border-error/20 text-error text-xs rounded-lg flex items-center gap-2">
-          <span className="material-symbols-outlined text-sm">warning</span>
-          <span>{errorMsg}</span>
-        </div>
-      )}
-
-      {/* Upload Dropzone Form */}
-      <div className="bg-canvas border-2 border-dashed border-hairline/60 rounded-lg p-8 flex flex-col items-center justify-center text-center">
-        <div className="bg-primary/5 text-primary p-3 rounded-full mb-4">
-          <span className="material-symbols-outlined text-3xl">cloud_upload</span>
-        </div>
-        <h3 className="font-display text-lg font-bold text-cream mb-2">Load Credentials</h3>
-        <p className="text-xs text-muted mb-6 max-w-sm">Connect a virtual transcript, personal CV, or scanned ID to matching checklists.</p>
-
-        <form onSubmit={handleUpload} className="w-full max-w-lg flex flex-col md:flex-row gap-3 items-center justify-center">
-          <label className="w-full md:flex-1 cursor-pointer">
-            <span className={`block p-2.5 bg-off-black border border-hairline/60 rounded-lg text-xs ${selectedFile ? 'text-cream font-bold' : 'text-muted'}`}>
-              {selectedFile ? selectedFile.name : 'Choose file (PDF, JPG, PNG)'}
-            </span>
-            <input
-              type="file"
-              accept=".pdf,.jpg,.jpeg,.png"
-              onChange={handleFileSelect}
-              className="hidden"
-            />
-          </label>
-
-          <select
-            value={docType}
-            onChange={(e) => setDocType(e.target.value)}
-            className="w-full md:w-auto p-2.5 bg-off-black border border-hairline/60 rounded-lg text-xs text-cream focus:outline-none focus:border-primary cursor-pointer"
-          >
-            {docTypes.map((type) => (
-              <option key={type} value={type}>{type}</option>
-            ))}
-          </select>
-
           <button
-            type="submit"
-            disabled={uploading}
-            className="w-full md:w-auto bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream font-bold text-xs py-2.5 px-6 rounded-lg hover:bg-primary-container transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap flex items-center gap-2"
+            onClick={async () => {
+              setRefreshSpin(true);
+              await onRefreshDocuments();
+              setTimeout(() => setRefreshSpin(false), 600);
+            }}
+            className="icon-btn inline-flex items-center justify-center rounded-full border border-ash text-graphite hover:text-off-black-ink hover:border-graphite transition-colors cursor-pointer shrink-0 self-start md:self-auto"
+            title="Refresh documents"
           >
-            {uploading ? (
-              <>
-                <span className="inline-block w-3 h-3 border-2 border-on-primary border-t-transparent rounded-full animate-spin"></span>
-                Uploading...
-              </>
-            ) : 'Upload'}
+            <RotateCcw className={`w-4 h-4 ${refreshSpin ? 'animate-spin' : ''}`} />
           </button>
-        </form>
-      </div>
 
-      {/* Vault Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {documents.map((doc) => (
-          <div
-            key={doc.id}
-            className="bg-canvas border border-hairline/40 rounded-lg p-5 transition-shadow relative group"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className="bg-primary/5 text-primary p-3 rounded-lg">
-                <span className="material-symbols-outlined text-[24px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  {getDocIcon(doc.type)}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-1">
-                {doc.file_path && (
-                  <button
-                    onClick={async () => {
-                      try {
-                        const { data, error } = await downloadDocument(doc.file_path!);
-                        if (error) throw error;
-                        const url = URL.createObjectURL(data);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        a.download = doc.name;
-                        a.click();
-                        URL.revokeObjectURL(url);
-                      } catch {
-                        toast.error('Could not download file');
-                      }
-                    }}
-                    className="text-muted hover:text-primary transition-colors p-1 rounded-full hover:bg-off-black cursor-pointer"
-                    title="Download file"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">download</span>
-                  </button>
-                )}
-                <button
-                  onClick={() => setDocToDelete(doc.id)}
-                  className="text-muted hover:text-status-urgent transition-colors p-1 rounded-full hover:bg-off-black cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[18px]">delete</span>
-                </button>
-              </div>
-            </div>
-
-            <h4 className="font-bold text-sm text-cream mb-2 truncate" title={doc.name}>{doc.name}</h4>
-
-            <div className="flex items-center gap-2 mt-1 mb-2 flex-wrap">
-              {doc.ai_extraction_result && doc.analysis_status === 'completed' && (
-                <>
-                  {getExtractionBadge(doc)}
-                  <button
-                    onClick={() => openConfirmation(doc)}
-                    className="inline-flex items-center gap-1 bg-primary-fixed/20 text-primary text-[9px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border border-primary/20 cursor-pointer hover:bg-primary-fixed/40 transition-colors"
-                    title={doc.user_confirmed ? 'Confirmed by you' : 'Review & confirm extracted data'}
-                  >
-                    <span className="material-symbols-outlined text-[10px]">
-                      {doc.user_confirmed ? 'verified' : 'rate_review'}
-                    </span>
-                    {doc.user_confirmed ? 'Confirmed' : 'Review'}
-                  </button>
-                </>
-              )}
-              {doc.analysis_status === 'failed' && (
-                <span className="inline-flex items-center gap-1 bg-status-urgent/10 text-status-urgent text-[9px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border border-status-urgent/20">
-                  <span className="material-symbols-outlined text-[10px]">error_outline</span>
-                  Failed
-                </span>
-              )}
-              {doc.analysis_status === 'pending' && (
-                <span className="inline-flex items-center gap-1 bg-status-warning/10 text-status-warning text-[9px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border border-amber-200">
-                  <span className="material-symbols-outlined text-[10px]">pending</span>
-                  Pending
-                </span>
-              )}
-              {doc.analysis_status === 'completed' && !doc.ai_extraction_result && (
-                <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 text-[9px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border border-green-200">
-                  <span className="material-symbols-outlined text-[10px]">check_circle</span>
-                  Analyzed
-                </span>
-              )}
-              {(doc.analysis_status === 'unreadable' || doc.analysis_status === 'failed' || doc.analysis_status === null) && (
-                <button
-                  onClick={() => {
-                    setManualForm({
-                      institution_name: null, degree_level: null, field_of_study: null,
-                      gpa: null, gpa_scale: null, gpa_system: null,
-                      graduation_year: null, work_experience_years: null, skills: [],
-                    });
-                    setManualEntryDoc(doc);
-                  }}
-                  className="inline-flex items-center gap-1 bg-off-black text-muted text-[9px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border border-hairline/40 cursor-pointer hover:bg-primary-fixed/20 hover:text-primary transition-colors"
-                >
-                  <span className="material-symbols-outlined text-[10px]">edit_note</span>
-                  Enter manually
-                </button>
-              )}
-              {(doc.analysis_status === 'pending') && onReanalyzeDocument && (
-                <button
-                  onClick={async () => {
-                    setAiExtracting(doc.id);
-                    try {
-                      await onReanalyzeDocument(doc);
-                    } finally {
-                      setAiExtracting(null);
-                    }
-                  }}
-                  disabled={aiExtracting === doc.id}
-                  className="inline-flex items-center gap-1 bg-off-black text-muted text-[9px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border border-hairline/40 cursor-pointer hover:bg-primary-fixed/20 hover:text-primary transition-colors disabled:opacity-50"
-                >
-                  {aiExtracting === doc.id ? (
-                    <span className="inline-block w-2.5 h-2.5 border-2 border-on-surface-variant border-t-transparent rounded-full animate-spin"></span>
-                  ) : (
-                    <span className="material-symbols-outlined text-[10px]">refresh</span>
-                  )}
-                  {aiExtracting === doc.id ? 'Analyzing...' : 'Re-analyze'}
-                </button>
-              )}
-            </div>
-
-            <div className="flex justify-between items-center mt-2 pt-3 border-t border-hairline/10">
-              <span className="bg-off-black text-muted text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded">
-                {doc.type}
+          <div className="bg-pure-white p-4 rounded-lg border border-ash w-full md:w-72 shrink-0">
+            <div className="flex justify-between items-center mb-2 text-ed-caption">
+              <span className="font-medium text-graphite">Storage Slots</span>
+              <span className="font-medium text-off-black-ink">
+                {currentCount} / {limit === 9999 ? 'Unlimited' : limit} used
               </span>
-              <div className="text-right text-[10px] text-muted font-semibold">
-                <p>{doc.size}</p>
-                <p>Uploaded: {doc.uploaded_at}</p>
-              </div>
+            </div>
+            <div className="w-full bg-ash rounded-full h-1 mb-2 overflow-hidden">
+              <div
+                className={`h-full bg-electric-lime rounded-full transition-all`}
+                style={{ width: `${Math.min(100, (currentCount / limit) * 100)}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between items-center text-ed-caption font-medium text-graphite mt-1 px-1">
+              <span>Tier: {userPlan.toUpperCase()}</span>
+              {userPlan === 'explorer' && (
+                <button
+                  onClick={() => onNavigateToTab('billing')}
+                  className="text-off-black-ink underline decoration-electric-lime underline-offset-2 hover:text-graphite hover:decoration-graphite flex items-center gap-0.5 cursor-pointer"
+                >
+                  Upgrade <ArrowRight className="w-3 h-3" />
+                </button>
+              )}
             </div>
           </div>
-        ))}
+        </div>
 
-        {documents.length === 0 && (
-          <div className="col-span-12 text-center py-16 bg-canvas border border-hairline/40 rounded-lg">
-            <span className="material-symbols-outlined text-4xl text-muted mb-4">folder_open</span>
-            <h4 className="font-semibold text-cream mb-1">Your vault is completely empty</h4>
-            <p className="text-xs text-muted">Upload transcripts, motivation drafts, or resumes above to match opportunities.</p>
+        {errorMsg && (
+          <div className="p-4 bg-error/10 border border-error/20 rounded-lg flex items-center gap-2">
+            <TriangleAlert className="w-4 h-4 text-error shrink-0" />
+            <span className="text-ed-caption normal-case tracking-normal text-error">{errorMsg}</span>
           </div>
         )}
-      </div>
 
-      {/* Confirmation Modal */}
-      {confirmDoc && confirmData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-sweep">
-          <div className="bg-canvas rounded-lg border border-hairline w-full max-w-lg max-h-[80vh] flex flex-col">
-            <div className="p-5 border-b border-hairline/30 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary text-lg">verified</span>
-                <h3 className="font-display font-black text-primary text-sm">Confirm Extracted Details</h3>
+        {/* Upload Dropzone Form */}
+        <div className="bg-parchment border-2 border-dashed border-ash hover:border-graphite rounded-ed p-8 flex flex-col items-center justify-center text-center transition-colors">
+          <CloudUpload className="w-6 h-6 text-graphite mb-3" />
+          <h3 className="text-ed-body font-medium text-off-black-ink mb-1">Load Credentials</h3>
+          <p className={helperCls + ' mb-6 max-w-sm'}>Connect a virtual transcript, personal CV, or scanned ID to matching checklists.</p>
+
+          <form onSubmit={handleUpload} className="w-full max-w-lg flex flex-col md:flex-row gap-3 items-center justify-center">
+            <label className="w-full md:flex-1 cursor-pointer">
+              <span className={`block px-4 py-3 min-h-[44px] bg-pure-white border border-ash rounded-lg text-ed-body-sm truncate ${selectedFile ? 'text-off-black-ink font-medium' : 'text-graphite'}`}>
+                {selectedFile ? selectedFile.name : 'Choose file (PDF, JPG, PNG)'}
+              </span>
+              <input
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+            </label>
+
+            <select
+              value={docType}
+              onChange={(e) => setDocType(e.target.value)}
+              className="w-full md:w-auto px-4 py-3 min-h-[44px] bg-pure-white border border-ash rounded-lg text-ed-body-sm text-off-black-ink focus:border-graphite focus:outline-none cursor-pointer"
+            >
+              {docTypes.map((type) => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+
+            <button
+              type="submit"
+              disabled={uploading}
+              className="w-full md:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-electric-lime min-h-[44px] py-3 px-6 text-ed-body-sm font-medium text-off-black-ink hover:bg-lime-hover active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50 disabled:pointer-events-none whitespace-nowrap"
+            >
+              {uploading ? (
+                <>
+                  <span className="inline-block w-3 h-3 border-2 border-off-black-ink border-t-transparent rounded-full animate-spin"></span>
+                  Uploading...
+                </>
+              ) : 'Upload'}
+            </button>
+          </form>
+        </div>
+
+        {/* Vault Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {documents.map((doc) => (
+            <div
+              key={doc.id}
+              className="bg-pure-white border border-ash rounded-ed p-5 transition-colors relative group hover:border-graphite/60"
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-parchment text-graphite">
+                  {(() => { const DocIcon = getDocIcon(doc.type); return <DocIcon className="w-5 h-5" />; })()}
+                </div>
+
+                <div className="flex items-center gap-1">
+                  {doc.file_path && (
+                    <button
+                      onClick={async () => {
+                        try {
+                          const { data, error } = await downloadDocument(doc.file_path!);
+                          if (error) throw error;
+                          const url = URL.createObjectURL(data);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = doc.name;
+                          a.click();
+                          URL.revokeObjectURL(url);
+                        } catch {
+                          toast.error('Could not download file');
+                        }
+                      }}
+                      className="icon-btn inline-flex items-center justify-center rounded-full text-graphite hover:text-off-black-ink transition-colors cursor-pointer"
+                      title="Download file"
+                    >
+                      <Download className="w-4 h-4" />
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setDocToDelete(doc.id)}
+                    className="icon-btn inline-flex items-center justify-center rounded-full text-graphite hover:text-error transition-colors cursor-pointer"
+                    title="Delete document"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-              <button onClick={() => { setConfirmDoc(null); setConfirmData(null); }} className="p-1 hover:bg-off-black rounded cursor-pointer">
-                <span className="material-symbols-outlined text-lg">close</span>
-              </button>
+
+              <h4 className="font-medium text-ed-body-sm text-off-black-ink mb-2 truncate" title={doc.name}>{doc.name}</h4>
+
+              <div className="flex items-center gap-2 mt-1 mb-2 flex-wrap">
+                {doc.ai_extraction_result && doc.analysis_status === 'completed' && (
+                  <>
+                    {getExtractionBadge(doc)}
+                    <button
+                      onClick={() => openConfirmation(doc)}
+                      className={`inline-flex items-center gap-1 text-[9px] font-medium uppercase tracking-wider px-2 py-1 rounded-full border cursor-pointer transition-colors ${doc.user_confirmed ? 'bg-electric-lime text-off-black-ink border-off-black-ink' : 'bg-pure-white text-graphite border-ash hover:border-graphite hover:text-off-black-ink'}`}
+                      title={doc.user_confirmed ? 'Confirmed by you' : 'Review & confirm extracted data'}
+                    >
+                      {doc.user_confirmed ? <BadgeCheck className="w-3 h-3" /> : <MessageSquareText className="w-3 h-3" />}
+                      {doc.user_confirmed ? 'Confirmed' : 'Review'}
+                    </button>
+                  </>
+                )}
+                {doc.analysis_status === 'failed' && (
+                  <span className="inline-flex items-center gap-1 bg-error/10 text-error text-[9px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border border-error/20">
+                    <CircleAlert className="w-3 h-3" />
+                    Failed
+                  </span>
+                )}
+                {doc.analysis_status === 'pending' && (
+                  <span className="inline-flex items-center gap-1 bg-parchment text-graphite text-[9px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border border-ash">
+                    <Clock className="w-3 h-3" />
+                    Pending
+                  </span>
+                )}
+                {doc.analysis_status === 'completed' && !doc.ai_extraction_result && (
+                  <span className="inline-flex items-center gap-1 bg-electric-lime text-off-black-ink text-[9px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border border-off-black-ink">
+                    <CheckCircle2 className="w-3 h-3" />
+                    Analyzed
+                  </span>
+                )}
+                {(doc.analysis_status === 'unreadable' || doc.analysis_status === 'failed' || doc.analysis_status === null) && (
+                  <button
+                    onClick={() => {
+                      setManualForm({
+                        institution_name: null, degree_level: null, field_of_study: null,
+                        gpa: null, gpa_scale: null, gpa_system: null,
+                        graduation_year: null, work_experience_years: null, skills: [],
+                      });
+                      setManualEntryDoc(doc);
+                    }}
+                    className="inline-flex items-center gap-1 bg-pure-white text-graphite text-[9px] font-medium uppercase tracking-wider px-2 py-1 rounded-full border border-ash cursor-pointer hover:text-off-black-ink hover:border-graphite transition-colors"
+                  >
+                    <Pencil className="w-3 h-3" />
+                    Enter manually
+                  </button>
+                )}
+                {(doc.analysis_status === 'pending') && onReanalyzeDocument && (
+                  <button
+                    onClick={async () => {
+                      setAiExtracting(doc.id);
+                      try {
+                        await onReanalyzeDocument(doc);
+                      } finally {
+                        setAiExtracting(null);
+                      }
+                    }}
+                    disabled={aiExtracting === doc.id}
+                    className="inline-flex items-center gap-1 bg-pure-white text-graphite text-[9px] font-medium uppercase tracking-wider px-2 py-1 rounded-full border border-ash cursor-pointer hover:text-off-black-ink hover:border-graphite transition-colors disabled:opacity-50"
+                  >
+                    {aiExtracting === doc.id ? (
+                      <span className="inline-block w-2.5 h-2.5 border-2 border-off-black-ink border-t-transparent rounded-full animate-spin"></span>
+                    ) : (
+                      <RotateCcw className="w-3 h-3" />
+                    )}
+                    {aiExtracting === doc.id ? 'Analyzing...' : 'Re-analyze'}
+                  </button>
+                )}
+              </div>
+
+              <div className="flex justify-between items-center mt-2 pt-3 border-t border-ash">
+                <span className="bg-parchment text-graphite text-ed-eyebrow font-medium uppercase tracking-wider px-2.5 py-1 rounded-full">
+                  {doc.type}
+                </span>
+                <div className="text-right text-ed-caption text-graphite">
+                  <p>{doc.size}</p>
+                  <p>Uploaded: {doc.uploaded_at}</p>
+                </div>
+              </div>
             </div>
-            <div className="flex-1 overflow-y-auto p-5 space-y-3">
-              <p className="text-xs text-muted mb-2">Review the extracted information below. Fields with high confidence are pre-verified. Correct any errors before saving.</p>
-              <div className="bg-off-black rounded-lg p-4 space-y-3 text-xs">
-                {Object.entries(confirmData).map(([key, val]) => {
-                  if (key === 'skills') return null;
-                  const displayVal = val ?? '—';
-                  return (
-                    <div key={key} className="flex items-center justify-between gap-2">
-                      <span className="text-muted font-medium capitalize min-w-[120px]">{key.replace(/_/g, ' ')}</span>
-                      <div className="flex items-center gap-2 flex-1 justify-end">
+          ))}
+
+          {documents.length === 0 && (
+            <div className="col-span-full text-center py-16 bg-parchment border border-dashed border-ash rounded-ed">
+              <FolderOpen className="w-6 h-6 text-graphite mx-auto mb-4" />
+              <h4 className="font-medium text-ed-body text-off-black-ink mb-1">Your vault is completely empty</h4>
+              <p className={helperCls}>Upload transcripts, motivation drafts, or resumes above to match opportunities.</p>
+            </div>
+          )}
+        </div>
+
+        {/* Confirmation Modal */}
+        {confirmDoc && confirmData && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-off-black-ink/65 backdrop-blur-sm p-4 animate-sweep">
+            <div className="bg-pure-white rounded-ed border border-ash w-full max-w-lg max-h-[80vh] flex flex-col">
+              <div className="p-5 border-b border-ash flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <BadgeCheck className="w-4 h-4 text-off-black-ink" />
+                  <h3 className="font-medium text-ed-body-sm text-off-black-ink">Confirm Extracted Details</h3>
+                </div>
+                <button onClick={() => { setConfirmDoc(null); setConfirmData(null); }} className="icon-btn inline-flex items-center justify-center rounded-full text-graphite hover:text-off-black-ink transition-colors cursor-pointer">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-5 space-y-3">
+                <p className={helperCls + ' mb-2'}>Review the extracted information below. Fields with high confidence are pre-verified. Correct any errors before saving.</p>
+                <div className="bg-parchment rounded-lg p-4 space-y-3 text-ed-body-sm">
+                  {Object.entries(confirmData).map(([key, val]) => {
+                    if (key === 'skills') return null;
+                    const displayVal = val ?? '—';
+                    return (
+                      <div key={key} className="flex items-center justify-between gap-2">
+                        <span className="text-ed-caption font-medium text-graphite capitalize min-w-[120px]">{key.replace(/_/g, ' ')}</span>
+                        <div className="flex items-center gap-2 flex-1 justify-end">
+                          <input
+                            type={key === 'gpa' || key === 'work_experience_years' || key === 'graduation_year' ? 'number' : 'text'}
+                            value={displayVal === '—' ? '' : String(displayVal)}
+                            onChange={(e) => {
+                              const newData = { ...confirmData };
+                              const numVal = e.target.value ? (key === 'gpa' || key === 'work_experience_years' ? parseFloat(e.target.value) : key === 'graduation_year' ? parseInt(e.target.value) : e.target.value) : null;
+                              (newData as any)[key] = numVal;
+                              setConfirmData(newData);
+                            }}
+                            className="w-full max-w-[160px] px-2 py-2 min-h-[36px] bg-pure-white border border-ash rounded-md text-right text-ed-body-sm font-medium text-off-black-ink focus:border-graphite outline-none"
+                            step={key === 'gpa' ? '0.01' : '1'}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="text-ed-caption italic text-graphite">Your confirmed details will update your profile and improve scholarship matching.</p>
+              </div>
+              <div className="p-4 border-t border-ash flex justify-end gap-3">
+                <button
+                  onClick={() => { setConfirmDoc(null); setConfirmData(null); }}
+                  className="rounded-full border border-ash px-5 min-h-[44px] text-ed-caption font-medium text-graphite hover:text-off-black-ink hover:border-graphite transition-colors cursor-pointer"
+                >
+                  Skip for Now
+                </button>
+                <button
+                  onClick={handleSaveConfirmation}
+                  disabled={savingConfirm}
+                  className="inline-flex items-center gap-2 rounded-full bg-electric-lime px-6 min-h-[44px] text-ed-caption font-medium text-off-black-ink hover:bg-lime-hover active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {savingConfirm ? (
+                    <><span className="inline-block w-3 h-3 border-2 border-off-black-ink border-t-transparent rounded-full animate-spin"></span>Saving...</>
+                  ) : 'Save Confirmed Details'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Manual Entry Modal for unreadable/failed docs */}
+        {manualEntryDoc && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-off-black-ink/65 backdrop-blur-sm p-4 animate-sweep">
+            <div className="bg-pure-white rounded-ed border border-ash w-full max-w-lg max-h-[80vh] flex flex-col">
+              <div className="p-5 border-b border-ash flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Pencil className="w-4 h-4 text-off-black-ink" />
+                  <h3 className="font-medium text-ed-body-sm text-off-black-ink">Enter Details Manually</h3>
+                </div>
+                <button onClick={() => setManualEntryDoc(null)} className="icon-btn inline-flex items-center justify-center rounded-full text-graphite hover:text-off-black-ink transition-colors cursor-pointer">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-5 space-y-3">
+                <p className="text-ed-caption normal-case tracking-normal text-error mb-2 flex items-start gap-1.5">
+                  <Info className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                  <span>We could not read the text from your document. This may happen if the file is password-protected or uses an unusual format. Your document is safely stored. Please fill in your details below.</span>
+                </p>
+                <div className="bg-parchment rounded-lg p-4 space-y-3 text-ed-body-sm">
+                  {Object.entries(manualForm).map(([key, val]) => {
+                    if (key === 'skills') return null;
+                    const displayVal = val ?? '';
+                    return (
+                      <div key={key} className="flex items-center justify-between gap-2">
+                        <span className="text-ed-caption font-medium text-graphite capitalize min-w-[120px]">{key.replace(/_/g, ' ')}</span>
                         <input
-                          type={key === 'gpa' || key === 'work_experience_years' || key === 'graduation_year' ? 'number' : 'text'}
-                          value={displayVal === '—' ? '' : String(displayVal)}
+                          type={key === 'gpa' || key === 'work_experience_years' ? 'number' : key === 'graduation_year' ? 'number' : 'text'}
+                          value={String(displayVal)}
                           onChange={(e) => {
-                            const newData = { ...confirmData };
-                            const numVal = e.target.value ? (key === 'gpa' || key === 'work_experience_years' ? parseFloat(e.target.value) : key === 'graduation_year' ? parseInt(e.target.value) : e.target.value) : null;
-                            (newData as any)[key] = numVal;
-                            setConfirmData(newData);
+                            const newForm = { ...manualForm };
+                            const raw = e.target.value;
+                            (newForm as any)[key] = key === 'gpa' ? (raw ? parseFloat(raw) : null) : key === 'work_experience_years' ? (raw ? parseFloat(raw) : null) : key === 'graduation_year' ? (raw ? parseInt(raw) : null) : raw || null;
+                            setManualForm(newForm);
                           }}
-                          className="w-full max-w-[160px] p-1.5 bg-off-black border border-hairline/40 rounded text-right text-cream font-bold"
+                          className="w-full max-w-[160px] px-2 py-2 min-h-[36px] bg-pure-white border border-ash rounded-md text-right text-ed-body-sm font-medium text-off-black-ink focus:border-graphite outline-none"
                           step={key === 'gpa' ? '0.01' : '1'}
                         />
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-              <p className="text-[10px] text-muted italic">Your confirmed details will update your profile and improve scholarship matching.</p>
-            </div>
-            <div className="p-4 border-t border-hairline/30 flex justify-end gap-3">
-              <button
-                onClick={() => { setConfirmDoc(null); setConfirmData(null); }}
-                className="text-xs font-bold text-muted px-4 py-2 rounded-lg hover:bg-off-black cursor-pointer"
-              >
-                Skip for Now
-              </button>
-              <button
-                onClick={handleSaveConfirmation}
-                disabled={savingConfirm}
-                className="bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream font-bold text-xs px-6 py-2 rounded-lg hover:bg-primary-container transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-2"
-              >
-                {savingConfirm ? (
-                  <><span className="inline-block w-3 h-3 border-2 border-on-primary border-t-transparent rounded-full animate-spin"></span>Saving...</>
-                ) : 'Save Confirmed Details'}
-              </button>
+              <div className="p-4 border-t border-ash flex justify-end gap-3">
+                <button
+                  onClick={() => setManualEntryDoc(null)}
+                  className="rounded-full border border-ash px-5 min-h-[44px] text-ed-caption font-medium text-graphite hover:text-off-black-ink hover:border-graphite transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleManualSave}
+                  disabled={savingConfirm}
+                  className="inline-flex items-center gap-2 rounded-full bg-electric-lime px-6 min-h-[44px] text-ed-caption font-medium text-off-black-ink hover:bg-lime-hover active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {savingConfirm ? (
+                    <><span className="inline-block w-3 h-3 border-2 border-off-black-ink border-t-transparent rounded-full animate-spin"></span>Saving...</>
+                  ) : 'Save Details'}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Manual Entry Modal for unreadable/failed docs */}
-      {manualEntryDoc && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-sweep">
-          <div className="bg-canvas rounded-lg border border-hairline w-full max-w-lg max-h-[80vh] flex flex-col">
-            <div className="p-5 border-b border-hairline/30 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-primary text-lg">edit_note</span>
-                <h3 className="font-display font-black text-primary text-sm">Enter Details Manually</h3>
-              </div>
-              <button onClick={() => setManualEntryDoc(null)} className="p-1 hover:bg-off-black rounded cursor-pointer">
-                <span className="material-symbols-outlined text-lg">close</span>
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-5 space-y-3">
-              <p className="text-xs text-status-urgent mb-2 flex items-center gap-1">
-                <span className="material-symbols-outlined text-sm">info</span>
-                We could not read the text from your document. This may happen if the file is password-protected or uses an unusual format. Your document is safely stored. Please fill in your details below.
-              </p>
-              <div className="bg-off-black rounded-lg p-4 space-y-3 text-xs">
-                {Object.entries(manualForm).map(([key, val]) => {
-                  if (key === 'skills') return null;
-                  const displayVal = val ?? '';
-                  return (
-                    <div key={key} className="flex items-center justify-between gap-2">
-                      <span className="text-muted font-medium capitalize min-w-[120px]">{key.replace(/_/g, ' ')}</span>
-                      <input
-                        type={key === 'gpa' || key === 'work_experience_years' ? 'number' : key === 'graduation_year' ? 'number' : 'text'}
-                        value={String(displayVal)}
-                        onChange={(e) => {
-                          const newForm = { ...manualForm };
-                          const raw = e.target.value;
-                          (newForm as any)[key] = key === 'gpa' ? (raw ? parseFloat(raw) : null) : key === 'work_experience_years' ? (raw ? parseFloat(raw) : null) : key === 'graduation_year' ? (raw ? parseInt(raw) : null) : raw || null;
-                          setManualForm(newForm);
-                        }}
-                        className="w-full max-w-[160px] p-1.5 bg-off-black border border-hairline/40 rounded text-right text-cream font-bold"
-                        step={key === 'gpa' ? '0.01' : '1'}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-            <div className="p-4 border-t border-hairline/30 flex justify-end gap-3">
-              <button
-                onClick={() => setManualEntryDoc(null)}
-                className="text-xs font-bold text-muted px-4 py-2 rounded-lg hover:bg-off-black cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleManualSave}
-                disabled={savingConfirm}
-                className="bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream font-bold text-xs px-6 py-2 rounded-lg hover:bg-primary-container transition-colors cursor-pointer disabled:opacity-50 flex items-center gap-2"
-              >
-                {savingConfirm ? (
-                  <><span className="inline-block w-3 h-3 border-2 border-on-primary border-t-transparent rounded-full animate-spin"></span>Saving...</>
-                ) : 'Save Details'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+        <ConfirmationDialog
+          isOpen={!!docToDelete}
+          title="Delete Document from Vault"
+          message={`Are you sure you want to permanently delete "${documents.find(d => d.id === docToDelete)?.name || 'this document'}" from your Document Vault? This entry will be removed alongside any real-time checklist associations.`}
+          confirmText="Yes, Delete"
+          cancelText="Keep Document"
+          type="danger"
+          onConfirm={() => {
+            if (docToDelete) {
+              onRemoveDoc(docToDelete);
+              setDocToDelete(null);
+            }
+          }}
+          onCancel={() => setDocToDelete(null)}
+        />
 
-      <ConfirmationDialog
-        isOpen={!!docToDelete}
-        title="Delete Document from Vault"
-        message={`Are you sure you want to permanently delete "${documents.find(d => d.id === docToDelete)?.name || 'this document'}" from your Document Vault? This entry will be removed alongside any real-time checklist associations.`}
-        confirmText="Yes, Delete"
-        cancelText="Keep Document"
-        type="danger"
-        onConfirm={() => {
-          if (docToDelete) {
-            onRemoveDoc(docToDelete);
-            setDocToDelete(null);
-          }
-        }}
-        onCancel={() => setDocToDelete(null)}
-      />
-
+      </div>
     </div>
   );
 }

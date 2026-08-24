@@ -1,6 +1,6 @@
-import React from 'react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, Compass, SearchX } from 'lucide-react';
 import { SEO } from './SEO';
-import { GhostPillButton } from './ui';
 
 interface NotFoundPageProps {
   onBack?: () => void;
@@ -8,37 +8,51 @@ interface NotFoundPageProps {
 
 export default function NotFoundPage({ onBack }: NotFoundPageProps) {
   return (
-    <div className="min-h-[100dvh] bg-canvas text-cream flex items-center justify-center px-6">
+    <div className="min-h-[80dvh] bg-pure-white text-off-black-ink flex items-center justify-center px-4 sm:px-6 py-20">
       <SEO
-        title="Page Not Found — Techsari Zawadi"
-        description="The page you are looking for does not exist. Return to the Zawadi homepage to find scholarships for African students."
+        title="Page Not Found — Techsari"
+        description="The page you are looking for does not exist. Return to the Techsari homepage to find scholarships for African students."
         path="/404"
       />
-      <div className="text-center max-w-md">
-        <div className="w-16 h-16 rounded-lg bg-accent-green/10 flex items-center justify-center mx-auto mb-6">
-          <svg className="w-8 h-8 text-accent-green" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-        <h1 className="text-4xl font-semibold text-cream tracking-tight mb-3">404</h1>
-        <p className="text-muted text-sm mb-8">
-          This page does not exist. It may have been moved or the link you followed may be broken.
+      <div className="w-full max-w-lg bg-parchment border border-ash rounded-ed p-8 md:p-12 text-center animate-sweep">
+        <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-electric-lime mb-6" aria-hidden>
+          <SearchX className="w-5 h-5 text-off-black-ink" strokeWidth={1.75} />
+        </span>
+
+        <p className="text-ed-caption uppercase text-graphite">Error 404</p>
+        <h1 className="mt-2 text-ed-h1-sm text-off-black-ink tracking-tight">
+          This page isn't on our map.
+        </h1>
+        <p className="mt-3 text-ed-body text-graphite max-w-[42ch] mx-auto">
+          The link may be broken or the page moved. The scholarship directory,
+          however, is very much alive — new verified grants land daily.
         </p>
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <GhostPillButton
-            variant="gradient"
-            size="sm"
-            onClick={() => window.location.href = '/'}
+
+        <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+          {onBack ? (
+            <button
+              onClick={onBack}
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-electric-lime px-7 min-h-[52px] text-base font-medium text-off-black-ink hover:bg-lime-hover active:scale-[0.98] transition-all cursor-pointer"
+            >
+              <Compass className="w-4 h-4" aria-hidden />
+              Go to homepage
+            </button>
+          ) : (
+            <Link
+              to="/"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-electric-lime px-7 min-h-[52px] text-base font-medium text-off-black-ink hover:bg-lime-hover active:scale-[0.98] transition-all"
+            >
+              <Compass className="w-4 h-4" aria-hidden />
+              Go to homepage
+            </Link>
+          )}
+          <Link
+            to="/scholarships/browse"
+            className="inline-flex items-center justify-center gap-2 rounded-full border border-off-black-ink px-6 min-h-[52px] text-base font-medium text-off-black-ink hover:bg-off-black-ink hover:text-pure-white active:scale-[0.98] transition-all"
           >
-            Go to Homepage
-          </GhostPillButton>
-          <GhostPillButton
-            variant="outline"
-            size="sm"
-            onClick={() => window.location.href = '/scholarships'}
-          >
-            Browse Scholarships
-          </GhostPillButton>
+            Browse scholarships
+            <ArrowRight className="w-4 h-4" aria-hidden />
+          </Link>
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { SEO } from './SEO';
+import { Breadcrumbs } from './Breadcrumbs';
 
 interface TermsOfServiceProps {
   onBack?: () => void;
@@ -15,13 +16,7 @@ export default function TermsOfService({ onBack }: TermsOfServiceProps) {
       />
       <section className="px-6 py-20 md:py-24">
         <div className="max-w-[800px] mx-auto">
-          <button
-            onClick={onBack}
-            className="flex items-center gap-2 text-xs font-bold text-muted hover:text-cream mb-8 cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[16px]">arrow_back</span>
-            Back to Home
-          </button>
+          <Breadcrumbs items={[{ name: 'Terms of service', path: '/terms' }]} />
 
           <h1 className="text-3xl md:text-5xl font-display font-semibold text-cream tracking-tight mb-2">Terms of Service</h1>
           <p className="text-sm text-muted mb-8">Last updated: May 27, 2026</p>

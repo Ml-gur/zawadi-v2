@@ -1,5 +1,34 @@
 const TIMEOUT_MS = 60_000;
 const MAX_RETRIES = 2;
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const MAX_REQUESTS_PER_WINDOW = 15;
+
+// In-memory rate limiting map
+const ipRequestCounts = new Map();
+
+function isRateLimited(ip) {
+  const now = Date.now();
+  const entry = ipRequestCounts.get(ip) || { count: 0, resetAt: now + RATE_LIMIT_WINDOW_MS };
+  
+  if (now > entry.resetAt) {
+    entry.count = 1;
+    entry.resetAt = now + RATE_LIMIT_WINDOW_MS;
+    ipRequestCounts.set(ip, entry);
+    return false;
+  }
+  
+  entry.count += 1;
+  ipRequestCounts.set(ip, entry);
+  return entry.count > MAX_REQUESTS_PER_WINDOW;
+}
+
+// Clean up stale entries every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, entry] of ipRequestCounts.entries()) {
+    if (now > entry.resetAt) ipRequestCounts.delete(ip);
+  }
+}, 300_000);
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -9,7 +38,7 @@ async function callProvider(provider, params) {
   const systemInstruction = params.systemInstruction;
   const prompt = params.prompt;
   const temperature = typeof params.temperature === 'number' ? params.temperature : 0.8;
-  const maxTokens = params.maxOutputTokens || 1500;
+  const maxTokens = Math.min(params.maxOutputTokens || 1500, 4000);
 
   if (provider === 'openai') {
     const key = process.env.OPENAI_API_KEY;
@@ -84,9 +113,14 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const clientIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
+  if (isRateLimited(clientIp)) {
+    return res.status(429).json({ error: 'Rate limit exceeded. Please wait a minute before requesting AI generations.' });
+  }
+
   const { provider: requestedProvider, systemInstruction, prompt, temperature, maxOutputTokens, deepseekModel, reasoningEffort } = req.body || {};
-  if (!prompt || typeof prompt !== 'string' || prompt.length > 32_000) {
-    return res.status(400).json({ error: 'Invalid or missing prompt' });
+  if (!prompt || typeof prompt !== 'string' || prompt.length > 20_000) {
+    return res.status(400).json({ error: 'Invalid or missing prompt (max 20,000 chars)' });
   }
 
   let provider = requestedProvider;
@@ -116,3 +150,4 @@ export default async function handler(req, res) {
     }
   }
 }
+

@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import toast from 'react-hot-toast';
+import { Copy, History, MessagesSquare, MessageSquareText, Plus, Save, SendHorizonal, Sparkles, Zap } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { EssayStudioGeneration } from '../types';
+import { SEO } from './SEO';
 
 interface EssayGeneratorProps {
   user: any;
@@ -343,20 +345,22 @@ export default function EssayGenerator({
   };
 
   return (
-    <div className="flex-1 flex flex-col lg:flex-row overflow-hidden gap-6 bg-off-black animate-sweep">
+    <div className="flex-1 w-full min-h-full flex flex-col lg:flex-row overflow-hidden gap-6 lg:gap-0 bg-parchment text-off-black-ink animate-sweep">
+      <SEO title="AI Essay Studio | Techsari" description="Draft, critique and polish scholarship essays with AI guidance and human mentor review." path="/essaygenerator" noindex />
+
 
       {/* Chat Panel */}
-      <div className="w-full lg:w-[420px] flex flex-col bg-canvas rounded-lg border border-hairline/60 overflow-hidden shrink-0">
-        <div className="flex border-b border-hairline">
+      <div className="w-full lg:w-[420px] flex flex-col bg-deep-charcoal text-pure-white rounded-ed m-0 lg:m-4 p-5 overflow-hidden shrink-0">
+        <div className="flex gap-1 bg-white/5 rounded-full p-1 mb-5 shrink-0">
           <button
             onClick={() => setActiveTab('chat')}
-            className={`flex-1 py-4 font-bold text-xs select-none outline-none border-b-2 uppercase tracking-wider ${activeTab === 'chat' ? 'text-primary border-primary bg-surface-bright' : 'text-muted hover:bg-off-black'}`}
+            className={`flex-1 py-2 rounded-full font-medium text-xs uppercase tracking-wider select-none outline-none transition-colors ${activeTab === 'chat' ? 'bg-electric-lime text-off-black-ink' : 'text-smoke hover:text-pure-white'}`}
           >
             Chat
           </button>
           <button
             onClick={() => setActiveTab('history')}
-            className={`flex-1 py-4 font-bold text-xs select-none outline-none border-b-2 uppercase tracking-wider ${activeTab === 'history' ? 'text-primary border-primary bg-surface-bright' : 'text-muted hover:bg-off-black'}`}
+            className={`flex-1 py-2 rounded-full font-medium text-xs uppercase tracking-wider select-none outline-none transition-colors ${activeTab === 'history' ? 'bg-electric-lime text-off-black-ink' : 'text-smoke hover:text-pure-white'}`}
           >
             History
           </button>
@@ -364,18 +368,18 @@ export default function EssayGenerator({
 
         {activeTab === 'chat' ? (
           <>
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-surface-bright/50">
+            <div className="flex-1 overflow-y-auto p-1 space-y-3">
               {messages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[85%] p-3 rounded-lg text-xs leading-relaxed ${
                     msg.role === 'user'
-                      ? 'bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream rounded-br-sm'
-                      : 'bg-off-black text-cream rounded-bl-sm'
+                      ? 'bg-electric-lime text-off-black-ink rounded-br-sm'
+                      : 'bg-white/5 border border-white/10 text-pure-white rounded-bl-sm'
                   }`}>
                     {msg.role === 'ai' && (
                       <div className="flex items-center gap-1.5 mb-1.5">
-                        <span className="material-symbols-outlined text-[14px] text-primary">auto_awesome</span>
-                        <span className="font-black text-[10px] uppercase tracking-wider text-primary">Zawadi Coach</span>
+                        <Sparkles className="w-3.5 h-3.5 text-electric-lime" aria-hidden />
+                        <span className="font-medium text-[10px] uppercase tracking-wider text-electric-lime">Techsari Coach</span>
                       </div>
                     )}
                     <div className="whitespace-pre-wrap">{msg.content}</div>
@@ -385,12 +389,12 @@ export default function EssayGenerator({
               <div ref={chatEndRef} />
             </div>
 
-            <div className="p-3 border-t border-hairline bg-canvas">
+            <div className="pt-3 mt-1 border-t border-white/10 shrink-0">
               {collectingStep === 'scholarship' && scholarships.length > 0 && (
                 <div className="mb-2">
                   <select
                     onChange={(e) => { if (e.target.value) { setInput(e.target.value); inputRef.current?.focus(); } }}
-                    className="w-full p-2 bg-off-black border border-hairline rounded-lg text-xs font-bold text-cream focus:outline-none focus:border-primary cursor-pointer"
+                    className="w-full p-2 bg-white/5 border border-white/10 rounded-lg text-xs font-medium text-pure-white focus:outline-none focus:border-electric-lime cursor-pointer"
                     defaultValue=""
                   >
                     <option value="" disabled>Select a scholarship...</option>
@@ -410,7 +414,7 @@ export default function EssayGenerator({
                     <button
                       key={i}
                       onClick={() => { setInput(s); inputRef.current?.focus(); }}
-                      className="text-[10px] font-bold px-2.5 py-1 rounded-full border border-hairline text-muted hover:bg-off-black hover:border-primary transition-colors cursor-pointer"
+                      className="text-[10px] font-medium px-2.5 py-1 rounded-full border border-white/10 text-smoke hover:border-electric-lime hover:text-pure-white transition-colors cursor-pointer"
                     >
                       {s}
                     </button>
@@ -431,53 +435,53 @@ export default function EssayGenerator({
                       ? 'AI is working...' : 'Type your message...'
                   }
                   disabled={convStage === 'generating_draft' || convStage === 'generating_critique' || convStage === 'generating_polish'}
-                  className="flex-1 p-2.5 rounded-lg border border-hairline bg-surface-bright text-xs text-cream placeholder:opacity-50 focus:outline-none focus:border-primary disabled:opacity-40"
+                  className="flex-1 p-2.5 rounded-full border border-white/10 bg-white/5 text-xs text-pure-white placeholder:text-smoke focus:outline-none focus:border-electric-lime disabled:opacity-40"
                 />
                 <button
                   onClick={handleSendMessage}
                   disabled={convStage === 'generating_draft' || convStage === 'generating_critique' || convStage === 'generating_polish' || !input.trim()}
-                  className="p-2.5 bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream rounded-lg hover:bg-primary-container transition-colors disabled:opacity-40 cursor-pointer"
+                  className="p-2.5 bg-electric-lime hover:bg-lime-hover text-off-black-ink rounded-full transition-colors disabled:opacity-40 cursor-pointer"
                 >
-                  <span className="material-symbols-outlined text-sm">send</span>
+                  <SendHorizonal className="w-4 h-4" aria-hidden />
                 </button>
               </div>
-              <p className="text-[9px] text-muted text-center mt-1.5 font-semibold">
+              <p className="w-fit mx-auto mt-2 px-3 py-1 rounded-full bg-parchment border border-ash text-ed-eyebrow uppercase tracking-wider text-graphite">
                 Daily: {remainingToday}/{dailyLimit} essays remaining
               </p>
             </div>
           </>
         ) : (
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-surface-bright">
-            {essays.map((e) => (
-              <div
-                key={e.id}
-                onClick={() => {
-                  setCollected({
-                    scholarshipName: e.scholarship_name,
-                    essayType: e.essay_type,
-                    notes: e.prompt,
-                    wordCount: 500,
-                  });
-                  setDraftContent(e.draft);
-                  setPolishedContent(e.final);
-                  setDisplayedText(e.final || e.draft);
-                  setStage(e.final ? 'ready_polish' : 'ready_draft');
-                  setConvStage(e.final ? 'polish_ready' : 'draft_ready');
-                  setActiveTab('chat');
-                  setMessages(prev => [...prev, { role: 'ai', content: `Loaded **${e.scholarship_name}** from history. What would you like to do with it?` }]);
-                }}
-                className="p-3 rounded-lg border border-hairline bg-canvas hover:border-primary cursor-pointer transition-all group"
-              >
-                <div className="flex justify-between items-start mb-1.5">
-                  <span className="bg-primary-fixed text-primary text-[9px] font-black px-2 py-0.5 rounded uppercase tracking-wider">{e.essay_type}</span>
+          <div className="flex-1 overflow-y-auto">
+            <div className="divide-y divide-white/10">
+              {essays.map((e) => (
+                <div
+                  key={e.id}
+                  onClick={() => {
+                    setCollected({
+                      scholarshipName: e.scholarship_name,
+                      essayType: e.essay_type,
+                      notes: e.prompt,
+                      wordCount: 500,
+                    });
+                    setDraftContent(e.draft);
+                    setPolishedContent(e.final);
+                    setDisplayedText(e.final || e.draft);
+                    setStage(e.final ? 'ready_polish' : 'ready_draft');
+                    setConvStage(e.final ? 'polish_ready' : 'draft_ready');
+                    setActiveTab('chat');
+                    setMessages(prev => [...prev, { role: 'ai', content: `Loaded **${e.scholarship_name}** from history. What would you like to do with it?` }]);
+                  }}
+                  className="py-4 cursor-pointer transition-colors group"
+                >
+                  <span className="inline-block bg-electric-lime text-off-black-ink text-[9px] font-medium px-2 py-0.5 rounded-full uppercase tracking-wider mb-1.5">{e.essay_type}</span>
+                  <h4 className="font-medium text-xs text-pure-white group-hover:text-electric-lime truncate">{e.scholarship_name}</h4>
+                  <p className="text-[10px] text-smoke truncate mt-1">{e.final || e.draft}</p>
                 </div>
-                <h4 className="font-bold text-xs text-primary group-hover:text-secondary truncate">{e.scholarship_name}</h4>
-                <p className="text-[10px] text-muted truncate mt-1">{e.final || e.draft}</p>
-              </div>
-            ))}
+              ))}
+            </div>
             {essays.length === 0 && (
-              <div className="text-center py-12 text-muted">
-                <span className="material-symbols-outlined text-3xl mb-2">history</span>
+              <div className="text-center py-12 text-smoke">
+                <History className="w-7 h-7 mx-auto mb-2" aria-hidden />
                 <p className="text-xs">No saved essays yet.</p>
               </div>
             )}
@@ -486,93 +490,95 @@ export default function EssayGenerator({
       </div>
 
       {/* Workspace Panel */}
-      <div className="flex-1 flex flex-col bg-canvas rounded-lg border border-hairline overflow-hidden">
-        <div className="px-5 py-3 border-b border-hairline bg-surface-bright flex items-center justify-between shrink-0">
+      <div className="flex-1 flex flex-col bg-pure-white border border-ash rounded-ed overflow-hidden lg:my-4 lg:mr-4">
+        <div className="px-5 py-3 border-b border-ash bg-pure-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5 text-xs">
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] ${
-                stage === 'drafting' ? 'bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream animate-pulse' :
-                stage === 'ready_draft' || stage === 'critiquing' || stage === 'ready_critique' || stage === 'polishing' || stage === 'ready_polish' ? 'bg-status-success text-canvas' : 'bg-off-black text-muted'
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center font-medium text-[10px] ${
+                stage === 'drafting' ? 'bg-electric-lime border border-off-black-ink text-off-black-ink animate-pulse' :
+                stage === 'ready_draft' || stage === 'critiquing' || stage === 'ready_critique' || stage === 'polishing' || stage === 'ready_polish' ? 'bg-off-black-ink text-pure-white' : 'bg-parchment border border-ash text-graphite'
               }`}>
                 {stage === 'ready_draft' || stage === 'critiquing' || stage === 'ready_critique' || stage === 'polishing' || stage === 'ready_polish' ? '✓' : '1'}
               </div>
-              <span className={`font-bold ${stage.startsWith('ready') || stage === 'critiquing' || stage === 'polishing' ? 'text-status-success' : 'text-primary'}`}>Draft</span>
+              <span className={`font-medium ${stage === 'idle' ? 'text-graphite' : 'text-off-black-ink'}`}>Draft</span>
             </div>
-            <div className="w-6 h-px bg-outline-variant/40"></div>
+            <div className="w-6 h-px bg-ash"></div>
             <div className={`flex items-center gap-1.5 text-xs transition-opacity ${stage === 'critiquing' || stage === 'ready_critique' || stage === 'polishing' || stage === 'ready_polish' ? 'opacity-100' : 'opacity-30'}`}>
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] ${
-                stage === 'critiquing' ? 'bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream animate-pulse' :
-                stage === 'ready_critique' || stage === 'polishing' || stage === 'ready_polish' ? 'bg-status-success text-canvas' : 'bg-off-black text-muted'
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center font-medium text-[10px] ${
+                stage === 'critiquing' ? 'bg-electric-lime border border-off-black-ink text-off-black-ink animate-pulse' :
+                stage === 'ready_critique' || stage === 'polishing' || stage === 'ready_polish' ? 'bg-off-black-ink text-pure-white' : 'bg-parchment border border-ash text-graphite'
               }`}>
                 {stage === 'ready_polish' || stage === 'polishing' ? '✓' : '2'}
               </div>
-              <span className={`font-bold ${stage === 'ready_polish' || stage === 'polishing' ? 'text-status-success' : 'text-primary'}`}>Critique</span>
+              <span className="font-medium text-off-black-ink">Critique</span>
             </div>
-            <div className="w-6 h-px bg-outline-variant/40"></div>
+            <div className="w-6 h-px bg-ash"></div>
             <div className={`flex items-center gap-1.5 text-xs transition-opacity ${stage === 'polishing' || stage === 'ready_polish' ? 'opacity-100' : 'opacity-30'}`}>
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] ${
-                stage === 'polishing' ? 'bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream animate-pulse' :
-                stage === 'ready_polish' ? 'bg-status-success text-canvas' : 'bg-off-black text-muted'
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center font-medium text-[10px] ${
+                stage === 'polishing' ? 'bg-electric-lime border border-off-black-ink text-off-black-ink animate-pulse' :
+                stage === 'ready_polish' ? 'bg-off-black-ink text-pure-white' : 'bg-parchment border border-ash text-graphite'
               }`}>3</div>
-              <span className={`font-bold ${stage === 'ready_polish' ? 'text-status-success' : 'text-primary'}`}>Polish</span>
+              <span className="font-medium text-off-black-ink">Polish</span>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             {stage.startsWith('ready') && workspaceContent() && (
               <>
-                <button onClick={handleCopy} className="p-1.5 border border-hairline hover:bg-off-black text-muted rounded-lg transition-colors cursor-pointer" title="Copy">
-                  <span className="material-symbols-outlined text-sm">content_copy</span>
+                <button onClick={handleCopy} className="p-1.5 border border-ash text-graphite hover:border-off-black-ink hover:text-off-black-ink rounded-full transition-colors cursor-pointer" title="Copy">
+                  <Copy className="w-4 h-4" aria-hidden />
                 </button>
-                <button onClick={handleSaveToVault} className="p-1.5 bg-secondary-container border border-secondary/30 text-on-secondary-container hover:bg-secondary-fixed rounded-lg transition-all cursor-pointer" title="Save to vault">
-                  <span className="material-symbols-outlined text-sm">folder_zip</span>
+                <button onClick={handleSaveToVault} className="p-1.5 bg-electric-lime hover:bg-lime-hover text-off-black-ink rounded-full transition-colors cursor-pointer" title="Save to vault">
+                  <Save className="w-4 h-4" aria-hidden />
                 </button>
                 {stage === 'ready_polish' && (
-                  <button onClick={handleSendToMentor} className="p-1.5 bg-primary border border-primary/30 text-on-primary hover:bg-primary-fixed hover:text-on-primary-fixed rounded-lg transition-all cursor-pointer flex items-center gap-1" title="Send for mentor review">
-                    <span className="material-symbols-outlined text-sm">rate_review</span>
-                    <span className="text-[10px] font-bold hidden sm:inline">Mentor Review</span>
+                  <button onClick={handleSendToMentor} className="p-1.5 pr-2.5 bg-electric-lime hover:bg-lime-hover text-off-black-ink rounded-full transition-colors cursor-pointer flex items-center gap-1" title="Send for mentor review">
+                    <MessageSquareText className="w-4 h-4" aria-hidden />
+                    <span className="text-[10px] font-medium hidden sm:inline">Mentor Review</span>
                   </button>
                 )}
               </>
             )}
             {stage !== 'idle' && (
-              <button onClick={handleRestart} className="p-1.5 border border-hairline hover:bg-off-black text-muted rounded-lg transition-colors cursor-pointer" title="New essay">
-                <span className="material-symbols-outlined text-sm">add</span>
+              <button onClick={handleRestart} className="p-1.5 border border-ash text-graphite hover:border-off-black-ink hover:text-off-black-ink rounded-full transition-colors cursor-pointer" title="New essay">
+                <Plus className="w-4 h-4" aria-hidden />
               </button>
             )}
           </div>
         </div>
 
-        <div className="flex-1 p-6 md:p-10 lg:px-16 overflow-y-auto relative bg-canvas">
+        <div className="flex-1 p-6 md:p-10 lg:px-16 overflow-y-auto relative bg-pure-white">
           {stage === 'idle' && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-muted">
-              <span className="material-symbols-outlined text-5xl mb-4 opacity-40">forum</span>
-              <h3 className="font-display text-lg font-black text-cream mb-1">Conversational Essay Studio</h3>
-              <p className="text-xs text-muted max-w-sm">Chat with your AI coach to craft compelling scholarship essays. Tell me about the scholarship you're applying for!</p>
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 text-graphite">
+              <MessagesSquare className="w-10 h-10 mb-4 text-stone" strokeWidth={1.5} aria-hidden />
+              <h3 className="text-lg font-medium text-off-black-ink mb-1">Conversational Essay Studio</h3>
+              <p className="text-xs text-graphite max-w-sm">Chat with your AI coach to craft compelling scholarship essays. Tell me about the scholarship you're applying for!</p>
             </div>
           )}
 
           {stage !== 'idle' && (
             <div className="max-w-2xl mx-auto space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-hairline/30">
+              <div className="flex items-center justify-between pb-3 border-b border-ash/70">
                 <div>
-                  <h2 className="font-display font-black text-primary text-sm">{workspaceTitle()}</h2>
+                  <h2 className="font-medium text-off-black-ink text-sm">{workspaceTitle()}</h2>
                   {collected.scholarshipName && (
-                    <p className="text-[10px] text-muted font-semibold mt-0.5">{collected.scholarshipName} — {collected.essayType}</p>
+                    <p className="text-[10px] text-graphite font-medium mt-0.5">{collected.scholarshipName} — {collected.essayType}</p>
                   )}
                 </div>
                 {(stage === 'drafting' || stage === 'critiquing' || stage === 'polishing') && (
-                  <span className="px-2 py-0.5 text-[9px] font-black uppercase tracking-wider rounded-full bg-status-warning/10 text-status-warning animate-pulse flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[10px]">hourglass_top</span>
+                  <span className="px-2.5 py-1 text-[9px] font-medium uppercase tracking-wider rounded-full bg-electric-lime text-off-black-ink animate-pulse flex items-center gap-1">
+                    <Zap className="w-3 h-3" aria-hidden />
                     Generating
                   </span>
                 )}
               </div>
-              <div className="font-body-md text-sm md:text-base text-cream leading-relaxed whitespace-pre-wrap font-light py-2">
-                {workspaceContent()}
-                {(stage === 'drafting' || stage === 'critiquing' || stage === 'polishing') && (
-                  <span className="w-2 h-4 inline-block bg-primary animate-pulse ml-0.5"></span>
-                )}
+              <div className="bg-parchment rounded-lg p-5">
+                <div className="text-sm md:text-base text-off-black-ink leading-relaxed whitespace-pre-wrap py-2">
+                  {workspaceContent()}
+                  {(stage === 'drafting' || stage === 'critiquing' || stage === 'polishing') && (
+                    <span className="w-2 h-4 inline-block bg-off-black-ink animate-pulse ml-0.5"></span>
+                  )}
+                </div>
               </div>
               <div ref={streamEndRef} />
             </div>

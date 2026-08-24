@@ -133,7 +133,7 @@ serve(async (req: Request) => {
     return corsResponse({ error: `Unknown action: ${action}` }, 400)
   } catch (err: any) {
     console.error('[process-payment] Error:', err.message)
-    return corsResponse({ error: 'Internal server error: ' + err.message }, 500)
+    return corsResponse({ error: 'Internal server error' }, 500)
   }
 })
 

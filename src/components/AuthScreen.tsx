@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { GhostPillButton } from './ui/GhostPillButton';
 
 interface AuthScreenProps {
   onLoginSuccess: (email: string, token?: string) => void;
   countries: string[];
+  onClose?: () => void;
 }
 
 const inputBase =
-  'w-full bg-canvas border rounded-lg px-4 py-3 min-h-[44px] text-cream placeholder:text-muted focus:border-accent-green focus-visible:ring-2 focus-visible:ring-accent-green/40 outline-none transition-colors';
-const inputClass = `${inputBase} border-hairline`;
+  'w-full bg-parchment border rounded-lg px-4 py-3 min-h-[44px] text-off-black-ink placeholder:text-stone focus:border-graphite focus-visible:ring-2 focus-visible:ring-surface-tint/40 outline-none transition-colors';
+const inputClass = `${inputBase} border-ash`;
 const inputErrorClass = `${inputBase} border-error`;
 
-export default function AuthScreen({ onLoginSuccess, countries }: AuthScreenProps) {
+export default function AuthScreen({ onLoginSuccess, countries, onClose }: AuthScreenProps) {
   const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
@@ -140,117 +141,123 @@ export default function AuthScreen({ onLoginSuccess, countries }: AuthScreenProp
   };
 
   return (
-    <div className="min-h-[85vh] flex items-center justify-center p-6 bg-canvas bg-grid-pattern">
-      <div className="w-full max-w-md bg-off-black border border-hairline rounded-lg p-6 animate-sweep">
-        <h3 className="font-display text-2xl font-black text-cream text-center mb-2">
-          {isSignUp ? "Create Account" : "Sign In"}
-        </h3>
-        <p className="text-xs text-muted text-center mb-8">
-          {isSignUp
-            ? "Your scholarship journey starts here."
-            : "Welcome back — continue your scholarship journey."
-          }
-        </p>
+    <div className="relative w-full max-w-md bg-pure-white border border-ash rounded-ed p-7 md:p-8 animate-sweep">
+      {onClose && (
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close sign in"
+          className="icon-btn absolute top-3 right-3 inline-flex items-center justify-center rounded-full text-graphite hover:text-off-black-ink transition-colors cursor-pointer"
+        >
+          <X className="w-5 h-5" aria-hidden />
+        </button>
+      )}
 
-        {errorMsg && (
-          <div className="mb-6 flex items-center gap-2 rounded-lg border border-error/20 bg-error/10 p-4 text-xs text-error">
-            <span className="material-symbols-outlined text-sm">warning</span>
-            <span>{errorMsg}</span>
+      <h3 className="text-heading tracking-tight text-off-black-ink mb-1.5">
+        {isSignUp ? 'Create your free profile' : 'Welcome back'}
+      </h3>
+      <p className="text-ed-body-sm text-graphite mb-7">
+        {isSignUp
+          ? 'Set up in three minutes. No fees, no card.'
+          : 'Sign in to manage your matched applications.'}
+      </p>
+
+      {errorMsg && (
+        <div className="mb-6 flex items-start gap-2 rounded-lg border border-error/30 bg-error/10 p-4 text-xs font-medium text-error">
+          <span>{errorMsg}</span>
+        </div>
+      )}
+
+      <div className="space-y-4" onKeyDown={handleKeyDown}>
+        {isSignUp && (
+          <div>
+            <label htmlFor="auth-name" className="mb-1.5 block text-ed-body-sm font-medium text-off-black-ink">Full Name</label>
+            <input
+              id="auth-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Your full name"
+              className={inputClass}
+              type="text"
+            />
           </div>
         )}
 
-        <div className="space-y-4" onKeyDown={handleKeyDown}>
-          {isSignUp && (
-            <div>
-              <label className="mb-2 block text-sm text-cream">Full Name</label>
-              <input
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Your full name"
-                className={inputClass}
-                type="text"
-              />
-            </div>
-          )}
-
-          <div>
-            <label className="mb-2 block text-sm text-cream">Email Address</label>
-            <input
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              className={emailError ? inputErrorClass : inputClass}
-              type="email"
-            />
-            {emailError && <p className="mt-1 text-xs text-error">{emailError}</p>}
-          </div>
-
-          {isSignUp && (
-            <div>
-              <label className="mb-2 block text-sm text-cream">Country of Citizenship</label>
-              <select
-                value={country}
-                onChange={(e) => setCountry(e.target.value)}
-                className={`${inputClass} cursor-pointer`}
-              >
-                {countries.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          <div>
-            <label className="mb-2 block text-sm text-cream">Password</label>
-            <input
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="At least 6 characters"
-              className={passwordError ? inputErrorClass : inputClass}
-              type="password"
-            />
-            {passwordError && <p className="mt-1 text-xs text-error">{passwordError}</p>}
-          </div>
-
-          <GhostPillButton
-            type="button"
-            variant="gradient"
-            fullWidth
-            disabled={loading}
-            onClick={handleSubmit}
-            className="mt-4"
-          >
-            {loading ? "Please wait..." : (isSignUp ? "Create Account" : "Sign In")}
-          </GhostPillButton>
-
-          {!isSignUp && (
-            <div className="mt-3 text-center">
-              <button
-                type="button"
-                onClick={() => navigate('/forgot-password')}
-                className="text-xs font-medium text-accent-green underline-offset-4 hover:underline transition-colors cursor-pointer"
-              >
-                Forgot Password?
-              </button>
-            </div>
-          )}
+        <div>
+          <label htmlFor="auth-email" className="mb-1.5 block text-ed-body-sm font-medium text-off-black-ink">Email Address</label>
+          <input
+            id="auth-email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            className={emailError ? inputErrorClass : inputClass}
+            type="email"
+            autoComplete="email"
+          />
+          {emailError && <p className="mt-1 text-xs text-error">{emailError}</p>}
         </div>
 
-        <div className="mt-6 text-center">
-          <button
-            type="button"
-            onClick={toggleMode}
-            className="text-xs font-medium text-accent-green underline-offset-4 hover:underline transition-colors cursor-pointer"
-          >
-            {isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up instead"}
-          </button>
+        {isSignUp && (
+          <div>
+            <label htmlFor="auth-country" className="mb-1.5 block text-ed-body-sm font-medium text-off-black-ink">Country of Citizenship</label>
+            <select
+              id="auth-country"
+              value={country}
+              onChange={(e) => setCountry(e.target.value)}
+              className={`${inputClass} cursor-pointer`}
+            >
+              {countries.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        <div>
+          <label htmlFor="auth-password" className="mb-1.5 block text-ed-body-sm font-medium text-off-black-ink">Password</label>
+          <input
+            id="auth-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="At least 6 characters"
+            className={passwordError ? inputErrorClass : inputClass}
+            type="password"
+            autoComplete={isSignUp ? 'new-password' : 'current-password'}
+          />
+          {passwordError && <p className="mt-1 text-xs text-error">{passwordError}</p>}
         </div>
+
+        <button
+          type="button"
+          disabled={loading}
+          onClick={handleSubmit}
+          className="w-full mt-2 inline-flex items-center justify-center rounded-full bg-electric-lime px-8 min-h-[52px] text-base font-medium text-off-black-ink hover:bg-lime-hover active:scale-[0.98] transition-all disabled:opacity-60 disabled:pointer-events-none cursor-pointer"
+        >
+          {loading ? 'Please wait…' : (isSignUp ? 'Create free account' : 'Continue to dashboard')}
+        </button>
 
         {!isSignUp && (
-          <p className="mt-6 text-xs text-center text-muted">
-            Sign in with your email and password
-          </p>
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => navigate('/forgot-password')}
+              className="text-xs font-medium text-graphite underline underline-offset-4 decoration-ash hover:text-off-black-ink hover:decoration-graphite transition-colors cursor-pointer"
+            >
+              Forgot password?
+            </button>
+          </div>
         )}
+      </div>
+
+      <div className="mt-6 pt-5 border-t border-ash text-center">
+        <button
+          type="button"
+          onClick={toggleMode}
+          className="text-xs font-medium text-graphite hover:text-off-black-ink transition-colors cursor-pointer"
+        >
+          {isSignUp ? 'Already have an account? ' : "Don't have an account yet? "}
+          <span className="underline underline-offset-4 decoration-electric-lime">{isSignUp ? 'Sign in' : 'Sign up free'}</span>
+        </button>
       </div>
     </div>
   );

@@ -1,4 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
+import {
+  Award,
+  ArrowLeft,
+  ArrowRight,
+  BarChart3,
+  CheckCircle2,
+  CreditCard,
+  Lock,
+  ShieldCheck,
+  Smartphone,
+  X,
+} from 'lucide-react';
+import { SEO } from './SEO';
 import { supabase } from '../lib/supabase';
 
 // Plans matching specification
@@ -100,6 +114,23 @@ interface SubscriptionPlansProps {
   onNavigateToTab: (tab: string) => void;
 }
 
+
+// Paystack inline.js is injected on first checkout use — never on page load
+let paystackPopPromise: Promise<boolean> | null = null;
+function ensurePaystackPop(): Promise<boolean> {
+  if ((window as any).PaystackPop) return Promise.resolve(true);
+  if (paystackPopPromise) return paystackPopPromise;
+  paystackPopPromise = new Promise(resolve => {
+    const s = document.createElement('script');
+    s.src = 'https://js.paystack.co/v1/inline.js';
+    s.async = true;
+    s.onload = () => resolve(Boolean((window as any).PaystackPop));
+    s.onerror = () => resolve(false);
+    document.head.appendChild(s);
+  });
+  return paystackPopPromise;
+}
+
 export default function SubscriptionPlans({ user, onPlanUpdated, onNavigateToTab }: SubscriptionPlansProps) {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
   const [activePlan, setActivePlan] = useState<string>(user?.plan || 'explorer');
@@ -114,7 +145,6 @@ export default function SubscriptionPlans({ user, onPlanUpdated, onNavigateToTab
   const [cardName, setCardName] = useState<string>('');
 
   const [successAnimation, setSuccessAnimation] = useState<boolean>(false);
-  const [infoToast, setInfoToast] = useState<string>('');
 
   useEffect(() => {
     if (user?.plan) {
@@ -123,8 +153,7 @@ export default function SubscriptionPlans({ user, onPlanUpdated, onNavigateToTab
   }, [user?.plan]);
 
   const triggerToast = (msg: string) => {
-    setInfoToast(msg);
-    setTimeout(() => setInfoToast(''), 4500);
+    toast(msg);
   };
 
   const getPrice = (plan: PlanTier) => {
@@ -188,7 +217,7 @@ export default function SubscriptionPlans({ user, onPlanUpdated, onNavigateToTab
     const planCode = priceInfo.code;
     const amountKES = priceInfo.kes;
     const publicPaystackKey = (import.meta as any).env?.VITE_PAYSTACK_PUBLIC_KEY;
-    const hasPaystackPop = !!(window as any).PaystackPop;
+    const hasPaystackPop = await ensurePaystackPop();
 
     // Step 1 — Server-side initialize (creates transaction + subscription on Paystack)
     let accessCode: string | null = null;
@@ -323,584 +352,607 @@ export default function SubscriptionPlans({ user, onPlanUpdated, onNavigateToTab
     }, 2800);
   };
 
+  const cardTone = (planId: string) =>
+    planId === 'plus'
+      ? 'bg-pure-white border-2 border-off-black-ink'
+      : planId === 'pro'
+        ? 'bg-deep-charcoal text-pure-white border-transparent'
+        : 'bg-parchment border-ash';
+
+  const isDarkCard = (planId: string) => planId === 'pro';
+
+  const inputClass =
+    'w-full bg-parchment border border-ash rounded-lg px-4 py-3 text-off-black-ink placeholder:text-stone focus:border-graphite outline-none transition-colors text-ed-body-sm';
+
   return (
-    <div className="space-y-8 animate-sweep">
-      
-      {/* Toast Notice */}
-      {infoToast && (
-        <div className="fixed bottom-6 right-6 z-50 p-4 bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream rounded-lg text-xs font-bold animate-slide-in-right flex items-center gap-2 max-w-sm">
-          <span className="material-symbols-outlined text-base">info</span>
-          <span>{infoToast}</span>
-        </div>
-      )}
+    <div className="bg-pure-white text-off-black-ink">
+      <SEO title="Plans & Pricing | Techsari" description="Free Explorer tier plus Scholar Plus and Application Pro plans. Pay in KES via M-Pesa or card." path="/subscriptionplans" noindex />
 
-      {/* Hero Banner Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <span className="text-xs font-bold text-secondary uppercase tracking-widest block mb-1">Affordable Premium Billing</span>
-          <h2 className="font-display text-2xl font-black text-primary">Academic Subscription Center</h2>
-          <p className="text-xs text-muted">Elevate your application quota limits, AI tools coefficient speeds, and human support channels</p>
-        </div>
-        <button
-          onClick={() => onNavigateToTab('dashboard')}
-          className="bg-off-black hover:bg-surface-variant text-primary border border-hairline/60 font-bold text-xs py-2.5 px-5 rounded-lg cursor-pointer transition-all w-max shrink-0 flex items-center gap-1.5 font-sans"
-        >
-          <span className="material-symbols-outlined text-[16px]">arrow_back</span>
-          Workspace Dashboard
-        </button>
-      </div>
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-16 md:py-24 space-y-14 md:space-y-20 animate-sweep">
 
-      {/* Current Active Plan Summary Card */}
-      <div className="premium-glass p-6 rounded-lg border border-hairline/40 flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
-            <span className="material-symbols-outlined text-2xl">workspace_premium</span>
-          </div>
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
           <div>
-            <div className="flex items-center gap-2">
-              <h3 className="font-display font-black text-base text-primary">
-                Current Subscription Level: {PLAN_TIERS.find(t => t.id === activePlan)?.name || activePlan.toUpperCase()}
-              </h3>
-              <span className="text-[10px] bg-emerald-500/10 text-emerald-600 font-black uppercase tracking-wider px-2 py-0.5 rounded-full">
-                Active Tier
-              </span>
-            </div>
-            <p className="text-xs text-muted mt-1">
-              Your academic profile is bound to local storage and computation quotas. Upgrades are synchronized live across application nodes.
+            <span className="block text-ed-eyebrow uppercase tracking-[0.18em] text-graphite mb-3">Pricing</span>
+            <h2 className="text-ed-h1-sm font-medium tracking-tight text-off-black-ink max-w-xl">
+              Pay only when you&rsquo;re ready to win.
+            </h2>
+            <p className="text-ed-body text-graphite mt-3 max-w-lg">
+              Elevate your application quota limits, AI tools coefficient speeds, and human support channels
             </p>
           </div>
+          <button
+            onClick={() => onNavigateToTab('dashboard')}
+            className="inline-flex shrink-0 items-center gap-2 self-start md:self-auto rounded-full border border-off-black-ink px-5 min-h-[44px] text-ed-body-sm font-medium text-off-black-ink transition-colors hover:bg-off-black-ink hover:text-pure-white cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4" strokeWidth={1.5} />
+            Workspace Dashboard
+          </button>
         </div>
 
-        {activePlan === 'explorer' && (
-          <div className="text-left md:text-right shrink-0">
-            <p className="text-[10px] font-bold text-muted uppercase tracking-wider">Storage Status</p>
-            <p className="text-xs text-cream font-semibold mt-1">Explorer Vault: 15 Document Quota max</p>
-            <p className="text-[10px] text-amber-500 mt-0.5">Please upgrade to unlock unlimited uploads & document AI intelligence</p>
+        {/* Current Active Plan Summary Card */}
+        <div className="rounded-ed border border-ash bg-parchment p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-start md:items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-electric-lime flex items-center justify-center text-off-black-ink shrink-0">
+              <Award className="w-5 h-5" strokeWidth={1.5} />
+            </div>
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="text-ed-sub font-medium tracking-tight text-off-black-ink">
+                  Current Subscription Level: {PLAN_TIERS.find(t => t.id === activePlan)?.name || activePlan.toUpperCase()}
+                </h3>
+                <span className="rounded-full bg-electric-lime px-2.5 py-0.5 text-ed-caption uppercase tracking-wide text-off-black-ink font-medium">
+                  Active Tier
+                </span>
+              </div>
+              <p className="text-ed-body-sm text-graphite mt-1">
+                Your academic profile is bound to local storage and computation quotas. Upgrades are synchronized live across application nodes.
+              </p>
+            </div>
           </div>
-        )}
-      </div>
 
-      {/* Monthly vs Annual billing switch */}
-      <div className="flex flex-col items-center gap-4 pt-2">
-        <div className="inline-flex bg-off-black border border-hairline/50 p-1.5 rounded-lg items-center gap-1">
-          <button
-            onClick={() => setBillingCycle('monthly')}
-            className={`px-5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-              billingCycle === 'monthly'
-                ? 'border-accent-green bg-accent-green/15 text-accent-green'
-                : 'text-muted hover:text-on-surface'
-            }`}
-          >
-            Monthly Period
-          </button>
-          
-          <button
-            onClick={() => setBillingCycle('annual')}
-            className={`relative px-5 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
-              billingCycle === 'annual'
-                ? 'border-accent-green bg-accent-green/15 text-accent-green'
-                : 'text-muted hover:text-on-surface'
-            }`}
-          >
-            <span>Annual (Pre-paid)</span>
-            <span className="border border-accent-green/40 text-accent-green text-[8px] font-semibold uppercase px-1.5 py-0.5 rounded-full">Save 17%</span>
-          </button>
+          {activePlan === 'explorer' && (
+            <div className="text-left md:text-right shrink-0">
+              <p className="text-ed-caption uppercase tracking-wide text-graphite">Storage Status</p>
+              <p className="text-ed-body-sm font-medium text-off-black-ink mt-1">Explorer Vault: 15 Document Quota max</p>
+              <p className="text-ed-caption text-graphite mt-0.5">Please upgrade to unlock unlimited uploads & document AI intelligence</p>
+            </div>
+          )}
         </div>
-        <p className="text-[11px] text-muted font-medium">USD base rates approximated against stable Kes conversion index. Secure payment processing for African markets.</p>
-      </div>
 
-      {/* Human mentor feedback banner */}
-      <div className="bg-gradient-to-r from-primary/5 to-secondary/5 border border-secondary/30 rounded-lg p-4 text-center">
-        <p className="text-xs font-bold text-on-surface">
-          <span className="text-secondary">✦</span> Every plan includes real human mentor feedback.{' '}
-          <span className="text-secondary">✦</span> We are an African platform built to help African students.{' '}
-          <span className="text-secondary">✦</span> The fees keep us running, not to restrict you.
-        </p>
-      </div>
-
-      {/* Pricing Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {PLAN_TIERS.map(plan => {
-          const isCurrent = activePlan === plan.id;
-          const price = getPrice(plan);
-
-          return (
-            <div 
-              key={plan.id}
-              className={`premium-glass rounded-lg border flex flex-col justify-between p-6 relative transition-all duration-300 ${
-                isCurrent 
-                  ? 'border-2 border-primary ring-2 ring-primary/15 bg-primary/2' 
-                  : 'border-hairline/40 hover:border-primary/45'
+        {/* Monthly vs Annual billing switch */}
+        <div className="flex flex-col items-center gap-4">
+          <div className="inline-flex items-center gap-1 rounded-full border border-ash bg-pure-white p-1.5">
+            <button
+              onClick={() => setBillingCycle('monthly')}
+              className={`px-5 min-h-[40px] rounded-full text-ed-body-sm font-medium transition-colors cursor-pointer ${
+                billingCycle === 'monthly'
+                  ? 'bg-off-black-ink text-pure-white'
+                  : 'text-graphite hover:text-off-black-ink'
               }`}
             >
-              {/* Highlight badge */}
-              {plan.badge && (
-                <span className="absolute -top-3 right-6 btn-gradient-stroke text-cream text-[8px] font-semibold uppercase tracking-widest px-3 py-1 rounded-full">
-                  {plan.badge}
-                </span>
+              Monthly Period
+            </button>
+
+            <button
+              onClick={() => setBillingCycle('annual')}
+              className={`relative inline-flex items-center gap-2 px-5 min-h-[40px] rounded-full text-ed-body-sm font-medium transition-colors cursor-pointer ${
+                billingCycle === 'annual'
+                  ? 'bg-off-black-ink text-pure-white'
+                  : 'text-graphite hover:text-off-black-ink'
+              }`}
+            >
+              <span>Annual (Pre-paid)</span>
+              <span className={`rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wide font-medium ${
+                billingCycle === 'annual' ? 'bg-electric-lime text-off-black-ink' : 'border border-ash text-graphite'
+              }`}>
+                Save 17%
+              </span>
+            </button>
+          </div>
+          <p className="text-ed-caption text-graphite">USD base rates approximated against stable Kes conversion index. Secure payment processing for African markets.</p>
+        </div>
+
+        {/* Human mentor feedback banner */}
+        <div className="rounded-ed border border-ash bg-parchment p-5 text-center">
+          <p className="text-ed-body-sm text-deep-charcoal">
+            Every plan includes real human mentor feedback.{' '}
+            <span className="text-stone" aria-hidden>·</span>{' '}
+            We are an African platform built to help African students.{' '}
+            <span className="text-stone" aria-hidden>·</span>{' '}
+            The fees keep us running, not to restrict you.
+          </p>
+        </div>
+
+        {/* Pricing Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {PLAN_TIERS.map(plan => {
+            const isCurrent = activePlan === plan.id;
+            const price = getPrice(plan);
+            const dark = isDarkCard(plan.id);
+
+            return (
+              <div
+                key={plan.id}
+                className={`rounded-ed border flex flex-col justify-between p-7 relative transition-colors duration-300 ${
+                  isCurrent ? 'outline outline-2 outline-offset-4 outline-electric-lime' : ''
+                } ${cardTone(plan.id)}`}
+              >
+                {/* Highlight badge */}
+                {plan.badge && (
+                  <span className="absolute -top-3.5 right-6 rounded-full bg-electric-lime px-3 py-1 text-ed-caption uppercase tracking-wide text-off-black-ink font-medium">
+                    {plan.badge}
+                  </span>
+                )}
+
+                <div>
+                  {/* Header */}
+                  <div className="space-y-1">
+                    <h4 className={`text-ed-body font-medium uppercase tracking-wide ${dark ? 'text-pure-white' : 'text-off-black-ink'}`}>{plan.name}</h4>
+                    <p className={`text-ed-body-sm min-h-[48px] leading-relaxed ${dark ? 'text-smoke' : 'text-graphite'}`}>{plan.description}</p>
+                  </div>
+
+                  {/* Price tag */}
+                  <div className={`pt-4 pb-4 border-b ${dark ? 'border-stone' : 'border-ash'}`}>
+                    <div className="flex items-baseline gap-1.5">
+                      <span className={`text-ed-h1-sm font-medium tracking-tight ${dark ? 'text-pure-white' : 'text-off-black-ink'}`}>
+                        {price.kes > 0 ? `KES ${price.kes.toLocaleString()}` : `$${price.usd}`}
+                      </span>
+                      <span className={`text-ed-body-sm ${dark ? 'text-smoke' : 'text-graphite'}`}>{price.suffix}</span>
+                    </div>
+                    {price.kes > 0 ? (
+                      <p className={`text-ed-caption mt-1 ${dark ? 'text-smoke' : 'text-graphite'}`}>
+                        ≈ ${price.usd}
+                      </p>
+                    ) : (
+                      <p className={`text-ed-caption mt-1 ${dark ? 'text-smoke' : 'text-graphite'}`}>Free-forever tier</p>
+                    )}
+                  </div>
+
+                  {/* Main Quota Highlights */}
+                  <div className={`py-4 space-y-2 border-b text-ed-body-sm ${dark ? 'border-stone' : 'border-ash'}`}>
+                    <div className="flex justify-between">
+                      <span className={dark ? 'text-smoke' : 'text-graphite'}>AI essays/day:</span>
+                      <span className={`font-medium ${dark ? 'text-electric-lime' : 'text-off-black-ink'}`}>{plan.essayLimit} drafts</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className={dark ? 'text-smoke' : 'text-graphite'}>Document uploads:</span>
+                      <span className={`font-medium ${dark ? 'text-electric-lime' : 'text-off-black-ink'}`}>{plan.docLimit} files</span>
+                    </div>
+                  </div>
+
+                  {/* Bullet checklist */}
+                  <ul className="py-5 space-y-3">
+                    {plan.features.map((feat, idx) => (
+                      <li key={idx} className="flex items-start gap-2.5 text-ed-body-sm leading-snug">
+                        <CheckCircle2
+                          className={`w-4 h-4 shrink-0 mt-0.5 ${dark ? 'text-electric-lime' : 'text-graphite'}`}
+                          strokeWidth={1.5}
+                          aria-hidden
+                        />
+                        <span>{feat}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* Purchase button trigger */}
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => handleCheckoutClick(plan)}
+                    disabled={isCurrent}
+                    className={`w-full inline-flex items-center justify-center gap-2 rounded-full min-h-[48px] px-6 text-ed-body-sm font-medium transition-all ${
+                      isCurrent
+                        ? 'border border-ash text-graphite opacity-60 pointer-events-none'
+                        : 'bg-electric-lime text-off-black-ink hover:bg-lime-hover active:scale-[0.98] cursor-pointer'
+                    }`}
+                  >
+                    {isCurrent ? (
+                      <>
+                        <ShieldCheck className="w-4 h-4" strokeWidth={1.5} aria-hidden />
+                        <span>Current Level</span>
+                      </>
+                    ) : (
+                      'Upgrade Subscription Level'
+                    )}
+                  </button>
+                </div>
+
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Institutional — B2B Section */}
+        <div className="rounded-ed border border-ash bg-parchment p-8 md:p-10">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
+            <div className="space-y-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="rounded-full border border-ash px-3 py-1 text-ed-caption uppercase tracking-wide text-graphite font-medium">B2B / Institutional</span>
+                <span className="rounded-full bg-electric-lime px-3 py-1 text-ed-caption uppercase tracking-wide text-off-black-ink font-medium">Custom Pricing</span>
+              </div>
+              <h3 className="text-ed-sub font-medium tracking-tight text-off-black-ink">Techsari Institutional</h3>
+              <p className="text-ed-body-sm text-graphite max-w-2xl leading-relaxed">
+                For universities, NGOs, scholarship programs, and government agencies that want to provide
+                Zawadi's full platform to their students, scholars, or beneficiaries at scale.
+              </p>
+              <ul className="space-y-2.5 pt-2">
+                {[
+                  'Unlimited AI essay drafts for all affiliated students',
+                  'Unlimited document vault uploads with full AI intelligence',
+                  'Unlimited mentor reviews (full_plus with strategy sessions)',
+                  'Essay voice machine learning for every student',
+                  'Dedicated account manager & implementation specialist',
+                  'Custom branding & white-label options',
+                  'Bulk student onboarding & CSV import',
+                  'Priority support with SLA guarantee (within 4h)',
+                  'Monthly analytics & impact reporting dashboard',
+                  'API access for custom integrations'
+                ].map((feat, idx) => (
+                  <li key={idx} className="flex items-start gap-2.5 text-ed-body-sm text-off-black-ink leading-snug">
+                    <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-graphite" strokeWidth={1.5} aria-hidden />
+                    <span>{feat}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="shrink-0 text-left md:text-right">
+              <p className="text-ed-caption uppercase tracking-wide text-graphite mb-1">Starting From</p>
+              <p className="text-ed-h1-sm font-medium tracking-tight text-off-black-ink">Custom</p>
+              <p className="text-ed-body-sm text-graphite mt-1">Volume-based pricing • Per-seat or flat rate</p>
+              <a
+                href="mailto:partnerships@zawadi.app?subject=Zawadi%20Institutional%20Plan%20Inquiry"
+                className="mt-4 inline-flex items-center justify-center gap-2 rounded-full border border-off-black-ink px-7 min-h-[48px] text-ed-body-sm font-medium text-off-black-ink transition-colors hover:bg-off-black-ink hover:text-pure-white"
+              >
+                Contact Partnerships
+                <ArrowRight className="w-4 h-4" strokeWidth={1.5} aria-hidden />
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Feature Comparison Matrix Accordion/Section */}
+        <div className="rounded-ed border border-ash bg-pure-white p-6 md:p-8 overflow-hidden">
+          <div className="border-b border-ash pb-4 mb-6">
+            <h3 className="text-ed-sub font-medium tracking-tight text-off-black-ink flex items-center gap-2.5">
+              <BarChart3 className="w-5 h-5" strokeWidth={1.5} aria-hidden />
+              Subscription Quota Contrast Metrics
+            </h3>
+            <p className="text-ed-body-sm text-graphite mt-1">Comprehensive grid comparing feature allocation details across academic levels</p>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-ed-body-sm">
+              <thead>
+                <tr className="bg-parchment">
+                  <th className="py-3.5 px-4 text-ed-caption uppercase tracking-wide text-graphite font-medium">Compare Metric Capability</th>
+                  <th className="py-3.5 px-4 text-ed-caption uppercase tracking-wide text-graphite font-medium">Explorer</th>
+                  <th className="py-3.5 px-4 text-ed-caption uppercase tracking-wide text-off-black-ink font-medium">Scholar Plus</th>
+                  <th className="py-3.5 px-4 text-ed-caption uppercase tracking-wide text-graphite font-medium">App Pro</th>
+                  <th className="py-3.5 px-4 text-ed-caption uppercase tracking-wide text-graphite font-medium">Institutional</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-ash text-off-black-ink">
+                <tr>
+                  <td className="py-3.5 px-4 font-medium">Daily AI essays generation</td>
+                  <td className="py-3.5 px-4 text-graphite">3 drafts</td>
+                  <td className="py-3.5 px-4">10 drafts</td>
+                  <td className="py-3.5 px-4">25 drafts</td>
+                  <td className="py-3.5 px-4 text-graphite">Unlimited</td>
+                </tr>
+                <tr>
+                  <td className="py-3.5 px-4 font-medium">Max document storage count</td>
+                  <td className="py-3.5 px-4 text-graphite">15 files</td>
+                  <td className="py-3.5 px-4">50 files</td>
+                  <td className="py-3.5 px-4">Unlimited</td>
+                  <td className="py-3.5 px-4 text-graphite">Unlimited</td>
+                </tr>
+                <tr>
+                  <td className="py-3.5 px-4 font-medium">Scholarship listings browsing</td>
+                  <td className="py-3.5 px-4 text-graphite">Unlimited</td>
+                  <td className="py-3.5 px-4">Unlimited</td>
+                  <td className="py-3.5 px-4">Unlimited</td>
+                  <td className="py-3.5 px-4 text-graphite">Unlimited</td>
+                </tr>
+                <tr>
+                  <td className="py-3.5 px-4 font-medium">Match score accuracy precision</td>
+                  <td className="py-3.5 px-4 text-graphite">Basic overview</td>
+                  <td className="py-3.5 px-4">Detailed breakdown</td>
+                  <td className="py-3.5 px-4">Detailed breakdown</td>
+                  <td className="py-3.5 px-4 text-graphite">Detailed breakdown</td>
+                </tr>
+                <tr>
+                  <td className="py-3.5 px-4 font-medium">Document vault gap analyses</td>
+                  <td className="py-3.5 px-4"><X className="w-4 h-4 text-error" strokeWidth={1.5} aria-hidden /><span className="sr-only">Unavailable</span></td>
+                  <td className="py-3.5 px-4"><CheckCircle2 className="w-4 h-4 text-off-black-ink" strokeWidth={1.5} aria-hidden /><span className="sr-only">Included</span></td>
+                  <td className="py-3.5 px-4"><CheckCircle2 className="w-4 h-4 text-off-black-ink" strokeWidth={1.5} aria-hidden /><span className="sr-only">Included</span></td>
+                  <td className="py-3.5 px-4"><CheckCircle2 className="w-4 h-4 text-graphite" strokeWidth={1.5} aria-hidden /><span className="sr-only">Included</span></td>
+                </tr>
+                <tr>
+                  <td className="py-3.5 px-4 font-medium">Document intelligence (AI assistance)</td>
+                  <td className="py-3.5 px-4 text-graphite">Transcripts only</td>
+                  <td className="py-3.5 px-4">Basic (transcripts, CV, essays)</td>
+                  <td className="py-3.5 px-4">Full processing</td>
+                  <td className="py-3.5 px-4 text-graphite">Full processing</td>
+                </tr>
+                <tr>
+                  <td className="py-3.5 px-4 font-medium">Robotic Auto-Apply Engine</td>
+                  <td className="py-3.5 px-4"><X className="w-4 h-4 text-error" strokeWidth={1.5} aria-hidden /><span className="sr-only">Unavailable</span></td>
+                  <td className="py-3.5 px-4"><X className="w-4 h-4 text-error" strokeWidth={1.5} aria-hidden /><span className="sr-only">Unavailable</span></td>
+                  <td className="py-3.5 px-4"><CheckCircle2 className="w-4 h-4 text-off-black-ink" strokeWidth={1.5} aria-hidden /><span className="sr-only">Fully available</span></td>
+                  <td className="py-3.5 px-4"><CheckCircle2 className="w-4 h-4 text-graphite" strokeWidth={1.5} aria-hidden /><span className="sr-only">Fully available</span></td>
+                </tr>
+                <tr>
+                  <td className="py-3.5 px-4 font-medium">Essay voice fingerprint learning</td>
+                  <td className="py-3.5 px-4"><X className="w-4 h-4 text-error" strokeWidth={1.5} aria-hidden /><span className="sr-only">Unavailable</span></td>
+                  <td className="py-3.5 px-4"><X className="w-4 h-4 text-error" strokeWidth={1.5} aria-hidden /><span className="sr-only">Unavailable</span></td>
+                  <td className="py-3.5 px-4"><CheckCircle2 className="w-4 h-4 text-off-black-ink" strokeWidth={1.5} aria-hidden /><span className="sr-only">Enabled</span></td>
+                  <td className="py-3.5 px-4"><CheckCircle2 className="w-4 h-4 text-graphite" strokeWidth={1.5} aria-hidden /><span className="sr-only">Enabled</span></td>
+                </tr>
+                <tr>
+                  <td className="py-3.5 px-4 font-medium">Human advisory & essay review</td>
+                  <td className="py-3.5 px-4 text-graphite">1 basic / mo</td>
+                  <td className="py-3.5 px-4">2 structured / mo</td>
+                  <td className="py-3.5 px-4">4 full (revised) / mo</td>
+                  <td className="py-3.5 px-4 text-graphite">Unlimited full_plus</td>
+                </tr>
+                <tr>
+                  <td className="py-3.5 px-4 font-medium">1-on-1 strategy sessions</td>
+                  <td className="py-3.5 px-4"><X className="w-4 h-4 text-error" strokeWidth={1.5} aria-hidden /><span className="sr-only">Unavailable</span></td>
+                  <td className="py-3.5 px-4"><X className="w-4 h-4 text-error" strokeWidth={1.5} aria-hidden /><span className="sr-only">Unavailable</span></td>
+                  <td className="py-3.5 px-4"><X className="w-4 h-4 text-error" strokeWidth={1.5} aria-hidden /><span className="sr-only">Unavailable</span></td>
+                  <td className="py-3.5 px-4"><CheckCircle2 className="w-4 h-4 text-graphite" strokeWidth={1.5} aria-hidden /><span className="sr-only">Available</span></td>
+                </tr>
+                <tr>
+                  <td className="py-3.5 px-4 font-medium">Support priority SLA</td>
+                  <td className="py-3.5 px-4 text-graphite">FAQ / Community</td>
+                  <td className="py-3.5 px-4">Email (48h response)</td>
+                  <td className="py-3.5 px-4">Priority Email (24h)</td>
+                  <td className="py-3.5 px-4 text-graphite">Dedicated SLA (4h)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Secure Payment Checkout Modal */}
+        {showCheckoutModal && selectedPlan && (
+          <div id="checkout_gateway_modal" className="fixed inset-0 bg-off-black-ink/70 backdrop-blur-xs flex items-center justify-center z-50 animate-fade-in px-4">
+            <div className="w-full max-w-lg bg-pure-white border border-ash rounded-ed overflow-hidden flex flex-col relative animate-scale-up max-h-[90vh] overflow-y-auto">
+
+              {/* Header branding */}
+              <div className="p-6 border-b border-ash bg-parchment flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-off-black-ink flex items-center justify-center text-pure-white shrink-0">
+                    <Lock className="w-4 h-4" strokeWidth={1.5} aria-hidden />
+                  </div>
+                  <div>
+                    <h3 className="text-ed-sub font-medium tracking-tight text-off-black-ink">Secure Payment Gateway</h3>
+                    <p className="text-ed-caption uppercase tracking-wide text-graphite mt-0.5">PCI-DSS Level 1 Protected</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => !isProcessing && setShowCheckoutModal(false)}
+                  disabled={isProcessing}
+                  className="w-9 h-9 rounded-full flex items-center justify-center cursor-pointer text-graphite transition-colors hover:text-off-black-ink hover:border-ash disabled:opacity-40"
+                >
+                  <X className="w-5 h-5" strokeWidth={1.5} aria-hidden />
+                </button>
+              </div>
+
+              {/* Content Body */}
+              {successAnimation ? (
+                <div className="m-6 rounded-lg border border-off-black-ink/20 bg-electric-lime/20 p-10 text-center space-y-4 animate-scale-up flex flex-col items-center justify-center min-h-[340px]">
+                  <div className="w-16 h-16 rounded-full bg-electric-lime text-off-black-ink flex items-center justify-center">
+                    <CheckCircle2 className="w-8 h-8" strokeWidth={1.5} aria-hidden />
+                  </div>
+                  <h4 className="text-ed-sub font-medium tracking-tight text-off-black-ink mt-2">Subscription Activated!</h4>
+                  <p className="text-ed-body-sm text-graphite max-w-sm leading-relaxed">
+                    Payment verified successfully. Welcome to the <span className="font-medium text-off-black-ink">{selectedPlan.name}</span> tier! All features are now active.
+                  </p>
+                </div>
+              ) : (
+                <div className="p-6 space-y-5 flex-1">
+                  {/* Selected tier recap */}
+                  <div className="bg-parchment p-4 rounded-lg border border-ash flex justify-between items-center">
+                    <div>
+                      <p className="text-ed-caption uppercase tracking-wide text-graphite">Academic Subscription</p>
+                      <p className="text-ed-body font-medium text-off-black-ink mt-0.5">{selectedPlan.name} Tier ({billingCycle})</p>
+                      <p className="text-ed-caption text-graphite mt-0.5">Billed immediately on payment confirmation</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-lg font-medium text-off-black-ink">KES {getPrice(selectedPlan).kes.toLocaleString()}</p>
+                      <p className="text-ed-caption text-graphite">≈ ${getPrice(selectedPlan).usd}</p>
+                    </div>
+                  </div>
+
+                  {/* Payment Method Selector */}
+                  <div>
+                    <p className="text-ed-body-sm font-medium text-off-black-ink mb-2">Select Payment Method</p>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => { setPaymentMethod('mobile_money'); setCardNumber(''); setCardExpiry(''); setCardCvv(''); setCardName(''); }}
+                        className={`flex flex-col items-center gap-1.5 p-4 rounded-lg border cursor-pointer transition-colors text-ed-body-sm font-medium ${
+                          paymentMethod === 'mobile_money'
+                            ? 'border-off-black-ink bg-parchment text-off-black-ink'
+                            : 'border-ash text-graphite hover:border-graphite'
+                        }`}
+                      >
+                        <Smartphone className="w-5 h-5" strokeWidth={1.5} aria-hidden />
+                        Mobile Money
+                        <span className="text-ed-caption text-graphite font-normal">M-Pesa, Airtel</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setPaymentMethod('card'); setMobilePhone(''); }}
+                        className={`flex flex-col items-center gap-1.5 p-4 rounded-lg border cursor-pointer transition-colors text-ed-body-sm font-medium ${
+                          paymentMethod === 'card'
+                            ? 'border-off-black-ink bg-parchment text-off-black-ink'
+                            : 'border-ash text-graphite hover:border-graphite'
+                        }`}
+                      >
+                        <CreditCard className="w-5 h-5" strokeWidth={1.5} aria-hidden />
+                        Debit / Credit Card
+                        <span className="text-ed-caption text-graphite font-normal">Visa, Mastercard</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Mobile Money Fields */}
+                  {paymentMethod === 'mobile_money' && (
+                    <div className="space-y-3 animate-sweep">
+                      <div>
+                        <label className="block text-ed-body-sm font-medium text-off-black-ink mb-1.5">Mobile Number <span className="text-error">*</span></label>
+                        <div className="relative">
+                          <Smartphone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-graphite pointer-events-none" strokeWidth={1.5} aria-hidden />
+                          <input
+                            type="tel"
+                            value={mobilePhone}
+                            onChange={e => setMobilePhone(e.target.value)}
+                            placeholder="e.g. +254712345678"
+                            className={`${inputClass} pl-10`}
+                          />
+                        </div>
+                        <p className="text-ed-caption text-graphite mt-1">Enter your M-Pesa or Airtel Money number. You will receive a payment prompt on your phone.</p>
+                        {mobilePhone && !isMobilePhoneValid && (
+                          <p className="text-ed-caption text-error mt-1">Please enter a valid phone number (9-15 digits).</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Card Fields */}
+                  {paymentMethod === 'card' && (
+                    <div className="space-y-3 animate-sweep">
+                      <div>
+                        <label className="block text-ed-body-sm font-medium text-off-black-ink mb-1.5">Cardholder Name <span className="text-error">*</span></label>
+                        <input
+                          type="text"
+                          value={cardName}
+                          onChange={e => setCardName(e.target.value)}
+                          placeholder="As shown on your card"
+                          className={inputClass}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-ed-body-sm font-medium text-off-black-ink mb-1.5">Card Number <span className="text-error">*</span></label>
+                        <div className="relative">
+                          <CreditCard className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-graphite pointer-events-none" strokeWidth={1.5} aria-hidden />
+                          <input
+                            type="text"
+                            value={cardNumber}
+                            onChange={e => {
+                              const v = e.target.value.replace(/\D/g, '').slice(0, 16);
+                              setCardNumber(v.replace(/(\d{4})/g, '$1 ').trim());
+                            }}
+                            placeholder="0000 0000 0000 0000"
+                            maxLength={19}
+                            className={`${inputClass} pl-10 font-mono`}
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-ed-body-sm font-medium text-off-black-ink mb-1.5">Expiry Date <span className="text-error">*</span></label>
+                          <input
+                            type="text"
+                            value={cardExpiry}
+                            onChange={e => {
+                              let v = e.target.value.replace(/\D/g, '').slice(0, 4);
+                              if (v.length >= 3) v = v.slice(0, 2) + '/' + v.slice(2);
+                              setCardExpiry(v);
+                            }}
+                            placeholder="MM/YY"
+                            maxLength={5}
+                            className={`${inputClass} font-mono`}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-ed-body-sm font-medium text-off-black-ink mb-1.5">CVV / CVC <span className="text-error">*</span></label>
+                          <input
+                            type="password"
+                            value={cardCvv}
+                            onChange={e => setCardCvv(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                            placeholder="•••"
+                            maxLength={4}
+                            className={`${inputClass} font-mono`}
+                          />
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 text-ed-caption text-graphite">
+                        <Lock className="w-4 h-4 text-graphite shrink-0" strokeWidth={1.5} aria-hidden />
+                        Your card details are encrypted and never stored on our servers.
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Processing indicator */}
+                  {isProcessing && (
+                    <div className="flex items-center justify-center gap-3 py-3 animate-sweep">
+                      <div className="w-5 h-5 rounded-full border-2 border-ash border-t-off-black-ink animate-spin"></div>
+                      <span className="text-ed-body-sm font-medium text-off-black-ink">
+                        {paymentMethod === 'mobile_money'
+                          ? 'Opening Paystack to send payment prompt to your phone...'
+                          : 'Opening secure card payment gateway...'}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Secure Gateway disclaimer */}
+                  <div className="flex items-start gap-2 text-ed-caption text-graphite leading-relaxed bg-parchment p-3 rounded-lg">
+                    <ShieldCheck className="w-4 h-4 text-graphite shrink-0 mt-0.5" strokeWidth={1.5} aria-hidden />
+                    <span>All payments are encrypted with TLS 1.3 and processed through PCI-DSS Level 1 certified infrastructure. Your payment details are never stored on our servers.</span>
+                  </div>
+                </div>
               )}
 
-              <div>
-                {/* Header */}
-                <div className="space-y-1">
-                  <h4 className="font-display font-black text-sm text-primary uppercase tracking-wide">{plan.name}</h4>
-                  <p className="text-[11px] text-muted min-h-[48px] leading-relaxed">{plan.description}</p>
-                </div>
-
-                {/* Price tag */}
-                <div className="pt-4 pb-2 border-b border-hairline/30">
-                  <div className="flex items-baseline gap-1">
-                    <span className="font-display font-black text-2xl text-on-surface">${price.usd}</span>
-                    <span className="text-xs text-muted uppercase font-bold">{price.suffix}</span>
-                  </div>
-                  {price.kes > 0 ? (
-                    <p className="text-xs font-extrabold text-secondary mt-0.5">
-                      ≈ KES {price.kes.toLocaleString()}{price.suffix}
-                    </p>
-                  ) : (
-                    <p className="text-xs font-extrabold text-secondary mt-0.5">Free-forever tier</p>
-                  )}
-                </div>
-
-                {/* Main Quota Highlights */}
-                <div className="py-4 space-y-2 border-b border-hairline/30 text-xs">
-                  <div className="flex justify-between font-bold">
-                    <span className="text-muted">AI essays/day:</span>
-                    <span className="text-primary font-black">{plan.essayLimit} drafts</span>
-                  </div>
-                  <div className="flex justify-between font-bold">
-                    <span className="text-muted">Document uploads:</span>
-                    <span className="text-primary font-black">{plan.docLimit} files</span>
-                  </div>
-                </div>
-
-                {/* Bullet checklist */}
-                <ul className="py-4 space-y-2.5">
-                  {plan.features.map((feat, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-[11px] leading-normal font-bold text-on-surface">
-                      <span className="material-symbols-outlined text-primary text-base shrink-0">check_circle</span>
-                      <span>{feat}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Purchase button trigger */}
-              <div className="pt-4">
-                <button
-                  type="button"
-                  onClick={() => handleCheckoutClick(plan)}
-                  disabled={isCurrent}
-                  className={`w-full py-3 rounded-lg text-xs font-extrabold transition-all cursor-pointer ${
-                    isCurrent 
-                      ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/30 cursor-not-allowed text-center flex items-center justify-center gap-1.5'
-                      : 'btn-gradient-stroke text-cream hover:brightness-110'
-                  }`}
-                >
-                  {isCurrent ? (
-                    <>
-                      <span className="material-symbols-outlined text-[14px]">verified_user</span>
-                      <span>Current Level</span>
-                    </>
-                  ) : (
-                    'Upgrade Subscription Level'
-                  )}
-                </button>
-              </div>
-
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Zawadi Institutional — B2B Section */}
-      <div className="premium-glass rounded-lg border-2 border-secondary/40 bg-gradient-to-br from-secondary/5 to-primary/5 p-8 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-secondary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <span className="border border-accent-blue/40 text-accent-blue text-[9px] font-semibold uppercase tracking-widest px-3 py-1 rounded-full">B2B / Institutional</span>
-              <span className="bg-primary/10 text-primary text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full">Custom Pricing</span>
-            </div>
-            <h3 className="font-display text-2xl font-black text-primary">Zawadi Institutional</h3>
-            <p className="text-sm text-muted max-w-2xl leading-relaxed">
-              For universities, NGOs, scholarship programs, and government agencies that want to provide 
-              Zawadi's full platform to their students, scholars, or beneficiaries at scale.
-            </p>
-            <ul className="space-y-2.5 pt-2">
-              {[
-                'Unlimited AI essay drafts for all affiliated students',
-                'Unlimited document vault uploads with full AI intelligence',
-                'Unlimited mentor reviews (full_plus with strategy sessions)',
-                'Essay voice machine learning for every student',
-                'Dedicated account manager & implementation specialist',
-                'Custom branding & white-label options',
-                'Bulk student onboarding & CSV import',
-                'Priority support with SLA guarantee (within 4h)',
-                'Monthly analytics & impact reporting dashboard',
-                'API access for custom integrations'
-              ].map((feat, idx) => (
-                <li key={idx} className="flex items-start gap-2 text-xs font-bold text-on-surface">
-                  <span className="material-symbols-outlined text-secondary text-base shrink-0">check_circle</span>
-                  <span>{feat}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="shrink-0 text-center md:text-right">
-            <p className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1">Starting From</p>
-            <p className="font-display text-3xl font-black text-primary">Custom</p>
-            <p className="text-xs text-muted mt-1">Volume-based pricing • Per-seat or flat rate</p>
-            <a
-              href="mailto:partnerships@zawadi.app?subject=Zawadi%20Institutional%20Plan%20Inquiry"
-              className="inline-block mt-4 inline-flex items-center justify-center mt-4 border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream font-semibold text-xs py-3 px-8 min-h-[44px] rounded-full transition-all"
-            >
-              Contact Partnerships →
-            </a>
-          </div>
-        </div>
-      </div>
-
-      {/* Feature Comparison Matrix Accordion/Section */}
-      <div className="premium-glass p-6 md:p-8 rounded-lg border border-hairline/45">
-        <div className="border-b border-hairline/30 pb-4 mb-6">
-          <h3 className="font-display text-lg font-black text-primary flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary">bar_chart</span>
-            Subscription Quota Contrast Metrics
-          </h3>
-          <p className="text-xs text-muted mt-0.5">Comprehensive grid comparing feature allocation details across academic levels</p>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr className="border-b border-hairline/45">
-                <th className="py-3 px-4 font-black uppercase text-muted text-[10px]">Compare Metric Capability</th>
-                <th className="py-3 px-4 font-black uppercase text-muted text-[10px]">Explorer</th>
-                <th className="py-3 px-4 font-black uppercase text-muted text-[10px] text-primary">Scholar Plus</th>
-                <th className="py-3 px-4 font-black uppercase text-muted text-[10px]">App Pro</th>
-                <th className="py-3 px-4 font-black uppercase text-muted text-[10px] text-secondary">Institutional</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-outline-variant/20 font-bold text-on-surface">
-              <tr>
-                <td className="py-3 px-4">Daily AI essays generation</td>
-                <td className="py-3 px-4 text-muted">3 drafts</td>
-                <td className="py-3 px-4 text-primary">10 drafts</td>
-                <td className="py-3 px-4">25 drafts</td>
-                <td className="py-3 px-4 text-secondary">Unlimited</td>
-              </tr>
-              <tr>
-                <td className="py-3 px-4">Max document storage count</td>
-                <td className="py-3 px-4 text-muted">15 files</td>
-                <td className="py-3 px-4 text-primary">50 files</td>
-                <td className="py-3 px-4 text-emerald-600">Unlimited</td>
-                <td className="py-3 px-4 text-secondary">Unlimited</td>
-              </tr>
-              <tr>
-                <td className="py-3 px-4">Scholarship listings browsing</td>
-                <td className="py-3 px-4 text-muted">Unlimited</td>
-                <td className="py-3 px-4 text-primary">Unlimited</td>
-                <td className="py-3 px-4">Unlimited</td>
-                <td className="py-3 px-4 text-secondary">Unlimited</td>
-              </tr>
-              <tr>
-                <td className="py-3 px-4">Match score accuracy precision</td>
-                <td className="py-3 px-4 text-muted">Basic overview</td>
-                <td className="py-3 px-4 text-primary">Detailed breakdown</td>
-                <td className="py-3 px-4">Detailed breakdown</td>
-                <td className="py-3 px-4 text-secondary">Detailed breakdown</td>
-              </tr>
-              <tr>
-                <td className="py-3 px-4">Document vault gap analyses</td>
-                <td className="py-3 px-4 text-red-500">❌ Unavailable</td>
-                <td className="py-3 px-4 text-emerald-600">✅ Included</td>
-                <td className="py-3 px-4 text-emerald-600">✅ Included</td>
-                <td className="py-3 px-4 text-secondary">✅ Included</td>
-              </tr>
-              <tr>
-                <td className="py-3 px-4">Document intelligence (AI assistance)</td>
-                <td className="py-3 px-4 text-muted">Transcripts only</td>
-                <td className="py-3 px-4 text-primary">Basic (transcripts, CV, essays)</td>
-                <td className="py-3 px-4">Full processing</td>
-                <td className="py-3 px-4 text-secondary">Full processing</td>
-              </tr>
-              <tr>
-                <td className="py-3 px-4">Robotic Auto-Apply Engine</td>
-                <td className="py-3 px-4 text-red-500">❌ Unavailable</td>
-                <td className="py-3 px-4 text-red-500">❌ Unavailable</td>
-                <td className="py-3 px-4 text-emerald-600">✅ Fully available</td>
-                <td className="py-3 px-4 text-secondary">✅ Fully available</td>
-              </tr>
-              <tr>
-                <td className="py-3 px-4">Essay voice fingerprint learning</td>
-                <td className="py-3 px-4 text-red-500">❌ Unavailable</td>
-                <td className="py-3 px-4 text-red-500">❌ Unavailable</td>
-                <td className="py-3 px-4 text-emerald-600">✅ Enabled</td>
-                <td className="py-3 px-4 text-secondary">✅ Enabled</td>
-              </tr>
-              <tr>
-                <td className="py-3 px-4">Human advisory & essay review</td>
-                <td className="py-3 px-4 text-muted">1 basic / mo</td>
-                <td className="py-3 px-4 text-primary">2 structured / mo</td>
-                <td className="py-3 px-4">4 full (revised) / mo</td>
-                <td className="py-3 px-4 text-secondary">Unlimited full_plus</td>
-              </tr>
-              <tr>
-                <td className="py-3 px-4">1-on-1 strategy sessions</td>
-                <td className="py-3 px-4 text-red-500">❌ Unavailable</td>
-                <td className="py-3 px-4 text-red-500">❌ Unavailable</td>
-                <td className="py-3 px-4 text-red-500">❌ Unavailable</td>
-                <td className="py-3 px-4 text-secondary">✅ Available</td>
-              </tr>
-              <tr>
-                <td className="py-3 px-4">Support priority SLA</td>
-                <td className="py-3 px-4 text-muted">FAQ / Community</td>
-                <td className="py-3 px-4 text-primary">Email (48h response)</td>
-                <td className="py-3 px-4">Priority Email (24h)</td>
-                <td className="py-3 px-4 text-secondary">Dedicated SLA (4h)</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Secure Payment Checkout Modal */}
-      {showCheckoutModal && selectedPlan && (
-        <div id="checkout_gateway_modal" className="fixed inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center z-50 animate-fade-in px-4">
-          <div className="w-full max-w-lg bg-canvas rounded-lg border border-hairline/50 overflow-hidden flex flex-col relative animate-scale-up max-h-[90vh] overflow-y-auto">
-            
-            {/* Header branding */}
-            <div className="p-6 border-b border-hairline/30 bg-primary/2 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg ring-1 ring-hairline flex items-center justify-center text-cream shrink-0">
-                  <span className="material-symbols-outlined text-lg">lock</span>
-                </div>
-                <div>
-                  <h3 className="font-display font-black text-primary text-base">Secure Payment Gateway</h3>
-                  <p className="text-[10px] text-muted uppercase font-black tracking-widest mt-0.5">PCI-DSS Level 1 Protected</p>
-                </div>
-              </div>
-              <button 
-                onClick={() => !isProcessing && setShowCheckoutModal(false)}
-                disabled={isProcessing}
-                className="w-8 h-8 rounded-full hover:bg-surface-variant flex items-center justify-center cursor-pointer text-muted transition-colors disabled:opacity-40"
-              >
-                <span className="material-symbols-outlined text-lg">close</span>
-              </button>
-            </div>
-
-            {/* Content Body */}
-            {successAnimation ? (
-              <div className="p-12 text-center space-y-4 animate-scale-up flex flex-col items-center justify-center min-h-[340px]">
-                <div className="w-20 h-20 bg-emerald-500/20 text-emerald-600 rounded-full flex items-center justify-center animate-bounce">
-                  <span className="material-symbols-outlined text-4xl font-bold">check_circle</span>
-                </div>
-                <h4 className="font-display text-xl font-black text-primary mt-4">Subscription Activated!</h4>
-                <p className="text-xs text-muted max-w-sm mt-0.5 leading-relaxed">
-                  Payment verified successfully. Welcome to the <strong>{selectedPlan.name}</strong> tier! All features are now active.
-                </p>
-              </div>
-            ) : (
-              <div className="p-6 space-y-5 flex-1">
-                {/* Selected tier recap */}
-                <div className="bg-off-black p-4 rounded-lg border border-hairline/40 flex justify-between items-center">
-                  <div>
-                    <h4 className="text-xs font-black text-primary uppercase">Academic Subscription</h4>
-                    <p className="text-sm font-black text-on-surface">{selectedPlan.name} Tier ({billingCycle})</p>
-                    <p className="text-[10px] text-muted">Billed immediately on payment confirmation</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-base font-black text-on-surface">${getPrice(selectedPlan).usd}</p>
-                    <p className="text-xs font-extrabold text-secondary">KES {getPrice(selectedPlan).kes.toLocaleString()}</p>
-                  </div>
-                </div>
-
-                {/* Payment Method Selector */}
-                <div>
-                  <p className="text-xs font-bold text-muted uppercase mb-2 tracking-wider">Select Payment Method</p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => { setPaymentMethod('mobile_money'); setCardNumber(''); setCardExpiry(''); setCardCvv(''); setCardName(''); }}
-                      className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border-2 cursor-pointer transition-all text-xs font-bold ${
-                        paymentMethod === 'mobile_money' ? 'border-primary bg-primary/5 text-primary' : 'border-hairline/50 text-muted hover:border-primary/40'
-                      }`}
-                    >
-                      <span className="material-symbols-outlined text-xl">smartphone</span>
-                      Mobile Money
-                      <span className="text-[9px] font-normal">M-Pesa, Airtel</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => { setPaymentMethod('card'); setMobilePhone(''); }}
-                      className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border-2 cursor-pointer transition-all text-xs font-bold ${
-                        paymentMethod === 'card' ? 'border-primary bg-primary/5 text-primary' : 'border-hairline/50 text-muted hover:border-primary/40'
-                      }`}
-                    >
-                      <span className="material-symbols-outlined text-xl">credit_card</span>
-                      Debit / Credit Card
-                      <span className="text-[9px] font-normal">Visa, Mastercard</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Mobile Money Fields */}
-                {paymentMethod === 'mobile_money' && (
-                  <div className="space-y-3 animate-sweep">
-                    <div>
-                      <label className="block text-xs font-bold text-muted uppercase mb-1.5">Mobile Number <span className="text-red-500">*</span></label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted">
-                          <span className="material-symbols-outlined text-base">smartphone</span>
+              {/* Modal actions footer */}
+              {!successAnimation && (
+                <div className="p-6 border-t border-ash flex gap-3">
+                  <button
+                    type="button"
+                    disabled={isProcessing}
+                    onClick={() => setShowCheckoutModal(false)}
+                    className="flex-1 rounded-full border border-ash min-h-[48px] text-ed-body-sm font-medium text-graphite hover:border-off-black-ink hover:text-off-black-ink transition-colors cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
+                  >
+                    Go Back
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isProcessing || !isPaymentDetailsComplete}
+                    onClick={handleInitiatePayment}
+                    className={`flex-1 inline-flex items-center justify-center gap-2 rounded-full min-h-[48px] px-6 text-ed-body-sm font-medium transition-all ${
+                      isProcessing || !isPaymentDetailsComplete
+                        ? 'border border-ash text-stone opacity-60 pointer-events-none'
+                        : 'bg-electric-lime text-off-black-ink hover:bg-lime-hover active:scale-[0.98] cursor-pointer'
+                    }`}
+                  >
+                    {isProcessing ? (
+                      <>
+                        <div className="w-4 h-4 rounded-full border-2 border-off-black-ink/20 border-t-off-black-ink animate-spin"></div>
+                        <span>Processing Payment...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="w-4 h-4" strokeWidth={1.5} aria-hidden />
+                        <span>
+                          {!isPaymentDetailsComplete
+                            ? `Enter ${paymentMethod === 'mobile_money' ? 'phone number' : 'card details'} above`
+                            : 'Authorize Payment'}
                         </span>
-                        <input
-                          type="tel"
-                          value={mobilePhone}
-                          onChange={e => setMobilePhone(e.target.value)}
-                          placeholder="e.g. +254712345678"
-                          className="w-full pl-10 pr-4 py-3 bg-off-black border border-hairline/50 rounded-lg text-xs focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
-                        />
-                      </div>
-                      <p className="text-[10px] text-muted mt-1">Enter your M-Pesa or Airtel Money number. You will receive a payment prompt on your phone.</p>
-                      {mobilePhone && !isMobilePhoneValid && (
-                        <p className="text-[10px] text-red-500 mt-1">Please enter a valid phone number (9-15 digits).</p>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Card Fields */}
-                {paymentMethod === 'card' && (
-                  <div className="space-y-3 animate-sweep">
-                    <div>
-                      <label className="block text-xs font-bold text-muted uppercase mb-1.5">Cardholder Name <span className="text-red-500">*</span></label>
-                      <input
-                        type="text"
-                        value={cardName}
-                        onChange={e => setCardName(e.target.value)}
-                        placeholder="As shown on your card"
-                        className="w-full px-4 py-3 bg-off-black border border-hairline/50 rounded-lg text-xs focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-muted uppercase mb-1.5">Card Number <span className="text-red-500">*</span></label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted">
-                          <span className="material-symbols-outlined text-base">credit_card</span>
-                        </span>
-                        <input
-                          type="text"
-                          value={cardNumber}
-                          onChange={e => {
-                            const v = e.target.value.replace(/\D/g, '').slice(0, 16);
-                            setCardNumber(v.replace(/(\d{4})/g, '$1 ').trim());
-                          }}
-                          placeholder="0000 0000 0000 0000"
-                          maxLength={19}
-                          className="w-full pl-10 pr-4 py-3 bg-off-black border border-hairline/50 rounded-lg text-xs focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors font-mono"
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs font-bold text-muted uppercase mb-1.5">Expiry Date <span className="text-red-500">*</span></label>
-                        <input
-                          type="text"
-                          value={cardExpiry}
-                          onChange={e => {
-                            let v = e.target.value.replace(/\D/g, '').slice(0, 4);
-                            if (v.length >= 3) v = v.slice(0, 2) + '/' + v.slice(2);
-                            setCardExpiry(v);
-                          }}
-                          placeholder="MM/YY"
-                          maxLength={5}
-                          className="w-full px-4 py-3 bg-off-black border border-hairline/50 rounded-lg text-xs focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors font-mono"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-muted uppercase mb-1.5">CVV / CVC <span className="text-red-500">*</span></label>
-                        <input
-                          type="password"
-                          value={cardCvv}
-                          onChange={e => setCardCvv(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                          placeholder="•••"
-                          maxLength={4}
-                          className="w-full px-4 py-3 bg-off-black border border-hairline/50 rounded-lg text-xs focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors font-mono"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 text-[10px] text-muted">
-                      <span className="material-symbols-outlined text-muted text-sm">lock</span>
-                      Your card details are encrypted and never stored on our servers.
-                    </div>
-                  </div>
-                )}
-
-                {/* Processing indicator */}
-                {isProcessing && (
-                  <div className="flex items-center justify-center gap-3 py-3 animate-sweep">
-                    <div className="w-5 h-5 rounded-full border-2 border-primary/20 border-t-primary animate-spin"></div>
-                    <span className="text-xs font-bold text-primary">
-                      {paymentMethod === 'mobile_money'
-                        ? 'Opening Paystack to send payment prompt to your phone...'
-                        : 'Opening secure card payment gateway...'}
-                    </span>
-                  </div>
-                )}
-
-                {/* Secure Gateway disclaimer */}
-                <div className="flex items-start gap-2 text-[10px] text-muted leading-relaxed bg-off-black/50 p-3 rounded-lg">
-                  <span className="material-symbols-outlined text-muted text-base shrink-0">security</span>
-                  <span>All payments are encrypted with TLS 1.3 and processed through PCI-DSS Level 1 certified infrastructure. Your payment details are never stored on our servers.</span>
+                      </>
+                    )}
+                  </button>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Modal actions footer */}
-            {!successAnimation && (
-              <div className="p-6 border-t border-hairline/30 flex gap-4 bg-primary/2">
-                <button
-                  type="button"
-                  disabled={isProcessing}
-                  onClick={() => setShowCheckoutModal(false)}
-                  className="flex-1 py-3 bg-off-black border border-hairline/60 hover:bg-surface-variant text-muted font-bold text-xs rounded-lg cursor-pointer transition-all disabled:opacity-40"
-                >
-                  Go Back
-                </button>
-                <button
-                  type="button"
-                  disabled={isProcessing || !isPaymentDetailsComplete}
-                  onClick={handleInitiatePayment}
-                  className={`flex-1 py-3 font-semibold text-sm rounded-full transition-all flex items-center justify-center gap-2 min-h-[48px] ${
-                    isProcessing || !isPaymentDetailsComplete
-                      ? 'border border-hairline text-muted cursor-not-allowed'
-                      : 'btn-gradient-stroke text-cream hover:brightness-110 active:scale-[0.98] cursor-pointer'
-                  }`}
-                >
-                  {isProcessing ? (
-                    <>
-                      <div className="w-4 h-4 rounded-full border-2 border-white/20 border-t-white animate-spin"></div>
-                      <span>Processing Payment...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="material-symbols-outlined text-[14px]">lock</span>
-                      <span>
-                        {!isPaymentDetailsComplete
-                          ? `Enter ${paymentMethod === 'mobile_money' ? 'phone number' : 'card details'} above`
-                          : 'Authorize Payment'}
-                      </span>
-                    </>
-                  )}
-                </button>
-              </div>
-            )}
-
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
+      </div>
     </div>
   );
 }

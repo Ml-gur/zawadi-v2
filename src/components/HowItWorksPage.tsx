@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowForward } from './Icons';
 import { GhostPillButton } from './ui';
 import { SEO } from './SEO';
+import { Breadcrumbs } from './Breadcrumbs';
 
 interface HowItWorksPageProps {
   onBack: () => void;
@@ -13,82 +14,73 @@ export default function HowItWorksPage({ onBack, onGetStarted }: HowItWorksPageP
   const steps = [
     {
       number: 1,
-      title: 'Create your profile in three minutes',
-      description: 'Enter five data points: your date of birth, nationality, degree level, field of study, and GPA. That is all we need to start matching you to scholarships you qualify for.'
+      title: 'Create your academic profile in three minutes',
+      description: 'Enter five core data points: date of birth, nationality, degree level, field of study, and normalized GPA. That is all our matching engine needs to unlock your personalized scholarship opportunities.'
     },
     {
       number: 2,
-      title: 'See only scholarships you are eligible to win',
-      description: 'Our matching engine checks your profile against the exact requirements of every scholarship in our database. Scholarships you do not qualify for are filtered out entirely. You see a ranked list of real opportunities with a match score explaining why each one fits your profile.'
+      title: 'See only scholarships you are 100% eligible to win',
+      description: 'Our engine checks your profile against the exact fine print of every international and regional opportunity. Irrelevant scholarships are filtered out. You see a ranked list with transparency into why each award fits your profile.'
     },
     {
       number: 3,
-      title: 'Filter for No-IELTS opportunities',
-      description: 'If you do not have an IELTS score, activate the No-IELTS filter to show only scholarships that accept a Medium of Instruction certificate or the Duolingo English Test. This removes the $250 language testing barrier immediately.'
+      title: 'Filter for verified No-IELTS opportunities',
+      description: 'If you do not have an IELTS score, activate the No-IELTS filter to surface scholarships that accept a Medium of Instruction certificate or the affordable Duolingo English Test. Eliminate testing cost barriers immediately.'
     },
     {
       number: 4,
-      title: 'Build your application with AI assistance',
-      description: 'Select a scholarship and open the essay co-creator. Enter notes about your background, motivations, and research interests. The AI generates a structured first draft of your statement of purpose. A peer mentor reviews the draft and returns feedback within 48 hours.'
+      title: 'Build your application with AI essay studio',
+      description: 'Select any scholarship to open the dedicated essay assistant. Input your background, goals, and leadership experiences to generate tailored statements of purpose that preserve your authentic scholar voice.'
     },
     {
       number: 5,
-      title: 'Track every application from one dashboard',
-      description: 'Save each scholarship you decide to pursue. The application tracker follows your progress from initial research through to submission, interview, and award. Deadlines are tracked automatically so nothing is missed.'
+      title: 'Track deadlines and documents from one workspace',
+      description: 'Store transcripts and test certificates in your encrypted Document Vault. Track live deadlines with countdown timers so you never miss an application window.'
     }
   ];
 
   return (
-    <div className="bg-canvas text-cream min-h-[100dvh]">
-<SEO
-  title="How Zawadi Works — Scholarship Matching for African Students"
-  description="Create a profile in three minutes. See scholarships you qualify for. Build your application with AI that learns your writing style. Get mentor review before you submit."
-  path="/how-it-works"
-  image="https://techsari.online/og-how-it-works.png"
-  ogTitle="How Zawadi Works — From Profile to Scholarship Application"
-  ogDescription="Four steps from registration to submitted application. Zawadi handles eligibility filtering, essay drafting, and human mentor review so African students can focus on applying."
-/>
-      <section className="px-6 py-20 md:py-24">
+    <div className="bg-surface-container-lowest text-on-surface font-body min-h-[100dvh] antialiased">
+      <SEO
+        title="How Zawadi Works — Scholarship Matching for African Students"
+        description="Create a profile in three minutes. See scholarships you qualify for. Build your application with AI that learns your writing style. Get mentor review before you submit."
+        path="/how-it-works"
+        image="https://techsari.online/og-how-it-works.png"
+        ogTitle="How Zawadi Works — From Profile to Scholarship Application"
+        ogDescription="Five steps from registration to submitted application. Zawadi handles eligibility filtering, essay drafting, and document tracking so African students can focus on applying."
+      />
+      <section className="px-4 md:px-10 py-16 md:py-24">
         <div className="max-w-[800px] mx-auto">
-          <button
-            onClick={onBack}
-            className="flex items-center gap-2 text-xs font-bold text-muted hover:text-cream transition-colors mb-8 cursor-pointer"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Home
-          </button>
+          <Breadcrumbs items={[{ name: 'How it works', path: '/how-it-works' }]} />
 
-          <h1 className="text-3xl md:text-5xl font-display font-semibold text-cream tracking-tight mb-4">How Zawadi Works</h1>
-          <p className="text-body-lg text-muted mb-12 max-w-2xl">
-            From profile creation to application submission. Five steps to find and apply for scholarships you actually qualify for.
+          <span className="font-eyebrow text-eyebrow uppercase tracking-wider text-graphite block mb-2">Step-by-Step Guide</span>
+          <h1 className="font-display text-4xl md:text-5xl font-medium text-on-surface tracking-tight mb-4">How Techsari Zawadi Works</h1>
+          <p className="font-body text-base md:text-lg text-secondary mb-14 max-w-2xl">
+            From initial registration to verified submission. Five simple steps to discover and apply for scholarships you actually qualify for.
           </p>
 
-          <div className="space-y-12">
+          <div className="space-y-10">
             {steps.map((step) => (
-              <div key={step.number} className="flex gap-6">
-                <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 rounded-full bg-cream text-canvas flex items-center justify-center font-display font-semibold text-lg shrink-0">
-                    {step.number}
-                  </div>
-                  {step.number < 5 && (
-                    <div className="w-0.5 flex-1 bg-hairline/40 mt-2"></div>
-                  )}
+              <div key={step.number} className="flex gap-6 p-6 md:p-8 rounded-card border border-outline-variant bg-surface-container-low transition-all hover:bg-surface-container">
+                <div className="w-12 h-12 rounded-full bg-primary-container text-on-surface flex items-center justify-center font-headline font-bold text-xl shrink-0 shadow-xs">
+                  {step.number}
                 </div>
-                <div className="pt-2">
-                  <h2 className="font-display text-xl font-semibold text-cream tracking-tight mb-2">{step.title}</h2>
-                  <p className="text-sm text-muted leading-relaxed">{step.description}</p>
+                <div className="pt-1 flex flex-col gap-2">
+                  <h2 className="font-headline text-xl md:text-2xl font-medium text-on-surface tracking-tight">{step.title}</h2>
+                  <p className="font-body text-base text-secondary leading-relaxed">{step.description}</p>
                 </div>
               </div>
             ))}
           </div>
 
           <div className="mt-16 text-center">
-            <GhostPillButton variant="gradient" size="lg" onClick={onGetStarted}>
-              Create Your Profile
+            <button
+              onClick={onGetStarted}
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-primary-container text-on-surface font-subheading text-base font-medium hover:bg-primary-fixed active:scale-[0.98] transition-all shadow-sm cursor-pointer"
+            >
+              <span>Create Free Account</span>
               <ArrowForward />
-            </GhostPillButton>
+            </button>
           </div>
         </div>
       </section>

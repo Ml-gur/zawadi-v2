@@ -1,6 +1,11 @@
 import { test, expect } from '@playwright/test';
 
 const routes = ['/', '/scholarships/browse', '/how-it-works', '/about', '/faq', '/contact', '/privacy', '/terms'];
+const darkRoutes = routes.filter(r => r !== '/' && r !== '/scholarships/browse');
+const lightPages: Array<[string, string]> = [
+  ['/', '#landing-root'],
+  ['/scholarships/browse', '#browse-root'],
+];
 
 test.describe('visual smoke — all viewports', () => {
   for (const route of routes) {
@@ -13,11 +18,26 @@ test.describe('visual smoke — all viewports', () => {
       }));
       expect(overflow.scroll).toBeLessThanOrEqual(overflow.inner + 1);
     });
+  }
 
-    test(`body is dark canvas on ${route}`, async ({ page }) => {
+  // The whole site is now the light Electric Editorial canvas.
+  for (const route of darkRoutes) {
+    test(`body is light canvas on ${route}`, async ({ page }) => {
       await page.goto(route, { waitUntil: 'domcontentloaded' });
       const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-      expect(bg.replace(/\s/g, '')).toMatch(/rgb\(14,16,15\)|#0e100f/i);
+      expect(bg.replace(/\s/g, '')).toMatch(/rgb\(248,251,232\)|#f8fbe8/i);
+    });
+  }
+
+  for (const [route, rootId] of lightPages) {
+    test(`body is light editorial canvas on ${route}`, async ({ page }) => {
+      await page.goto(route, { waitUntil: 'domcontentloaded' });
+      await page.locator(rootId).waitFor({ state: 'attached', timeout: 15000 });
+      const bg = await page.evaluate(sel => {
+        const el = document.querySelector(sel) as HTMLElement | null;
+        return el ? getComputedStyle(el).backgroundColor : '';
+      }, rootId);
+      expect(bg.replace(/\s/g, '')).toMatch(/rgb\(255,\s?255,\s?255\)|rgb\(245,\s?245,\s?235\)|#fff|#f5f5eb/i);
     });
   }
 

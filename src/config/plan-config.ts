@@ -46,7 +46,7 @@ export const PLAN_LABELS: Record<string, string> = {
   explorer: 'Explorer',
   plus: 'Scholar Plus',
   pro: 'Application Pro',
-  institutional: 'Zawadi Institutional',
+  institutional: 'Techsari Institutional',
 };
 
 export const PLAN_HIERARCHY: Record<string, number> = {

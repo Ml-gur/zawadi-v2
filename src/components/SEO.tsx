@@ -18,7 +18,7 @@ interface SEOMeta {
   children?: ReactNode;
 }
 
-export function SEO({ title, description, ogDescription, ogTitle, path, image = OG_IMAGE, keywords, locale = 'en_US', schema, children }: SEOMeta) {
+export function SEO({ title, description, ogDescription, ogTitle, path, image = OG_IMAGE, keywords, locale = 'en_US', schema, noindex, children }: SEOMeta & { noindex?: boolean }) {
   const fullUrl = `${SITE_URL}${path}`;
   const ogDesc = ogDescription || description;
 
@@ -26,6 +26,7 @@ export function SEO({ title, description, ogDescription, ogTitle, path, image = 
     <Helmet>
       <title>{title}</title>
       <meta name="description" content={description} />
+      {noindex && <meta name="robots" content="noindex" />}
       {keywords && <meta name="keywords" content={keywords} />}
       <link rel="canonical" href={fullUrl} />
 
@@ -37,7 +38,7 @@ export function SEO({ title, description, ogDescription, ogTitle, path, image = 
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
       <meta property="og:image:alt" content={ogTitle || title} />
-      <meta property="og:site_name" content="Zawadi" />
+      <meta property="og:site_name" content="Techsari" />
       <meta property="og:locale" content={locale} />
 
       <meta name="twitter:card" content="summary_large_image" />

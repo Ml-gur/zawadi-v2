@@ -5,7 +5,7 @@ export default async function handler(req, res) {
     return res.status(405).end();
   }
 
-  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
   const anonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !anonKey) {
@@ -34,6 +34,9 @@ export default async function handler(req, res) {
       { loc: 'https://techsari.online/about', freq: 'monthly', priority: '0.5' },
       { loc: 'https://techsari.online/faq', freq: 'monthly', priority: '0.5' },
       { loc: 'https://techsari.online/how-it-works', freq: 'monthly', priority: '0.6' },
+      { loc: 'https://techsari.online/contact', freq: 'monthly', priority: '0.4' },
+      { loc: 'https://techsari.online/privacy', freq: 'yearly', priority: '0.3' },
+      { loc: 'https://techsari.online/terms', freq: 'yearly', priority: '0.3' },
     ];
 
     for (const page of staticPages) {

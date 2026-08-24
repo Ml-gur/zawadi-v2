@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { CalendarClock, ExternalLink, Inbox, Trash2 } from 'lucide-react';
 import { Scholarship, ApplicationTracker as TrackerType } from '../types';
+import { flagFor } from '../lib/flags';
 import ConfirmationDialog from './ConfirmationDialog';
+import { SEO } from './SEO';
 
 interface ApplicationTrackerProps {
   scholarships: Scholarship[];
@@ -10,334 +14,245 @@ interface ApplicationTrackerProps {
   onNavigateToTab: (tab: string) => void;
 }
 
+const STAGES = [
+  'All', 'Saved', 'Drafting', 'Preparing Documents', 'Essay Drafting', 'Ready to Submit',
+  'Applied', 'Interview', 'Awarded', 'Rejected',
+] as const;
+
+const STAGE_TONE: Record<string, string> = {
+  Saved: 'bg-parchment text-graphite',
+  Drafting: 'bg-electric-lime text-off-black-ink',
+  'Preparing Documents': 'bg-electric-lime text-off-black-ink',
+  'Essay Drafting': 'bg-electric-lime text-off-black-ink',
+  'Ready to Submit': 'bg-off-black-ink text-pure-white',
+  Applied: 'bg-off-black-ink text-pure-white',
+  Interview: 'bg-deep-charcoal text-pure-white',
+  Awarded: 'bg-electric-lime text-off-black-ink',
+  Rejected: 'bg-error/10 text-error',
+};
+
+function daysLeft(deadline: string): number | null {
+  if (!deadline) return null;
+  const t = Date.parse(deadline);
+  if (Number.isNaN(t)) return null;
+  return Math.ceil((t - Date.now()) / 86_400_000);
+}
+
 export default function ApplicationTracker({
   scholarships,
   applications,
   onTrackScholarship,
   onRemoveTrack,
-  onNavigateToTab
 }: ApplicationTrackerProps) {
-  const [filterStatus, setFilterStatus] = useState<string>('All');
+  const [searchParams] = useSearchParams();
+  const [filterStatus, setFilterStatus] = useState<string>(searchParams.get('stage') || 'All');
   const [noteEditId, setNoteEditId] = useState<string | null>(null);
   const [editingNotes, setEditingNotes] = useState<string>('');
-  const [sortBy, setSortBy] = useState<'none' | 'priority' | 'deadline'>('none');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
-  const statuses = [
-    "All", "Saved", "Drafting", "Preparing Documents", "Essay Drafting", "Ready to Submit",
-    "Applied", "Interview", "Awarded", "Rejected"
-  ];
+  const byId = useMemo(() => new Map(scholarships.map(s => [s.id, s])), [scholarships]);
 
-  const getScholarshipName = (id: string) => {
-    const s = scholarships.find(s => s.id === id);
-    return s ? s.name : "Unknown Scholarship";
-  };
-
-  const getScholarshipDeadline = (id: string) => {
-    const s = scholarships.find(s => s.id === id);
-    return s ? s.deadline : "N/A";
-  };
-
-  const getScholarshipSponsor = (id: string) => {
-    const s = scholarships.find(s => s.id === id);
-    return s ? s.provider : "Global";
-  };
-
-  const filteredApps = applications.filter((app) => {
-    if (app.status === 'not_started') return false;
-    if (filterStatus === 'All') return true;
-    return app.status === filterStatus;
-  });
-
-  const handleSort = (field: 'priority' | 'deadline') => {
-    if (sortBy === field) {
-      if (sortOrder === 'asc') {
-        setSortOrder('desc');
-      } else {
-        setSortBy('none');
-      }
-    } else {
-      setSortBy(field);
-      setSortOrder('asc');
+  const stageCounts = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const app of applications) {
+      if (app.status === 'not_started') continue;
+      counts.set(app.status, (counts.get(app.status) || 0) + 1);
     }
-  };
+    return counts;
+  }, [applications]);
 
-  const sortedApps = [...filteredApps].sort((a, b) => {
-    if (sortBy === 'priority') {
-      const priorityWeight = { 'High': 3, 'Normal': 2, 'Low': 1 };
-      const weightA = priorityWeight[a.priority as keyof typeof priorityWeight] || 0;
-      const weightB = priorityWeight[b.priority as keyof typeof priorityWeight] || 0;
-      return sortOrder === 'asc' ? weightA - weightB : weightB - weightA;
-    }
-    if (sortBy === 'deadline') {
-      const deadlineA = getScholarshipDeadline(a.scholarship_id);
-      const deadlineB = getScholarshipDeadline(b.scholarship_id);
-      
-      if (deadlineA === 'N/A' && deadlineB === 'N/A') return 0;
-      if (deadlineA === 'N/A') return 1;
-      if (deadlineB === 'N/A') return -1;
+  const rows = useMemo(() => {
+    return applications
+      .filter(app => app.status !== 'not_started')
+      .filter(app => filterStatus === 'All' || app.status === filterStatus)
+      .map(app => ({ app, s: byId.get(app.scholarship_id) }))
+      .sort((a, b) => {
+        const da = a.s?.deadline ? Date.parse(a.s.deadline) : Infinity;
+        const db = b.s?.deadline ? Date.parse(b.s.deadline) : Infinity;
+        return da - db;
+      });
+  }, [applications, filterStatus, byId]);
 
-      const dateA = new Date(deadlineA).getTime();
-      const dateB = new Date(deadlineB).getTime();
-      return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
-    }
-    return 0;
-  });
-
-  const handleUpdateStatus = (app: TrackerType, nextStatus: string) => {
-    onTrackScholarship(app.scholarship_id, nextStatus, app.notes, app.priority);
-  };
-
-  const handleUpdatePriority = (app: TrackerType, nextPriority: any) => {
-    onTrackScholarship(app.scholarship_id, app.status, app.notes, nextPriority);
-  };
-
-  const handleStartEditNotes = (app: TrackerType) => {
-    setNoteEditId(app.id);
-    setEditingNotes(app.notes);
-  };
-
-  const handleSaveNotes = (app: TrackerType) => {
+  const saveNote = (app: TrackerType) => {
     onTrackScholarship(app.scholarship_id, app.status, editingNotes, app.priority);
     setNoteEditId(null);
   };
 
   return (
-    <div className="space-y-6 animate-sweep">
-      
-      {/* Header */}
-      <div>
-        <h2 className="font-display text-2xl font-black text-primary">Application Tracker pipeline</h2>
-        <p className="text-xs text-muted mt-0.5">Track your pipeline status, update priority categories or write inline notes.</p>
-      </div>
+    <div className="animate-sweep">
+      <SEO title="Application Tracker | Techsari" description="Track every scholarship from saved to awarded, with deadlines sorted by what closes next." path="/applicationtracker" noindex />
 
-      {/* Filter toolbar */}
-      <div className="bg-canvas border border-hairline/50 p-4 rounded-lg flex flex-col md:flex-row gap-4 md:items-center justify-between">
-        <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-xs font-bold text-muted uppercase mr-2">Filter Stage:</span>
-          {statuses.map((st) => (
+      <span className="text-ed-eyebrow uppercase text-graphite">Applications</span>
+      <h1 className="mt-2 text-ed-h1-sm text-off-black-ink tracking-tight">Your application pipeline.</h1>
+      <p className="mt-2 text-ed-body text-graphite max-w-[56ch]">
+        Every scholarship you have saved, drafted or submitted — with deadlines
+        sorted so the next one closing always sits on top.
+      </p>
+
+      {/* Stage filter pills */}
+      <div className="mt-8 flex flex-wrap items-center gap-2" role="tablist" aria-label="Filter by stage">
+        {STAGES.map(stage => {
+          const active = filterStatus === stage;
+          const count = stage === 'All' ? applications.filter(a => a.status !== 'not_started').length : stageCounts.get(stage) || 0;
+          return (
             <button
-              key={st}
-              onClick={() => setFilterStatus(st)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${filterStatus === st ? 'bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream' : 'bg-off-black hover:bg-off-black text-muted'}`}
+              key={stage}
+              role="tab"
+              aria-selected={active}
+              onClick={() => setFilterStatus(stage)}
+              className={`inline-flex items-center gap-1.5 rounded-full px-4 min-h-[40px] text-ed-body-sm font-medium transition-all cursor-pointer ${
+                active
+                  ? 'bg-off-black-ink text-pure-white'
+                  : 'bg-pure-white border border-ash text-graphite hover:border-off-black-ink hover:text-off-black-ink'
+              }`}
             >
-              {st}
+              {stage}
+              <span
+                className={`inline-flex min-w-5 h-5 px-1 rounded-full text-[10px] font-medium items-center justify-center ${
+                  active ? 'bg-electric-lime text-off-black-ink' : 'bg-parchment text-graphite'
+                }`}
+              >
+                {count}
+              </span>
             </button>
-          ))}
-        </div>
-        
-        {/* Sorting selection drop-down */}
-        <div className="flex items-center gap-2 self-start md:self-auto">
-          <span className="text-xs font-bold text-muted uppercase whitespace-nowrap">Sort Pipeline:</span>
-          <select
-            value={`${sortBy}-${sortOrder}`}
-            onChange={(e) => {
-              const [valField, valOrder] = e.target.value.split('-');
-              if (valField === 'none') {
-                setSortBy('none');
-              } else {
-                setSortBy(valField as any);
-                setSortOrder(valOrder as any);
-              }
-            }}
-            className="text-xs bg-off-black border border-hairline rounded-lg p-2 text-cream focus:outline-none focus:border-primary cursor-pointer font-semibold"
+          );
+        })}
+      </div>
+
+      {/* Rows */}
+      {rows.length === 0 ? (
+        <div className="mt-10 bg-parchment border border-ash rounded-ed py-16 px-6 text-center">
+          <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-pure-white border border-ash mb-5" aria-hidden>
+            <Inbox className="w-5 h-5 text-graphite" strokeWidth={1.5} />
+          </span>
+          <p className="text-ed-sub text-off-black-ink">
+            {filterStatus === 'All' ? 'No tracked scholarships yet.' : `Nothing in ${filterStatus} yet.`}
+          </p>
+          <p className="mt-2 text-ed-body text-graphite">
+            Save a scholarship from the finder and it lands here automatically.
+          </p>
+          <Link
+            to="/scholarships"
+            className="mt-6 inline-flex items-center gap-2 rounded-full bg-electric-lime px-6 min-h-[48px] text-ed-body-sm font-medium text-off-black-ink hover:bg-lime-hover active:scale-[0.98] transition-all"
           >
-            <option value="none-asc">Default Order</option>
-            <option value="priority-desc">Priority: High to Low</option>
-            <option value="priority-asc">Priority: Low to High</option>
-            <option value="deadline-asc">Deadline: Nearest First</option>
-            <option value="deadline-desc">Deadline: Furthest First</option>
-          </select>
+            Find scholarships to apply
+          </Link>
         </div>
-      </div>
-
-      {/* Pipeline List Table container */}
-      <div className="bg-canvas border border-hairline/50 rounded-lg overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[800px]">
-            <thead className="bg-off-black border-b border-hairline">
-              <tr>
-                <th 
-                  onClick={() => handleSort('deadline')}
-                  className="py-3.5 px-6 font-label-sm text-label-sm text-muted uppercase tracking-wider font-semibold cursor-pointer select-none hover:bg-off-black transition-colors"
-                  title="Click to sort by Scholarship deadline date"
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span>Scholarship / Deadline</span>
-                    {sortBy === 'deadline' ? (
-                      <span className="material-symbols-outlined text-[16px] text-primary">
-                        {sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward'}
-                      </span>
-                    ) : (
-                      <span className="material-symbols-outlined text-[16px] text-muted/40 hover:text-muted">unfold_more</span>
-                    )}
-                  </div>
-                </th>
-                <th 
-                  onClick={() => handleSort('priority')}
-                  className="py-3.5 px-6 font-label-sm text-label-sm text-muted uppercase tracking-wider font-semibold cursor-pointer select-none hover:bg-off-black transition-colors"
-                  title="Click to sort by priority levels"
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span>Priority</span>
-                    {sortBy === 'priority' ? (
-                      <span className="material-symbols-outlined text-[16px] text-primary">
-                        {sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward'}
-                      </span>
-                    ) : (
-                      <span className="material-symbols-outlined text-[16px] text-muted/40 hover:text-muted">unfold_more</span>
-                    )}
-                  </div>
-                </th>
-                <th className="py-3.5 px-6 font-label-sm text-label-sm text-muted uppercase tracking-wider font-semibold">Tracking Stage</th>
-                <th className="py-3.5 px-6 font-label-sm text-label-sm text-muted uppercase tracking-wider font-semibold">My Notes</th>
-                <th className="py-3.5 px-6 font-label-sm text-label-sm text-muted uppercase tracking-wider font-semibold text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-outline-variant/40 bg-canvas">
-              {sortedApps.map((app) => (
-                <tr key={app.id} className="hover:bg-off-black/40 transition-colors">
-                  
-                  {/* Scholarship Name & Sponsor */}
-                  <td className="py-4 px-6 min-w-[250px]">
-                    <div className="font-bold text-primary truncate max-w-[220px]">
-                      {getScholarshipName(app.scholarship_id)}
-                    </div>
-                    <div className="text-xs text-muted mt-0.5 flex items-center gap-1.5">
-                      <span>{getScholarshipSponsor(app.scholarship_id)}</span>
-                      <span>•</span>
-                      <span className="flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[12px]">calendar_today</span>
-                        {getScholarshipDeadline(app.scholarship_id)}
-                      </span>
-                    </div>
-                  </td>
-
-                  {/* Priority Pill */}
-                  <td className="py-4 px-6">
-                    <select
-                      value={app.priority}
-                      onChange={(e) => handleUpdatePriority(app, e.target.value as any)}
-                      className={`text-xs font-bold rounded-lg border px-3 py-1 cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary ${
-                        app.priority === 'High' 
-                          ? 'bg-status-urgent/10 border-status-urgent/20 text-status-urgent' 
-                          : app.priority === 'Normal' 
-                          ? 'bg-status-info/10 border-status-info/20 text-status-info' 
-                          : 'bg-status-warning/10 border-status-warning/20 text-status-warning'
-                      }`}
-                    >
-                      <option value="Low">Low Priority</option>
-                      <option value="Normal">Normal Priority</option>
-                      <option value="High">High Priority</option>
-                    </select>
-                  </td>
-
-                  {/* Stage Dropdown select */}
-                  <td className="py-4 px-6">
-                    <select
-                      value={app.status}
-                      onChange={(e) => handleUpdateStatus(app, e.target.value)}
-                      className={`text-xs border rounded-lg p-2 focus:outline-none focus:border-primary cursor-pointer font-bold transition-all ${
-                        app.status === 'Applied' 
-                          ? 'bg-accent-green/15 text-accent-green border-accent-green/50' 
-                          : (app.status === 'Drafting' || app.status === 'Essay Drafting')
-                          ? 'border-accent-green bg-accent-green/15 text-accent-green'
-                          : app.status === 'Saved'
-                          ? 'bg-secondary/15 text-secondary border-secondary/25 font-black'
-                          : 'bg-off-black border-hairline text-on-surface'
-                      }`}
-                    >
-                      <option value="Saved" className="bg-off-black text-secondary font-bold">Saved</option>
-                      <option value="Drafting" className="bg-off-black text-primary font-bold">Drafting</option>
-                      <option value="Preparing Documents" className="bg-off-black text-on-surface">Preparing Documents</option>
-                      <option value="Essay Drafting" className="bg-off-black text-on-surface">Essay Drafting</option>
-                      <option value="Ready to Submit" className="bg-off-black text-on-surface">Ready to Submit</option>
-                      <option value="Applied" className="bg-off-black text-secondary font-bold">Applied</option>
-                      <option value="Interview" className="bg-off-black text-on-surface">Interview</option>
-                      <option value="Awarded" className="bg-off-black text-on-surface">Awarded</option>
-                      <option value="Rejected" className="bg-off-black text-on-surface">Rejected</option>
-                    </select>
-                  </td>
-
-                  {/* Dynamic Notes */}
-                  <td className="py-4 px-6 max-w-[300px]">
-                    {noteEditId === app.id ? (
-                      <div className="flex gap-2 items-center">
-                        <input 
-                          value={editingNotes}
-                          onChange={(e) => setEditingNotes(e.target.value)}
-                          className="p-1.5 border border-hairline rounded text-xs w-full bg-off-black"
-                          type="text"
-                        />
-                        <button 
-                          onClick={() => handleSaveNotes(app)}
-                          className="text-status-success p-1 hover:bg-status-success/10 rounded"
-                        >
-                          <span className="material-symbols-outlined text-[16px]">done</span>
-                        </button>
-                      </div>
-                    ) : (
-                      <div 
-                        onClick={() => handleStartEditNotes(app)}
-                        className="text-xs text-muted truncate text-left hover:underline cursor-pointer flex items-center justify-between group"
+      ) : (
+        <ul className="mt-8 space-y-3">
+          {rows.map(({ app, s }) => {
+            const dl = s?.deadline ? daysLeft(s.deadline) : null;
+            const urgent = dl !== null && dl <= 14;
+            return (
+              <li
+                key={app.id || `${app.user_email}-${app.scholarship_id}`}
+                className={`bg-pure-white border rounded-ed p-5 md:p-6 flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-6 transition-colors ${
+                  urgent ? 'border-error/40' : 'border-ash hover:border-graphite/50'
+                }`}
+              >
+                {/* Scholarship identity */}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-lg leading-none" aria-hidden>{flagFor(s)}</span>
+                    {s ? (
+                      <Link
+                        to={`/scholarships/browse/${s.slug || s.id}`}
+                        className="text-ed-sub tracking-tight text-off-black-ink hover:text-graphite transition-colors truncate max-w-[420px]"
                       >
-                        <span className="truncate flex-1 pr-4">{app.notes || "(Click to write first-hand notes)"}</span>
-                        <span className="material-symbols-outlined text-[14px] text-muted opacity-0 group-hover:opacity-100 transition-opacity">edit</span>
-                      </div>
+                        {s.name}
+                      </Link>
+                    ) : (
+                      <span className="text-ed-sub tracking-tight text-graphite">Removed listing</span>
                     )}
-                  </td>
+                    {s && <ExternalLink className="w-3.5 h-3.5 text-stone shrink-0" aria-hidden />}
+                  </div>
+                  <p className="mt-1 text-ed-body-sm text-graphite truncate">
+                    {s?.provider || '—'}
+                    {s?.amount ? ` · ${s.amount}` : ''}
+                  </p>
+                </div>
 
-                  {/* Action delete trash button */}
-                  <td className="py-4 px-6 text-right">
-                    <button 
-                      onClick={() => setDeleteConfirmId(app.id)}
-                      className="text-muted hover:text-status-urgent p-2 rounded-full hover:bg-off-black transition-colors cursor-pointer"
-                      title="Untrack scholarship"
+                {/* Deadline */}
+                <div className={`shrink-0 flex items-center gap-1.5 text-ed-body-sm ${urgent ? 'text-error font-medium' : 'text-graphite'}`}>
+                  <CalendarClock className="w-4 h-4 shrink-0" aria-hidden />
+                  {dl === null
+                    ? 'No deadline listed'
+                    : dl <= 0
+                      ? 'Closing today'
+                      : `${dl} day${dl === 1 ? '' : 's'} left`}
+                </div>
+
+                {/* Stage select */}
+                <div className="shrink-0">
+                  <label className="sr-only" htmlFor={`stage-${app.scholarship_id}`}>Tracking stage</label>
+                  <select
+                    id={`stage-${app.scholarship_id}`}
+                    value={app.status}
+                    onChange={e => onTrackScholarship(app.scholarship_id, e.target.value, app.notes, app.priority)}
+                    className={`appearance-none rounded-full px-4 min-h-[40px] text-ed-body-sm font-medium border cursor-pointer focus:outline-none focus:border-graphite ${STAGE_TONE[app.status] || 'bg-parchment text-graphite border-ash'}`}
+                  >
+                    {STAGES.filter(x => x !== 'All').map(stage => (
+                      <option key={stage} value={stage}>{stage}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Notes */}
+                <div className="min-w-0 flex-1 lg:max-w-[280px]">
+                  {noteEditId === app.scholarship_id ? (
+                    <div className="flex items-center gap-2">
+                      <input
+                        autoFocus
+                        value={editingNotes}
+                        onChange={e => setEditingNotes(e.target.value)}
+                        onKeyDown={e => { if (e.key === 'Enter') saveNote(app); }}
+                        placeholder="Add a note…"
+                        className="w-full bg-parchment border border-ash rounded-lg px-3 py-2 min-h-[40px] text-ed-body-sm text-off-black-ink focus:outline-none focus:border-graphite"
+                      />
+                      <button
+                        onClick={() => saveNote(app)}
+                        className="shrink-0 rounded-full bg-electric-lime px-4 min-h-[40px] text-ed-body-sm font-medium text-off-black-ink hover:bg-lime-hover transition-colors cursor-pointer"
+                      >
+                        Save
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => { setNoteEditId(app.scholarship_id); setEditingNotes(app.notes || ''); }}
+                      className={`w-full text-left text-ed-body-sm truncate min-h-[40px] cursor-pointer ${
+                        app.notes ? 'text-off-black-ink' : 'text-stone hover:text-graphite transition-colors'
+                      }`}
+                      title="Edit note"
                     >
-                      <span className="material-symbols-outlined text-[18px]">delete</span>
+                      {app.notes || 'Add a note…'}
                     </button>
-                  </td>
+                  )}
+                </div>
 
-                </tr>
-              ))}
+                {/* Remove */}
+                <button
+                  onClick={() => setDeleteConfirmId(app.scholarship_id)}
+                  aria-label={`Stop tracking ${s?.name || 'this scholarship'}`}
+                  className="icon-btn shrink-0 inline-flex items-center justify-center rounded-full border border-ash text-graphite hover:text-error hover:border-error transition-colors cursor-pointer"
+                >
+                  <Trash2 className="w-4 h-4" aria-hidden />
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
 
-              {sortedApps.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="py-20 text-center">
-                    <span className="material-symbols-outlined text-4xl text-muted mb-4">analytics</span>
-                    <h4 className="font-semibold text-cream mb-1">Pipeline is clean</h4>
-                    <p className="text-xs text-muted mb-4">No active applications currently set in this tracking stage.</p>
-                    <button 
-                      onClick={() => onNavigateToTab('scholarships')}
-                      className="bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream text-xs font-semibold px-4 py-2 rounded-lg hover:opacity-90 cursor-pointer"
-                    >
-                      Discover Scholarships
-                    </button>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <ConfirmationDialog
-        isOpen={!!deleteConfirmId}
-        title="Remove Scholarship from Tracker"
-        message={`Are you sure you want to remove "${(applications.find(a => a.id === deleteConfirmId) ? getScholarshipName(applications.find(a => a.id === deleteConfirmId)!.scholarship_id) : '')}" from your Application Tracker? All tracking progress and notes for this scholarship will be permanently deleted.`}
-        confirmText="Yes, Remove"
-        cancelText="Keep Tracking"
-        type="danger"
-        onConfirm={() => {
-          if (deleteConfirmId) {
-            onRemoveTrack(deleteConfirmId);
-            setDeleteConfirmId(null);
-          }
-        }}
-        onCancel={() => setDeleteConfirmId(null)}
-      />
-
+      {deleteConfirmId && (
+        <ConfirmationDialog
+          isOpen
+          title="Stop tracking this scholarship?"
+          message="It will be removed from your pipeline. You can always track it again from the finder."
+          confirmText="Stop tracking"
+          onConfirm={() => { onRemoveTrack(deleteConfirmId); setDeleteConfirmId(null); }}
+          onCancel={() => setDeleteConfirmId(null)}
+        />
+      )}
     </div>
   );
 }

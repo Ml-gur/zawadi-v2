@@ -15,12 +15,8 @@
 -- 1. HELPER FUNCTIONS
 -- ============================================================
 
-CREATE OR REPLACE FUNCTION exec_sql(sql_text TEXT)
-RETURNS VOID AS $$
-BEGIN
-  EXECUTE sql_text;
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+-- Drop legacy dangerous RPC if present
+DROP FUNCTION IF EXISTS exec_sql(TEXT);
 
 CREATE OR REPLACE FUNCTION increment_view_count(schol_id TEXT)
 RETURNS VOID AS $$

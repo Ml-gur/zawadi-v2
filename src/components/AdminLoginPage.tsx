@@ -54,9 +54,6 @@ export default function AdminLoginPage() {
         return;
       }
 
-      const token = data.session.access_token;
-      localStorage.setItem('zawadi_admin_token', token);
-      localStorage.setItem('zawadi_token', token);
       window.location.href = '/admin';
     } catch {
       setError('Connection error. Please check your connection.');

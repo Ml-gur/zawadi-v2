@@ -6,9 +6,15 @@ export async function getPublishedScholarships(filters?: {
   degree?: string;
   no_ielts?: boolean;
 }) {
-  let query = supabase.from('scholarships').select('*').eq('published', true);
-  if (filters?.country) query = query.contains('countries', [filters.country]);
-  if (filters?.degree) query = query.contains('degree_levels', [filters.degree]);
+  const today = new Date().toISOString().split('T')[0];
+  let query = supabase
+    .from('scholarships')
+    .select('*')
+    .eq('published', true)
+    .or(`deadline.is.null,deadline.gte.${today}`);
+  // postgrest-js serialises arrays as Postgres literals ({a,b}); these columns are jsonb and need JSON text
+  if (filters?.country) query = query.contains('countries', JSON.stringify([filters.country]));
+  if (filters?.degree) query = query.contains('degree_levels', JSON.stringify([filters.degree]));
   if (filters?.no_ielts) query = query.eq('no_ielts', true);
   return query.order('id', { ascending: false });
 }
@@ -41,21 +47,31 @@ export async function togglePublishScholarship(id: string, currentPublished: boo
 
 // ─── Auto-Unpublish ───
 export async function autoUnpublishExpiredScholarships() {
-  return supabase.rpc('auto_unpublish_expired_scholarships');
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    return await supabase
+      .from('scholarships')
+      .update({ published: false })
+      .lt('deadline', today)
+      .eq('published', true);
+  } catch {
+    return { data: null, error: null };
+  }
 }
 
 export async function getAutoUnpublishedScholarships() {
+  const today = new Date().toISOString().split('T')[0];
   return supabase
     .from('scholarships')
     .select('*')
-    .eq('auto_unpublished', true)
+    .lt('deadline', today)
     .order('updated_at', { ascending: false });
 }
 
 export async function republishScholarship(id: string) {
   return supabase
     .from('scholarships')
-    .update({ published: true, auto_unpublished: false })
+    .update({ published: true })
     .eq('id', id)
     .select()
     .single();

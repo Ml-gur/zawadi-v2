@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 20));
   const offset = (page - 1) * limit;
 
-  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
   const anonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !anonKey) {
@@ -27,7 +27,7 @@ export default async function handler(req, res) {
 
     const dataQuery = supabase
       .from('scholarships')
-      .select('id,slug,name,provider,countries,degree_levels,funding_type,amount,deadline,urgency,description,no_ielts,targets_financial_need,targets_first_generation,is_intra_african,updated_at')
+      .select('id,slug,name,provider,countries,degree_levels,funding_type,amount,deadline,urgency,description,no_ielts,targets_financial_need,targets_first_generation,is_intra_african,fields_of_study,host_region,iso2,updated_at')
       .eq('published', true)
       .or('deadline.is.null,deadline.gte.' + new Date().toISOString().split('T')[0])
       .order('deadline', { ascending: true, nullsLast: true })

@@ -6,11 +6,14 @@ export default async function handler(req, res) {
   }
 
   const { slug } = req.query;
+  // PostgREST filter grammar is built from this value — lock it to slug charset (audit F6)
+  const safeSlug = String(slug || '').replace(/[^a-zA-Z0-9-]/g, '');
+  if (!safeSlug) return res.status(400).json({ error: 'Invalid scholarship identifier' });
   if (!slug) {
     return res.status(400).json({ error: 'Slug parameter is required' });
   }
 
-  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
   const anonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !anonKey) {
@@ -27,11 +30,11 @@ export default async function handler(req, res) {
         urgency,description,no_ielts,targets_financial_need,targets_first_generation,
         is_intra_african,updated_at,fields_of_study,instruction_language,host_institution,
         host_country,host_region,targets_rural_origin,targets_ldc_countries,stem_focus,
-        development_focus,min_gpa_normalised,requires_leadership,requires_community
+        development_focus,min_gpa_normalised,requires_leadership,requires_community,
+        apply_url,source_url,published
       `)
-      .eq('slug', slug)
+      .or(`slug.eq.${safeSlug},id.eq.${safeSlug}`)
       .eq('published', true)
-      .or('deadline.is.null,deadline.gte.' + new Date().toISOString().split('T')[0])
       .maybeSingle();
 
     if (error) {

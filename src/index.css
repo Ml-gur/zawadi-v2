@@ -2,73 +2,147 @@
 
 @theme {
   /* Typography */
-  --font-sans: "Inter Tight", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: "Inter Tight", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter Tight", Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Inter Tight", Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-headline: "Inter Tight", Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Inter Tight", Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-label: "Inter Tight", Inter, ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  /* Type scale — display sizes clamp down on small screens */
-  --text-display: clamp(4rem, 14vw, 14rem);
-  --text-display--line-height: 0.9;
-  --text-display--letter-spacing: -0.02em;
-  --text-heading-lg: clamp(3rem, 9vw, 6.3125rem);
+  /* Material 3 & Editorial Unified Tokens */
+  --color-surface: #f8fbe8;
+  --color-surface-dim: #d8dcca;
+  --color-surface-bright: #f8fbe8;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f2f5e3;
+  --color-surface-container: #ecf0dd;
+  --color-surface-container-high: #e6ead8;
+  --color-surface-container-highest: #e1e4d2;
+  --color-on-surface: #191d12;
+  --color-on-surface-variant: #424936;
+  --color-inverse-surface: #2e3226;
+  --color-inverse-on-surface: #eff3e0;
+  --color-outline: #737a64;
+  --color-outline-variant: #c2cab0;
+  --color-surface-tint: #466800;
+  --color-primary: #466800;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #beff50;
+  --color-on-primary-container: #4f7500;
+  --color-inverse-primary: #9bd92a;
+  --color-secondary: #5f5e58;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #e2dfd7;
+  --color-on-secondary-container: #64635c;
+  --color-tertiary: #5e5f58;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #ecece2;
+  --color-on-tertiary-container: #696b63;
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+  --color-primary-fixed: #b6f648;
+  --color-primary-fixed-dim: #9bd92a;
+  --color-on-primary-fixed: #121f00;
+  --color-on-primary-fixed-variant: #344e00;
+  --color-secondary-fixed: #e5e2da;
+  --color-secondary-fixed-dim: #c9c6be;
+  --color-on-secondary-fixed: #1c1c17;
+  --color-on-secondary-fixed-variant: #484741;
+  --color-tertiary-fixed: #e3e3d9;
+  --color-tertiary-fixed-dim: #c7c7be;
+  --color-on-tertiary-fixed: #1a1c16;
+  --color-on-tertiary-fixed-variant: #464740;
+  --color-background: #f8fbe8;
+  --color-on-background: #191d12;
+  --color-surface-variant: #e1e4d2;
+  --color-pure-white: #ffffff;
+  --color-ash: #d2d2c8;
+  --color-graphite: #6e6e64;
+  --color-deep-charcoal: #30302a;
+  --color-stone: #919183;
+  --color-smoke: #b9b9b7;
+  --color-parchment: #f5f5eb;
+  --color-off-black-ink: #14140f;
+  --color-electric-lime: #beff50;
+  --color-lime-hover: #aef53d;
+  --color-on-lime: rgba(20, 20, 15, 0.78);
+  --color-mist: #f2f5e3;
+
+  /* Aliases for backwards compatibility */
+  --color-canvas: #f8fbe8;
+  --color-cream: #14140f;
+  --color-muted: #6e6e64;
+  --color-hairline: #d2d2c8;
+  --color-accent-green: #466800;
+  --color-status-success: #15803d;
+  --color-status-urgent: #ba1a1a;
+  --color-ed-error: #ba1a1a;
+
+  /* Type scale */
+  --text-display: 90px;
+  --text-display--line-height: 0.89;
+  --text-display--letter-spacing: -2.7px;
+  --text-display--font-weight: 500;
+
+  --text-heading-lg: 60px;
   --text-heading-lg--line-height: 1;
-  --text-heading-lg--letter-spacing: -0.011em;
-  --text-heading: clamp(2.5rem, 7vw, 4.125rem);
-  --text-heading--line-height: 1.2;
-  --text-heading--letter-spacing: -0.01em;
-  --text-heading-sm: clamp(1.875rem, 5vw, 2.75rem);
-  --text-heading-sm--line-height: 1.2;
-  --text-heading-sm--letter-spacing: -0.01em;
-  --text-subheading: clamp(1.5rem, 4vw, 2.125rem);
-  --text-subheading--line-height: 1.2;
-  --text-subheading--letter-spacing: -0.01em;
+  --text-heading-lg--letter-spacing: -1.8px;
+  --text-heading-lg--font-weight: 500;
 
-  /* Core surfaces — dark chalkboard system */
-  --color-canvas: #0e100f;
-  --color-off-black: #191919;
-  --color-cream: #fffce1;
-  --color-muted: #909083; /* bumped from #7c7c6f for WCAG AA on canvas */
-  --color-hairline: #42433d;
+  --text-heading-lg-mobile: 36px;
+  --text-heading-lg-mobile--line-height: 1.1;
+  --text-heading-lg-mobile--letter-spacing: -1.08px;
+  --text-heading-lg-mobile--font-weight: 500;
 
-  /* Taxonomy accents (locked domains) */
-  --color-accent-green: #0ae448;
-  --color-accent-light-green: #abff84;
-  --color-accent-orange: #ff8709;
-  --color-accent-pink: #fec5fb;
-  --color-accent-lilac: #9d95ff;
-  --color-accent-blue: #00bae2;
+  --text-heading: 28px;
+  --text-heading--line-height: 1.14;
+  --text-heading--letter-spacing: -0.56px;
+  --text-heading--font-weight: 500;
 
-  /* Status — AA-checked against canvas */
-  --color-status-success: #34d399;
-  --color-status-info: #38bdf8;
-  --color-status-warning: #fbbf24;
-  --color-status-urgent: #ff6b6b;
-  --color-error: #ff6b6b;
-  --color-on-error: #0e100f;
+  --text-subheading: 22px;
+  --text-subheading--line-height: 1.18;
+  --text-subheading--letter-spacing: 0px;
+  --text-subheading--font-weight: 500;
 
-  /* Legacy aliases — old token names now resolve to the dark system.
-     Delete each alias as its consumers migrate to semantic names. */
-  --color-primary: #fffce1;
-  --color-on-primary: #0e100f;
-  --color-secondary: #0ae448;
-  --color-on-secondary: #0e100f;
-  --color-background: #0e100f;
-  --color-surface: #0e100f;
-  --color-surface-bright: #191919;
-  --color-surface-dim: #0a0b0a;
-  --color-surface-variant: #191919;
-  --color-surface-container-lowest: #0e100f;
-  --color-surface-container-low: #131513;
-  --color-surface-container: #191919;
-  --color-surface-container-high: #1e201e;
-  --color-surface-container-highest: #232623;
-  --color-on-surface: #fffce1;
-  --color-on-background: #fffce1;
-  --color-on-surface-variant: #909083;
-  --color-inverse-surface: #fffce1;
-  --color-inverse-on-surface: #0e100f;
-  --color-outline: #909083;
-  --color-outline-variant: #42433d;
+  --text-body: 16px;
+  --text-body--line-height: 1.5;
+  --text-body--letter-spacing: 0px;
+  --text-body--font-weight: 400;
+
+  --text-body-sm: 14px;
+  --text-body-sm--line-height: 1.29;
+  --text-body-sm--letter-spacing: 0px;
+  --text-body-sm--font-weight: 400;
+
+  --text-caption: 12px;
+  --text-caption--line-height: 1.33;
+  --text-caption--letter-spacing: 1.2px;
+  --text-caption--font-weight: 500;
+
+  --text-eyebrow: 10px;
+  --text-eyebrow--line-height: 1.4;
+  --text-eyebrow--letter-spacing: 1px;
+  --text-eyebrow--font-weight: 500;
+
+  /* Editorial type scale aliases */
+  --text-ed-eyebrow: 10px;
+  --text-ed-caption: 12px;
+  --text-ed-body-sm: 14px;
+  --text-ed-body: 16px;
+  --text-ed-sub: 22px;
+  --text-ed-h2: 28px;
+  --text-ed-h1-sm: 36px;
+  --text-ed-h1: 60px;
+  --text-ed-hero-sm: 48px;
+  --text-ed-hero: clamp(3rem, 8vw, 5.625rem);
+
+  /* Radii */
+  --radius-card: 28px;
+  --radius-button: 28px;
+  --radius-ed: 28px;
+  --radius-full: 9999px;
 }
 
 html {
@@ -85,13 +159,13 @@ body {
 }
 
 ::selection {
-  background: rgba(10, 228, 72, 0.25);
-  color: var(--color-cream);
+  background: rgba(190, 255, 80, 0.45);
+  color: var(--color-off-black-ink);
 }
 
 /* Designed focus ring everywhere */
 :focus-visible {
-  outline: 2px solid var(--color-accent-green);
+  outline: 2px solid var(--color-surface-tint);
   outline-offset: 2px;
   border-radius: 2px;
 }
@@ -99,14 +173,14 @@ body {
 /* Slim dark scrollbars */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--color-hairline) transparent;
+  scrollbar-color: var(--color-ash) transparent;
 }
 *::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 *::-webkit-scrollbar-thumb {
-  background: var(--color-hairline);
+  background: var(--color-ash);
   border-radius: 9999px;
 }
 *::-webkit-scrollbar-track {
@@ -130,7 +204,7 @@ body {
     inset: 0;
     background: radial-gradient(
       420px circle at var(--mx, 50%) var(--my, 50%),
-      rgba(255, 252, 225, 0.05),
+      rgba(20, 20, 15, 0.05),
       transparent 65%
     );
     opacity: 0;
@@ -143,10 +217,7 @@ body {
 
   /* Static gradient display text (no animated background-position) */
   .text-brand-gradient {
-    background: linear-gradient(114.41deg, #0ae448 15%, #abff84 60%, #fffce1 105%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: var(--color-off-black-ink);
   }
 
   /* Shine sweep on primary CTAs */
@@ -158,7 +229,7 @@ body {
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(105deg, transparent 35%, rgba(255, 252, 225, 0.22) 50%, transparent 65%);
+    background: linear-gradient(105deg, transparent 35%, rgba(20, 20, 15, 0.10) 50%, transparent 65%);
     transform: translateX(-120%);
     transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
     pointer-events: none;
@@ -181,15 +252,16 @@ body {
   .btn-gradient-stroke {
     border: 1.5px solid transparent;
     background:
-      linear-gradient(var(--color-canvas), var(--color-canvas)) padding-box,
-      linear-gradient(114.41deg, #0ae448 20.74%, #abff84 65.5%) border-box;
+      linear-gradient(#ffffff, #ffffff) padding-box,
+      linear-gradient(114.41deg, #beff50 20.74%, #aef53d 65.5%) border-box;
+    color: var(--color-off-black-ink);
   }
 
   .bg-grid-pattern {
     background-size: 40px 40px;
     background-image:
-      linear-gradient(to right, rgba(124, 124, 111, 0.07) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(124, 124, 111, 0.07) 1px, transparent 1px);
+      linear-gradient(to right, rgba(20, 20, 15, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(20, 20, 15, 0.05) 1px, transparent 1px);
   }
 
   .mesh-gradient {
@@ -248,7 +320,7 @@ body {
 }
 
 .radial-progress {
-  background: conic-gradient(var(--progress-color, #0ae448) var(--progress, 0deg), rgba(124, 124, 111, 0.25) 0deg);
+  background: conic-gradient(var(--progress-color, #4f7500) var(--progress, 0deg), rgba(210, 210, 200, 0.4) 0deg);
   border-radius: 50%;
 }
 

@@ -56,6 +56,8 @@ function DashboardSkeleton() {
 }
 
 const LandingPage = lazy(() => import('./components/LandingPage'));
+import LandingHeader from './components/landing/LandingHeader';
+import LandingFooter from './components/landing/LandingFooter';
 const AuthScreen = lazy(() => import('./components/AuthScreen'));
 const Dashboard = lazy(() => import('./components/Dashboard'));
 const Scholarships = lazy(() => import('./components/Scholarships'));
@@ -94,7 +96,6 @@ export default function App() {
   const [auditLogs, setAuditLogs] = useState<AuditLogItem[]>([]);
 
   const [authLoading, setAuthLoading] = useState(true);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showProfileSetup, setShowProfileSetup] = useState(false);
   const [profileReady, setProfileReady] = useState(false);
 
@@ -152,10 +153,10 @@ export default function App() {
   const currentTab = pathToTab[location.pathname] || '';
   const isPublicPage = ['/', '/about', '/faq', '/privacy', '/terms', '/how-it-works', '/contact', '/forgot-password', '/reset-password', '/scholarships'].includes(location.pathname) || location.pathname.startsWith('/scholarships/');
 
-  const hideHeaderFooter = !isPublicPage && !user;
+  const ownsChrome = location.pathname === '/' || location.pathname === '/scholarships/browse' || location.pathname.startsWith('/scholarships/browse') || location.pathname === '/scholarships';
+  const hideHeaderFooter = (!isPublicPage && !user) || ownsChrome;
 
   const handleNavigateToTab = (tab: string) => {
-    setMobileMenuOpen(false);
     const path = tabToPath[tab];
     if (path) navigate(path);
     else if (tab === 'home') { navigate('/'); setShowAuth(false); }
@@ -164,15 +165,16 @@ export default function App() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
-        localStorage.setItem('zawadi_token', session.access_token);
         (async () => {
           try {
-            const { data: profile, error } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+            const userEmail = session.user.email || '';
+            const { data: profile, error } = await supabase
+              .from('profiles')
+              .select('*')
+              .or(`email.eq.${userEmail},id.eq.${session.user.id}`)
+              .maybeSingle();
             if (!error && profile) {
               setUser(profile as UserProfile);
-              if ((profile as { role?: string }).role === 'super_admin') {
-                localStorage.setItem('zawadi_admin_token', session.access_token);
-              }
             } else {
               setUser({
                 email: session.user.email!,
@@ -185,17 +187,15 @@ export default function App() {
               });
             }
           } catch {
-            localStorage.removeItem('zawadi_token');
+            // Ignored
           } finally {
             setAuthLoading(false);
           }
         })();
       } else {
-        localStorage.removeItem('zawadi_token');
         setAuthLoading(false);
       }
     }).catch(() => {
-      localStorage.removeItem('zawadi_token');
       setAuthLoading(false);
     });
   }, []);
@@ -243,6 +243,19 @@ export default function App() {
     window.addEventListener('open-auth', handler);
     return () => window.removeEventListener('open-auth', handler);
   }, []);
+
+  useEffect(() => {
+    const handler = () => handleLogout();
+    window.addEventListener('zawadi-signout', handler);
+    return () => window.removeEventListener('zawadi-signout', handler);
+  });
+
+  useEffect(() => {
+    if (!showAuth) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setShowAuth(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [showAuth]);
 
   const fetchScholarships = async (_email?: string) => {
     try {
@@ -307,23 +320,23 @@ export default function App() {
   };
 
   const handleLoginSuccess = async (email: string, token?: string) => {
-    if (!token) return;
-    localStorage.setItem('zawadi_token', token);
     try {
-      // Fetch the user profile from Supabase using the authenticated session
-      const { data: { user: authUser } } = await supabase.auth.getUser();
+      // Read the freshly-established local session instead of re-validating
+      // over the network (getUser adds a round-trip that stalls on slow links).
+      const { data: { session } } = await supabase.auth.getSession();
+      const authUser = session?.user;
       if (authUser) {
+        const userEmail = email || authUser.email || '';
         const { data: profile, error } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', authUser.id)
-          .single();
+          .or(`email.eq.${userEmail},id.eq.${authUser.id}`)
+          .maybeSingle();
 
         if (!error && profile) {
           setUser(profile as UserProfile);
           setShowAuth(false);
           if (profile.role === 'super_admin') {
-            localStorage.setItem('zawadi_admin_token', token);
             navigate('/admin');
           } else {
             navigate('/dashboard');
@@ -343,18 +356,14 @@ export default function App() {
           setShowAuth(false);
           navigate('/dashboard');
         }
-      } else {
-        localStorage.removeItem('zawadi_token');
       }
     } catch (err) {
-      localStorage.removeItem('zawadi_token');
+      console.error('Login profile sync error', err);
     }
   };
 
   const handleLogout = () => {
     supabase.auth.signOut();
-    localStorage.removeItem('zawadi_token');
-    localStorage.removeItem('zawadi_admin_token');
     setUser(null);
     profileSetupDismissedRef.current = false;
     setShowAuth(false);
@@ -387,8 +396,12 @@ export default function App() {
     if (!user) return;
     try {
       const { error } = await deleteApplication(id);
-      if (!error) setApplications(prev => prev.filter(a => a.id !== id));
-      else alert(error.message || "Failed to stop tracking this scholarship.");
+      if (!error) {
+        setApplications(prev => prev.filter(a => a.id !== id));
+        toast.success("Scholarship removed from your tracker");
+      } else {
+        toast.error(error.message || "Failed to stop tracking this scholarship.");
+      }
     } catch (err) { console.error("Error deleting tracked application", err); }
   };
 
@@ -628,7 +641,7 @@ export default function App() {
           if (exists) return prev.map(s => s.id === data.id ? data as Scholarship : s);
           return [...prev, data as Scholarship];
         });
-        alert("Listing saved successfully!");
+        toast.success("Listing saved successfully!");
         fetchUserData(user.email);
         fetch('https://www.google.com/ping?sitemap=https://techsari.online/sitemap.xml').catch(() => {});
       }
@@ -639,7 +652,11 @@ export default function App() {
     if (!user) return;
     try {
       const { error } = await deleteScholarship(id);
-      if (!error) { setScholarships(prev => prev.filter(s => s.id !== id)); fetchUserData(user.email); }
+      if (!error) {
+        setScholarships(prev => prev.filter(s => s.id !== id));
+        fetchUserData(user.email);
+        toast.success("Opportunity removed");
+      }
     } catch (err) { console.error("CRUD deletion error", err); }
   };
 
@@ -651,8 +668,9 @@ export default function App() {
       if (!error && data) {
         setScholarships(prev => prev.map(s => s.id === id ? { ...s, published: data.published ?? !s.published } : s));
         fetch('https://www.google.com/ping?sitemap=https://techsari.online/sitemap.xml').catch(() => {});
+        toast.success(data.published ? "Opportunity published" : "Opportunity unpublished");
       } else {
-        alert(`Toggle failed: ${error?.message || 'Server error'}`);
+        toast.error(`Toggle failed: ${error?.message || 'Server error'}`);
       }
     } catch (err) { console.error("Toggle publish error", err); }
   };
@@ -661,8 +679,13 @@ export default function App() {
     if (!user) return;
     try {
       const { error } = await bulkDeleteScholarships(ids);
-      if (!error) { setScholarships(prev => prev.filter(s => !ids.includes(s.id))); fetchUserData(user.email); alert(`Successfully removed ${ids.length} selected opportunities!`); }
-      else { alert(`Bulk deletion failed: ${error.message || 'Server error context'}`); }
+      if (!error) {
+        setScholarships(prev => prev.filter(s => !ids.includes(s.id)));
+        fetchUserData(user.email);
+        toast.success(`Successfully removed ${ids.length} selected opportunities!`);
+      } else {
+        toast.error(`Bulk deletion failed: ${error.message || 'Server error'}`);
+      }
     } catch (err) { console.error("Bulk CRUD deletion error", err); }
   };
 
@@ -686,11 +709,10 @@ export default function App() {
     } catch (err) { console.error("Moderation error", err); }
   };
 
-  const isActive = (path: string) => location.pathname === path;
 
-  if (authLoading) {
+  if (authLoading && !isPublicPage) {
     return (
-      <div className="min-h-[100dvh] flex flex-col items-center justify-center bg-canvas gap-4">
+      <div className="min-h-[100dvh] flex flex-col items-center justify-center bg-surface-container-lowest gap-4">
         <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
         <p className="text-xs text-on-surface-variant font-medium">Loading...</p>
       </div>
@@ -698,144 +720,46 @@ export default function App() {
   }
 
   return (
-    <div className="bg-canvas text-on-surface font-sans min-h-[100dvh] flex flex-col">
+    <div className="bg-surface-container-lowest text-on-surface font-body min-h-[100dvh] flex flex-col">
 
-      {/* Header */}
-      {!hideHeaderFooter && (
-        <header className="sticky top-0 bg-canvas/85 backdrop-blur-xl border-b border-hairline z-40">
-          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+      {/* Unified header — same chrome for guests and scholars */}
+      <LandingHeader
+        user={user}
+        onGetStarted={() => setShowAuth(true)}
+        onLogin={() => setShowAuth(true)}
+      />
 
-            <div className="flex items-center gap-2 sm:gap-6">
-              <Link to={user ? '/dashboard' : '/'} className="flex items-center gap-1.5 sm:gap-2.5 cursor-pointer hover:opacity-90">
-                <Logo size={40} />
-                <div className="hidden sm:block">
-                  <span className="font-display text-lg font-black text-primary tracking-tight whitespace-nowrap">Techsari Zawadi</span>
-                  <span className="text-[9px] bg-cream/[0.06] text-muted px-1.5 py-0.5 rounded font-bold uppercase block w-max mt-0.5 tracking-wider">African Scholars</span>
-                </div>
-              </Link>
 
-              {user && (
-                <nav className="hidden lg:flex items-center gap-1 text-xs font-bold text-on-surface-variant uppercase tracking-tight">
-                  {user.role !== 'super_admin' ? (
-                    <>
-                      <button onClick={() => navigate('/dashboard')} className={`px-3 py-2 rounded-lg hover:text-cream ${isActive('/dashboard') ? 'text-cream bg-cream/[0.06]' : ''}`}>Workspace</button>
-                      <button onClick={() => navigate('/scholarships')} className={`px-3 py-2 rounded-lg hover:text-cream ${isActive('/scholarships') ? 'text-cream bg-cream/[0.06]' : ''}`}>Scholarships</button>
-                      <button onClick={() => navigate('/vault')} className={`px-3 py-2 rounded-lg hover:text-cream ${isActive('/vault') ? 'text-cream bg-cream/[0.06]' : ''}`}>Doc Vault</button>
-                      <button onClick={() => navigate('/essays')} className={`px-3 py-2 rounded-lg hover:text-cream ${isActive('/essays') ? 'text-cream bg-cream/[0.06]' : ''}`}>AI Essay Studio</button>
-                      <button onClick={() => navigate('/profile')} className={`px-3 py-2 rounded-lg hover:text-cream ${isActive('/profile') ? 'text-cream bg-cream/[0.06]' : ''}`}>My Profile</button>
-                      <button onClick={() => navigate('/billing')} className={`px-3 py-2 rounded-lg hover:text-cream ${isActive('/billing') ? 'text-cream bg-cream/[0.06]' : ''}`}>Premium Plans</button>
-                    </>
-                  ) : null}
-                  {user.role === 'super_admin' && (
-                    <>
-                      <button onClick={() => navigate('/mentor')} className={`px-3 py-2 rounded-lg hover:text-cream ${isActive('/mentor') ? 'text-cream bg-cream/[0.06]' : ''}`}>Mentor Queue</button>
-                      <button onClick={() => navigate('/admin')} className={`px-3.5 py-2 rounded-full border border-accent-green/50 text-accent-green hover:bg-accent-green/10 ${isActive('/admin') ? 'bg-accent-green/15 font-semibold' : ''}`}>System Control</button>
-                    </>
-                  )}
-                </nav>
-              )}
-            </div>
-
-            <div className="flex items-center gap-1.5 sm:gap-3">
-              {!user && (
-                <nav className="hidden sm:flex items-center gap-4 text-xs font-bold text-on-surface-variant mr-4">
-                  <button onClick={() => navigate('/about')} className="hover:text-primary transition-colors cursor-pointer">About</button>
-                  <button onClick={() => navigate('/contact')} className="hover:text-primary transition-colors cursor-pointer">Contact</button>
-                  <button onClick={() => navigate('/faq')} className="hover:text-primary transition-colors cursor-pointer">FAQ</button>
-                </nav>
-              )}
-              {user ? (
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="text-right hidden sm:block">
-                    <p className="text-xs font-bold text-primary">{user.name || "Scholar Sandbox"}</p>
-                    <p className="text-[10px] font-extrabold text-secondary flex items-center justify-end gap-1.5">
-                      <span>{user.plan && user.plan.toLowerCase() !== 'explorer' ? user.plan.toUpperCase() + ' TIER' : 'FREE ACADEMIC ACCOUNT'}</span>
-                      {(!user.plan || user.plan.toLowerCase() === 'explorer') && (
-                        <button onClick={() => navigate('/billing')} className="border border-accent-green/60 text-accent-green hover:bg-accent-green/10 font-semibold text-[9px] uppercase px-1.5 py-0.5 rounded-full cursor-pointer transition-colors shrink-0">Upgrade</button>
-                      )}
-                    </p>
-                  </div>
-                  <button onClick={handleLogout} className="bg-transparent hover:bg-cream/[0.04] border border-hairline text-cream text-[11px] font-semibold uppercase tracking-tight py-2 px-3 sm:px-3.5 rounded-full flex items-center gap-1.5 cursor-pointer transition-colors">
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                    <span className="hidden sm:inline">Logout</span>
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <button onClick={() => setShowAuth(true)} className="hidden sm:inline-flex bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream font-semibold text-xs px-4 py-2.5 rounded-full transition-colors cursor-pointer whitespace-nowrap">Log In</button>
-                  <button onClick={() => setShowAuth(true)} className="btn-gradient-stroke text-cream font-semibold text-xs px-4 sm:px-6 py-2.5 rounded-full transition-all hover:brightness-110 active:scale-[0.98] cursor-pointer whitespace-nowrap">Get Started</button>
-                </div>
-              )}
-
-              <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden text-primary p-2 cursor-pointer">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  {mobileMenuOpen ? <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /> : <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />}
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          {/* Mobile drawer — visible for ALL users below md */}
-          <div className={`md:hidden overflow-hidden transition-all duration-300 ease-out ${mobileMenuOpen ? 'max-h-[560px]' : 'max-h-0'}`}>
-            <div className="border-t border-hairline bg-canvas py-3 px-4 sm:px-6 flex flex-col gap-1">
-              {user ? (
-                <>
-                  {user.role !== 'super_admin' ? (
-                    <>
-                      <button onClick={() => { navigate('/dashboard'); setMobileMenuOpen(false); }} className={`text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg ${isActive('/dashboard') ? 'text-cream bg-cream/[0.06]' : 'text-on-surface-variant hover:text-primary'}`}>Workspace</button>
-                      <button onClick={() => { navigate('/scholarships'); setMobileMenuOpen(false); }} className={`text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg ${isActive('/scholarships') ? 'text-cream bg-cream/[0.06]' : 'text-on-surface-variant hover:text-primary'}`}>Scholarships</button>
-                      <button onClick={() => { navigate('/vault'); setMobileMenuOpen(false); }} className={`text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg ${isActive('/vault') ? 'text-cream bg-cream/[0.06]' : 'text-on-surface-variant hover:text-primary'}`}>Document Vault</button>
-                      <button onClick={() => { navigate('/essays'); setMobileMenuOpen(false); }} className={`text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg ${isActive('/essays') ? 'text-cream bg-cream/[0.06]' : 'text-on-surface-variant hover:text-primary'}`}>AI Essay Studio</button>
-                      <button onClick={() => { navigate('/profile'); setMobileMenuOpen(false); }} className={`text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg ${isActive('/profile') ? 'text-cream bg-cream/[0.06]' : 'text-on-surface-variant hover:text-primary'}`}>My Profile</button>
-                      <button onClick={() => { navigate('/billing'); setMobileMenuOpen(false); }} className={`text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg ${isActive('/billing') ? 'text-cream bg-cream/[0.06]' : 'text-on-surface-variant hover:text-primary'}`}>Premium Plans</button>
-                    </>
-                  ) : null}
-                  {user.role === 'super_admin' && (
-                    <button onClick={() => { navigate('/admin'); setMobileMenuOpen(false); }} className={`text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg text-secondary ${isActive('/admin') ? 'font-black text-primary bg-primary/5' : ''}`}>System Control</button>
-                  )}
-                  <div className="border-t border-outline-variant/30 my-2 pt-2">
-                    <button onClick={() => { navigate('/about'); setMobileMenuOpen(false); }} className="text-left text-[11px] font-semibold text-on-surface-variant py-2 px-2 rounded-lg">About</button>
-                    <button onClick={() => { navigate('/faq'); setMobileMenuOpen(false); }} className="text-left text-[11px] font-semibold text-on-surface-variant py-2 px-2 rounded-lg">FAQ</button>
-                    <button onClick={() => { navigate('/how-it-works'); setMobileMenuOpen(false); }} className="text-left text-[11px] font-semibold text-on-surface-variant py-2 px-2 rounded-lg">How It Works</button>
-                    <button onClick={() => { navigate('/contact'); setMobileMenuOpen(false); }} className="text-left text-[11px] font-semibold text-on-surface-variant py-2 px-2 rounded-lg">Contact Us</button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <button onClick={() => { navigate('/scholarships'); setMobileMenuOpen(false); }} className={`text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg ${isActive('/scholarships') ? 'text-cream bg-cream/[0.06]' : 'text-on-surface-variant hover:text-primary'}`}>Scholarships</button>
-                  <button onClick={() => { navigate('/about'); setMobileMenuOpen(false); }} className="text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg text-on-surface-variant hover:text-primary">About</button>
-                  <button onClick={() => { navigate('/how-it-works'); setMobileMenuOpen(false); }} className="text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg text-on-surface-variant hover:text-primary">How It Works</button>
-                  <button onClick={() => { navigate('/faq'); setMobileMenuOpen(false); }} className="text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg text-on-surface-variant hover:text-primary">FAQ</button>
-                  <button onClick={() => { navigate('/contact'); setMobileMenuOpen(false); }} className="text-left text-xs font-bold uppercase tracking-wide py-2.5 px-2 rounded-lg text-on-surface-variant hover:text-primary">Contact</button>
-                  <div className="border-t border-outline-variant/30 my-2 pt-3 flex flex-col gap-2">
-                    <button onClick={() => { setShowAuth(true); setMobileMenuOpen(false); }} className="btn-gradient-stroke w-full text-cream font-semibold text-xs py-3 rounded-full transition-all hover:brightness-110 cursor-pointer">Sign In</button>
-                    <button onClick={() => { setShowAuth(true); setMobileMenuOpen(false); }} className="w-full bg-transparent text-cream border border-cream/60 hover:border-cream hover:bg-cream/[0.04] font-semibold text-xs py-3 rounded-full transition-colors cursor-pointer">Create Account</button>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </header>
-      )}              {/* Main Content */}
-      <main className="flex-grow max-w-[1280px] w-full mx-auto px-6 py-8">
+      {/* Main Content */}
+      <main className={ownsChrome ? 'flex-grow w-full' : 'flex-grow max-w-[1200px] w-full mx-auto px-4 md:px-10 py-10'}>
         <Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading...</div>}>
-          {!user && showAuth && location.pathname === '/' ? (
-            <AuthScreen onLoginSuccess={handleLoginSuccess} countries={countries} />
-          ) : (
-            <>
-            {!user && showAuth && (
-              <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm overflow-y-auto">
-                <AuthScreen onLoginSuccess={handleLoginSuccess} countries={countries} />
+          {!user && showAuth && (
+            <div
+              className="fixed inset-0 z-[90] bg-off-black-ink/65 backdrop-blur-sm overflow-y-auto"
+              onClick={() => setShowAuth(false)}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Sign in or create an account"
+            >
+              <div className="min-h-full flex items-center justify-center p-4">
+                <div onClick={e => e.stopPropagation()} className="w-full max-w-md">
+                  <AuthScreen
+                    onLoginSuccess={handleLoginSuccess}
+                    countries={countries}
+                    onClose={() => setShowAuth(false)}
+                  />
+                </div>
               </div>
-            )}
-            <Routes>
-              <Route path="/" element={<LandingPage onGetStarted={() => setShowAuth(true)} onLogin={() => setShowAuth(true)} countries={countries} onViewAllFAQs={() => navigate('/faq')} />} />
+            </div>
+          )}
+          <Routes>
+              <Route path="/" element={<LandingPage user={user} onGetStarted={() => setShowAuth(true)} onLogin={() => setShowAuth(true)} countries={countries} onViewAllFAQs={() => navigate('/faq')} />} />
               <Route path="/about" element={<AboutPage onBack={() => navigate('/')} />} />
               <Route path="/faq" element={<FAQPage onBack={() => navigate('/')} />} />
               <Route path="/privacy" element={<PrivacyPolicy onBack={() => navigate('/')} />} />
               <Route path="/terms" element={<TermsOfService onBack={() => navigate('/')} />} />
               <Route path="/how-it-works" element={<HowItWorksPage onBack={() => navigate('/')} onGetStarted={() => { setShowAuth(true); navigate('/'); }} />} />
-              <Route path="/scholarships/browse" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading scholarships...</div>}><PublicScholarshipList /></Suspense>} />
+              <Route path="/scholarships/browse" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading scholarships...</div>}><PublicScholarshipList user={user} /></Suspense>} />
               <Route path="/scholarships/browse/:slug" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading...</div>}><PublicScholarshipDetail user={user} /></Suspense>} />
               <Route path="/scholarships/:slug" element={<ScholarshipRedirect />} />
               <Route path="/scholarships" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading scholarships...</div>}><Scholarships user={user} scholarships={scholarships} applications={applications} documents={documents} onTrackScholarship={handleTrackScholarship} onUploadMetadata={handleUploadDocument} onNavigateToTab={handleNavigateToTab} /></Suspense>} />
@@ -863,12 +787,24 @@ export default function App() {
                       </div>
                     ) : (
                       <Suspense fallback={<DashboardSkeleton />}>
-                        <Dashboard user={user} scholarships={scholarships} applications={applications} documents={documents} essays={essays} onNavigateToTab={handleNavigateToTab} onViewScholarship={() => navigate('/scholarships')} onTriggerQuickDraft={() => navigate('/essays')} />
+                        <Dashboard user={user} scholarships={scholarships} applications={applications} documents={documents} essays={essays} onNavigateToTab={handleNavigateToTab} onViewScholarship={(schol) => navigate(`/scholarships/browse/${schol.slug}`)} onTriggerQuickDraft={() => navigate('/essays')} />
                       </Suspense>
                     )
                   } />
                   <Route path="/vault" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading vault...</div>}><DocumentVault user={user} documents={documents} onUploadDocument={handleUploadDocument} onRemoveDoc={handleRemoveDoc} onReanalyzeDocument={handleReanalyzeDocument} onNavigateToTab={handleNavigateToTab} onRefreshDocuments={handleRefreshDocuments} userEmail={user?.email} /></Suspense>} />
-                  <Route path="/essays" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading...</div>}><ComingSoonPage /></Suspense>} />
+                  <Route path="/essays" element={
+                    <Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading AI Essay Studio...</div>}>
+                      <EssayGenerator
+                        user={user}
+                        essays={essays}
+                        scholarships={scholarships}
+                        documents={documents}
+                        onGenerateEssay={handleGenerateEssay}
+                        onNavigateToTab={handleNavigateToTab}
+                        onUploadMetadata={handleUploadDocument}
+                      />
+                    </Suspense>
+                  } />
                   <Route path="/profile" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading profile...</div>}><StudentProfile user={user} onUpdateProfile={handleUpdateProfile} onNavigateToTab={handleNavigateToTab} /></Suspense>} />
                   <Route path="/applications" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading tracker...</div>}><ApplicationTracker scholarships={scholarships} applications={applications} onTrackScholarship={handleTrackScholarship} onRemoveTrack={handleRemoveTrack} onNavigateToTab={handleNavigateToTab} /></Suspense>} />
                   <Route path="/billing" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading plans...</div>}><SubscriptionPlans user={user} onPlanUpdated={(u) => { setUser(u); fetchUserData(u.email); }} onNavigateToTab={handleNavigateToTab} /></Suspense>} />
@@ -879,60 +815,30 @@ export default function App() {
                 <Route path="*" element={<Suspense fallback={null}><NotFoundPage onBack={() => navigate('/')} /></Suspense>} />
               )}
             </Routes>
-            </>
-          )}
         </Suspense>
       </main>
 
       {/* Footer */}
-      {!hideHeaderFooter && (
-        <footer className="bg-off-black border-t border-hairline pt-10 md:pt-14 pb-24 md:pb-10 px-4 sm:px-6">
-          <div className="max-w-[1280px] w-full mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 text-on-surface-variant font-light text-xs items-start">
-            <div className="flex flex-col gap-3">
-              <h4 className="font-display font-black text-primary text-sm tracking-tight flex items-center gap-2">
-                <span className="shrink-0"><Logo size={24} /></span>
-                Zawadi
-              </h4>
-              <p className="leading-relaxed">Matching African students to scholarships they actually qualify for. No spam. No data selling.</p>
+      {user ? (
+        <footer className="w-full border-t border-ash bg-pure-white">
+          <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Logo size={20} tone="dark" />
+              <span className="text-ed-body-sm font-medium text-off-black-ink">Techsari</span>
             </div>
-            <div className="flex flex-col [&_button]:m-0 [&_button]:p-0 [&_button]:min-h-0 [&_button+button]:mt-2">
-              <p className="text-primary font-black uppercase text-[10px] tracking-wider mb-2">QUICK NAVIGATION</p>
-              <button onClick={() => user ? navigate('/dashboard') : navigate('/scholarships')} className="block hover:text-primary text-left cursor-pointer">Find Scholarships</button>
-              <button onClick={() => navigate('/how-it-works')} className="block hover:text-primary text-left cursor-pointer">How It Works</button>
-              <button onClick={() => navigate('/faq')} className="block hover:text-primary text-left cursor-pointer">FAQ</button>
+            <div className="flex items-center gap-5 text-ed-caption uppercase text-graphite">
+              <Link to="/privacy" className="hover:text-off-black-ink transition-colors">Privacy</Link>
+              <Link to="/terms" className="hover:text-off-black-ink transition-colors">Terms</Link>
+              <Link to="/contact" className="hover:text-off-black-ink transition-colors">Support</Link>
             </div>
-            <div className="flex flex-col [&_button]:m-0 [&_button]:p-0 [&_button]:min-h-0 [&_button+button]:mt-2">
-              <p className="text-primary font-black uppercase text-[10px] tracking-wider mb-2">LEGAL & COMPANY</p>
-              <button onClick={() => navigate('/about')} className="block hover:text-primary text-left cursor-pointer">About Us</button>
-              <button onClick={() => navigate('/contact')} className="block hover:text-primary text-left cursor-pointer">Contact Us</button>
-              <button onClick={() => navigate('/privacy')} className="block hover:text-primary text-left cursor-pointer">Privacy Policy</button>
-              <button onClick={() => navigate('/terms')} className="block hover:text-primary text-left cursor-pointer">Terms of Service</button>
-              <p className="text-[10px] text-muted mt-4">&copy; 2026 Zawadi. All rights reserved.</p>
+            <div className="flex items-center gap-2 font-mono text-[11px] text-graphite">
+              <span className="w-1.5 h-1.5 rounded-full bg-electric-lime" aria-hidden />
+              <span>© 2026 Techsari — Deterministic matching for African scholars</span>
             </div>
           </div>
         </footer>
-      )}
-
-      {/* Mobile Bottom Nav Bar */}
-      {!hideHeaderFooter && !user && (
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-off-black/95 backdrop-blur-xl border-t border-hairline px-2 py-1.5 flex items-center justify-around safe-area-bottom">
-          <a href="/" className="flex flex-col items-center gap-0.5 text-primary py-1 px-3">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-            <span className="text-[9px] font-bold uppercase tracking-wide">Home</span>
-          </a>
-          <Link to="/scholarships" className="flex flex-col items-center gap-0.5 text-on-surface-variant hover:text-primary py-1 px-3">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-            <span className="text-[9px] font-bold uppercase tracking-wide">Search</span>
-          </Link>
-          <button onClick={() => setShowAuth(true)} className="flex flex-col items-center gap-0.5 text-on-surface-variant hover:text-primary py-1 px-3 cursor-pointer">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-            <span className="text-[9px] font-bold uppercase tracking-wide">Profile</span>
-          </button>
-          <button onClick={() => navigate('/about')} className="flex flex-col items-center gap-0.5 text-on-surface-variant hover:text-primary py-1 px-3 cursor-pointer">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-            <span className="text-[9px] font-bold uppercase tracking-wide">About</span>
-          </button>
-        </nav>
+      ) : (
+        <LandingFooter />
       )}
 
       <Toaster position="top-right" toastOptions={{ duration: 4000 }} />

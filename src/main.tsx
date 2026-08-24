@@ -23,7 +23,7 @@ document.documentElement.classList.add('js');
     'data:image/svg+xml,' + encodeURIComponent(
       `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect x="4" y="4" width="56" height="56" rx="16" fill="${bg}" stroke="${z}" stroke-width="4"/><path d="M20 20 H44 L24 40 H46" fill="none" stroke="${z}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="47" cy="47" r="7" fill="${dot}"/></svg>`
     );
-  const frames = [draw('#0e100f', '#fffce1', '#0ae448'), draw('#0e100f', '#abff84', '#fec5fb')];
+  const frames = [draw('#beff50', '#14140f', '#466800'), draw('#f5f5eb', '#14140f', '#9bd92a')];
   let i = 0;
   setInterval(() => {
     if (document.hidden) return;

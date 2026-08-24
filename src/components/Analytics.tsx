@@ -16,10 +16,18 @@ function Analytics() {
   useEffect(() => {
     if (!GA_MEASUREMENT_ID) return;
 
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
-    document.head.appendChild(script);
+    // Load analytics out of the critical path — never compete with LCP
+    const idle = (cb: () => void) =>
+      'requestIdleCallback' in window ? (window as any).requestIdleCallback(cb, { timeout: 4000 }) : setTimeout(cb, 2000);
+    const cancel = (id: number) =>
+      'cancelIdleCallback' in window ? (window as any).cancelIdleCallback(id) : clearTimeout(id);
+    let script: HTMLScriptElement | null = null;
+    const idleId = idle(() => {
+      script = document.createElement('script');
+      script.async = true;
+      script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+      document.head.appendChild(script);
+    });
 
     window.dataLayer = window.dataLayer || [];
     window.gtag = function (...args: unknown[]) {
@@ -29,7 +37,8 @@ function Analytics() {
     window.gtag('config', GA_MEASUREMENT_ID, { send_page_view: true });
 
     return () => {
-      document.head.removeChild(script);
+      cancel(idleId);
+      if (script) document.head.removeChild(script);
     };
   }, []);
 

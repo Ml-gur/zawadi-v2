@@ -1,10 +1,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useCompare } from './compare/useCompare';
+import CompareModal from './compare/CompareModal';
+import { Columns2, Download, Bell, RefreshCw, X, CalendarClock, Sparkles } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { Scholarship, ApplicationTracker, DocumentVaultItem } from '../types';
 import { AFRICAN_COUNTRIES } from '../config/matching-config';
-import { Lock, Search, Globe, GraduationCap, Bookmark, ArrowLeft, ArrowDown, ExternalLink } from 'lucide-react';
+import { Lock, Search, GraduationCap, Bookmark, ArrowLeft, ArrowDown } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { SEO } from './SEO';
 import ShareButton from './ShareButton';
+import BrowseCard from '../pages/public/BrowseCard';
 
 interface ScholarshipsProps {
   user?: any;
@@ -59,10 +65,12 @@ export default function Scholarships({
     try {
       const from = page * PUBLIC_PAGE_SIZE;
       const to = from + PUBLIC_PAGE_SIZE - 1;
+      const today = new Date().toISOString().split('T')[0];
       const { data, error } = await supabase
         .from('scholarships')
         .select('id, name, provider, host_region, host_institution, funding_type, deadline, no_ielts, degree_levels, countries, fields_of_study, urgency, iso2, published, description, eligibility, amount, required_documents, apply_url, source_url, slug, created_at')
         .eq('published', true)
+        .or(`deadline.is.null,deadline.gte.${today}`)
         .order('id', { ascending: false })
         .range(from, to);
 
@@ -94,7 +102,8 @@ export default function Scholarships({
     if (!publicLoading && publicScholarships.length > 0) {
       (async () => {
         try {
-          const { count } = await supabase.from('scholarships').select('id', { count: 'exact', head: true }).eq('published', true);
+          const today = new Date().toISOString().split('T')[0];
+          const { count } = await supabase.from('scholarships').select('id', { count: 'exact', head: true }).eq('published', true).or(`deadline.is.null,deadline.gte.${today}`);
           if (count != null) setPublicTotalCount(count);
         } catch {
           // keep previous total
@@ -150,6 +159,13 @@ export default function Scholarships({
   const [amountShownFilter, setAmountShownFilter] = useState(false);
   const [matchSortFilter, setMatchSortFilter] = useState<'default' | 'high' | 'all'>('default');
   const [noIeltsFilter, setNoIeltsFilter] = useState(false);
+  const [deadlineSort, setDeadlineSort] = useState(false);
+  const { ids: compareIds, open: compareOpen, setOpen: setCompareOpen, toggle: toggleCompare } = useCompare();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  useEffect(() => {
+    if (searchParams.get('sort') === 'deadline') setDeadlineSort(true);
+  }, [searchParams]);
   const [showAlertsModal, setShowAlertsModal] = useState(false);
   const [showNoIeltsTooltip, setShowNoIeltsTooltip] = useState(false);
 
@@ -167,42 +183,49 @@ export default function Scholarships({
     const eligible = scholarships.filter(s => s && s.published);
 
     eligible.forEach(s => {
-      const isUrgent = s.deadline && !s.deadline.toLowerCase().includes('varies') && !s.deadline.toLowerCase().includes('annual');
+      const dl = s.deadline ? Math.ceil((new Date(s.deadline).getTime() - Date.now()) / 86400000) : null;
+      const isUrgent = dl !== null && !Number.isNaN(dl) && dl > 0 && dl <= 45
+        && !s.deadline!.toLowerCase().includes('varies')
+        && !s.deadline!.toLowerCase().includes('annual');
       if (isUrgent) {
         alerts.push({
           id: `deadline-${s.id}`,
-          title: `Approaching Deadline: ${s.name}`,
-          description: `The deadline is ${s.deadline}. Please make sure your personal essays in AI Essay Studio are complete and ready.`,
+          title: `Approaching deadline: ${s.name}`,
+          description: `Closes ${s.deadline} — ${dl === 1 ? 'tomorrow' : `in ${dl} days`}. Make sure your essays and documents are ready.`,
           date: `Closing: ${s.deadline}`,
           severity: 'urgent',
           sourceSchol: s
         });
-      } else {
-        const isHighMatch = (s.match?.score || 0) >= 94;
-        if (isHighMatch) {
-          alerts.push({
-            id: `new-${s.id}`,
-            title: `New Match recommendation: ${s.name}`,
-            description: `A highly recommended opportunity from ${s.provider} matches your configured study profile with ${s.match!.score}% compatibility.`,
-            date: `New`,
-            severity: 'info',
-            sourceSchol: s
-          });
-        }
+      } else if ((s.match?.score || 0) >= 90) {
+        alerts.push({
+          id: `new-${s.id}`,
+          title: `New match recommendation: ${s.name}`,
+          description: `From ${s.provider} — your profile scores ${s.match!.score}% compatibility.`,
+          date: 'New',
+          severity: 'info',
+          sourceSchol: s
+        });
       }
     });
 
-    return alerts.sort((a, b) => {
+    const sorted = alerts.sort((a, b) => {
       if (a.severity === 'urgent' && b.severity !== 'urgent') return -1;
       if (a.severity !== 'urgent' && b.severity === 'urgent') return 1;
+      if (a.severity === 'urgent' && b.severity === 'urgent') {
+        const da = Date.parse(a.sourceSchol.deadline) || Infinity;
+        const db = Date.parse(b.sourceSchol.deadline) || Infinity;
+        return da - db;
+      }
       return 0;
     });
+    return sorted.slice(0, 12);
   }, [scholarships]);
 
   // Public preview rendering
   if (isPublic) {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div id="scholarship-dashboard-root" className="min-h-[100dvh] bg-parchment text-off-black-ink flex flex-col">
+        <div className="flex-grow w-full max-w-[1200px] mx-auto px-4 sm:px-6 py-14 md:py-20 space-y-8">
         <SEO
           title="Scholarships for African Students — Zawadi"
           description="Browse verified scholarships open to students from all 54 African countries. Filtered for real eligibility. No IELTS required options. Full funding and partial funding available."
@@ -212,79 +235,84 @@ export default function Scholarships({
           image="https://techsari.online/og-scholarships.png"
         />
 
-        {/* Guest Banner */}
-        <div className="bg-off-black rounded-lg p-6 md:p-8 border border-hairline bg-[radial-gradient(circle_at_85%_20%,rgba(10,228,72,0.07)_0%,transparent_55%)]">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex-1">
-              <h2 className="font-display font-semibold text-lg text-cream mb-1">You are viewing scholarships as a guest</h2>
-              <p className="text-xs text-muted max-w-xl">
-                Create a free account to see your eligibility score for each one.
-              </p>
-            </div>
-            <div className="flex items-center gap-3 shrink-0">
-              <button
-                onClick={() => { setShowAuthModal(false); handleAuthAction(); }}
-                className="btn-gradient-stroke px-5 py-2.5 min-h-[44px] text-cream font-semibold rounded-full hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer text-xs"
-              >
-                Create Free Account
-              </button>
-              <button
-                onClick={() => { setShowAuthModal(false); handleAuthAction(); }}
-                className="px-5 py-2.5 min-h-[44px] bg-transparent border border-cream/40 text-cream font-semibold rounded-full hover:border-cream hover:bg-cream/[0.04] transition-colors cursor-pointer text-xs"
-              >
-                Log In
-              </button>
-            </div>
+        {/* Guest Banner — dark island */}
+        <div className="rounded-ed bg-deep-charcoal text-pure-white p-8 md:p-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <h2 className="text-ed-sub text-pure-white">You are viewing scholarships as a guest</h2>
+            <p className="mt-2 text-ed-body-sm text-smoke max-w-xl">
+              Create a free account to see your eligibility score for each one.
+            </p>
+          </div>
+          <div className="flex items-center gap-3 shrink-0">
+            <button
+              onClick={() => { setShowAuthModal(false); handleAuthAction(); }}
+              className="inline-flex items-center justify-center rounded-full bg-electric-lime px-7 min-h-[48px] text-base font-medium text-off-black-ink hover:bg-lime-hover active:scale-[0.98] transition-all cursor-pointer"
+            >
+              Create Free Account
+            </button>
+            <button
+              onClick={() => { setShowAuthModal(false); handleAuthAction(); }}
+              className="text-base font-medium text-pure-white border-b border-pure-white pb-0.5 hover:text-smoke hover:border-smoke transition-colors cursor-pointer"
+            >
+              Log In
+            </button>
           </div>
         </div>
 
-        {/* Filter Bar */}
-        <div className="bg-canvas/95 border border-hairline/60 rounded-lg p-4">
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted/50" />
+        {/* Filter Bar — editorial white */}
+        <div className="rounded-ed border border-ash/70 bg-pure-white p-6 md:p-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-4">
+            <div className="lg:col-span-2 relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-graphite pointer-events-none" aria-hidden />
               <input
                 value={publicSearch}
                 onChange={(e) => setPublicSearch(e.target.value)}
-                placeholder="Search scholarships..."
-                className="w-full pl-9 pr-3 py-2 border border-hairline/70 rounded-lg text-xs bg-off-black text-cream placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                placeholder="Search scholarships, keywords, or sponsors…"
+                aria-label="Search scholarships"
+                className="w-full pl-12 pr-4 py-3 rounded-lg border border-ash bg-pure-white text-ed-body placeholder:text-graphite focus:outline-none focus:border-graphite hover:border-graphite transition-colors"
               />
             </div>
-            <select
-              value={publicCountry}
-              onChange={(e) => setPublicCountry(e.target.value)}
-              className="bg-off-black border border-hairline/70 rounded-lg px-3 py-2 text-xs font-bold text-muted focus:outline-none focus:border-primary cursor-pointer"
-            >
-              <option value="">All countries</option>
-              {AFRICAN_COUNTRIES.map(c => (
-                <option key={c.code} value={c.name}>{c.name}</option>
-              ))}
-              <option value="Europe">Europe</option>
-              <option value="United States">United States</option>
-              <option value="United Kingdom">United Kingdom</option>
-            </select>
-            <select
-              value={publicDegree}
-              onChange={(e) => setPublicDegree(e.target.value)}
-              className="bg-off-black border border-hairline/70 rounded-lg px-3 py-2 text-xs font-bold text-muted focus:outline-none focus:border-primary cursor-pointer"
-            >
-              <option value="">All levels</option>
-              {['Bachelors', 'Masters', 'PhD', 'Doctorate', 'Postdoctoral'].map(d => <option key={d} value={d}>{d}</option>)}
-            </select>
-            <label className="flex items-center gap-1.5 text-xs text-cream font-bold bg-off-black border border-hairline/70 px-3 py-2 rounded-lg cursor-pointer hover:bg-surface-variant/45 transition-colors">
-              <input
-                type="checkbox"
-                checked={publicNoIelts}
-                onChange={(e) => setPublicNoIelts(e.target.checked)}
-                className="rounded text-secondary border-hairline/80 accent-secondary cursor-pointer w-3.5 h-3.5"
-              />
-              <span>No IELTS</span>
-            </label>
-            <span className="text-[10px] text-muted font-medium italic"><button onClick={() => handleShowAuth()} className="text-secondary font-bold underline cursor-pointer">Log in</button> for advanced filters</span>
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:col-span-2 gap-3">
+              <select
+                value={publicCountry}
+                onChange={(e) => setPublicCountry(e.target.value)}
+                aria-label="Filter by country"
+                className="w-full appearance-none px-4 py-3 pr-10 rounded-lg border border-ash bg-pure-white text-ed-body-sm font-medium focus:outline-none focus:border-graphite hover:border-graphite transition-colors cursor-pointer"
+              >
+                <option value="">Country</option>
+                {AFRICAN_COUNTRIES.map(c => (
+                  <option key={c.code} value={c.name}>{c.name}</option>
+                ))}
+                <option value="Europe">Europe</option>
+                <option value="United States">United States</option>
+                <option value="United Kingdom">United Kingdom</option>
+              </select>
+              <select
+                value={publicDegree}
+                onChange={(e) => setPublicDegree(e.target.value)}
+                aria-label="Filter by level"
+                className="w-full appearance-none px-4 py-3 pr-10 rounded-lg border border-ash bg-pure-white text-ed-body-sm font-medium focus:outline-none focus:border-graphite hover:border-graphite transition-colors cursor-pointer"
+              >
+                <option value="">Level</option>
+                {['Bachelors', 'Masters', 'PhD', 'Doctorate', 'Postdoctoral'].map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+              <label className="flex items-center justify-center gap-2 text-ed-body-sm font-medium bg-pure-white border border-ash rounded-lg px-4 py-3 cursor-pointer hover:border-off-black-ink transition-colors">
+                <input
+                  type="checkbox"
+                  checked={publicNoIelts}
+                  onChange={(e) => setPublicNoIelts(e.target.checked)}
+                  className="rounded text-off-black-ink border-ash accent-off-black-ink cursor-pointer w-4 h-4"
+                />
+                <span className={publicNoIelts ? 'text-off-black-ink font-medium' : 'text-graphite'}>No IELTS</span>
+              </label>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="text-ed-caption uppercase text-graphite">Showing {filteredPublic.length} filtered results</span>
             {(publicSearch || publicCountry || publicDegree || publicNoIelts) && (
               <button
                 onClick={() => { setPublicSearch(''); setPublicCountry(''); setPublicDegree(''); setPublicNoIelts(false); }}
-                className="text-xs font-black text-secondary hover:text-primary cursor-pointer hover:underline"
+                className="text-ed-body-sm font-medium text-off-black-ink border-b border-off-black-ink pb-0.5 hover:text-graphite hover:border-graphite transition-colors cursor-pointer"
               >
                 Clear Filters
               </button>
@@ -293,164 +321,96 @@ export default function Scholarships({
         </div>
 
         {/* Results count */}
-        <div className="flex items-center justify-between px-1">
-          <span className="text-xs font-extrabold text-muted uppercase tracking-wider bg-off-black/40 px-3 py-1.5 rounded-lg border border-hairline/30">
-            Showing {filteredPublic.length} of {publicTotalCount} scholarships
+        <div className="flex items-center justify-between">
+          <span className="text-ed-body-sm text-graphite">
+            Showing {filteredPublic.length} of {publicTotalCount || filteredPublic.length} scholarships
           </span>
-          <span className="text-[10px] text-muted/60 font-medium">
-            <button onClick={() => handleShowAuth()} className="text-secondary font-bold underline cursor-pointer">Sign up free</button> to see all and get matched
+          <span className="text-ed-body-sm text-graphite hidden md:inline">
+            <button onClick={() => handleShowAuth()} className="font-medium text-off-black-ink border-b border-off-black-ink pb-0.5 hover:text-graphite hover:border-graphite transition-colors cursor-pointer">Sign up free</button> to see all and get matched
           </span>
           {publicError && (
-            <span className="text-[10px] font-bold text-status-error/80 bg-status-error/5 px-2.5 py-1 rounded-lg">
+            <span className="text-xs font-medium text-ed-error bg-ed-error/10 border border-ed-error/20 px-3 py-1.5 rounded-full">
               {publicError}
             </span>
           )}
         </div>
 
-        {/* Scholarship Cards Grid */}
+        {/* Scholarship Cards Grid — editorial */}
         {publicLoading && publicScholarships.length === 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
             {[1, 2, 3, 4, 5, 6].map(i => (
-              <div key={i} className="bg-canvas border border-hairline/60 rounded-lg p-5 animate-pulse">
-                <div className="h-4 bg-outline-variant/30 rounded w-3/4 mb-3" />
-                <div className="h-3 bg-outline-variant/20 rounded w-1/2 mb-4" />
-                <div className="flex gap-2 mb-3">
-                  <div className="h-5 bg-outline-variant/20 rounded-full w-16" />
-                  <div className="h-5 bg-outline-variant/20 rounded-full w-20" />
-                </div>
-                <div className="h-3 bg-outline-variant/20 rounded w-full mb-2" />
-                <div className="h-3 bg-outline-variant/20 rounded w-2/3" />
+              <div key={i} className="rounded-ed border border-ash/70 bg-pure-white p-8 min-h-[300px] animate-pulse">
+                <div className="h-4 w-24 bg-mist rounded-full mb-6" />
+                <div className="h-5 w-3/4 bg-mist rounded mb-3" />
+                <div className="h-3 w-1/2 bg-mist rounded mb-6" />
+                <div className="h-3 w-full bg-mist rounded mb-2" />
+                <div className="h-3 w-2/3 bg-mist rounded" />
               </div>
             ))}
           </div>
         ) : filteredPublic.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredPublic.map(s => {
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+              {filteredPublic.map((s, idx) => {
+                const isDark = idx % 3 === 2;
                 const urgency = (() => {
                   if (!s.deadline || s.deadline.toLowerCase().includes('varies'))
-                    return { label: 'Varies', color: 'text-muted/50', bg: 'bg-off-black' };
+                    return { label: 'Varies', isClosing: false };
                   const days = Math.ceil((new Date(s.deadline).getTime() - Date.now()) / 86400000);
-                  if (days < 0) return { label: 'Deadline Passed', color: 'text-status-error', bg: 'bg-status-error/10' };
-                  if (days <= 30) return { label: `${days} days left`, color: 'text-status-error', bg: 'bg-status-error/10' };
-                  if (days <= 60) return { label: `${days} days left`, color: 'text-status-warning', bg: 'bg-status-warning/10' };
-                  if (days <= 90) return { label: `${days} days left`, color: 'text-status-warning', bg: 'bg-status-warning/10' };
-                  return { label: `${days} days left`, color: 'text-status-success', bg: 'bg-status-success/10' };
+                  if (days < 0) return { label: 'Deadline Passed', isClosing: false };
+                  if (days <= 30) return { label: `${days} days left`, isClosing: true };
+                  return { label: `${days} days left`, isClosing: false };
                 })();
 
-                const hostInfo = [s.host_institution, s.host_region].filter(Boolean).join(' \u00B7 ');
+                const hostInfo = [s.host_institution, s.host_region].filter(Boolean).join(' · ');
+                const category = (s.degree_levels?.[0] || s.funding_type || 'Opportunity').toUpperCase();
 
                 return (
-                  <div
-                    key={s.id}
-                    onClick={() => setSelectedSchol(s)}
-                    className="group bg-canvas border border-hairline/60 rounded-lg hover:border-primary/30 transition-all duration-200 cursor-pointer flex flex-col overflow-hidden"
-                  >
-                    {/* Accent bar */}
-                    <div className={`h-1.5 w-full ${
-                      urgency.label.includes('left') && parseInt(urgency.label) <= 30
-                        ? 'bg-status-error'
-                        : urgency.label.includes('left') && parseInt(urgency.label) <= 60
-                        ? 'bg-status-warning'
-                        : 'bg-primary/30'
-                    }`} />
-
-                    <div className="p-4 flex flex-col gap-2.5 flex-1">
-                      {/* Top: name + provider */}
-                      <div className="min-w-0">
-                        <h3 className="font-display font-extrabold text-sm text-primary leading-tight group-hover:text-secondary transition-colors line-clamp-2">
-                          {s.name}
-                        </h3>
-                        {s.provider && (
-                          <p className="text-[11px] text-muted/70 mt-0.5 font-medium">{s.provider}</p>
-                        )}
-                      </div>
-
-                      {/* Host institution / region */}
-                      {hostInfo && (
-                        <p className="text-[10px] text-muted/50 flex items-center gap-1">
-                          <GraduationCap className="w-3 h-3 shrink-0" />
-                          {hostInfo}
-                        </p>
-                      )}
-
-                      {/* Eligible countries */}
-                      {(s.countries || s.country) && (s.countries || s.country).length > 0 && (
-                        <div className="flex flex-wrap gap-1">
-                          {(s.countries || s.country || []).slice(0, 3).map((c: string) => (
-                            <span key={c} className="text-[9px] px-1.5 py-0.5 rounded-md bg-primary-fixed/10 text-primary font-semibold">
-                              {c}
-                            </span>
-                          ))}
-                          {(s.countries || s.country || []).length > 3 && (
-                            <span className="text-[9px] text-muted/50 font-medium">
-                              +{((s.countries || s.country || []).length - 3)} more
-                            </span>
+                  <div key={s.id} onClick={() => setSelectedSchol(s)} className={isDark ? 'md:col-span-2 lg:col-span-1 cursor-pointer' : 'cursor-pointer'}>
+                    <article className={`group h-full min-h-[300px] rounded-ed p-7 md:p-8 flex flex-col justify-between transition-transform duration-300 hover:-translate-y-1 ${isDark ? 'bg-deep-charcoal text-pure-white' : 'bg-pure-white border border-ash/70'}`}>
+                      <div>
+                        <div className="flex items-start justify-between gap-3 mb-4">
+                          <span className={`text-ed-eyebrow uppercase pt-1 ${isDark ? 'text-smoke' : 'text-graphite'}`}>{category}</span>
+                          {urgency.isClosing ? (
+                            <span className="shrink-0 rounded-full bg-electric-lime px-3 py-1 text-ed-caption uppercase text-off-black-ink">Closing soon</span>
+                          ) : (
+                            <span className={`shrink-0 rounded-full border px-3 py-1 text-ed-caption uppercase ${isDark ? 'border-stone text-smoke' : 'border-ash text-graphite'}`}>{urgency.label}</span>
                           )}
                         </div>
-                      )}
-
-                      {/* Amount */}
-                      {s.amount && (
-                        <p className="text-[11px] font-bold text-status-success flex items-center gap-1">
-                          <span className="text-[9px]">●</span>
-                          {s.amount}
-                        </p>
-                      )}
-
-                      {/* Tags */}
-                      <div className="flex flex-wrap items-center gap-1.5 mt-auto">
-                        {s.funding_type && (
-                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
-                            s.funding_type === 'Full'
-                              ? 'bg-status-success/10 text-status-success'
-                              : 'bg-secondary-container/20 text-secondary'
-                          }`}>
-                            {s.funding_type === 'Full' ? 'Full Funding' : 'Partial Funding'}
-                          </span>
-                        )}
-                        {s.no_ielts && (
-                          <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-status-warning/10 text-status-warning border border-status-warning/30">
-                            No IELTS
-                          </span>
-                        )}
-                        {(s.degree_levels || []).slice(0, 1).map(d => (
-                          <span key={d} className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary-fixed/15 text-primary font-semibold">
-                            {d}
-                          </span>
-                        ))}
-                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ml-auto ${urgency.bg} ${urgency.color}`}>
-                          {urgency.label}
-                        </span>
-                      </div>
-
-                      {/* Share + Sign-up prompt */}
-                      <div className="flex items-center justify-between pt-2 border-t border-hairline/20 mt-1">
-                        <ShareButton url={`/scholarships/browse/${s.slug}`} iconOnly size="sm" />
-                        <div className="flex items-center gap-1.5 text-muted/50">
-                          <Lock className="w-3 h-3" />
-                          <span className="text-[9px] font-medium">Sign up for match score</span>
+                        <h3 className={`text-ed-h2 leading-tight line-clamp-2 ${isDark ? 'text-pure-white' : 'text-off-black-ink'}`}>{s.name}</h3>
+                        {s.provider && <p className={`mt-1 text-ed-body-sm font-medium ${isDark ? 'text-pure-white/80' : 'text-off-black-ink/80'}`}>{s.provider}</p>}
+                        {hostInfo && <p className={`text-xs flex items-center gap-1 mt-1 ${isDark ? 'text-smoke' : 'text-graphite'}`}><GraduationCap className="w-3 h-3 shrink-0" />{hostInfo}</p>}
+                      {(s.countries || s.country) && (s.countries || s.country).length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-3">
+                          {(s.countries || s.country || []).slice(0, 3).map((c: string) => (
+                            <span key={c} className={`text-xs px-2 py-0.5 rounded-full border ${isDark ? 'border-stone text-smoke' : 'border-ash text-graphite'}`}>{c}</span>
+                          ))}
+                          {(s.countries || s.country || []).length > 3 && <span className={`text-xs ${isDark ? 'text-smoke' : 'text-graphite'}`}>+{((s.countries || s.country || []).length - 3)} more</span>}
                         </div>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleShowAuth(); }}
-                          className="text-[9px] font-bold text-primary hover:text-secondary transition-colors"
-                        >
-                          Sign Up Free
-                        </button>
+                      )}
+                      {s.amount && <p className={`mt-3 text-ed-body-sm font-medium ${isDark ? 'text-electric-lime' : 'text-graphite'}`}>{s.amount}</p>}
+                      <div className="mt-3 flex flex-wrap gap-1.5">
+                        {s.funding_type && <span className={`text-xs px-2.5 py-0.5 rounded-full border ${isDark ? 'border-stone text-smoke' : 'border-ash text-graphite'}`}>{s.funding_type === 'Full' ? 'Full Funding' : 'Partial Funding'}</span>}
+                        {s.no_ielts && <span className={`text-xs px-2.5 py-0.5 rounded-full border ${isDark ? 'border-electric-lime/50 text-electric-lime' : 'border-ash text-graphite'}`}>No IELTS</span>}
                       </div>
-                    </div>
+                      </div>
+                      <div className={`mt-6 pt-4 border-t flex items-center justify-between gap-3 ${isDark ? 'border-stone' : 'border-ash'}`}>
+                        <ShareButton url={`/scholarships/browse/${s.slug}`} iconOnly size="sm" tone={isDark ? 'dark' : 'light'} />
+                        <span className={`flex items-center gap-1.5 text-xs ${isDark ? 'text-smoke' : 'text-graphite'}`}><Lock className="w-3 h-3" />Sign up for match score</span>
+                        <span className={`text-sm font-medium ${isDark ? 'text-electric-lime' : 'text-off-black-ink'}`}>Sign Up Free</span>
+                      </div>
+                    </article>
                   </div>
                 );
               })}
             </div>
 
-            {/* Load More */}
             {publicHasMore && (
               <div className="flex justify-center mt-8">
                 <button
                   onClick={handleLoadMore}
                   disabled={publicLoading}
-                  className="px-8 py-3 bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream font-bold rounded-full hover:bg-primary-container hover:text-on-primary-container transition-all duration-200 text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
+                  className="px-8 py-3 min-h-[48px] rounded-full border border-off-black-ink text-sm font-medium text-off-black-ink hover:bg-off-black-ink hover:text-pure-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 cursor-pointer"
                 >
                   {publicLoading ? (
                     <>
@@ -674,6 +634,7 @@ export default function Scholarships({
             </div>
           </div>
         )}
+        </div>
       </div>
     );
   }
@@ -808,6 +769,22 @@ export default function Scholarships({
 
     return matchesSearch && matchesCountry && matchesDegree && matchesStatus && matchesFunding && matchesType && matchesAccess && matchesUrgency && matchesSchool && matchesDocsReady && matchesAmountVal && matchesRating && matchesNoIelts && matchesHostRegion && matchesSponsorType;
   }).sort((a, b) => {
+    // Deadline sort deep-link (?sort=deadline): soonest CLOSING first, expired pushed to the bottom
+    if (deadlineSort) {
+      const now = Date.now();
+      const da = a.deadline ? Date.parse(a.deadline) : NaN;
+      const db = b.deadline ? Date.parse(b.deadline) : NaN;
+      const aValid = !Number.isNaN(da) && da >= now;
+      const bValid = !Number.isNaN(db) && db >= now;
+      if (aValid && bValid) return da - db;
+      if (aValid) return -1;
+      if (bValid) return 1;
+      const aOpen = !a.deadline || /varies|annual|rolling/i.test(a.deadline);
+      const bOpen = !b.deadline || /varies|annual|rolling/i.test(b.deadline);
+      if (aOpen && !bOpen) return -1;
+      if (!aOpen && bOpen) return 1;
+      return 0;
+    }
     // Push expired scholarships to the bottom regardless of match score
     const now = Date.now();
     const aExpired = a.deadline ? Math.ceil((new Date(a.deadline).getTime() - now) / 86400000) < 0 : false;
@@ -869,508 +846,61 @@ export default function Scholarships({
   };
 
   return (
-    <div className="space-y-6">
+    <div id="scholarship-dashboard-root" className="min-h-[100dvh] bg-parchment text-off-black-ink flex flex-col">
+      <div className="flex-grow w-full max-w-[1200px] mx-auto px-4 sm:px-6 py-14 md:py-20 space-y-8">
       
-      {/* If detailed scholarship is selected, show details mockup (9th mockup) */}
-      {selectedSchol ? (
-        <div className="animate-sweep space-y-6">
-          
-          {/* Breadcrumb / Back button */}
-          <div className="flex items-center justify-between text-muted font-semibold text-xs py-2">
-            <div className="flex items-center gap-2 min-w-0">
-              <button 
-                onClick={() => setSelectedSchol(null)}
-                className="hover:text-primary flex items-center gap-1 transition-colors cursor-pointer shrink-0"
-              >
-                <span className="material-symbols-outlined text-sm">arrow_back</span> Back
-              </button>
-              <span className="shrink-0">/</span>
-              <span className="truncate">{selectedSchol.fields?.[0] || "Global Development"}</span>
-              <span className="shrink-0">/</span>
-              <span className="text-primary font-bold truncate max-w-[160px]">{selectedSchol.name}</span>
-            </div>
-            {selectedSchol.slug && (
-              <ShareButton
-                url={`/scholarships/browse/${selectedSchol.slug}`}
-                title={selectedSchol.name}
-                iconOnly
-                size="sm"
-              />
-            )}
-          </div>
+      {/* Scholarship finder — cards route to the shared public detail page for a uniform experience */}
+      <div className="space-y-6">
 
-          {/* Bento Grid Layout for Details */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            
-            {/* Left Column (8 cols): Info */}
-            <div className="lg:col-span-8 flex flex-col gap-6">
-              
-              {/* Detail Hero banner */}
-              <div className="bg-canvas border border-hairline/60 rounded-lg p-6 md:p-8 relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-primary-fixed rounded-full opacity-10 -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
-                
-                <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
-                      <span className="bg-off-black text-cream font-semibold text-[10px] px-2.5 py-1 rounded uppercase tracking-wider border border-hairline">
-                        {selectedSchol.degree_levels?.[0] || "Graduate"}
-                      </span>
-                      <span className="bg-secondary-fixed text-on-secondary-fixed font-semibold text-[10px] px-2.5 py-1 rounded uppercase tracking-wider flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[12px]">verified</span> Fully Funded
-                      </span>
-                      {selectedSchol.no_ielts && (
-                        <span className="bg-status-warning/10 text-status-warning font-medium text-[10px] px-2.5 py-1 rounded uppercase tracking-wider flex items-center gap-1 border border-status-warning/30">
-                          <span className="material-symbols-outlined text-[12px]">check_circle</span> No IELTS
-                        </span>
-                      )}
-                    </div>
-
-                    <h1 className="text-2xl md:text-3xl lg:text-4xl font-display font-black text-primary mb-2">
-                      {selectedSchol.name}
-                    </h1>
-                    <p className="text-sm font-semibold text-muted mb-6">
-                      {selectedSchol.provider} • {selectedSchol.host_institution || selectedSchol.host}
-                    </p>
-
-                    <div className="flex flex-wrap gap-4 text-xs mt-4">
-                      <div className="flex items-center gap-2 bg-background p-3 rounded-lg border border-hairline">
-                        <span className="material-symbols-outlined text-primary text-lg">payments</span>
-                        <div>
-                          <p className="text-[10px] text-muted font-bold uppercase">Funding Value</p>
-                          <p className="font-bold text-cream text-xs">{selectedSchol.amount || "Full tuition expenses"}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 bg-background p-3 rounded-lg border border-hairline">
-                        <span className="material-symbols-outlined text-status-warning text-lg">calendar_today</span>
-                        <div>
-                          <p className="text-[10px] text-muted font-bold uppercase">Target Deadline</p>
-                          <p className="font-bold text-cream text-xs">
-                            {selectedSchol.deadline} 
-                            <span className="text-status-warning font-normal text-[10px] ml-1.5">
-                              {(() => {
-                                const days = Math.ceil((new Date(selectedSchol.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-                                return days > 0 ? `(${days} days left)` : '(Deadline passed)';
-                              })()}
-                            </span>
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {selectedSchol.no_ielts === true && (
-                      <div className="bg-status-success/10 border border-status-success/30 rounded-lg p-3 mt-3">
-                        <p className="text-xs font-bold text-status-success">No IELTS Required. IELTS alternatives accepted.</p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Circle Match percentage */}
-                  <div className="flex flex-col items-center justify-center bg-background p-4 rounded-lg border border-hairline min-w-[140px] shrink-0">
-                    {selectedSchol.match ? (
-                      <>
-                        <p className="text-[10px] font-extrabold text-muted uppercase tracking-wider mb-2">My compatibility</p>
-                        <div className="relative w-16 h-16 flex items-center justify-center">
-                          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                            <path className="text-surface-container-high" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="3"></path>
-                            <path className="text-status-success" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeDasharray={`${selectedSchol.match.score}, 100`} strokeWidth="3"></path>
-                          </svg>
-                          <span className="absolute text-lg font-black text-primary">{selectedSchol.match.score}%</span>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-[10px] font-extrabold text-muted uppercase tracking-wider mb-2">Compatibility</p>
-                        <div className="w-16 h-16 flex items-center justify-center bg-off-black rounded-full">
-                          <span className="material-symbols-outlined text-2xl text-muted">person_edit</span>
-                        </div>
-                        <button onClick={() => window.dispatchEvent(new CustomEvent('open-profile-setup'))} className="mt-2 text-[8px] font-semibold text-primary hover:underline uppercase tracking-wider">
-                          Set up profile
-                        </button>
-                      </>
-                    )}
-                    {selectedSchol.no_ielts && (
-                      <span className="mt-2 text-[8px] font-semibold text-status-warning bg-status-warning/10 border border-status-warning/30 rounded px-1.5 py-0.5 uppercase">No IELTS</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Overview Details tabs */}
-              <div className="bg-canvas border border-hairline rounded-lg overflow-hidden text-sm">
-                <div className="flex border-b border-hairline bg-surface-admin px-4 overflow-x-auto hide-scrollbar">
-                  <button className="px-6 py-4 font-bold text-primary border-b-2 border-primary">Overview</button>
-                  <button className="px-6 py-4 text-muted hover:text-primary">Eligible Regions</button>
-                </div>
-                <div className="p-6 md:p-8 space-y-6">
-                  <div>
-                    <h3 className="text-lg font-extrabold text-primary mb-3">About the Scholarship</h3>
-                    <p className="text-muted leading-relaxed font-light">
-                      {selectedSchol.description}
-                    </p>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-extrabold text-primary mb-3">Eligibility Requirements</h3>
-                    <p className="text-muted leading-relaxed font-light mb-4">
-                      {selectedSchol.eligibility}
-                    </p>
-                    <ul className="space-y-2">
-                      <li className="flex items-start gap-2.5 text-cream font-light">
-                        <span className="material-symbols-outlined text-secondary text-sm mt-0.5">check_circle</span>
-                        Citizen of: {(selectedSchol.countries || selectedSchol.country || []).join(', ')}
-                      </li>
-                      <li className="flex items-start gap-2.5 text-cream font-light">
-                        <span className="material-symbols-outlined text-secondary text-sm mt-0.5">check_circle</span>
-                        Course topics: {(selectedSchol.fields || []).join(', ')}
-                      </li>
-                    </ul>
-
-                    {/* Match Reasons */}
-                    {selectedSchol.match && selectedSchol.match.reasons.length > 0 && (
-                      <div className="mt-6 bg-status-success/5 border border-status-success/15 rounded-lg p-4">
-                        <h4 className="text-xs font-black text-status-success uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                          <span className="material-symbols-outlined text-sm">auto_awesome</span>
-                          Why this scholarship fits you
-                        </h4>
-                        <ul className="space-y-1.5">
-                          {(selectedSchol.match?.reasons || []).map((r, i) => (
-                            <li key={i} className="text-xs text-muted flex items-start gap-2">
-                              <span className="text-status-success mt-0.5">✓</span>
-                              {r}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    {/* Requirements Section */}
-                    {(selectedSchol.work_experience_required || selectedSchol.age_limit_masters || selectedSchol.age_limit_phd || selectedSchol.no_ielts) && (
-                      <div className="mt-6 bg-canvas border border-hairline/60 rounded-lg p-5">
-                        <h4 className="font-bold text-xs text-primary mb-3">Requirements</h4>
-                        <div className="space-y-2 text-xs">
-                          {selectedSchol.work_experience_required && <p className="font-semibold text-on-surface">{selectedSchol.work_experience_required} years of professional work experience required</p>}
-                          {selectedSchol.age_limit_masters && <p className="font-semibold text-on-surface">Maximum age for Masters applicants is {selectedSchol.age_limit_masters} years</p>}
-                          {selectedSchol.age_limit_phd && <p className="font-semibold text-on-surface">Maximum age for PhD applicants is {selectedSchol.age_limit_phd} years</p>}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Vault matching Checklist */}
-              <div className="bg-canvas border border-hairline rounded-lg p-6 md:p-8">
-                <div className="flex justify-between items-end mb-6">
-                  <div>
-                    <h3 className="text-lg font-black text-primary mb-1">Required Documents Checklist</h3>
-                    <p className="text-xs text-muted">Validated in real-time against your Document Vault</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {(selectedSchol.required_documents || []).map((docName) => {
-                    const isDocStored = checkDocumentStored(docName);
-                    return (
-                      <div 
-                        key={docName} 
-                        className={`flex items-center justify-between p-4 border rounded-lg ${isDocStored ? 'border-status-success/30 bg-status-success/5' : 'border-status-warning/30 bg-status-warning/5'}`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded flex-shrink-0 flex items-center justify-center font-bold ${isDocStored ? 'bg-status-success/10 text-status-success' : 'bg-status-warning/10 text-status-warning'}`}>
-                            <span className="material-symbols-outlined text-lg">
-                              {docName.includes('CV') ? 'description' : docName.includes('Transcript') ? 'table_chart' : 'edit_document'}
-                            </span>
-                          </div>
-                          <div>
-                            <p className="text-xs font-bold text-on-surface">{docName}</p>
-                            <p className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-0.5 ${isDocStored ? 'text-status-success' : 'text-status-warning'}`}>
-                              <span className="material-symbols-outlined text-xs">
-                                {isDocStored ? 'check' : 'warning'}
-                              </span>
-                              {isDocStored ? 'Loaded' : 'Missing'}
-                            </p>
-                          </div>
-                        </div>
-                        {!isDocStored && import.meta.env.DEV && (
-                          <button 
-                            onClick={() => {
-                              const fileName = docName.replace(' / ', '_') + "_sample.pdf";
-                              const blob = new Blob(['Sample ' + docName], { type: 'application/pdf' });
-                              const file = new File([blob], fileName, { type: 'application/pdf' });
-                              onUploadMetadata(file, docName);
-                            }}
-                            className="text-status-warning hover:bg-status-warning/15 p-2 rounded-full transition-colors cursor-pointer"
-                            title="Auto-simulate upload of this item"
-                          >
-                            <span className="material-symbols-outlined text-sm">upload</span>
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-            </div>
-
-            {/* Right Column (4 cols): Tracking actions (Bento Side widget) */}
-            <div className="lg:col-span-4 flex flex-col gap-6">
-              
-              {/* Application CTA widget */}
-              <div className="bg-canvas border border-hairline rounded-lg p-6">
-                <div className="flex flex-col gap-3 mb-6">
-                  <a 
-                    href={selectedSchol.apply_url} 
-                    target="_blank" 
-                    rel="noreferrer"
-                    className="bg-transparent border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream font-bold text-center text-sm rounded-lg py-3 w-full flex items-center justify-center gap-2 hover:bg-primary-container transition-colors"
-                  >
-                    Apply Now (Official Site)
-                    <span className="material-symbols-outlined text-xs">open_in_new</span>
-                  </a>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <button 
-                      onClick={() => handleToggleSave(selectedSchol.id)}
-                      className={`font-bold text-xs rounded-lg py-2.5 px-4 flex items-center justify-center gap-1.5 border transition-all cursor-pointer ${isSaved(selectedSchol.id) ? 'bg-secondary-container border-secondary/30 text-on-secondary-container' : 'bg-off-black border-hairline hover:bg-surface-variant text-on-surface'}`}
-                    >
-                      <span className="material-symbols-outlined text-sm">
-                        {isSaved(selectedSchol.id) ? 'check' : 'bookmark_border'}
-                      </span>
-                      {isSaved(selectedSchol.id) ? 'Saved ✓' : 'Save'}
-                    </button>
-
-                    {selectedSchol.slug && (
-                      <ShareButton
-                        url={`/scholarships/browse/${selectedSchol.slug}`}
-                        title={selectedSchol.name}
-                        size="sm"
-                      />
-                    )}
-
-                    <button 
-                      onClick={() => {
-                        sessionStorage.setItem('zawadi_essay_scholarship', selectedSchol.name);
-                        sessionStorage.setItem('zawadi_essay_scholarship_id', selectedSchol.id);
-                        onNavigateToTab?.('essays');
-                      }} 
-                      className="bg-tertiary-fixed text-on-tertiary-fixed font-bold text-xs rounded-lg py-2.5 px-4 flex items-center justify-center gap-1.5 hover:bg-tertiary-fixed-dim transition-colors border border-tertiary-fixed"
-                    >
-                      <span className="material-symbols-outlined text-sm">auto_awesome</span>
-                      AI Essay
-                    </button>
-                  </div>
-                </div>
-
-                <hr className="border-hairline/50 mb-6" />
-
-                {/* Tracker widget */}
-                <h4 className="font-bold text-xs text-primary uppercase tracking-wider mb-4 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-md">analytics</span>
-                  Application Tracker Status
-                </h4>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-[10px] font-bold text-muted uppercase mb-1 block">Tracking Stage</label>
-                    {(() => {
-                      const currentStatus = getApplicationForSchol(selectedSchol.id)?.status || 'not_started';
-                      let selectBgStyle = "bg-off-black border-hairline text-on-surface";
-                      if (currentStatus === 'Applied') {
-                        selectBgStyle = "bg-accent-green/15 text-accent-green border-accent-green/50 font-semibold";
-                      } else if (currentStatus === 'Drafting' || currentStatus === 'Essay Drafting') {
-                        selectBgStyle = "border-accent-green bg-accent-green/15 text-accent-green font-semibold animate-pulse";
-                      } else if (currentStatus === 'Saved') {
-                        selectBgStyle = "bg-secondary/15 text-secondary border-secondary/30 font-extrabold";
-                      }
-                      return (
-                        <select 
-                          value={currentStatus}
-                          onChange={(e) => onTrackScholarship(selectedSchol.id, e.target.value, getApplicationForSchol(selectedSchol.id)?.notes || '', getApplicationForSchol(selectedSchol.id)?.priority || 'Normal')}
-                          className={`w-full p-2.5 text-xs rounded-lg focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary cursor-pointer font-bold transition-all border ${selectBgStyle}`}
-                        >
-                          <option value="not_started" className="bg-off-black text-cream font-semibold">Not Tracked (Disable)</option>
-                          <option value="Saved" className="bg-off-black text-secondary font-semibold">Saved</option>
-                          <option value="Drafting" className="bg-off-black text-primary font-semibold">Drafting</option>
-                          <option value="Preparing Documents" className="bg-off-black text-cream font-semibold">Preparing Documents</option>
-                          <option value="Essay Drafting" className="bg-off-black text-cream font-semibold">Essay Drafting</option>
-                          <option value="Ready to Submit" className="bg-off-black text-cream font-semibold">Ready to Submit</option>
-                          <option value="Applied" className="bg-off-black text-secondary font-semibold">Applied</option>
-                          <option value="Interview" className="bg-off-black text-cream font-semibold">Interview</option>
-                          <option value="Awarded" className="bg-off-black text-status-success font-semibold">Awarded</option>
-                          <option value="Rejected" className="bg-off-black text-status-urgent font-semibold">Rejected</option>
-                        </select>
-                      );
-                    })()}
-                  </div>
-
-                  <div>
-                    <label className="text-[10px] font-bold text-muted uppercase mb-1 block">Priority Level</label>
-                    <div className="flex gap-2">
-                      {['Low', 'Normal', 'High'].map((p) => (
-                        <button
-                          key={p}
-                          onClick={() => {
-                            const app = getApplicationForSchol(selectedSchol.id);
-                            onTrackScholarship(
-                              selectedSchol.id, 
-                              app?.status || 'Saved', 
-                              app?.notes || '', 
-                              p as any
-                            );
-                          }}
-                          className={`flex-1 text-center py-2 border rounded font-bold text-[11px] transition-all cursor-pointer ${
-                            (getApplicationForSchol(selectedSchol.id)?.priority || 'Normal') === p 
-                              ? 'bg-primary-fixed border-primary text-primary font-black scale-102' 
-                              : 'border-hairline/60 bg-off-black hover:bg-surface-variant text-muted'
-                          }`}
-                        >
-                          {p}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="text-[10px] font-bold text-muted uppercase mb-1 block">Personal Application Notes</label>
-                    <textarea 
-                      value={getApplicationForSchol(selectedSchol.id)?.notes || ''}
-                      onChange={(e) => {
-                        const app = getApplicationForSchol(selectedSchol.id);
-                        onTrackScholarship(
-                          selectedSchol.id,
-                          app?.status || 'Saved',
-                          e.target.value,
-                          app?.priority || 'Normal'
-                        );
-                      }}
-                      placeholder="Add personal checklists, ideas, essay prompts or references..."
-                      rows={3}
-                      className="w-full bg-off-black border border-hairline rounded-lg p-2 text-xs text-cream focus:outline-none focus:border-primary resize-none placeholder:opacity-50"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Match breakdown metrics */}
-              <div className="bg-canvas border border-hairline rounded-lg p-5 space-y-4">
-                <h4 className="font-bold text-xs text-primary uppercase">Compatibility Breakdown</h4>
-                
-                <div className="space-y-3">
-                  {(selectedSchol.match ? [
-                    { label: 'Country / Region', key: 'country' as const },
-                    { label: 'Degree Level', key: 'degree' as const },
-                    { label: 'Field of Study', key: 'field' as const },
-                    { label: 'GPA / Grades', key: 'gpa' as const },
-                    { label: 'Language', key: 'languages' as const },
-                    { label: 'Experience', key: 'experience' as const },
-                    { label: 'Destination', key: 'destination' as const },
-                    { label: 'Documents', key: 'documents' as const },
-                  ] : []).map(({ label, key }) => {
-                    const val = selectedSchol.match!.breakdown[key];
-                    const color = val >= 90 ? 'bg-status-success' : val >= 70 ? 'bg-primary' : val >= 40 ? 'bg-status-warning' : 'bg-status-error';
-                    return (
-                      <div key={key}>
-                        <div className="flex justify-between text-xs font-semibold mb-1">
-                          <span>{label}</span>
-                          <span className={val >= 90 ? 'text-status-success font-black' : val >= 70 ? 'text-primary font-black' : 'text-status-warning font-black'}>{val}%</span>
-                        </div>
-                        <div className="w-full h-1.5 bg-surface-variant rounded-full">
-                          <div className={`h-full ${color} rounded-full`} style={{ width: `${val}%` }}></div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                  {selectedSchol.match?.no_ielts_benefit && (
-                    <div className="bg-status-warning/10 border border-status-warning/30 rounded-lg p-2 text-[10px] text-status-warning font-medium flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-sm text-status-warning">check_circle</span>
-                      No IELTS required — save $300+ on English proficiency tests
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Source & Verification */}
-              <div className="bg-canvas border border-hairline/60 rounded-lg p-5">
-                <h4 className="font-bold text-xs text-primary mb-3">Source & Verification</h4>
-                <div className="space-y-2 text-xs">
-                  {selectedSchol.source_url && (
-                    <a href={selectedSchol.source_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline flex items-center gap-1">
-                      <ExternalLink className="w-3 h-3" /> View Original Listing
-                    </a>
-                  )}
-                  {selectedSchol.verified_at && <p className="text-muted">Verified: {new Date(selectedSchol.verified_at).toLocaleDateString()}</p>}
-                  <p className="text-muted">Data source: {selectedSchol.pipeline_source === 'pipeline' ? 'Pipeline' : 'Manual Admin Entry'}</p>
-                  {selectedSchol.apply_url ? (
-                    <a href={selectedSchol.apply_url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 mt-2 px-5 py-2.5 rounded-full btn-gradient-stroke text-cream font-semibold text-xs transition-all hover:brightness-110 active:scale-[0.98]">
-                      Apply Now
-                    </a>
-                  ) : selectedSchol.source_url ? (
-                    <a href={selectedSchol.source_url} target="_blank" rel="noopener noreferrer" className="inline-block mt-2 px-4 py-2 bg-off-black text-cream rounded-lg font-bold text-xs hover:bg-off-black transition-all border border-hairline/40">
-                      Find Application Link
-                    </a>
-                  ) : null}
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-
-        </div>
-      ) : (
-        // Premium Table-based Scholarship Finder & Unified Tracker Dashboard
-        <div className="space-y-6">
-          
           {/* Main Top Header Section with Side Actions */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <p className="text-[10px] font-extrabold text-secondary tracking-widest uppercase mb-0.5">Africa-Wide Scholarship Web App</p>
-              <h2 className="font-display text-3xl font-black text-primary tracking-tight">Scholarship finder</h2>
+              <p className="text-ed-caption uppercase text-graphite tracking-wide mb-1">Africa-wide scholarship finder</p>
+              <h2 className="text-ed-h1-sm text-off-black-ink tracking-tight">Scholarship finder</h2>
             </div>
             
             {/* Top Right Action Row */}
             <div className="flex items-center gap-2 flex-wrap">
-              <button 
+              <button
                 onClick={() => setShowAlertsModal(true)}
-                className="relative flex items-center gap-1.5 px-3 py-2 bg-canvas hover:bg-off-black border border-hairline/50 rounded-lg text-xs font-bold text-cream cursor-pointer shadow-3xs transition-all"
+                className="relative inline-flex items-center gap-1.5 px-4 min-h-[40px] bg-pure-white border border-ash rounded-full text-ed-body-sm font-medium text-graphite hover:text-off-black-ink hover:border-off-black-ink transition-all cursor-pointer"
               >
-                <span className="material-symbols-outlined text-[16px] text-status-warning">notifications</span>
+                <Bell className="w-4 h-4" aria-hidden />
                 <span>Alerts</span>
                 {systemAlerts.length > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-accent-green/15 border border-accent-green/50 text-accent-green text-[9px] font-semibold animate-pulse">
+                  <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-electric-lime border border-off-black-ink text-off-black-ink text-[9px] font-medium">
                     {systemAlerts.length}
                   </span>
                 )}
               </button>
               
-              <button 
+              <button
                 onClick={() => {
-                  alert("Syncing all tracked opportunities with your active application pipeline...");
+                  toast.success("Syncing all tracked opportunities with your active application pipeline...");
                   window.location.reload();
                 }}
-                className="flex items-center gap-1.5 px-3 py-2 bg-canvas hover:bg-off-black border border-hairline/50 rounded-lg text-xs font-bold text-cream cursor-pointer shadow-3xs transition-all"
+                className="inline-flex items-center gap-1.5 px-4 min-h-[40px] bg-pure-white border border-ash rounded-full text-ed-body-sm font-medium text-graphite hover:text-off-black-ink hover:border-off-black-ink transition-all cursor-pointer"
               >
-                <span className="material-symbols-outlined text-[16px] text-muted font-bold">sync</span>
+                <RefreshCw className="w-4 h-4" aria-hidden />
                 <span>Sync</span>
               </button>
             </div>
           </div>
 
-          {/* Premium Filter System Container */}
-          <div className="bg-canvas/95 border border-hairline/60 rounded-lg p-5 space-y-4">
-            <h3 className="text-xs font-black text-primary/70 uppercase tracking-widest">Premium filter system</h3>
+          {/* Premium Filter System Container — editorial */}
+          <div className="bg-pure-white border border-ash/70 rounded-ed p-6 md:p-8 space-y-5">
+            <h3 className="text-ed-caption uppercase text-graphite">Filter scholarships</h3>
             
             {/* Horizontal Filter Layout Row 1 */}
             <div className="flex flex-wrap items-center gap-3">
               {/* Keyword Search */}
               <div className="relative flex-1 min-w-[260px]">
-                <span className="material-symbols-outlined absolute left-3 top-2.5 text-muted text-[16px] font-bold">search</span>
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-graphite pointer-events-none" aria-hidden />
                 <input 
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search scholarship, school, country, field"
-                  className="w-full pl-10 pr-4 py-2 border border-hairline/70 rounded-lg text-xs bg-off-black text-cream placeholder:text-muted/40 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  className="w-full pl-10 pr-4 py-3 border border-ash rounded-lg text-ed-body-sm bg-pure-white text-off-black-ink placeholder:text-graphite focus:outline-none focus:border-graphite hover:border-graphite transition-colors"
                   type="text"
                 />
               </div>
@@ -1379,7 +909,7 @@ export default function Scholarships({
               <select 
                 value={countryFilter}
                 onChange={(e) => setCountryFilter(e.target.value)}
-                className="bg-off-black border border-hairline/70 rounded-lg px-3 py-2 text-xs font-bold text-muted focus:outline-none focus:border-primary cursor-pointer w-max"
+                className="bg-pure-white border border-ash rounded-lg px-4 py-3 text-ed-body-sm font-medium text-off-black-ink focus:outline-none focus:border-graphite hover:border-graphite transition-colors cursor-pointer"
               >
                 <option value="">All countries</option>
                 {AFRICAN_COUNTRIES.map(c => (
@@ -1394,7 +924,7 @@ export default function Scholarships({
               <select 
                 value={degree}
                 onChange={(e) => setDegree(e.target.value)}
-                className="bg-off-black border border-hairline/70 rounded-lg px-3 py-2 text-xs font-bold text-muted focus:outline-none focus:border-primary cursor-pointer w-max"
+                className="bg-pure-white border border-ash rounded-lg px-4 py-3 text-ed-body-sm font-medium text-off-black-ink focus:outline-none focus:border-graphite hover:border-graphite transition-colors cursor-pointer"
               >
                 <option value="">All levels</option>
                 {degrees.map(d => <option key={d} value={d}>{d}</option>)}
@@ -1404,7 +934,7 @@ export default function Scholarships({
               <select 
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="bg-off-black border border-hairline/70 rounded-lg px-3 py-2 text-xs font-bold text-muted focus:outline-none focus:border-primary cursor-pointer w-max"
+                className="bg-pure-white border border-ash rounded-lg px-4 py-3 text-ed-body-sm font-medium text-off-black-ink focus:outline-none focus:border-graphite hover:border-graphite transition-colors cursor-pointer"
               >
                 <option value="">All statuses</option>
                 <option value="not_started">Not started</option>
@@ -1423,7 +953,7 @@ export default function Scholarships({
               <select 
                 value={funding}
                 onChange={(e) => setFunding(e.target.value)}
-                className="bg-off-black border border-hairline/70 rounded-lg px-3 py-2 text-xs font-bold text-muted focus:outline-none focus:border-primary cursor-pointer w-max"
+                className="bg-pure-white border border-ash rounded-lg px-4 py-3 text-ed-body-sm font-medium text-off-black-ink focus:outline-none focus:border-graphite hover:border-graphite transition-colors cursor-pointer"
               >
                 <option value="">All funding</option>
                 <option value="Full">Fully funded</option>
@@ -1434,7 +964,7 @@ export default function Scholarships({
               <select
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value)}
-                className="bg-off-black border border-hairline/70 rounded-lg px-3 py-2 text-xs font-bold text-muted focus:outline-none focus:border-primary cursor-pointer w-max"
+                className="bg-pure-white border border-ash rounded-lg px-4 py-3 text-ed-body-sm font-medium text-off-black-ink focus:outline-none focus:border-graphite hover:border-graphite transition-colors cursor-pointer"
               >
                 <option value="">All types</option>
                 <option value="Government">Government</option>
@@ -1447,7 +977,7 @@ export default function Scholarships({
               <select 
                 value={accessFilter}
                 onChange={(e) => setAccessFilter(e.target.value)}
-                className="bg-off-black border border-hairline/70 rounded-lg px-3 py-2 text-xs font-bold text-muted focus:outline-none focus:border-primary cursor-pointer w-max"
+                className="bg-pure-white border border-ash rounded-lg px-4 py-3 text-ed-body-sm font-medium text-off-black-ink focus:outline-none focus:border-graphite hover:border-graphite transition-colors cursor-pointer"
               >
                 <option value="">Any access</option>
                 <option value="Direct">Direct portal access</option>
@@ -1456,18 +986,18 @@ export default function Scholarships({
             </div>
 
             {/* Horizontal Filter Layout Row 2 */}
-            <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-hairline/30">
+            <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-ash">
               {/* School host text filter */}
               <input 
                 value={schoolFilter}
                 onChange={(e) => setSchoolFilter(e.target.value)}
                 placeholder="School"
-                className="bg-off-black border border-hairline/70 rounded-lg px-3 py-2 text-xs font-semibold text-cream placeholder:text-muted/40 focus:outline-none focus:border-primary w-28"
+                className="bg-pure-white border border-ash rounded-lg px-4 py-3 text-ed-body-sm text-off-black-ink placeholder:text-graphite focus:outline-none focus:border-graphite hover:border-graphite w-32 transition-colors"
                 type="text"
               />
 
               {/* Docs Ready Checkbox */}
-              <label className="flex items-center gap-1.5 text-xs text-cream font-bold bg-off-black border border-hairline/70 px-3 py-2 rounded-lg cursor-pointer hover:bg-surface-variant/45 transition-colors">
+              <label className="flex items-center gap-2 text-ed-body-sm font-medium bg-pure-white border border-ash px-4 py-3 rounded-lg cursor-pointer hover:border-off-black-ink transition-colors">
                 <input 
                   type="checkbox"
                   checked={docsReadyFilter}
@@ -1478,8 +1008,8 @@ export default function Scholarships({
               </label>
 
               {/* Amount Shown Checkbox */}
-              <label className="flex items-center gap-1.5 text-xs text-cream font-bold bg-off-black border border-hairline/70 px-3 py-2 rounded-lg cursor-pointer hover:bg-surface-variant/45 transition-colors">
-                <input 
+              <label className="flex items-center gap-1.5 text-ed-body-sm font-medium bg-pure-white border border-ash px-4 py-3 rounded-lg cursor-pointer hover:border-off-black-ink transition-colors">
+                <input
                   type="checkbox"
                   checked={amountShownFilter}
                   onChange={(e) => setAmountShownFilter(e.target.checked)}
@@ -1492,17 +1022,18 @@ export default function Scholarships({
               <select
                 value={matchSortFilter}
                 onChange={(e) => setMatchSortFilter(e.target.value as any)}
-                className="bg-off-black border border-hairline/70 rounded-lg px-3 py-2 text-xs font-bold text-muted focus:outline-none focus:border-primary cursor-pointer w-max"
+                aria-label="Match score threshold"
+                className="bg-pure-white border border-ash rounded-lg px-4 py-3 text-ed-body-sm font-medium text-off-black-ink focus:outline-none focus:border-graphite hover:border-graphite transition-colors cursor-pointer"
               >
-                <option value="default">match</option>
-                <option value="high">Score &gt;= 90%</option>
+                <option value="default">Any match</option>
+                <option value="high">Score &gt;= 80%</option>
                 <option value="all">Any alignment</option>
               </select>
 
               {/* No-IELTS toggle with tooltip */}
               <div className="relative">
-                <label className="flex items-center gap-1.5 text-xs text-cream font-bold bg-off-black border border-hairline/70 px-3 py-2 rounded-lg cursor-pointer hover:bg-surface-variant/45 transition-colors">
-                  <input 
+                <label className="flex items-center gap-1.5 text-ed-body-sm font-medium bg-pure-white border border-ash px-4 py-3 rounded-lg cursor-pointer hover:border-off-black-ink transition-colors">
+                  <input
                     type="checkbox"
                     checked={noIeltsFilter}
                     onChange={(e) => {
@@ -1513,38 +1044,38 @@ export default function Scholarships({
                         setShowNoIeltsTooltip(false);
                       }
                     }}
-                    className="rounded text-secondary border-hairline/80 accent-secondary cursor-pointer w-3.5 h-3.5"
+                    className="rounded text-primary border-hairline/80 accent-primary cursor-pointer w-3.5 h-3.5"
                   />
                   <span>No IELTS</span>
                 </label>
                 {showNoIeltsTooltip && (
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-off-black text-cream text-[10px] rounded-lg p-3 border border-hairline z-50 pointer-events-none">
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 bg-off-black-ink text-pure-white text-xs rounded-lg p-3 z-50 pointer-events-none">
                     <div className="flex items-start gap-2">
-                      <span className="material-symbols-outlined text-secondary text-base shrink-0">info</span>
+                      <Search className="w-3.5 h-3.5 shrink-0 mt-0.5 text-electric-lime" aria-hidden />
                       <span>Removing the destination filter will show you more No-IELTS opportunities across all regions.</span>
                     </div>
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-off-black border-r border-b border-hairline rotate-45 -mt-1"></div>
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-off-black-ink border-r border-b rotate-45 -mt-1"></div>
                   </div>
                 )}
               </div>
 
               {/* Urgency filter dropdown */}
-              <select value={urgencyFilter} onChange={e => setUrgencyFilter(e.target.value)}
-                      className="py-2.5 px-4 bg-off-black border border-hairline/40 text-xs font-semibold rounded-lg outline-none">
+              <select value={urgencyFilter} onChange={e => setUrgencyFilter(e.target.value)} aria-label="Filter by urgency"
+                      className="bg-pure-white border border-ash rounded-lg px-4 py-3 text-ed-body-sm font-medium text-off-black-ink focus:outline-none focus:border-graphite hover:border-graphite transition-colors cursor-pointer">
                 <option value="">Urgency: All</option>
                 <option value="Closing Soon">Closing Soon (≤30 days)</option>
                 <option value="Closing in 60">Closing in 60 days</option>
                 <option value="Open All">Open All Deadlines</option>
               </select>
-              <select value={hostRegionFilter} onChange={e => setHostRegionFilter(e.target.value)}
-                      className="py-2.5 px-4 bg-off-black border border-hairline/40 text-xs font-semibold rounded-lg outline-none">
+              <select value={hostRegionFilter} onChange={e => setHostRegionFilter(e.target.value)} aria-label="Filter by host region"
+                      className="bg-pure-white border border-ash rounded-lg px-4 py-3 text-ed-body-sm font-medium text-off-black-ink focus:outline-none focus:border-graphite hover:border-graphite transition-colors cursor-pointer">
                 <option value="">Region: All</option>
                 {['West Africa hubs','East Africa hubs','Southern Africa hubs','North Africa hubs','Central Africa hubs','United Kingdom and Ireland','United States and Canada','Australia and New Zealand','Commonwealth Africa','Commonwealth Global','France and Belgium','Francophone destinations','Lusophone destinations','Germany, Austria, Switzerland (German-speaking)','Nordic countries','Netherlands and Belgium','Rest of Europe','China and East Asia','Japan and South Korea','Southeast Asia','Middle East and Gulf states','Intra-African'].map(r => (
                   <option key={r} value={r}>{r}</option>
                 ))}
               </select>
-              <select value={sponsorTypeFilter} onChange={e => setSponsorTypeFilter(e.target.value)}
-                      className="py-2.5 px-4 bg-off-black border border-hairline/40 text-xs font-semibold rounded-lg outline-none">
+              <select value={sponsorTypeFilter} onChange={e => setSponsorTypeFilter(e.target.value)} aria-label="Filter by sponsor type"
+                      className="bg-pure-white border border-ash rounded-lg px-4 py-3 text-ed-body-sm font-medium text-off-black-ink focus:outline-none focus:border-graphite hover:border-graphite transition-colors cursor-pointer">
                 <option value="">Sponsor: All</option>
                 {['Government', 'Foundation', 'University', 'Corporate', 'UN'].map(t => (
                   <option key={t} value={t}>{t}</option>
@@ -1572,7 +1103,7 @@ export default function Scholarships({
                       setMatchSortFilter('default');
                       setNoIeltsFilter(false);
                     }}
-                    className="text-xs font-black text-secondary hover:text-primary cursor-pointer hover:underline"
+                    className="text-xs font-medium text-graphite underline underline-offset-4 decoration-ash hover:text-off-black-ink cursor-pointer"
                   >
                     Clear Filters
                   </button>
@@ -1582,356 +1113,103 @@ export default function Scholarships({
           </div>
 
           {/* Table Counts Subheader Bar */}
-          <div className="flex items-center justify-between px-1">
-            <span className="text-xs font-extrabold text-muted uppercase tracking-wider bg-off-black/40 px-3 py-1.5 rounded-lg border border-hairline/30">
-              {filteredList.length} Opportunities Located
+          <div className="flex items-center justify-between gap-3 flex-wrap px-1">
+            <span className="text-ed-caption uppercase text-graphite bg-parchment border border-ash px-3 py-1.5 rounded-full">
+              {filteredList.length} opportunities located
             </span>
 
-            <button 
-              onClick={handleExportCSV}
-              className="flex items-center gap-1.5 px-4 py-2 border border-hairline/60 rounded-lg text-xs font-bold text-cream bg-canvas hover:bg-off-black transition-all cursor-pointer shadow-3xs"
-            >
-              <span className="material-symbols-outlined text-sm font-bold">download</span>
-              <span>Export</span>
-            </button>
-          </div>
-
-          {/* Main Opportunities List Table Container */}
-          <div className="bg-canvas border border-hairline/60 rounded-lg overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse min-w-[1200px]">
-                <thead>
-                  <tr className="border-b border-hairline text-[10px] uppercase font-bold text-muted tracking-wider bg-off-black/80">
-                    <th className="py-4 px-5">Match</th>
-                    <th className="py-4 px-5">Scholarship</th>
-                    <th className="py-4 px-5">Country and school</th>
-                    <th className="py-4 px-5">Amount</th>
-                    <th className="py-4 px-5">Eligibility</th>
-                    <th className="py-4 px-5">Documents</th>
-                    <th className="py-4 px-5">Urgency</th>
-                    <th className="py-4 px-5">Status</th>
-                    <th className="py-4 px-5">Priority</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-outline-variant/30">
-                  {filteredList.length === 0 ? (
-                    <tr>
-                      <td colSpan={9} className="py-16 text-center">
-                        <span className="material-symbols-outlined text-4xl text-muted-variant mb-3">search</span>
-                        <p className="text-sm text-muted font-medium">No scholarships match your current filters. Try removing some filters or updating your profile details. New opportunities are added daily through our automated discovery pipeline.</p>
-                      </td>
-                    </tr>
-                  ) : filteredList.map((s) => {
-                    const matchedApp = getApplicationForSchol(s.id);
-                    const currentStatus = matchedApp && matchedApp.status !== 'not_started' ? matchedApp.status : 'not_started';
-                    const currentPriority = matchedApp && matchedApp.priority ? matchedApp.priority : 'Normal';
-                    const matchScore = s.match ? s.match.score : 0;
-                    
-                    // Determine which required documents are missing in the vault
-                    const missingDocs = (s.required_documents || []).filter(
-                      reqDoc => !documents.some(d => d.type && d.type.toLowerCase() === reqDoc.toLowerCase())
-                    );
-
-                    // Dynamic colors for the tracking stage select dropdown inside table
-                    let trackingStageBg = "bg-off-black border-hairline/80 text-on-surface";
-                    if (currentStatus === 'Applied') {
-                      trackingStageBg = "bg-accent-green/15 text-accent-green border-accent-green/50 font-semibold";
-                    } else if (currentStatus === 'Drafting' || currentStatus === 'Essay Drafting') {
-                      trackingStageBg = "border-accent-green bg-accent-green/15 text-accent-green font-semibold animate-pulse";
-                    } else if (currentStatus === 'Saved') {
-                      trackingStageBg = "bg-secondary/15 text-secondary border-secondary/30 font-bold";
-                    }
-
-                    return (
-                      <tr key={s.id} className="hover:bg-off-black/40 transition-colors duration-150 align-top">
-                        
-                        {/* Column 1: Match Score Gauge & Checkbox flag */}
-                        <td className="py-5 px-5 shrink-0 max-w-[100px]">
-                          <div className="flex flex-col items-center gap-2">
-                            {matchScore > 0 ? (
-                              <>
-                                {/* SVG Radial compatibility ring charts */}
-                                <div className="relative w-11 h-11 flex items-center justify-center bg-off-black/30 rounded-full select-none">
-                                  <svg className="absolute w-11 h-11 transform -rotate-90">
-                                    <circle
-                                      cx="22"
-                                      cy="22"
-                                      r="18"
-                                      className="text-muted-variant/20"
-                                      strokeWidth="3.5"
-                                      stroke="currentColor"
-                                      fill="transparent"
-                                    />
-                                    <circle
-                                      cx="22"
-                                      cy="22"
-                                      r="18"
-                                      className={matchScore >= 80 ? "text-secondary" : "text-status-warning"}
-                                      strokeWidth="3.5"
-                                      strokeDasharray={2 * Math.PI * 18}
-                                      strokeDashoffset={2 * Math.PI * 18 * (1 - matchScore / 100)}
-                                      strokeLinecap="round"
-                                      stroke="currentColor"
-                                      fill="transparent"
-                                    />
-                                  </svg>
-                                  <span className="text-[11px] font-black text-primary relative">{matchScore}%</span>
-                                </div>
-
-                                {/* Match reason tooltip */}
-                                {s.match && (s.match?.reasons || []).length > 0 && (
-                                  <div className="group relative">
-                                    <span className="text-[8px] text-status-success font-black uppercase tracking-wider cursor-help border border-status-success/20 rounded px-1 py-0.5 bg-status-success/5">
-                                      why match?
-                                    </span>
-                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 w-48 bg-off-black text-cream text-[9px] rounded-lg p-2 border border-hairline opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 pointer-events-none whitespace-normal text-left">
-                                      <ul className="list-disc list-inside space-y-0.5">
-                                        {(s.match?.reasons || []).slice(0, 3).map((r, i) => (
-                                          <li key={i}>{r}</li>
-                                        ))}
-                                        {(s.match?.reasons || []).length > 3 && (
-                                          <li className="text-secondary font-bold">+{(s.match?.reasons || []).length - 3} more</li>
-                                        )}
-                                      </ul>
-                                    </div>
-                                  </div>
-                                )}
-                              </>
-                            ) : (
-                              <div className="flex flex-col items-center gap-1">
-                                <div className="w-11 h-11 flex items-center justify-center bg-off-black rounded-full">
-                                  <span className="material-symbols-outlined text-sm text-muted">person_edit</span>
-                                </div>
-                                <button
-                                  onClick={() => window.dispatchEvent(new CustomEvent('open-profile-setup'))}
-                                  className="text-[7px] font-black text-primary hover:underline uppercase tracking-wider"
-                                >
-                                  Set up profile
-                                </button>
-                              </div>
-                            )}
-
-                            {/* No-IELTS badge */}
-                            {s.no_ielts && (
-                              <span className="text-[7px] font-black text-status-warning bg-status-warning/10 border border-status-warning/30 rounded px-1 py-0.5 uppercase tracking-wide whitespace-nowrap">
-                                No IELTS
-                              </span>
-                            )}
-
-                            {/* Applied/Not Applied checkpoint with checkbox */}
-                            <label className="flex items-center gap-1 mt-1 cursor-pointer select-none">
-                              <input 
-                                type="checkbox"
-                                checked={currentStatus !== 'not_started'}
-                                onChange={() => handleToggleSave(s.id)}
-                                className="w-3 h-3 rounded text-secondary border-outline accent-secondary cursor-pointer"
-                              />
-                              <span className={`text-[9px] font-bold ${currentStatus !== 'not_started' ? 'text-secondary font-black' : 'text-muted/70'}`}>
-                                {currentStatus !== 'not_started' ? (currentStatus === 'Applied' ? 'Applied ✓' : currentStatus) : 'Not applied'}
-                              </span>
-                            </label>
-                          </div>
-                        </td>
-
-                        {/* Column 2: Scholarship Name & Details */}
-                        <td className="py-5 px-5 max-w-[280px]">
-                          <div className="space-y-1 relative">
-                            {s.urgency === 'Urgent' && (
-                              <span className="inline-block px-2 py-0.5 rounded text-[9px] font-bold border border-status-urgent/50 text-status-urgent mb-1">Urgent</span>
-                            )}
-                            {s.urgency === 'Warning' && (
-                              <span className="inline-block px-2 py-0.5 rounded text-[9px] font-bold border border-status-warning/50 text-status-warning mb-1">Closing Soon</span>
-                            )}
-                            {s.urgency === 'Expired' && (
-                              <span className="inline-block px-2 py-0.5 rounded text-[9px] font-bold border border-hairline text-muted mb-1">Deadline Passed</span>
-                            )}
-                            <h4 
-                              onClick={() => setSelectedSchol(s)}
-                              className="font-display font-extrabold text-xs text-primary leading-tight hover:text-secondary hover:underline cursor-pointer transition-colors"
-                            >
-                              {s.name}
-                            </h4>
-                            <p className="text-[10px] text-muted/90 leading-snug font-medium">
-                              {s.provider}
-                            </p>
-                            {s.host_institution && s.host_institution !== s.provider && (
-                              <p className="text-[10px] text-muted">{s.host_institution}</p>
-                            )}
-                            {s.sponsor_type && (
-                              <p className="text-[10px] text-muted font-medium">{s.sponsor_type}</p>
-                            )}
-                            
-                            {/* Course/Subject chips in light blue */}
-                            <div className="flex flex-wrap gap-1 pt-1">
-                              {(s.fields || []).map(f => (
-                                <span 
-                                  key={f}
-                                  className="text-[9px] px-1.5 py-0.5 rounded bg-primary-fixed/20 text-on-primary-fixed-variant border border-primary/5 font-semibold"
-                                >
-                                  {f}
-                                </span>
-                              ))}
-                            </div>
-
-                            {/* Official Portal External Link */}
-                            <div className="pt-1.5">
-                              <a 
-                                href={s.apply_url} 
-                                target="_blank" 
-                                rel="noreferrer" 
-                                className="inline-flex items-center gap-1 text-[9px] text-secondary font-black hover:underline hover:opacity-90 transition-opacity"
-                              >
-                                <span className="material-symbols-outlined text-[11px]">open_in_new</span>
-                                <span>Official portal</span>
-                              </a>
-                            </div>
-
-                            {/* Share button */}
-                            {s.slug && (
-                              <div className="pt-1.5">
-                                <ShareButton url={`/scholarships/browse/${s.slug}`} iconOnly size="sm" />
-                              </div>
-                            )}
-                          </div>
-                        </td>
-
-                        {/* Column 3: Country and School Host */}
-                        <td className="py-5 px-5 max-w-[200px]">
-                          <div className="space-y-1">
-                            <div className="font-extrabold text-xs text-cream whitespace-normal leading-snug">
-                              {(s.countries || s.country || []).join(', ')}
-                            </div>
-                            <div className="text-[10px] text-muted/90 leading-relaxed font-normal">
-                              {s.host_institution || s.host || ''}
-                            </div>
-                            <div className="text-[9px] font-bold text-primary bg-primary/5 border border-primary/10 rounded px-1.5 py-0.5 w-max">
-                              {(s.degree_levels || []).join(', ')}
-                            </div>
-                          </div>
-                        </td>
-
-                        {/* Column 4: Amount & Financial coverage */}
-                        <td className="py-5 px-5 max-w-[150px]">
-                          <div className="space-y-1">
-                            <div className="font-extrabold text-xs text-cream italic">
-                              {s.funding_type === 'Full' ? 'Fully Funded' : 'Partially Funded'}
-                            </div>
-                            <div className="text-[10px] text-muted/95 leading-normal font-medium">
-                              {s.amount}
-                            </div>
-                          </div>
-                        </td>
-
-                        {/* Column 5: Eligibility Criteria */}
-                        <td className="py-5 px-5 max-w-[200px]">
-                          <p className="text-[10px] text-muted/90 leading-relaxed font-normal line-clamp-4">
-                            {s.eligibility}
-                          </p>
-                        </td>
-
-                        {/* Column 6: Required Documents & Live checklist status */}
-                        <td className="py-5 px-5 max-w-[220px]">
-                          <div className="space-y-1.5">
-                            <div className="text-[10px] text-primary/80 font-bold leading-normal">
-                              {(s.required_documents || []).join(', ')}
-                            </div>
-                            
-                            {/* Interactive Document Matching Alerts */}
-                            {missingDocs.length > 0 ? (
-                              <div className="bg-status-warning/5 border border-status-warning/15 text-[9px] p-2 rounded-lg text-muted">
-                                <span className="font-extrabold text-status-warning tracking-tight">Missing: </span>
-                                {missingDocs.join(', ')}
-                              </div>
-                            ) : (
-                              <div className="bg-secondary/5 border border-secondary/15 text-[9px] px-2 py-1 rounded-lg text-secondary font-black inline-flex items-center gap-1">
-                                <span className="material-symbols-outlined text-[11px]">check_circle</span>
-                                <span>All Documents Ready</span>
-                              </div>
-                            )}
-                          </div>
-                        </td>
-
-                        {/* Column 7: Urgency & Deadline pill */}
-                        <td className="py-5 px-5">
-                          <div className="space-y-1">
-                            <span className="inline-block font-extrabold text-[9px] px-2 py-0.5 rounded-md uppercase tracking-wide bg-primary-fixed text-primary border border-primary/15 whitespace-nowrap">
-                              {s.deadline.toLowerCase().includes('varies') || s.deadline.toLowerCase().includes('consortium') ? 'Varies by university' : 'Closes ' + s.deadline}
-                            </span>
-                          </div>
-                        </td>
-
-                        {/* Column 8: Status selector Dropdown in table */}
-                        <td className="py-5 px-5">
-                          <select 
-                            value={currentStatus}
-                            onChange={(e) => onTrackScholarship(s.id, e.target.value, matchedApp?.notes || `Auto-saved from listings list`, matchedApp?.priority || 'Normal')}
-                            className={`p-1.5 px-2 border rounded-lg text-[11px] focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer font-bold transition-all w-max ${trackingStageBg}`}
-                          >
-                            <option value="not_started">Not started</option>
-                            <option value="Saved">Saved</option>
-                            <option value="Drafting">Drafting</option>
-                            <option value="Preparing Documents">Preparing Documents</option>
-                            <option value="Essay Drafting">Essay Drafting</option>
-                            <option value="Ready to Submit">Ready to Submit</option>
-                            <option value="Applied">Applied</option>
-                            <option value="Interview">Interview</option>
-                            <option value="Awarded">Awarded</option>
-                            <option value="Rejected">Rejected</option>
-                          </select>
-                        </td>
-
-                        {/* Column 9: Priority selector dropdown inside table */}
-                        <td className="py-5 px-5">
-                          <select 
-                            value={currentPriority}
-                            onChange={(e) => {
-                              onTrackScholarship(s.id, currentStatus === 'not_started' ? 'Saved' : currentStatus, matchedApp?.notes || '', e.target.value as any);
-                            }}
-                            className={`p-1.5 border rounded-lg text-[11px] focus:outline-none cursor-pointer font-bold w-max ${
-                              currentPriority === 'High' 
-                                ? 'bg-status-urgent/15 text-status-urgent border-status-urgent/25' 
-                                : currentPriority === 'Normal'
-                                ? 'bg-status-info/15 text-status-info border-status-info/25'
-                                : 'bg-status-warning/15 text-status-warning border-status-warning/25'
-                            }`}
-                          >
-                            <option value="Low">Low</option>
-                            <option value="Normal">Normal</option>
-                            <option value="High">High</option>
-                          </select>
-                        </td>
-
-                      </tr>
-                    );
-                  })}
-
-                </tbody>
-              </table>
+            <div className="flex items-center gap-2 ml-auto">
+              <button
+                onClick={() => setDeadlineSort(v => !v)}
+                aria-pressed={deadlineSort}
+                className={`inline-flex items-center rounded-full px-4 min-h-[40px] text-ed-body-sm font-medium transition-all cursor-pointer ${
+                  deadlineSort
+                    ? 'bg-off-black-ink text-pure-white'
+                    : 'border border-ash text-graphite hover:border-off-black-ink hover:text-off-black-ink'
+                }`}
+              >
+                Closing soon first
+              </button>
+              <button
+                onClick={handleExportCSV}
+                className="inline-flex items-center gap-1.5 px-4 min-h-[40px] border border-ash rounded-full text-ed-body-sm font-medium text-graphite hover:text-off-black-ink hover:border-off-black-ink transition-all cursor-pointer"
+              >
+                <Download className="w-4 h-4" aria-hidden />
+                <span>Export</span>
+              </button>
             </div>
           </div>
 
+          {/* Opportunities grid — same as /scholarships/browse */}
+          {filteredList.length === 0 ? (
+            <div className="rounded-ed border border-ash/70 bg-pure-white py-16 px-6 text-center">
+              <p className="text-ed-sub text-off-black-ink">No scholarships match your current filters.</p>
+              <p className="mt-2 text-ed-body text-graphite">Try removing some filters or updating your profile details — new opportunities land daily.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+              {filteredList.map((s, idx) => {
+                const isDark = idx % 3 === 2;
+                return (
+                  <div key={s.id} onClick={() => navigate(`/scholarships/browse/${s.slug || s.id}`)} className={isDark ? 'md:col-span-2 lg:col-span-1 cursor-pointer' : 'cursor-pointer'}>
+                    <BrowseCard
+                      s={s}
+                      dark={isDark}
+                      comparing={compareIds.has(s.id)}
+                      onToggleCompare={() => toggleCompare(s.id)}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          )}
          </div>
+
+      {/* Floating comparison bar */}
+      {compareIds.size > 0 && !compareOpen && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[70] animate-sweep">
+          <div className="flex items-center gap-3 bg-off-black-ink text-pure-white rounded-full pl-5 pr-2 py-2 border border-off-black-ink">
+            <Columns2 className="w-4 h-4 text-electric-lime" aria-hidden />
+            <span className="text-ed-body-sm font-medium whitespace-nowrap">{compareIds.size} selected for comparison</span>
+            <button
+              onClick={() => setCompareOpen(true)}
+              className="inline-flex items-center rounded-full bg-electric-lime px-5 min-h-[40px] text-ed-body-sm font-medium text-off-black-ink hover:bg-lime-hover active:scale-[0.98] transition-all cursor-pointer"
+            >
+              Compare now
+            </button>
+          </div>
+        </div>
       )}
 
-      {/* Premium Notification Alerts Modal */}
+      <CompareModal
+        open={compareOpen}
+        scholarships={scholarships.filter(s => compareIds.has(s.id))}
+        onRemove={toggleCompare}
+        onClose={() => setCompareOpen(false)}
+      />
+
+      {/* Scholarship alerts drawer */}
       {showAlertsModal && (
-        <div id="alerts_system_modal" className="fixed inset-0 bg-black/60 backdrop-blur-xs flex justify-end z-50 animate-fade-in">
-          <div className="w-full max-w-md bg-canvas h-full flex flex-col justify-between border-l border-hairline/40 animate-slide-in-right">
-            
+        <div id="alerts_system_modal" className="fixed inset-0 bg-off-black-ink/65 backdrop-blur-sm flex justify-end z-50 animate-fade-in">
+          <div className="w-full max-w-md bg-pure-white h-full flex flex-col justify-between border-l border-ash animate-slide-in-right">
+
             {/* Header */}
-            <div className="p-6 border-b border-hairline/40 flex items-center justify-between">
-              <div className="flex items-center gap-2 font-display">
-                <span className="material-symbols-outlined text-status-warning font-bold">notifications_active</span>
+            <div className="p-6 border-b border-ash flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-electric-lime shrink-0">
+                  <Bell className="w-4 h-4 text-off-black-ink" aria-hidden />
+                </span>
                 <div>
-                  <h3 className="font-display font-black text-primary text-base">Scholarship Alert Center</h3>
-                  <p className="text-[10px] text-muted uppercase font-bold tracking-wider">Live deadlines & updates</p>
+                  <h3 className="text-heading text-off-black-ink tracking-tight">Scholarship alerts</h3>
+                  <p className="text-ed-caption uppercase text-graphite">Live deadlines &amp; updates</p>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={() => setShowAlertsModal(false)}
-                className="w-8 h-8 rounded-full hover:bg-surface-variant flex items-center justify-center cursor-pointer text-muted transition-colors"
+                aria-label="Close alerts"
+                className="icon-btn w-9 h-9 rounded-full border border-ash inline-flex items-center justify-center text-graphite hover:text-off-black-ink hover:border-graphite transition-colors cursor-pointer"
               >
-                <span className="material-symbols-outlined text-lg">close</span>
+                <X className="w-4 h-4" aria-hidden />
               </button>
             </div>
 
@@ -1939,50 +1217,52 @@ export default function Scholarships({
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
               {systemAlerts.length === 0 ? (
                 <div className="text-center py-12">
-                  <span className="material-symbols-outlined text-4xl text-muted-variant mb-2">notifications_off</span>
-                  <p className="text-xs font-bold text-muted">No pending alerts or deadlines found.</p>
+                  <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-parchment border border-ash mb-4" aria-hidden>
+                    <Bell className="w-5 h-5 text-graphite" strokeWidth={1.5} />
+                  </span>
+                  <p className="text-ed-body-sm font-medium text-off-black-ink">No pending alerts or deadlines found.</p>
                 </div>
               ) : (
                 systemAlerts.map(alert => (
-                  <div 
+                  <div
                     key={alert.id}
-                    className={`p-4 border rounded-lg space-y-3 transition-all ${
-                      alert.severity === 'urgent' 
-                        ? 'bg-status-urgent/5 border-status-urgent/25 hover:border-status-urgent/45' 
-                        : 'bg-status-info/5 border-status-info/25 hover:border-status-info/45'
+                    className={`p-4 border rounded-lg space-y-3 transition-colors ${
+                      alert.severity === 'urgent'
+                        ? 'bg-error/5 border-error/25 hover:border-error/45'
+                        : 'bg-parchment border-ash hover:border-graphite/50'
                     }`}
                   >
                     <div className="flex items-start gap-3">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                        alert.severity === 'urgent' ? 'bg-status-urgent/15 text-status-urgent' : 'bg-status-info/15 text-status-info'
+                        alert.severity === 'urgent' ? 'bg-error/10 text-error' : 'bg-electric-lime text-off-black-ink'
                       }`}>
-                        <span className="material-symbols-outlined text-base">
-                          {alert.severity === 'urgent' ? 'alarm' : 'campaign'}
-                        </span>
+                        {alert.severity === 'urgent'
+                          ? <CalendarClock className="w-4 h-4" aria-hidden />
+                          : <Sparkles className="w-4 h-4" aria-hidden />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
                           <span className={`text-[9px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded-md ${
-                            alert.severity === 'urgent' ? 'bg-status-urgent/10 text-status-urgent' : 'bg-status-info/10 text-status-info'
+                            alert.severity === 'urgent' ? 'bg-error/10 text-error' : 'bg-off-black-ink/5 text-graphite'
                           }`}>
                             {alert.severity === 'urgent' ? 'Urgent' : 'Opportunity'}
                           </span>
-                          <span className="text-[9px] font-bold text-muted/70">{alert.date}</span>
+                          <span className="text-[10px] font-medium text-graphite">{alert.date}</span>
                         </div>
-                        <h4 className="font-extrabold text-xs text-cream mt-1.5 leading-normal">{alert.title}</h4>
-                        <p className="text-[11px] text-muted/85 mt-1 leading-relaxed">
+                        <h4 className="font-medium text-ed-body-sm text-off-black-ink mt-1.5 leading-normal">{alert.title}</h4>
+                        <p className="text-xs text-graphite mt-1 leading-relaxed">
                           {alert.description}
                         </p>
                       </div>
                     </div>
-                    
-                    <div className="flex justify-end gap-2 pt-1 border-t border-hairline/10">
+
+                    <div className="flex justify-end gap-2 pt-1 border-t border-ash/70">
                       <button
                         onClick={() => {
-                          setSelectedSchol(alert.sourceSchol);
+                          navigate(`/scholarships/browse/${alert.sourceSchol.slug || alert.sourceSchol.id}`);
                           setShowAlertsModal(false);
                         }}
-                        className="px-3 py-1.5 bg-off-black text-primary border border-hairline hover:bg-surface-variant rounded-lg text-[10px] font-black cursor-pointer transition-colors"
+                        className="px-3 py-1.5 rounded-full bg-off-black-ink text-pure-white text-xs font-medium hover:bg-black transition-colors cursor-pointer"
                       >
                         Explore Opportunity
                       </button>
@@ -1993,10 +1273,10 @@ export default function Scholarships({
             </div>
 
             {/* Footer */}
-            <div className="p-6 border-t border-hairline/40 bg-off-black/50">
+            <div className="p-6 border-t border-ash">
               <button
                 onClick={() => setShowAlertsModal(false)}
-                className="w-full py-2.5 min-h-[44px] border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-cream font-semibold text-sm rounded-full cursor-pointer transition-colors text-center"
+                className="w-full py-2.5 min-h-[44px] rounded-full bg-electric-lime text-off-black-ink font-medium text-sm hover:bg-lime-hover active:scale-[0.98] transition-all cursor-pointer text-center"
               >
                 Got it, Thanks
               </button>
@@ -2005,7 +1285,7 @@ export default function Scholarships({
           </div>
         </div>
       )}
-
+      </div>
     </div>
   );
 }

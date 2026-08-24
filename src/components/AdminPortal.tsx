@@ -184,10 +184,11 @@ export default function AdminPortal({
 
   const fetchAutoUnpublished = async () => {
     try {
+      const today = new Date().toISOString().split('T')[0];
       const { data } = await supabase
         .from('scholarships')
         .select('*')
-        .eq('auto_unpublished', true)
+        .lt('deadline', today)
         .order('updated_at', { ascending: false });
       if (data) {
         setAutoUnpublishedList(data as Scholarship[]);
@@ -602,17 +603,17 @@ export default function AdminPortal({
     const targetPublished = publishedOverride ?? formPublished;
 
     if (!formName || !formProvider || !formHost || !formApplyUrl) {
-      alert("Please specify the main parameters: Title, Sponsor, Host Institution and Apply link.");
+      toast.error("Please specify required fields: Title, Sponsor, Host Institution and Apply link.");
       return;
     }
 
     if (!formApplyUrl.startsWith('http')) {
-      alert("Verify Error: Apply link must start with http:// or https://");
+      toast.error("Validation Error: Apply link must start with http:// or https://");
       return;
     }
 
     if (selectedCountries.length === 0) {
-      alert("Verify Error: Choose at least one eligible African territory code.");
+      toast.error("Validation Error: Choose at least one eligible African country.");
       return;
     }
 
@@ -669,8 +670,9 @@ export default function AdminPortal({
     setIsScraping(true);
     try {
       await onTriggerScrapeCampaign();
+      toast.success("Pipeline crawl session initiated.");
     } catch {
-      alert("Pipeline crawl session triggered.");
+      toast.error("Pipeline crawl session failed to trigger.");
     } finally {
       setIsScraping(false);
     }
@@ -765,12 +767,14 @@ export default function AdminPortal({
       s.provider.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.host.toLowerCase().includes(searchQuery.toLowerCase());
     
-  const matchesPublish = 
-    filterPublishStatus === 'all' ? true :
-    filterPublishStatus === 'published' ? s.published && !s.archived && !s.auto_unpublished :
-    filterPublishStatus === 'archived' ? s.archived :
-    filterPublishStatus === 'auto-unpublished' ? s.auto_unpublished === true :
-    !s.published && !s.archived && !s.auto_unpublished;
+    const today = new Date().toISOString().split('T')[0];
+    const isExpired = Boolean(s.deadline && s.deadline < today);
+    const matchesPublish = 
+      filterPublishStatus === 'all' ? true :
+      filterPublishStatus === 'published' ? s.published && !s.archived && !isExpired :
+      filterPublishStatus === 'archived' ? s.archived :
+      filterPublishStatus === 'auto-unpublished' ? isExpired || s.auto_unpublished === true :
+      !s.published && !s.archived;
 
     const matchesRegion =
       filterRegion === 'all' ? true :
@@ -1321,17 +1325,24 @@ export default function AdminPortal({
                           </td>
                           <td className="px-6 py-4 font-mono font-medium text-on-surface-variant">{s.deadline || 'Variable / No exp'}</td>
                           <td className="px-6 py-4">
-            <span className={`px-2 py-0.5 rounded-full text-[9px] font-black border ${
-              s.archived
-                ? 'bg-surface-variant/40 border-outline-variant/30 text-on-surface-variant'
-                : s.auto_unpublished
-                  ? 'bg-status-urgent/15 border-status-urgent/25 text-status-urgent'
-                  : s.published
-                    ? 'bg-status-success/15 border-status-success/25 text-status-success'
-                    : 'bg-status-warning/15 border-status-warning/25 text-status-warning'
-            }`}>
-              {s.archived ? 'Archived' : s.auto_unpublished ? 'Auto-Unpublished' : s.published ? 'Published' : 'Draft'}
-            </span>
+            {(() => {
+              const today = new Date().toISOString().split('T')[0];
+              const isExp = Boolean(s.deadline && s.deadline < today);
+              const isAutoUnpub = isExp || s.auto_unpublished === true;
+              return (
+                <span className={`px-2 py-0.5 rounded-full text-[9px] font-black border ${
+                  s.archived
+                    ? 'bg-surface-variant/40 border-outline-variant/30 text-on-surface-variant'
+                    : isAutoUnpub
+                      ? 'bg-status-urgent/15 border-status-urgent/25 text-status-urgent'
+                      : s.published
+                        ? 'bg-status-success/15 border-status-success/25 text-status-success'
+                        : 'bg-status-warning/15 border-status-warning/25 text-status-warning'
+                }`}>
+                  {s.archived ? 'Archived' : isAutoUnpub ? 'Auto-Unpublished' : s.published ? 'Published' : 'Draft'}
+                </span>
+              );
+            })()}
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
@@ -1349,11 +1360,11 @@ export default function AdminPortal({
                               >
                                 <Edit className="w-3.5 h-3.5" />
                               </button>
-                              {s.auto_unpublished ? (
+                              {(Boolean(s.deadline && s.deadline < new Date().toISOString().split('T')[0]) || s.auto_unpublished) ? (
                                 <>
                                   <button 
                                     onClick={async () => {
-                                      await supabase.from('scholarships').update({ published: true, auto_unpublished: false }).eq('id', s.id);
+                                      await supabase.from('scholarships').update({ published: true }).eq('id', s.id);
                                       fetchAutoUnpublished();
                                       toast.success('Scholarship republished successfully');
                                     }}
