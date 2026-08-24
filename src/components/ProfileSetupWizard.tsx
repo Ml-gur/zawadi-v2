@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { X } from 'lucide-react';
 import { AFRICAN_COUNTRIES } from '../config/matching-config';
 import { GhostPillButton } from './ui/GhostPillButton';
 
@@ -19,7 +20,10 @@ interface ProfileSetupWizardProps {
 }
 
 const inputClass =
-  'w-full bg-canvas border border-hairline rounded-lg px-4 py-3 min-h-[44px] text-cream placeholder:text-muted focus:border-accent-green focus-visible:ring-2 focus-visible:ring-accent-green/40 outline-none transition-colors';
+  'w-full bg-pure-white border border-ash rounded-lg px-4 py-3 min-h-[44px] text-ed-body-sm text-off-black-ink placeholder:text-stone focus:border-graphite focus-visible:ring-2 focus-visible:ring-graphite/25 outline-none transition-colors [color-scheme:light]';
+
+const chipSelected = 'border-transparent bg-electric-lime text-off-black-ink';
+const chipUnselected = 'bg-pure-white border-ash text-graphite hover:border-graphite';
 
 export default function ProfileSetupWizard({ user, onSave, onDismiss }: ProfileSetupWizardProps) {
   const [profile, setProfile] = useState({
@@ -52,26 +56,31 @@ export default function ProfileSetupWizard({ user, onSave, onDismiss }: ProfileS
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-sweep">
-      <div className="bg-off-black border border-hairline rounded-lg w-full max-w-lg max-h-[90vh] flex flex-col">
-        <div className="p-6 pb-0 flex items-center justify-between">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-off-black-ink/65 backdrop-blur-sm p-4 animate-sweep"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Complete your profile"
+    >
+      <div className="bg-pure-white border border-ash rounded-ed w-full max-w-lg max-h-[90vh] flex flex-col">
+        <div className="p-6 pb-5 border-b border-ash flex items-start justify-between gap-3">
           <div>
-            <h2 className="font-display text-xl font-black text-cream">
+            <h2 className="text-ed-sub font-medium text-off-black-ink">
               Tell us about yourself
             </h2>
-            <p className="text-xs text-muted mt-0.5">
+            <p className="text-ed-body-sm text-graphite mt-1">
               Five quick questions so we can match you to the right scholarships.
             </p>
           </div>
-          <button onClick={onDismiss} className="p-2 rounded-lg cursor-pointer text-muted transition-colors hover:bg-cream/[0.04] hover:text-cream">
-            <span className="material-symbols-outlined text-lg">close</span>
+          <button onClick={onDismiss} aria-label="Close" className="icon-btn inline-flex items-center justify-center rounded-full text-graphite hover:text-off-black-ink transition-colors cursor-pointer -mt-1 -mr-1 shrink-0">
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-5">
           {/* 1. Date of Birth */}
           <div>
-            <label className="mb-2 block text-sm text-cream">Date of Birth *</label>
+            <label className="mb-2 block text-ed-body-sm font-medium text-off-black-ink">Date of Birth *</label>
             <input
               type="date"
               value={profile.date_of_birth}
@@ -82,11 +91,11 @@ export default function ProfileSetupWizard({ user, onSave, onDismiss }: ProfileS
 
           {/* 2. Nationality */}
           <div>
-            <label className="mb-2 block text-sm text-cream">Your Country / Nationality *</label>
+            <label className="mb-2 block text-ed-body-sm font-medium text-off-black-ink">Your Country / Nationality *</label>
             <select
               value={profile.country}
               onChange={e => update('country', e.target.value)}
-              className={`${inputClass} bg-canvas text-cream cursor-pointer`}
+              className={`${inputClass} cursor-pointer`}
             >
               <option value="">Select your country...</option>
               {AFRICAN_COUNTRIES.map(c => (
@@ -97,16 +106,16 @@ export default function ProfileSetupWizard({ user, onSave, onDismiss }: ProfileS
 
           {/* 3. Current Degree Level */}
           <div>
-            <label className="mb-2 block text-sm text-cream">Current Degree Level *</label>
+            <label className="mb-2 block text-ed-body-sm font-medium text-off-black-ink">Current Degree Level *</label>
             <div className="grid grid-cols-2 gap-2">
               {['Bachelors', 'Masters', 'PhD', 'Doctorate', 'Postdoctoral'].map(d => (
                 <button
                   key={d}
                   onClick={() => update('degree_level', d)}
-                  className={`p-3 rounded-lg border text-xs font-bold text-left transition-all cursor-pointer ${
+                  className={`p-3 rounded-lg border text-xs font-medium text-left transition-all cursor-pointer ${
                     profile.degree_level === d
-                      ? 'border-accent-blue bg-accent-blue/10 text-accent-blue'
-                      : 'bg-canvas border-hairline text-cream hover:border-accent-blue/60'
+                      ? chipSelected
+                      : chipUnselected
                   }`}
                 >
                   {d}
@@ -117,11 +126,11 @@ export default function ProfileSetupWizard({ user, onSave, onDismiss }: ProfileS
 
           {/* 4. Desired Field of Study */}
           <div>
-            <label className="mb-2 block text-sm text-cream">Desired Field of Study *</label>
+            <label className="mb-2 block text-ed-body-sm font-medium text-off-black-ink">Desired Field of Study *</label>
             <select
               value={profile.field_of_study}
               onChange={e => update('field_of_study', e.target.value)}
-              className={`${inputClass} bg-canvas text-cream cursor-pointer`}
+              className={`${inputClass} cursor-pointer`}
             >
               <option value="">Select your field...</option>
               {["Computer Science", "Engineering", "Business", "Public Health", "Law",
@@ -135,7 +144,7 @@ export default function ProfileSetupWizard({ user, onSave, onDismiss }: ProfileS
 
           {/* 5. Current GPA */}
           <div>
-            <label className="mb-2 block text-sm text-cream">Current GPA *</label>
+            <label className="mb-2 block text-ed-body-sm font-medium text-off-black-ink">Current GPA *</label>
             <div className="flex gap-3 items-start">
               <input
                 type="number"
@@ -148,7 +157,7 @@ export default function ProfileSetupWizard({ user, onSave, onDismiss }: ProfileS
                 max="100"
               />
               <div className="flex flex-col gap-1 shrink-0">
-                <label className={`px-3 py-2 rounded-lg border text-[10px] font-bold cursor-pointer transition-all ${profile.gpa_system === 'us4' ? 'border-accent-blue bg-accent-blue/10 text-accent-blue' : 'bg-canvas border-hairline text-muted hover:border-accent-blue/60'}`}>
+                <label className={`px-3 py-2 rounded-lg border text-[10px] font-medium cursor-pointer transition-all ${profile.gpa_system === 'us4' ? chipSelected : chipUnselected}`}>
                   <input
                     type="radio"
                     name="gpa_scale"
@@ -159,7 +168,7 @@ export default function ProfileSetupWizard({ user, onSave, onDismiss }: ProfileS
                   />
                   4.0 scale
                 </label>
-                <label className={`px-3 py-2 rounded-lg border text-[10px] font-bold cursor-pointer transition-all ${profile.gpa_system === 'pct_100' ? 'border-accent-blue bg-accent-blue/10 text-accent-blue' : 'bg-canvas border-hairline text-muted hover:border-accent-blue/60'}`}>
+                <label className={`px-3 py-2 rounded-lg border text-[10px] font-medium cursor-pointer transition-all ${profile.gpa_system === 'pct_100' ? chipSelected : chipUnselected}`}>
                   <input
                     type="radio"
                     name="gpa_scale"
@@ -175,7 +184,7 @@ export default function ProfileSetupWizard({ user, onSave, onDismiss }: ProfileS
           </div>
         </div>
 
-        <div className="p-6 pt-0">
+        <div className="p-5 border-t border-ash">
           <GhostPillButton
             variant="gradient"
             fullWidth
