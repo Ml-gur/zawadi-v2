@@ -571,9 +571,14 @@ function extractFromPDFText(rawText: string, docType: string): PatternResult {
 
 const AI_FETCH_TIMEOUT_MS = 8_000
 
-async function callDeepSeek(systemPrompt: string, textContent: string): Promise<string | null> {
-  const apiKey = Deno.env.get('DEEPSEEK_API_KEY')
+async function callDeepSeek(systemPrompt: string, textContent: string, aiCfg: Record<string, unknown> | null): Promise<string | null> {
+  const apiKey = (aiCfg?.deepseek_key as string) || Deno.env.get('DEEPSEEK_API_KEY')
   if (!apiKey) return null
+  // Only DeepSeek models can be called with the DeepSeek key — if the admin
+  // configured a different provider without a DeepSeek key, skip AI fallback
+  // (pattern-only extraction) instead of failing the whole analysis.
+  if (aiCfg?.provider && aiCfg.provider !== 'deepseek' && !aiCfg.deepseek_key) return null
+  const model = (aiCfg?.provider === 'deepseek' && aiCfg.ai_model as string) || 'deepseek-v4-pro'
   try {
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), AI_FETCH_TIMEOUT_MS)
@@ -582,7 +587,7 @@ async function callDeepSeek(systemPrompt: string, textContent: string): Promise<
       signal: controller.signal,
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
-        model: 'deepseek-v4-flash',
+        model,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: textContent.substring(0, 15000) },
@@ -613,7 +618,7 @@ function tryParseJson(text: string): any | null {
   return null
 }
 
-async function extractRemainingFieldsWithAI(rawText: string, patternResult: PatternResult): Promise<Record<string, unknown>> {
+async function extractRemainingFieldsWithAI(rawText: string, patternResult: PatternResult, aiCfg: Record<string, unknown> | null): Promise<Record<string, unknown>> {
   const missingFields: string[] = []
   if (!patternResult.institution_name || patternResult.confidence.institution_name < 0.7) {
     missingFields.push('institution_name: the full official name of the educational institution')
@@ -646,7 +651,7 @@ Text:
 ${rawText.substring(0, 2000)}`
 
   const systemPrompt = 'You are a document data extractor. Return only the requested JSON fields. Never hallucinate values.'
-  const raw = await callDeepSeek(systemPrompt, prompt)
+  const raw = await callDeepSeek(systemPrompt, prompt, aiCfg)
   if (!raw) return {}
 
   const parsed = tryParseJson(raw)
@@ -683,6 +688,14 @@ serve(async (req: Request) => {
     const body = await req.json()
     const { documentId, docType, textContent, action } = body
 
+    // AI provider settings are admin-managed via the AI Config panel
+    // (ai_config table) — same source generate-essay reads.
+    const { data: aiCfg } = await supabase
+      .from('ai_config')
+      .select('provider, deepseek_key, openai_key, gemini_key, ai_model')
+      .eq('id', 'default')
+      .maybeSingle()
+
     if (action === 'analyze') {
       if (!documentId || !docType || !textContent) {
         return corsResponse({ error: 'documentId, docType, and textContent are required' }, 400)
@@ -699,7 +712,7 @@ serve(async (req: Request) => {
 
       // Step 2: AI fallback for low-confidence fields
       if (isTranscript && patternResult.extraction_method !== 'pattern') {
-        const aiFields = await extractRemainingFieldsWithAI(textContent, patternResult)
+        const aiFields = await extractRemainingFieldsWithAI(textContent, patternResult, aiCfg ?? null)
         Object.assign(merged, aiFields)
         if (Object.keys(aiFields).length > 0) {
           extractionMethod = patternResult.extraction_method === 'ai' ? 'ai' : 'hybrid'
