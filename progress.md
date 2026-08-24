@@ -26,3 +26,14 @@
 - 8c87412 feat(app): compare/deadline/badges/uniform finder + breadcrumbs
 - 50371ec feat(launch): security hardening, closing-soon filter, perf/mobile fixes, favicon set
 - 78f0431 chore: drop temp perf script from repo
+
+## Session 2 — matching honesty + urgency UX (2026-08-24, commit 8be21cb)
+1. Matching gate strict: no % until country AND degree AND field confirmed (needs_profile).
+2. Dashboard setup panel: missing profile fields + doc analysis status; honest copy.
+3. Day-based deadline badges everywhere (cards, table, tracker); opens_at + migration 015 with graceful fallback (42703/PGRST204 retry without column — caught live in dev).
+4. eligibilityInfo(): Pan-African/regional markers → plain labels + globe; flags only for concrete lists (compare/cards/detail/table).
+5. Authed finder: grid/table toggle; TrackerTable with per-row stage select (187 rows verified).
+6. Detail: real required_documents checklist + provider fine print + steps referencing them.
+7. Perf: explicit columns (-90KB/payload), removed duplicate fetch on login, deadline-ordered query.
+8. Full e2e: 272 passed / 5 skipped.
+USER ACTION: run migrations 013, 014, 015 in Supabase SQL editor; rotate Test@212 password.
