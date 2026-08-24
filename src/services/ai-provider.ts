@@ -53,9 +53,14 @@ async function postToProxy(params: GenerateContentParams, signalTimeoutMs: numbe
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), signalTimeoutMs);
   try {
+    const { supabase } = await import('../lib/supabase');
+    const { data: { session } } = await supabase.auth.getSession();
     const res = await fetch('/api/ai-generate', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+      },
       body: JSON.stringify({
         provider: params.deepseekModel === 'deepseek-v4-pro' ? 'deepseek' : undefined,
         systemInstruction: params.systemInstruction,

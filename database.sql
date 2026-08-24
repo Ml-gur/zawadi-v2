@@ -596,17 +596,35 @@ ALTER TABLE mentor_profiles         ENABLE ROW LEVEL SECURITY;
 ALTER TABLE mentor_feedback_ratings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications           ENABLE ROW LEVEL SECURITY;
 
--- Scholarships: public read
-CREATE POLICY scholarships_select_all ON scholarships
-  FOR SELECT USING (true);
+-- Scholarships: public read (published only; staff see all — mirrors migration 013)
+CREATE POLICY "Public read published scholarships" ON scholarships
+  FOR SELECT TO anon, authenticated USING (published = true);
+CREATE POLICY "Staff read all scholarships" ON scholarships
+  FOR SELECT TO authenticated USING (
+    EXISTS (
+      SELECT 1 FROM profiles
+      WHERE email = (auth.jwt() ->> 'email')
+        AND role IN ('super_admin', 'content_manager')
+    )
+  );
 
--- Profiles: users read/write own
+-- Profiles: users read/write own (role/plan/status are service-role only — mirrors 013)
 CREATE POLICY profiles_select_own ON profiles
   FOR SELECT USING (auth.email() = email OR auth.role() = 'service_role');
 CREATE POLICY profiles_insert_own ON profiles
   FOR INSERT WITH CHECK (auth.email() = email OR auth.role() = 'service_role');
 CREATE POLICY profiles_update_own ON profiles
-  FOR UPDATE USING (auth.email() = email OR auth.role() = 'service_role');
+  FOR UPDATE
+  USING (auth.email() = email OR auth.role() = 'service_role')
+  WITH CHECK (
+    auth.role() = 'service_role'
+    OR (
+      auth.email() = email
+      AND role  = (SELECT p.role  FROM profiles p WHERE p.email = auth.email())
+      AND plan  = (SELECT p.plan  FROM profiles p WHERE p.email = auth.email())
+      AND status = (SELECT p.status FROM profiles p WHERE p.email = auth.email())
+    )
+  );
 
 -- Applications: users manage own
 CREATE POLICY applications_select_own ON applications

@@ -48,6 +48,7 @@ export default function PublicScholarshipList({ user }: { user?: any } = {}) {
   const [region, setRegion] = useState('');
   const [funding, setFunding] = useState<'' | 'Full' | 'Partial'>('');
   const [noIeltsOnly, setNoIeltsOnly] = useState(false);
+  const [closingSoonOnly, setClosingSoonOnly] = useState(false);
   const [view, setView] = useState<'grid' | 'table'>('grid');
 
   const { ids: compareIds, open: compareOpen, setOpen: setCompareOpen, toggle: toggleCompare, clear: clearCompare } = useCompare();
@@ -101,6 +102,11 @@ export default function PublicScholarshipList({ user }: { user?: any } = {}) {
     return items.filter(s => {
       if (funding && s.funding_type !== funding) return false;
       if (noIeltsOnly && !s.no_ielts) return false;
+      if (closingSoonOnly) {
+        const t = s.deadline ? Date.parse(s.deadline) : NaN;
+        const days = Number.isNaN(t) ? Infinity : Math.ceil((t - Date.now()) / 86_400_000);
+        if (!(days >= 0 && days <= 30) && s.urgency !== 'Urgent') return false;
+      }
       if (level && !(s.degree_levels || []).includes(level)) return false;
       if (country && !(s.countries || []).includes(country)) return false;
       if (region) {
@@ -118,10 +124,10 @@ export default function PublicScholarshipList({ user }: { user?: any } = {}) {
       }
       return true;
     });
-  }, [items, query, country, level, region, funding, noIeltsOnly]);
+  }, [items, query, country, level, region, funding, noIeltsOnly, closingSoonOnly]);
 
-  const clearFilters = () => { setQuery(''); setCountry(''); setLevel(''); setRegion(''); setFunding(''); setNoIeltsOnly(false); };
-  const hasFilters = Boolean(query || country || level || region || funding || noIeltsOnly);
+  const clearFilters = () => { setQuery(''); setCountry(''); setLevel(''); setRegion(''); setFunding(''); setNoIeltsOnly(false); setClosingSoonOnly(false); };
+  const hasFilters = Boolean(query || country || level || region || funding || noIeltsOnly || closingSoonOnly);
   const totalPages = data ? Math.ceil(data.total / limit) : 0;
 
   const openAuth = () => window.dispatchEvent(new CustomEvent('open-auth'));
@@ -256,6 +262,9 @@ export default function PublicScholarshipList({ user }: { user?: any } = {}) {
               <button onClick={() => setNoIeltsOnly(v => !v)} aria-pressed={noIeltsOnly} className={chipClass(noIeltsOnly)}>
                 No IELTS
               </button>
+              <button onClick={() => setClosingSoonOnly(v => !v)} aria-pressed={closingSoonOnly} className={chipClass(closingSoonOnly)}>
+                Closing soon
+              </button>
             </div>
 
             <div className="flex items-center gap-1 bg-mist border border-ash/80 rounded-lg p-1" role="group" aria-label="View mode">
@@ -263,7 +272,7 @@ export default function PublicScholarshipList({ user }: { user?: any } = {}) {
                 onClick={() => setView('grid')}
                 aria-pressed={view === 'grid'}
                 aria-label="Grid view"
-                className={`p-2 rounded-md transition-colors cursor-pointer inline-flex ${view === 'grid' ? 'bg-pure-white border border-ash text-off-black-ink hover:border-graphite' : 'text-graphite hover:text-off-black-ink'}`}
+                className={`p-3 rounded-md transition-colors cursor-pointer inline-flex ${view === 'grid' ? 'bg-pure-white border border-ash text-off-black-ink hover:border-graphite' : 'text-graphite hover:text-off-black-ink'}`}
               >
                 <LayoutGrid className="w-4 h-4" />
               </button>
@@ -271,7 +280,7 @@ export default function PublicScholarshipList({ user }: { user?: any } = {}) {
                 onClick={() => setView('table')}
                 aria-pressed={view === 'table'}
                 aria-label="Table view"
-                className={`p-2 rounded-md transition-colors cursor-pointer inline-flex ${view === 'table' ? 'bg-pure-white border border-ash text-off-black-ink hover:border-graphite' : 'text-graphite hover:text-off-black-ink'}`}
+                className={`p-3 rounded-md transition-colors cursor-pointer inline-flex ${view === 'table' ? 'bg-pure-white border border-ash text-off-black-ink hover:border-graphite' : 'text-graphite hover:text-off-black-ink'}`}
               >
                 <Rows3 className="w-4 h-4" />
               </button>

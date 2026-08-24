@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 
-const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'admin@zawadi.app';
+// Optional client-side pre-check only; the real boundary is RLS + role checks server-side.
+const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL as string | undefined;
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
@@ -14,7 +15,7 @@ export default function AdminLoginPage() {
     setError('');
     setLoading(true);
 
-    if (email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+    if (ADMIN_EMAIL && email.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
       setError('Access denied. Admin privileges required.');
       setLoading(false);
       return;

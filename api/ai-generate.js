@@ -1,3 +1,5 @@
+import { createClient } from '@supabase/supabase-js';
+
 const TIMEOUT_MS = 60_000;
 const MAX_RETRIES = 2;
 const RATE_LIMIT_WINDOW_MS = 60_000;
@@ -9,17 +11,37 @@ const ipRequestCounts = new Map();
 function isRateLimited(ip) {
   const now = Date.now();
   const entry = ipRequestCounts.get(ip) || { count: 0, resetAt: now + RATE_LIMIT_WINDOW_MS };
-  
+
   if (now > entry.resetAt) {
     entry.count = 1;
     entry.resetAt = now + RATE_LIMIT_WINDOW_MS;
     ipRequestCounts.set(ip, entry);
     return false;
   }
-  
+
   entry.count += 1;
   ipRequestCounts.set(ip, entry);
   return entry.count > MAX_REQUESTS_PER_WINDOW;
+}
+
+/** Verify the caller's Supabase session server-side; returns user email or null. */
+async function authenticate(authHeader) {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
+  const token = authHeader.slice('Bearer '.length).trim();
+  if (!token || token.length > 4096) return null;
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const anonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !anonKey) return null;
+  try {
+    const supabase = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    });
+    const { data, error } = await supabase.auth.getUser(token);
+    if (error || !data?.user) return null;
+    return data.user;
+  } catch {
+    return null;
+  }
 }
 
 // Clean up stale entries every 5 minutes
@@ -87,10 +109,10 @@ async function callProvider(provider, params) {
       ? `System: ${systemInstruction}\n\n${prompt}`
       : prompt;
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(key)}`,
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
         body: JSON.stringify({
           contents: [{ parts: [{ text: contents }] }],
           generationConfig: { temperature, maxOutputTokens: maxTokens },
@@ -113,8 +135,14 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // Bill-abuse guard: only signed-in scholars may spend AI credits.
+  const user = await authenticate(req.headers.authorization);
+  if (!user) {
+    return res.status(401).json({ error: 'Sign in to use the AI studio.' });
+  }
+
   const clientIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
-  if (isRateLimited(clientIp)) {
+  if (isRateLimited(`${user.id}:${clientIp}`)) {
     return res.status(429).json({ error: 'Rate limit exceeded. Please wait a minute before requesting AI generations.' });
   }
 

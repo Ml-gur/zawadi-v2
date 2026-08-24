@@ -58,14 +58,14 @@ export default function LandingHeader({ onGetStarted, onLogin, user }: LandingHe
       <div className="max-w-[1200px] mx-auto flex items-center justify-between gap-4 px-4 sm:px-6 py-3">
         <Link
           to={authed ? '/dashboard' : '/'}
-          className="flex items-center gap-2.5 shrink-0 group"
+          className="flex items-center gap-2.5 shrink-0 group hover:text-graphite transition-colors"
           onClick={() => setOpen(false)}
           aria-label={authed ? 'Techsari — go to dashboard' : 'Techsari — home'}
         >
           <span className="transition-transform duration-300 group-hover:-rotate-6">
             <Logo size={30} tone="dark" />
           </span>
-          <span className="text-xl font-medium tracking-[-0.02em] text-off-black-ink">Techsari</span>
+          <span className="text-xl font-medium tracking-[-0.02em] text-off-black-ink transition-colors duration-200 group-hover:text-graphite">Techsari</span>
         </Link>
 
         <nav aria-label="Primary" className="hidden lg:flex items-center gap-6 xl:gap-7">
@@ -78,7 +78,7 @@ export default function LandingHeader({ onGetStarted, onLogin, user }: LandingHe
                 aria-current={active ? 'page' : undefined}
                 className={`text-ed-body-sm font-medium whitespace-nowrap pb-1 border-b-2 transition-colors ${
                   active
-                    ? 'text-off-black-ink border-electric-lime'
+                    ? 'text-off-black-ink border-electric-lime hover:text-graphite'
                     : 'text-graphite border-transparent hover:text-off-black-ink'
                 }`}
               >

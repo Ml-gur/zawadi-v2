@@ -44,7 +44,7 @@ test.describe('visual smoke — all viewports', () => {
   test('hero headline and CTA visible on landing', async ({ page }) => {
     await page.goto('/');
     await page.waitForTimeout(1200);
-    await expect(page.getByRole('button', { name: /start free/i }).first()).toBeVisible();
+    await expect(page.getByRole('button', { name: /find my matches/i }).first()).toBeVisible();
     const h1 = page.locator('h1').first();
     await expect(h1).toBeVisible();
     const box = await h1.boundingBox();

@@ -38,7 +38,7 @@ export default function ShareButton({ url, title, className = '', iconOnly, size
     }
   }, [url, title]);
 
-  const sizeClasses = size === 'md' ? 'w-8 h-8 rounded-lg' : 'w-7 h-7 rounded-lg';
+  const sizeClasses = size === 'md' ? 'w-11 h-11 rounded-lg' : 'w-10 h-10 rounded-lg';
 
   const toneClasses = tone === 'light'
     ? `${copied ? 'bg-mist text-ed-error' : 'bg-pure-white border border-ash text-graphite hover:border-off-black-ink hover:text-off-black-ink'}`
