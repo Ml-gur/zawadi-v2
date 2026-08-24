@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import ShareButton from '../../components/ShareButton';
 import { flagFor } from '../../lib/flags';
-import { eligibilityInfo } from './browse-shared';
+import EligibilityList from '../../components/EligibilityList';
 
 interface ScholarshipDetail {
   id: string;
@@ -318,10 +318,7 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
 
           <div className="flex flex-wrap gap-2 pt-2">
             <span className="inline-flex items-center px-3.5 py-1.5 rounded-full border border-ash bg-pure-white font-caption text-caption text-secondary">
-              <span aria-hidden className="mr-1.5 text-base leading-none">
-                {eligibilityInfo(scholarship.countries).isBroad ? '🌍' : flagFor(scholarship)}
-              </span>
-              {eligibilityInfo(scholarship.countries).label}
+              <EligibilityList countries={scholarship.countries} max={3} textClass="text-secondary" moreClass="text-primary underline underline-offset-4" />
             </span>
             {(scholarship.host_institution || scholarship.host_country?.length) && (
               <span className="inline-flex items-center px-3.5 py-1.5 rounded-full border border-ash bg-pure-white font-caption text-caption text-secondary">
@@ -375,7 +372,7 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
                 <li className="flex items-start gap-3">
                   <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" />
                   <span className="font-body text-base text-secondary">
-                    Open to citizens from: <strong className="text-on-surface">{eligibilityInfo(scholarship.countries).label}</strong>.
+                    Open to citizens from: <strong className="text-on-surface"><EligibilityList countries={scholarship.countries} max={6} textClass="text-on-surface" moreClass="text-primary underline underline-offset-4" /></strong>.
                   </span>
                 </li>
                 {scholarship.degree_levels && (

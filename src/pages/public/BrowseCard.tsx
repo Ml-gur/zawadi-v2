@@ -3,7 +3,8 @@ import { ArrowRight, Clock, Columns2 } from 'lucide-react';
 import type { FC } from 'react';
 import ShareButton from '../../components/ShareButton';
 import type { ScholarshipTeaser } from './browse-shared';
-import { formatDeadline, deadlineBadge, eligibilityInfo } from './browse-shared';
+import { formatDeadline, deadlineBadge } from './browse-shared';
+import EligibilityList from '../../components/EligibilityList';
 import { flagFor } from '../../lib/flags';
 import type { BadgeTone } from './browse-shared';
 
@@ -76,7 +77,6 @@ const BrowseCard: FC<BrowseCardProps> = ({ s, dark, comparing, onToggleCompare }
   const href = `/scholarships/browse/${s.slug || s.id}`;
   const category = (s.degree_levels?.[0] || s.funding_type || 'Opportunity').toUpperCase();
   const flag = flagFor(s);
-  const eligibility = eligibilityInfo(s.countries);
 
   if (dark) {
     return (
@@ -96,13 +96,16 @@ const BrowseCard: FC<BrowseCardProps> = ({ s, dark, comparing, onToggleCompare }
             {s.targets_financial_need && <span className="px-2.5 py-0.5 rounded-full border border-stone text-xs font-medium text-smoke">Financial need</span>}
             {s.is_intra_african && <span className="px-2.5 py-0.5 rounded-full border border-stone text-xs font-medium text-smoke">Intra-African</span>}
           </div>
+          <p className="mt-3 text-ed-body-sm text-smoke">
+            <span className="text-ed-caption uppercase text-stone mr-1.5">Open to</span>
+            <EligibilityList countries={s.countries} max={2} textClass="text-smoke" moreClass="text-pure-white underline underline-offset-4 decoration-stone" />
+          </p>
         </div>
         <div className="mt-6 pt-4 border-t border-stone flex items-center justify-between gap-3">
           <span className="flex items-center gap-1.5 text-ed-body-sm text-smoke min-w-0">
             <Clock className="w-3.5 h-3.5 shrink-0" aria-hidden />
             <span className="truncate">
               {badge.tone === 'rolling' ? 'Rolling deadline' : formatDeadline(s.deadline || null)}
-              {!eligibility.isBroad && <span className="hidden md:inline"> · {eligibility.label}</span>}
             </span>
           </span>
           <span className="flex items-center gap-2 shrink-0">
@@ -150,6 +153,10 @@ const BrowseCard: FC<BrowseCardProps> = ({ s, dark, comparing, onToggleCompare }
             <span className="px-2.5 py-0.5 rounded-full border border-ash text-xs font-medium text-graphite">Intra-African</span>
           )}
         </div>
+        <p className="mt-3 text-ed-body-sm text-graphite">
+          <span className="text-ed-caption uppercase text-stone mr-1.5">Open to</span>
+          <EligibilityList countries={s.countries} max={2} />
+        </p>
       </div>
 
       <div className="mt-6 pt-4 border-t border-ash flex items-center justify-between gap-3">
@@ -157,7 +164,6 @@ const BrowseCard: FC<BrowseCardProps> = ({ s, dark, comparing, onToggleCompare }
           <Clock className="w-3.5 h-3.5 shrink-0" aria-hidden />
           <span className="truncate">
             {badge.tone === 'rolling' ? 'Rolling deadline' : formatDeadline(s.deadline || null)}
-            {!eligibility.isBroad && <span className="hidden md:inline"> · {eligibility.label}</span>}
           </span>
         </span>
         <span className="flex items-center gap-2 shrink-0">

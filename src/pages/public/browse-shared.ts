@@ -77,75 +77,109 @@ export function deadlineBadge(
   return { label: `Closes in ${d} days`, tone: d <= 14 ? 'urgent' : 'normal' };
 }
 
-const REGIONAL_MARKERS: Record<string, string> = {
-  'PAN-AFRICAN': 'All African countries',
-  'PAN_AFRICAN': 'All African countries',
-  'AFRICAN': 'All African countries',
-  'ALL': 'All African countries',
-  'GLOBAL': 'All African countries',
-  'SUB-SAHARAN AFRICA': 'Sub-Saharan African countries',
-  'SUB_SAHARAN': 'Sub-Saharan African countries',
-  'SUB-SAHARAN': 'Sub-Saharan African countries',
-  'ECOWAS': 'ECOWAS member states (West Africa)',
-  'SADC': 'SADC member states (Southern Africa)',
-  'EAC': 'East African Community member states',
-  'IGAD': 'IGAD member states',
-  'CENSAD': 'CEN-SAD member states',
-  'AMU': 'Arab Maghreb Union member states',
-  'ECCAS': 'ECCAS member states (Central Africa)',
+// ─── Eligibility expansion ───
+// "Pan-African" or "ECOWAS" is not something a student can picture. Expand
+// every regional marker to its actual member countries; only genuine
+// continent-wide eligibility gets the summary "All African countries".
+
+import {
+  getCountriesByAURegion,
+  getCommonwealthCountries,
+  getFrancophonieCountries,
+  getCPLPCountries,
+  getAfricanCountries,
+} from '../../lib/country-graph';
+import { OIC_MEMBER_NAMES, REGION_NAMES } from '../../config/matching-config';
+
+const setToNames = (set: Set<string>): string[] =>
+  [...set].map(n => n.replace(/\b\w/g, ch => ch.toUpperCase()));
+
+const MARKER_EXPANDERS: Record<string, () => string[]> = {
+  'ECOWAS': () => getCountriesByAURegion('ECOWAS'),
+  'SADC': () => getCountriesByAURegion('SADC'),
+  'EAC': () => getCountriesByAURegion('EAC'),
+  'IGAD': () => getCountriesByAURegion('IGAD'),
+  'COMESA': () => getCountriesByAURegion('COMESA'),
+  'CENSAD': () => getCountriesByAURegion('CENSAD'),
+  'AMU': () => getCountriesByAURegion('AMU'),
+  'ECCAS': () => getCountriesByAURegion('ECCAS'),
+  'SUB-SAHARAN AFRICA': () => [...REGION_NAMES['Sub-Saharan Africa'] ?? []].map(n => n.replace(/\b\w/g, ch => ch.toUpperCase())),
+  'SUB_SAHARAN': () => [...REGION_NAMES['Sub-Saharan Africa'] ?? []].map(n => n.replace(/\b\w/g, ch => ch.toUpperCase())),
+  'SUB-SAHARAN': () => [...REGION_NAMES['Sub-Saharan Africa'] ?? []].map(n => n.replace(/\b\w/g, ch => ch.toUpperCase())),
+  'FRANCOPHONE': () => {
+    const african = new Set(getAfricanCountries().map(c => c.toLowerCase()));
+    return getFrancophonieCountries().filter(c => african.has(c.toLowerCase()));
+  },
+  'LUSOPHONE': () => {
+    const african = new Set(getAfricanCountries().map(c => c.toLowerCase()));
+    return getCPLPCountries().filter(c => african.has(c.toLowerCase()));
+  },
+  'OIC': () => setToNames(OIC_MEMBER_NAMES),
+  'COMMONWEALTH': () => getCommonwealthCountries(),
+};
+
+const ALL_AFRICA_MARKERS = new Set([
+  'PAN-AFRICAN', 'PAN_AFRICAN', 'AFRICAN', 'ALL', 'GLOBAL',
+  'ALL AFRICAN COUNTRIES', 'ALL AFRICA', 'AFRICA',
+]);
+
+const MARKER_LABELS: Record<string, string> = {
+  'ECOWAS': 'West Africa (ECOWAS)',
+  'SADC': 'Southern Africa (SADC)',
+  'EAC': 'East Africa (EAC)',
+  'IGAD': 'East Africa (IGAD)',
   'COMESA': 'COMESA member states',
-  'FRANCOPHONE': 'Francophone African countries',
-  'LUSOPHONE': 'Lusophone African countries',
+  'CENSAD': 'CEN-SAD member states',
+  'AMU': 'North Africa (AMU)',
+  'ECCAS': 'Central Africa (ECCAS)',
+  'SUB-SAHARAN AFRICA': 'Sub-Saharan Africa',
+  'SUB_SAHARAN': 'Sub-Saharan Africa',
+  'SUB-SAHARAN': 'Sub-Saharan Africa',
+  'FRANCOPHONE': 'Francophone Africa',
+  'LUSOPHONE': 'Lusophone Africa',
   'OIC': 'OIC member states',
   'COMMONWEALTH': 'Commonwealth countries',
 };
 
-function normaliseMarker(c: string): string | null {
-  const key = c.toUpperCase().trim();
-  return REGIONAL_MARKERS[key] ?? null;
-}
-
 export interface EligibilityInfo {
-  /** Human-readable eligibility, e.g. "Kenya, Nigeria +12 more" or "All African countries" */
-  label: string;
-  /** True when eligibility is a broad regional/global list — never pair a national flag with it */
-  isBroad: boolean;
-  /** Concrete country names when isBroad is false */
-  concrete: string[];
+  /** Expanded, concrete country names — safe to list verbatim */
+  countries: string[];
+  /** True only when eligibility genuinely covers the whole continent */
+  isAllAfrica: boolean;
+  /** Optional grouping label, e.g. "West Africa (ECOWAS)" when the list came from a marker */
+  markerLabel: string | null;
 }
 
-/**
- * Eligibility list → honest label. "Pan-African" is not a place students know;
- * "All African countries" is. Regional markers get expanded to what they mean.
- */
 export function eligibilityInfo(countries?: string[] | null): EligibilityInfo {
   const list = (countries || []).map(c => (c || '').trim()).filter(Boolean);
-  if (list.length === 0) return { label: 'All African countries', isBroad: true, concrete: [] };
+  if (list.length === 0) return { countries: [], isAllAfrica: true, markerLabel: null };
 
-  const expanded = list.map(c => normaliseMarker(c) ?? c);
-  const broadCount = expanded.filter((c, i) => normaliseMarker(list[i]) !== null).length;
+  if (list.some(c => ALL_AFRICA_MARKERS.has(c.toUpperCase()))) {
+    return { countries: [], isAllAfrica: true, markerLabel: null };
+  }
 
-  // Any broad marker present means eligibility is regional/global — say so plainly.
-  if (broadCount > 0) {
-    // If the marker resolves to "All African countries" use it directly.
-    const markerLabels = expanded.filter((c, i) => normaliseMarker(list[i]) !== null);
-    if (markerLabels.includes('All African countries')) {
-      return { label: 'All African countries', isBroad: true, concrete: [] };
+  const expanded: string[] = [];
+  let markerLabel: string | null = null;
+  for (const c of list) {
+    const key = c.toUpperCase();
+    if (MARKER_EXPANDERS[key]) {
+      markerLabel = MARKER_LABELS[key] ?? markerLabel;
+      for (const name of MARKER_EXPANDERS[key]()) {
+        if (!expanded.some(e => e.toLowerCase() === name.toLowerCase())) expanded.push(name);
+      }
+    } else if (!expanded.some(e => e.toLowerCase() === c.toLowerCase())) {
+      expanded.push(c);
     }
-    return { label: markerLabels[0], isBroad: true, concrete: [] };
   }
 
-  if (list.length <= 4) {
-    return { label: expanded.join(', '), isBroad: false, concrete: expanded };
-  }
-  return {
-    label: `${expanded.slice(0, 3).join(', ')} +${list.length - 3} more`,
-    isBroad: false,
-    concrete: expanded,
-  };
+  return { countries: expanded, isAllAfrica: false, markerLabel };
 }
 
-/** Back-compat wrapper for card footers. */
+/** Back-compat wrapper for tight spaces. */
 export function truncateCountries(countries: string[]): string {
-  return eligibilityInfo(countries).label;
+  const info = eligibilityInfo(countries);
+  if (info.isAllAfrica) return 'All African countries';
+  const { countries: names } = info;
+  if (names.length <= 3) return names.join(', ');
+  return `${names.slice(0, 3).join(', ')} +${names.length - 3} more`;
 }

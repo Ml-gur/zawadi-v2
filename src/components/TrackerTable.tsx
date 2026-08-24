@@ -2,7 +2,8 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import type { FC } from 'react';
 import type { Scholarship, ApplicationTracker } from '../types';
-import { formatDeadline, deadlineBadge, eligibilityInfo } from '../pages/public/browse-shared';
+import { formatDeadline, deadlineBadge } from '../pages/public/browse-shared';
+import EligibilityList from './EligibilityList';
 import { flagFor } from '../lib/flags';
 
 const STAGES = [
@@ -64,7 +65,6 @@ export default function TrackerTable({ items, applications, onTrackScholarship }
               const app = byId.get(s.id);
               const stage = app && app.status !== 'not_started' ? app.status : '';
               const href = `/scholarships/browse/${s.slug || s.id}`;
-              const eligibility = eligibilityInfo(s.countries || s.country);
               return (
                 <tr key={s.id} className="group align-top hover:bg-mist/60 transition-colors">
                   <td className="px-6 py-5 max-w-[320px]">
@@ -78,7 +78,9 @@ export default function TrackerTable({ items, applications, onTrackScholarship }
                     <span className="mt-1 block text-ed-body-sm text-graphite">{s.provider || '—'}</span>
                     {s.no_ielts && <span className="mt-1 inline-block rounded-full border border-ash px-2 py-0.5 text-xs text-graphite">No IELTS</span>}
                   </td>
-                  <td className="px-6 py-5 text-ed-body-sm text-graphite max-w-[200px]">{eligibility.label}</td>
+                  <td className="px-6 py-5 text-ed-body-sm text-graphite max-w-[220px]">
+                    <EligibilityList countries={(s.countries || s.country) as string[]} max={2} />
+                  </td>
                   <td className="px-6 py-5 text-ed-body-sm max-w-[180px]">{s.amount || '—'}</td>
                   <td className="px-6 py-5 whitespace-nowrap">
                     <span className="block text-ed-body-sm"><Badge s={s} /></span>

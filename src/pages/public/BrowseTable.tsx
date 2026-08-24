@@ -2,7 +2,8 @@ import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import type { FC } from 'react';
 import type { ScholarshipTeaser } from './browse-shared';
-import { formatDeadline, deadlineBadge, eligibilityInfo } from './browse-shared';
+import { formatDeadline, deadlineBadge } from './browse-shared';
+import EligibilityList from '../../components/EligibilityList';
 import { flagFor } from '../../lib/flags';
 
 const Badge: FC<{ s: ScholarshipTeaser }> = ({ s }) => {
@@ -36,7 +37,6 @@ export default function BrowseTable({ items }: { items: ScholarshipTeaser[] }) {
             {items.map(s => {
               const badge = deadlineBadge(s.deadline || null, s.urgency, s.opens_at);
               const href = `/scholarships/browse/${s.slug || s.id}`;
-              const eligibility = eligibilityInfo(s.countries);
               return (
                 <tr key={s.id} className="group hover:bg-mist transition-colors">
                   <td className="px-6 py-5">
@@ -53,7 +53,9 @@ export default function BrowseTable({ items }: { items: ScholarshipTeaser[] }) {
                   </td>
                   <td className="px-6 py-5">
                     <span className="block font-medium">{s.provider || '—'}</span>
-                    <span className="block text-ed-body-sm text-graphite mt-0.5">{eligibility.label}</span>
+                    <span className="block text-ed-body-sm text-graphite mt-0.5">
+                      <EligibilityList countries={s.countries} max={2} />
+                    </span>
                   </td>
                   <td className="px-6 py-5 text-sm text-graphite">
                     {s.degree_levels?.length ? s.degree_levels.join(', ') : '—'}
