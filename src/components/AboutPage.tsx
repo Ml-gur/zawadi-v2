@@ -10,19 +10,19 @@ export default function AboutPage({ onBack }: AboutPageProps) {
   return (
     <div className="bg-surface-container-lowest text-on-surface font-body min-h-[100dvh]">
       <SEO
-        title="About Zawadi — Scholarship Platform Built for African Students"
-        description="Zawadi was built to fix the scholarship access gap for African students. We filter out irrelevant results, remove the IELTS barrier, and pair AI essay tools with human mentor review."
+        title="About Techsari — Scholarship Platform Built for African Students"
+        description="Techsari is an eligibility-first scholarship matching engine for African students. We read every listing's actual requirements, check them against your profile, and pair AI tools with human mentor review."
         path="/about"
         image="https://www.techsari.online/og-about.png"
-        ogTitle="About Zawadi — Built for African Students"
-        ogDescription="Most scholarship platforms sell student data to advertisers. Zawadi does not. We match students to funding they qualify for and help them apply without wasting time on irrelevant results."
+        ogTitle="About Techsari — Built for African Students"
+        ogDescription="Most scholarship platforms sell student data to advertisers. Techsari does not. We match students to funding they qualify for and help them apply without wasting time on irrelevant results."
       />
       <section className="px-4 md:px-10 py-16 md:py-24">
         <div className="max-w-[840px] mx-auto">
           <Breadcrumbs items={[{ name: 'About', path: '/about' }]} />
 
           <span className="font-eyebrow text-eyebrow uppercase tracking-wider text-graphite block mb-2">Our Mission</span>
-          <h1 className="font-display text-4xl md:text-5xl font-medium tracking-tight text-on-surface mb-8">About Techsari Zawadi</h1>
+          <h1 className="font-display text-4xl md:text-5xl font-medium tracking-tight text-on-surface mb-8">About Techsari</h1>
 
           <div className="space-y-6 font-body text-base text-secondary leading-relaxed">
             <p>
@@ -30,7 +30,7 @@ export default function AboutPage({ onBack }: AboutPageProps) {
             </p>
 
             <p>
-              Zawadi was built to dismantle the specific structural barriers that keep qualified African scholars from applying: the prohibitive $250 IELTS examination requirement that blocks candidates before they begin, the lack of structured guidance on articulating impact in statements of purpose, and the cognitive overhead of managing multiple portals, fragmented deadlines, and unverified criteria.
+              Techsari was built to dismantle the structural barriers that keep qualified African scholars from applying: eligibility rules buried in page-four fine print, deadlines scattered across portals, English-test requirements discovered only after paying for them, statements of purpose written without guidance, and the cognitive overhead of managing it all alone. Our engine reads every listing's actual requirements and checks them against your profile — so the question "do I qualify?" gets a straight answer.
             </p>
 
             <p>
@@ -44,7 +44,7 @@ export default function AboutPage({ onBack }: AboutPageProps) {
 
           <div className="mt-12 p-8 bg-parchment rounded-card border border-ash">
             <p className="font-headline text-xl font-medium text-deep-charcoal leading-relaxed">
-              "Zawadi's mission is to transform the scholarship discovery experience from exploiting student data to actively equipping African leaders."
+              "Techsari's mission is to transform the scholarship discovery experience from exploiting student data to actively equipping African leaders."
             </p>
           </div>
 

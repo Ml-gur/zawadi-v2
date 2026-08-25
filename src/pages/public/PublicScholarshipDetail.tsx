@@ -246,7 +246,7 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
   return (
     <div className="min-h-[100dvh] bg-surface-container-lowest text-on-surface font-body antialiased flex flex-col justify-between">
       <SEO
-        title={`${scholarship.name} | Techsari Zawadi`}
+        title={`${scholarship.name} | Techsari Techsari`}
         description={seoDesc}
         path={`/scholarships/browse/${scholarship.slug || scholarship.id}`}
         image={ogImageUrl}

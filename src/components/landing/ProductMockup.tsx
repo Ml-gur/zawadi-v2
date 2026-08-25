@@ -38,7 +38,7 @@ function ScoreRing({ value }: { value: number }) {
   );
 }
 
-/** Decorative CSS laptop showing a stylised Zawadi match list. Not interactive. */
+/** Decorative CSS laptop showing a stylised Techsari match list. Not interactive. */
 export default function ProductMockup() {
   return (
     <div className="relative mx-auto w-full max-w-[540px]" aria-hidden="true">
@@ -52,7 +52,7 @@ export default function ProductMockup() {
             <span className="w-2 h-2 rounded-full bg-ash" />
             <span className="w-2 h-2 rounded-full bg-ash" />
             <span className="w-2 h-2 rounded-full bg-ash" />
-            <span className="ml-auto text-ed-caption uppercase text-off-black-ink truncate">zawadi.techsari.online</span>
+            <span className="ml-auto text-ed-caption uppercase text-off-black-ink truncate">techsari.techsari.online</span>
           </div>
 
           <div className="p-3 sm:p-4 flex flex-col gap-2">

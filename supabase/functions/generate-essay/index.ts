@@ -65,7 +65,6 @@ async function callAiProvider(
   userPrompt: string,
   temperature: number,
   maxOutputTokens: number,
-  modelOverride?: string,
 ): Promise<string> {
   const hasDeepSeek = !!(cfg?.deepseek_key || Deno.env.get('DEEPSEEK_API_KEY'))
   const hasOpenAI = !!(cfg?.openai_key || Deno.env.get('OPENAI_API_KEY'))
@@ -84,7 +83,7 @@ async function callAiProvider(
     const apiKey = cfg?.deepseek_key || Deno.env.get('DEEPSEEK_API_KEY') || ''
     if (!apiKey) return null
     try {
-      const model = modelOverride || cfg?.ai_model || 'deepseek-v4-flash'
+      const model = cfg?.ai_model || 'deepseek-v4-flash'
       return await callDeepSeek(apiKey, systemInstruction, userPrompt, temperature, maxOutputTokens, model)
     } catch (e: any) {
       lastErr.push(`deepseek: ${e.message}`)
@@ -96,7 +95,7 @@ async function callAiProvider(
     const apiKey = cfg?.openai_key || Deno.env.get('OPENAI_API_KEY') || ''
     if (!apiKey) return null
     try {
-      const model = modelOverride || cfg?.ai_model || 'gpt-4o'
+      const model = cfg?.ai_model || 'gpt-4o'
       const res = await fetch('https://api.openai.com/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
@@ -129,7 +128,7 @@ async function callAiProvider(
     try {
       const { GoogleGenAI } = await import('https://esm.sh/@google/genai')
       const genAI = new GoogleGenAI({ apiKey: geminiKey })
-      const model = modelOverride || cfg?.ai_model || 'gemini-2.5-flash'
+      const model = cfg?.ai_model || 'gemini-2.5-flash'
       const result = await genAI.models.generateContent({
         model,
         contents: [{ role: 'user', parts: [{ text: userPrompt }] }],
@@ -181,7 +180,7 @@ const PLAN_LABELS: Record<string, string> = {
   explorer: 'Explorer',
   plus: 'Scholar Plus',
   pro: 'Application Pro',
-  institutional: 'Zawadi Institutional',
+  institutional: 'Techsari Institutional',
 }
 
 serve(async (req: Request) => {
@@ -312,7 +311,7 @@ async function handleGenerateEssay(
   let maxOutputTokens = 1500
 
   if (stage === 'draft') {
-    systemInstruction = `You are Zawadi, an expert scholarship essay coach helping African students write compelling statements of purpose.
+    systemInstruction = `You are Techsari, an expert scholarship essay coach helping African students write compelling statements of purpose.
 You generate high-quality, personalized scholarship essays based on the student's background and the specific scholarship.
 The student is from ${userCountry}, pursuing a ${userDegree} in ${userField}.
 Use their provided notes to write an authentic, persuasive essay.
@@ -361,8 +360,6 @@ ESSAY TO POLISH: ${baseText}`
     maxOutputTokens = aiConfig?.ai_max_tokens_essay ?? 1500
   }
 
-  const effectiveModel = reqProvider || undefined
-
   try {
     generatedText = await callAiProvider(
       aiConfig,
@@ -370,7 +367,6 @@ ESSAY TO POLISH: ${baseText}`
       userPrompt,
       temperature,
       maxOutputTokens,
-      effectiveModel,
     )
   } catch (err: any) {
     console.error('AI generation failed:', err.message)

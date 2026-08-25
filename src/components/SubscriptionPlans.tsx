@@ -575,7 +575,7 @@ export default function SubscriptionPlans({ user, onPlanUpdated, onNavigateToTab
               <h3 className="text-ed-sub font-medium tracking-tight text-off-black-ink">Techsari Institutional</h3>
               <p className="text-ed-body-sm text-graphite max-w-2xl leading-relaxed">
                 For universities, NGOs, scholarship programs, and government agencies that want to provide
-                Zawadi's full platform to their students, scholars, or beneficiaries at scale.
+                Techsari's full platform to their students, scholars, or beneficiaries at scale.
               </p>
               <ul className="space-y-2.5 pt-2">
                 {[
@@ -602,7 +602,7 @@ export default function SubscriptionPlans({ user, onPlanUpdated, onNavigateToTab
               <p className="text-ed-h1-sm font-medium tracking-tight text-off-black-ink">Custom</p>
               <p className="text-ed-body-sm text-graphite mt-1">Volume-based pricing • Per-seat or flat rate</p>
               <a
-                href="mailto:partnerships@zawadi.app?subject=Zawadi%20Institutional%20Plan%20Inquiry"
+                href="mailto:partnerships@Techsari.app?subject=Techsari%20Institutional%20Plan%20Inquiry"
                 className="mt-4 inline-flex items-center justify-center gap-2 rounded-full border border-off-black-ink px-7 min-h-[48px] text-ed-body-sm font-medium text-off-black-ink transition-colors hover:bg-off-black-ink hover:text-pure-white"
               >
                 Contact Partnerships

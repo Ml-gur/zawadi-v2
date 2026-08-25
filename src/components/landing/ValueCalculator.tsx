@@ -171,7 +171,7 @@ export default function ValueCalculator() {
             </h2>
             <p className="mt-6 text-ed-sub font-normal text-graphite max-w-[42ch]">
               A scholarship can cover tuition, living costs, travel,
-              accommodation, insurance or several of them together. Zawadi
+              accommodation, insurance or several of them together. Techsari
               shows what each opportunity actually covers, so you understand
               the real value before you apply.
             </p>

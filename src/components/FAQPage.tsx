@@ -18,7 +18,7 @@ const faqData = [
   {
     category: "IELTS & Language Requirements",
     items: [
-      { q: "Do I need to take the IELTS to apply for scholarships on Techsari?", a: "No. Techsari has a No-IELTS filter that shows you scholarships accepting a Medium of Instruction certificate from your secondary school or university, or the Duolingo English Test which costs $60. You do not need to pay $250 for IELTS to use this platform or to qualify for the scholarships we list." },
+      { q: "Do I need IELTS to apply for scholarships on Techsari?", a: "It depends on the scholarship — and we record the exact requirement for every listing. Many accept a Medium of Instruction certificate from your school or university, or the Duolingo English Test ($60, online, results in 48 hours). Some require IELTS. Use the No-IELTS filter to see only scholarships with confirmed alternatives, and check the English requirement shown on each listing before paying for any test." },
       { q: "What is a Medium of Instruction certificate?", a: "A Medium of Instruction certificate is a letter from your school or university confirming that your classes were conducted in English. Many scholarship providers accept this in place of an IELTS score. You can request it from your institution's registrar office, usually at no cost." },
       { q: "Can I submit my Duolingo English Test score instead of IELTS?", a: "Yes. The Duolingo English Test costs $60, is taken online from your home, and results are available within 48 hours. Many scholarships in our database accept Duolingo scores. Use the No-IELTS filter to find them." }
     ]

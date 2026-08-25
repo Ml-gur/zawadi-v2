@@ -245,8 +245,8 @@ export default function App() {
 
   useEffect(() => {
     const handler = () => handleLogout();
-    window.addEventListener('zawadi-signout', handler);
-    return () => window.removeEventListener('zawadi-signout', handler);
+    window.addEventListener('Techsari-signout', handler);
+    return () => window.removeEventListener('Techsari-signout', handler);
   });
 
   useEffect(() => {

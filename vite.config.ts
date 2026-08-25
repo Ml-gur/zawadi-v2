@@ -19,9 +19,9 @@ export default defineConfig(() => {
           navigateFallback: 'index.html'
         },
         manifest: {
-          name: 'Zawadi — AI-Powered Scholarship Platform for African Students',
-          short_name: 'Zawadi',
-          description: 'Discover and apply for verified global scholarships with Zawadi. Our AI-driven platform matches African students with life-changing opportunities.',
+          name: 'Techsari — AI-Powered Scholarship Platform for African Students',
+          short_name: 'Techsari',
+          description: 'Discover and apply for verified global scholarships with Techsari. Our AI-driven platform matches African students with life-changing opportunities.',
           theme_color: '#0e100f',
           background_color: '#0e100f',
           display: 'standalone',

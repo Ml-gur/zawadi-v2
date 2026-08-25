@@ -28,7 +28,7 @@ export default function Hero({ onGetStarted, onLogin, countriesCount }: HeroProp
 
           <FadeUp delay={0.16}>
             <p className="mt-6 text-ed-sub font-normal text-graphite max-w-[48ch]">
-              One profile. Thousands of eligibility rules. Zawadi checks your
+              One profile. Thousands of eligibility rules. Techsari checks your
               nationality, degree, field, grades, experience and English
               requirements against verified scholarship opportunities — so you
               spend less time searching and more time applying.

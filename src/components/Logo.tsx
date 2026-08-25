@@ -1,5 +1,5 @@
 /**
- * Zawadi brand mark — "gift in a vault".
+ * Techsari brand mark — "gift in a vault".
  *
  * Construction: a rounded-square vault frame; the Z is cut so its
  * final stroke reads as a forward arrow (progress toward funding);
@@ -20,7 +20,7 @@ export function Logo({ size = 36, withGlow = false, tone = 'light' }: { size?: n
       height={size}
       viewBox="0 0 64 64"
       role="img"
-      aria-label="Zawadi logo"
+      aria-label="Techsari logo"
       style={withGlow ? { filter: 'drop-shadow(0 0 0 rgba(10,228,72,0))' } : undefined}
     >
       <rect x="4" y="4" width="56" height="56" rx="16" fill="none" stroke={stroke} strokeWidth={3} />

@@ -28,55 +28,55 @@ interface RouteMeta {
 
 const ROUTE_META: Record<string, RouteMeta> = {
   '/': {
-    title: 'Zawadi — Scholarship Matching for African Students',
+    title: 'Techsari — Scholarship Matching for African Students',
     description: 'Find scholarships you are eligible to win across all 54 African countries. Strict eligibility filtering removes scholarships you do not qualify for. No IELTS required options included. Free for students.',
     image: `${SITE_URL}/og-home.png`,
-    ogTitle: 'Zawadi — Find Scholarships You Actually Qualify For',
+    ogTitle: 'Techsari — Find Scholarships You Actually Qualify For',
     ogDescription: 'Strict eligibility matching for African students. See only scholarships where you meet every requirement. No spam. No data selling. No IELTS barrier.',
   },
   '/scholarships': {
-    title: 'Scholarships for African Students — Zawadi',
+    title: 'Scholarships for African Students — Techsari',
     description: 'Browse verified scholarships open to students from all 54 African countries. Every listing checked for real eligibility. No IELTS required options. Full funding and partial funding available.',
     image: `${SITE_URL}/og-scholarships.png`,
-    ogTitle: 'Scholarships for African Students — Zawadi',
+    ogTitle: 'Scholarships for African Students — Techsari',
     ogDescription: 'Verified scholarships open to African students. Every listing is checked for active deadlines and real eligibility. See funding from UK, Germany, USA, Japan, and African universities.',
   },
   '/about': {
-    title: 'About Zawadi — Scholarship Platform Built for African Students',
-    description: 'Zawadi was built to fix the scholarship access gap for African students. We filter out irrelevant results, remove the IELTS barrier, and pair AI essay tools with human mentor review.',
+    title: 'About Techsari — Scholarship Platform Built for African Students',
+    description: 'Techsari was built to fix the scholarship access gap for African students. We filter out irrelevant results, remove the IELTS barrier, and pair AI essay tools with human mentor review.',
     image: `${SITE_URL}/og-about.png`,
-    ogTitle: 'About Zawadi — Built for African Students',
-    ogDescription: 'Most scholarship platforms sell student data to advertisers. Zawadi does not. We match students to funding they qualify for and help them apply without wasting time on irrelevant results.',
+    ogTitle: 'About Techsari — Built for African Students',
+    ogDescription: 'Most scholarship platforms sell student data to advertisers. Techsari does not. We match students to funding they qualify for and help them apply without wasting time on irrelevant results.',
   },
   '/how-it-works': {
-    title: 'How Zawadi Works — Scholarship Matching for African Students',
+    title: 'How Techsari Works — Scholarship Matching for African Students',
     description: 'Create a profile in three minutes. See scholarships you qualify for. Build your application with AI that learns your writing style. Get mentor review before you submit.',
     image: `${SITE_URL}/og-how-it-works.png`,
-    ogTitle: 'How Zawadi Works — From Profile to Scholarship Application',
-    ogDescription: 'Four steps from registration to submitted application. Zawadi handles eligibility filtering, essay drafting, and human mentor review so African students can focus on applying.',
+    ogTitle: 'How Techsari Works — From Profile to Scholarship Application',
+    ogDescription: 'Four steps from registration to submitted application. Techsari handles eligibility filtering, essay drafting, and human mentor review so African students can focus on applying.',
   },
   '/faq': {
-    title: 'Scholarship FAQ for African Students — Zawadi',
+    title: 'Scholarship FAQ for African Students — Techsari',
     description: 'Answers to common questions about finding scholarships as an African student. Covers IELTS alternatives, eligibility matching, how to apply, and which countries qualify.',
     image: `${SITE_URL}/og-faq.png`,
-    ogTitle: 'Scholarship FAQ for African Students — Zawadi',
-    ogDescription: 'Common questions about scholarships for African students. IELTS requirements, application tips, eligibility criteria, and how the Zawadi matching system works.',
+    ogTitle: 'Scholarship FAQ for African Students — Techsari',
+    ogDescription: 'Common questions about scholarships for African students. IELTS requirements, application tips, eligibility criteria, and how the Techsari matching system works.',
   },
   '/contact': {
-    title: 'Contact Zawadi — Get Help or Partner With Us',
-    description: 'Contact the Zawadi team for student support, scholarship provider listings, institutional partnerships, or press inquiries.',
+    title: 'Contact Techsari — Get Help or Partner With Us',
+    description: 'Contact the Techsari team for student support, scholarship provider listings, institutional partnerships, or press inquiries.',
     image: `${SITE_URL}/og-image.png`,
-    ogTitle: 'Contact Zawadi — We\'re Here to Help',
-    ogDescription: 'Reach out to the Zawadi team for student support, institutional partnerships, or scholarship provider inquiries. We respond within 24 hours.',
+    ogTitle: 'Contact Techsari — We\'re Here to Help',
+    ogDescription: 'Reach out to the Techsari team for student support, institutional partnerships, or scholarship provider inquiries. We respond within 24 hours.',
   },
   '/privacy': {
-    title: 'Privacy Policy — Techsari Zawadi',
-    description: 'Techsari Zawadi Privacy Policy — how we collect, use, and protect your data as an African student using our scholarship platform.',
+    title: 'Privacy Policy — Techsari Techsari',
+    description: 'Techsari Techsari Privacy Policy — how we collect, use, and protect your data as an African student using our scholarship platform.',
     image: `${SITE_URL}/og-image.png`,
   },
   '/terms': {
-    title: 'Terms of Service — Techsari Zawadi',
-    description: 'Techsari Zawadi Terms of Service — the terms governing your use of our AI-powered scholarship platform for African students.',
+    title: 'Terms of Service — Techsari Techsari',
+    description: 'Techsari Techsari Terms of Service — the terms governing your use of our AI-powered scholarship platform for African students.',
     image: `${SITE_URL}/og-image.png`,
   },
 };
@@ -133,7 +133,7 @@ function buildMetaTags(meta: RouteMeta, url: string): string {
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta property="og:image:alt" content="${escapeHtml(title)}" />
-<meta property="og:site_name" content="Zawadi" />
+<meta property="og:site_name" content="Techsari" />
 <meta property="og:locale" content="en_US" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="${escapeHtml(title)}" />
@@ -206,7 +206,7 @@ export default async function middleware(request: Request): Promise<Response> {
             : `Apply for ${data.name}. Deadline: ${deadlineStr}.`;
           const ogImageUrl = buildScholarOgUrl(data);
           meta = {
-            title: `${data.name} | Zawadi`,
+            title: `${data.name} | Techsari`,
             description: seoDesc,
             image: ogImageUrl,
             ogTitle: data.name,

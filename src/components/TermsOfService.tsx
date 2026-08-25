@@ -10,8 +10,8 @@ export default function TermsOfService({ onBack }: TermsOfServiceProps) {
   return (
     <div className="bg-pure-white text-off-black-ink min-h-[100dvh]">
       <SEO
-        title="Terms of Service — Techsari Zawadi"
-        description="The Terms of Service governing your use of Techsari Zawadi, a scholarship discovery and application platform for African students."
+        title="Terms of Service — Techsari Techsari"
+        description="The Terms of Service governing your use of Techsari Techsari, a scholarship discovery and application platform for African students."
         path="/terms"
       />
       <section className="px-4 sm:px-6 py-16 md:py-24">
@@ -22,27 +22,27 @@ export default function TermsOfService({ onBack }: TermsOfServiceProps) {
           <p className="text-ed-body-sm text-graphite mb-8">Last updated: August 25, 2026</p>
 
           <p className="text-ed-body text-graphite leading-relaxed mb-10">
-            These Terms govern your use of Zawadi, operated by Techsari ("we", "us",
+            These Terms govern your use of Techsari, operated by Techsari ("we", "us",
             "our"). By creating an account or using the Service, you agree to them.
           </p>
 
           <div className="space-y-12">
 
-            <Section title="1. What Zawadi is — and is not">
+            <Section title="1. What Techsari is — and is not">
               <p>
-                Zawadi provides scholarship discovery, matching, and application-support
+                Techsari provides scholarship discovery, matching, and application-support
                 tools, including deadline tracking, document storage, essay drafting
                 assistance, and application management.
               </p>
               <p className="bg-parchment border border-ash rounded-ed p-5 font-medium text-off-black-ink">
-                Zawadi does not award scholarships, determine scholarship eligibility,
+                Techsari does not award scholarships, determine scholarship eligibility,
                 or guarantee admission, funding, or selection by any scholarship provider.
               </p>
             </Section>
 
             <Section title="2. Eligibility and accounts">
               <ul className="list-disc pl-6 space-y-2">
-                <li>Zawadi is intended for individuals aged 16 and older. By creating an account, you confirm that you meet this requirement</li>
+                <li>Techsari is intended for individuals aged 16 and older. By creating an account, you confirm that you meet this requirement</li>
                 <li>You must provide accurate and complete registration information and keep it up to date</li>
                 <li>You are responsible for keeping your password confidential and for all activity under your account</li>
                 <li>One account per person; shared accounts are not permitted</li>
@@ -65,7 +65,7 @@ export default function TermsOfService({ onBack }: TermsOfServiceProps) {
 
             <Section title="4. Third-party scholarship providers">
               <p>
-                Zawadi is independent from the scholarship organizations listed on the
+                Techsari is independent from the scholarship organizations listed on the
                 platform unless expressly stated otherwise.
               </p>
               <p>
@@ -118,16 +118,16 @@ export default function TermsOfService({ onBack }: TermsOfServiceProps) {
 
             <Section title="9. Intellectual property">
               <ul className="list-disc pl-6 space-y-2">
-                <li>The Zawadi platform, including its code, design, branding, and name, belongs to Techsari</li>
+                <li>The Techsari platform, including its code, design, branding, and name, belongs to Techsari</li>
                 <li>You own the documents and application data you upload to the Service</li>
                 <li>You may use content generated through our AI tools for your personal educational and scholarship application purposes, subject to applicable law and the rules of the relevant scholarship provider</li>
-                <li>You grant Zawadi a limited license to store and process your content solely to provide the Service, and to maintain, secure, troubleshoot, and improve the Service as described in our Privacy Policy</li>
+                <li>You grant Techsari a limited license to store and process your content solely to provide the Service, and to maintain, secure, troubleshoot, and improve the Service as described in our Privacy Policy</li>
               </ul>
             </Section>
 
             <Section title="10. No professional advice">
               <p>
-                Content on Zawadi is provided for informational and educational
+                Content on Techsari is provided for informational and educational
                 purposes only. It is not legal, financial, immigration, or academic
                 advice, and should not be treated as a substitute for guidance from a
                 qualified professional.
@@ -206,7 +206,7 @@ export default function TermsOfService({ onBack }: TermsOfServiceProps) {
           <div className="mt-12 pt-8 border-t border-ash">
             <p className="text-ed-caption text-graphite">Last updated: August 25, 2026</p>
             <p className="text-ed-body-sm text-graphite italic mt-2">
-              <em>Techsari Zawadi · Built for African students, by Africans.</em>
+              <em>Techsari Techsari · Built for African students, by Africans.</em>
             </p>
           </div>
         </div>

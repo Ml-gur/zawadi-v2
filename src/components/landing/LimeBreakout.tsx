@@ -21,7 +21,7 @@ export default function LimeBreakout({ onGetStarted }: LimeBreakoutProps) {
             <p className="mt-5 text-ed-sub font-normal text-on-lime max-w-[46ch]">
               The right scholarship is not the one that looks easiest. It is
               the one whose requirements you actually meet. Find yours with
-              Zawadi.
+              Techsari.
             </p>
 
             <div className="mt-9 flex flex-wrap items-center justify-center gap-4">

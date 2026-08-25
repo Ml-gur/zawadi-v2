@@ -50,7 +50,7 @@ const MENTOR_REVIEW_LIMITS: Record<string, MentorEntitlement> = {
 
 const PLAN_LABELS: Record<string, string> = {
   explorer: 'Explorer', plus: 'Scholar Plus',
-  pro: 'Application Pro', institutional: 'Zawadi Institutional',
+  pro: 'Application Pro', institutional: 'Techsari Institutional',
 }
 
 // ─── Main handler ─────────────────────────────────────────────────
@@ -184,7 +184,7 @@ async function handleRequestReview(
   if (insertErr) return corsResponse({ error: 'Failed to create request: ' + insertErr.message }, 500)
 
   // Notify admin
-  const adminEmail = Deno.env.get('ADMIN_EMAIL') || 'admin@zawadi.app'
+  const adminEmail = Deno.env.get('ADMIN_EMAIL') || 'admin@Techsari.app'
   await supabase.from('notifications').insert({
     user_email: adminEmail,
     message: `New mentor review request ${payload.request_reference} for ${scholarship_name}`,
@@ -557,7 +557,7 @@ async function handleSubmitReview(
   if (error) return corsResponse({ error: error.message }, 500)
 
   // Notify admin
-  const adminEmail = Deno.env.get('ADMIN_EMAIL') || 'admin@zawadi.app'
+  const adminEmail = Deno.env.get('ADMIN_EMAIL') || 'admin@Techsari.app'
   await supabase.from('notifications').insert({
     user_email: adminEmail,
     message: `Mentor ${userEmail} submitted review for ${request.request_reference}`,

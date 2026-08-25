@@ -41,7 +41,7 @@ export function ScholarshipSchema({ scholarship }: ScholarshipSchemaProps) {
       educationalLevel: (scholarship.degree_levels || []).join(', '),
       provider: {
         '@type': 'Organization',
-        name: 'Zawadi by Techsari',
+        name: 'Techsari by Techsari',
         url: 'https://www.techsari.online',
       },
     });

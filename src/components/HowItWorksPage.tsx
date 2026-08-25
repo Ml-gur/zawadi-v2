@@ -42,19 +42,19 @@ export default function HowItWorksPage({ onBack, onGetStarted }: HowItWorksPageP
   return (
     <div className="bg-surface-container-lowest text-on-surface font-body min-h-[100dvh] antialiased">
       <SEO
-        title="How Zawadi Works — Scholarship Matching for African Students"
+        title="How Techsari Works — Scholarship Matching for African Students"
         description="Create a profile in three minutes. See scholarships you qualify for. Build your application with AI that learns your writing style. Get mentor review before you submit."
         path="/how-it-works"
         image="https://www.techsari.online/og-how-it-works.png"
-        ogTitle="How Zawadi Works — From Profile to Scholarship Application"
-        ogDescription="Five steps from registration to submitted application. Zawadi handles eligibility filtering, essay drafting, and document tracking so African students can focus on applying."
+        ogTitle="How Techsari Works — From Profile to Scholarship Application"
+        ogDescription="Five steps from registration to submitted application. Techsari handles eligibility filtering, essay drafting, and document tracking so African students can focus on applying."
       />
       <section className="px-4 md:px-10 py-16 md:py-24">
         <div className="max-w-[800px] mx-auto">
           <Breadcrumbs items={[{ name: 'How it works', path: '/how-it-works' }]} />
 
           <span className="font-eyebrow text-eyebrow uppercase tracking-wider text-graphite block mb-2">Step-by-Step Guide</span>
-          <h1 className="font-display text-4xl md:text-5xl font-medium text-on-surface tracking-tight mb-4">How Techsari Zawadi Works</h1>
+          <h1 className="font-display text-4xl md:text-5xl font-medium text-on-surface tracking-tight mb-4">How Techsari Techsari Works</h1>
           <p className="font-body text-base md:text-lg text-secondary mb-14 max-w-2xl">
             From initial registration to verified submission. Five simple steps to discover and apply for scholarships you actually qualify for.
           </p>

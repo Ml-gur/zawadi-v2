@@ -57,7 +57,7 @@ export default function PWAInstallPrompt() {
             Z
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-primary">Install Zawadi</p>
+            <p className="text-xs font-bold text-primary">Install Techsari</p>
             <p className="text-[10px] text-muted">
               {isIosDevice ? 'Add to your home screen for the best experience' : 'Add to your desktop for the best experience'}
             </p>

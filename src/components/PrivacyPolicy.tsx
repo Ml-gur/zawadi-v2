@@ -10,8 +10,8 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
   return (
     <div className="bg-pure-white text-off-black-ink min-h-[100dvh]">
       <SEO
-        title="Privacy Policy — Techsari Zawadi"
-        description="How Techsari Zawadi collects, uses, and protects the personal information of African students who use our scholarship platform."
+        title="Privacy Policy — Techsari Techsari"
+        description="How Techsari Techsari collects, uses, and protects the personal information of African students who use our scholarship platform."
         path="/privacy"
       />
       <section className="px-4 sm:px-6 py-16 md:py-24">
@@ -22,7 +22,7 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
           <p className="text-ed-body-sm text-graphite mb-8">Last updated: August 25, 2026</p>
 
           <p className="text-ed-body text-graphite leading-relaxed mb-10">
-            This policy explains what information Zawadi collects, why we collect it,
+            This policy explains what information Techsari collects, why we collect it,
             who may process it, and the choices you have. We have written it in plain
             language because it applies to real people making real applications.
           </p>
@@ -31,7 +31,7 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
 
             <Section title="1. Who we are">
               <p>
-                Zawadi is a scholarship discovery and application platform operated by
+                Techsari is a scholarship discovery and application platform operated by
                 Techsari, a company based in Kenya serving African students.
               </p>
               <div className="bg-parchment border border-ash rounded-ed p-6 space-y-1">
@@ -79,7 +79,7 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
 
             <Section title="4. Artificial intelligence">
               <p>
-                Some features of Zawadi use artificial intelligence to assist with
+                Some features of Techsari use artificial intelligence to assist with
                 scholarship matching, application preparation, and essay drafting.
                 Information you provide to these features may be processed by our AI
                 service providers to generate responses or recommendations.
@@ -92,7 +92,7 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
             </Section>
 
             <Section title="5. Who may process your information">
-              <p>To operate Zawadi, we rely on categories of service providers:</p>
+              <p>To operate Techsari, we rely on categories of service providers:</p>
               <ul className="list-disc pl-6 space-y-2">
                 <li>Cloud infrastructure providers (hosting, databases, authentication, and file storage)</li>
                 <li>Payment processors</li>
@@ -108,7 +108,7 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
                 We do not sell your personal information or share it with third parties
                 for their own advertising or marketing purposes. We may share
                 information with service providers that process information on our
-                behalf to operate and improve Zawadi. We may also disclose information
+                behalf to operate and improve Techsari. We may also disclose information
                 where we are required to do so by law.
               </p>
             </Section>
@@ -182,7 +182,7 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
 
             <Section title="11. Age requirements">
               <p>
-                Zawadi is intended for people aged 16 and older, consistent with our
+                Techsari is intended for people aged 16 and older, consistent with our
                 Terms of Service. We do not knowingly collect personal information
                 from anyone under 16. If we learn that we have, we will delete it.
               </p>
@@ -196,7 +196,7 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
               <p>
                 We may update this policy as the service evolves. If a change is
                 material, we will tell you through the platform or by email before it
-                takes effect. Continuing to use Zawadi after a change means you accept
+                takes effect. Continuing to use Techsari after a change means you accept
                 the updated policy.
               </p>
             </Section>

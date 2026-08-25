@@ -8,8 +8,8 @@ import { GhostPillButton } from './ui';
 const contactSchema = {
   "@context": "https://schema.org",
   "@type": "ContactPage",
-  "name": "Contact Zawadi",
-  "description": "Get in touch with the Zawadi team for student support, scholarship listings, partnerships, and media inquiries."
+  "name": "Contact Techsari",
+  "description": "Get in touch with the Techsari team for student support, scholarship listings, partnerships, and media inquiries."
 };
 
 const SUBJECTS = [
@@ -66,11 +66,11 @@ export default function ContactPage({ onBack }: { onBack: () => void }) {
   return (
     <div className="min-h-[100dvh] bg-surface-container-lowest text-on-surface font-body antialiased">
       <SEO
-        title="Contact Zawadi — Get Help or Partner With Us"
-        description="Contact the Zawadi team for student support, scholarship provider listings, institutional partnerships, or press inquiries."
+        title="Contact Techsari — Get Help or Partner With Us"
+        description="Contact the Techsari team for student support, scholarship provider listings, institutional partnerships, or press inquiries."
         path="/contact"
-        ogTitle="Contact Zawadi — We're Here to Help"
-        ogDescription="Reach out to the Zawadi team for student support, institutional partnerships, or scholarship provider inquiries. We respond within 24 hours."
+        ogTitle="Contact Techsari — We're Here to Help"
+        ogDescription="Reach out to the Techsari team for student support, institutional partnerships, or scholarship provider inquiries. We respond within 24 hours."
         schema={contactSchema}
       />
 
@@ -158,7 +158,7 @@ export default function ContactPage({ onBack }: { onBack: () => void }) {
                 <span className="material-symbols-outlined text-lg">business</span>
               </div>
               <h3 className="font-headline font-medium text-sm text-on-surface uppercase tracking-wider mb-1">For Scholarship Providers</h3>
-              <p className="font-body text-sm text-secondary mb-3">Want to list your foundation or university scholarship on Zawadi and reach verified candidates?</p>
+              <p className="font-body text-sm text-secondary mb-3">Want to list your foundation or university scholarship on Techsari and reach verified candidates?</p>
               <a href="mailto:hello@techsari.online" className="font-body text-xs font-semibold text-primary hover:underline">
                 Partner with us &rarr;
               </a>

@@ -232,9 +232,9 @@ export default function Scholarships({
       <div id="scholarship-dashboard-root" className="min-h-[100dvh] bg-parchment text-off-black-ink flex flex-col">
         <div className="flex-grow w-full max-w-[1200px] mx-auto px-4 sm:px-6 py-14 md:py-20 space-y-8">
         <SEO
-          title="Scholarships for African Students — Zawadi"
+          title="Scholarships for African Students — Techsari"
           description="Browse verified scholarships open to students from all 54 African countries. Filtered for real eligibility. No IELTS required options. Full funding and partial funding available."
-          ogTitle="Scholarships for African Students — Zawadi"
+          ogTitle="Scholarships for African Students — Techsari"
           ogDescription="Verified scholarships open to African students. Every listing is checked for active deadlines and real eligibility. See funding from UK, Germany, USA, Japan, and African universities."
           path="/scholarships"
           image="https://www.techsari.online/og-scholarships.png"
@@ -634,7 +634,7 @@ export default function Scholarships({
               onClick={(e) => e.stopPropagation()}
             >
               <GraduationCap className="w-12 h-12 text-primary mx-auto mb-4" />
-              <h3 className="text-lg font-display font-black text-primary mb-2">Welcome to Zawadi</h3>
+              <h3 className="text-lg font-display font-black text-primary mb-2">Welcome to Techsari</h3>
               <p className="text-xs text-muted mb-6 leading-relaxed">
                 Create a free profile to see your eligibility score for each scholarship, track applications, and get matched to opportunities you qualify for.
               </p>
@@ -848,7 +848,7 @@ export default function Scholarships({
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `zawadi_academic_listings_report_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `Techsari_academic_listings_report_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

@@ -31,7 +31,7 @@ const websiteSchema = {
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  "name": "Zawadi",
+  "name": "Techsari",
   "url": "https://www.techsari.online",
 };
 

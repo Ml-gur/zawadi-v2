@@ -50,7 +50,7 @@ export default function LandingHeader({ onGetStarted, onLogin, user }: LandingHe
 
   const signOut = () => {
     setOpen(false);
-    window.dispatchEvent(new CustomEvent('zawadi-signout'));
+    window.dispatchEvent(new CustomEvent('Techsari-signout'));
   };
 
   return (
