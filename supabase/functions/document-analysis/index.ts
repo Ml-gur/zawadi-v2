@@ -641,14 +641,17 @@ async function extractRemainingFieldsWithAI(rawText: string, patternResult: Patt
   if (missingFields.length === 0) return {}
 
   const keys = missingFields.map(f => f.split(':')[0])
-  const prompt = `Extract only these specific fields from the transcript below.
+  const prompt = `Extract only these specific fields from the student document below.
 Return JSON with only these keys: ${keys.join(', ')}.
 Return null for any field you cannot find. Never guess.
+The document may be a transcript with course tables — the GPA/CGPA often appears
+in a summary row (e.g. "CGPA: 3.45/5.00") or near the words "cumulative", "overall",
+or "grade point average". Read carefully across table rows.
 
 ${missingFields.join('\n')}
 
 Text:
-${rawText.substring(0, 2000)}`
+${rawText.substring(0, 12000)}`
 
   const systemPrompt = 'You are a document data extractor. Return only the requested JSON fields. Never hallucinate values.'
   const raw = await callDeepSeek(systemPrompt, prompt, aiCfg)

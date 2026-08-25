@@ -48,11 +48,34 @@ export async function extractTextFromBuffer(
       const page = await pdf.getPage(i);
       const tc = await page.getTextContent();
 
-      const items = tc.items
-        .map((item: any) => item.str)
+      // Reconstruct visual lines: PDF text items arrive in paint order, which
+      // scrambles tabular transcripts. Group items by Y coordinate, sort each
+      // line by X, and insert spaces where the gap exceeds the glyph advance.
+      const lines = new Map<number, { x: number; str: string; end: number }[]>();
+      for (const item of tc.items as any[]) {
+        if (!item.str) continue;
+        const y = Math.round(item.transform[5] / 2) * 2; // 2pt tolerance bucket
+        const x = item.transform[4];
+        const line = lines.get(y) ?? [];
+        line.push({ x, str: item.str, end: x + (item.width || item.str.length * 4) });
+        lines.set(y, line);
+      }
+      const pageLines = [...lines.entries()]
+        .sort((a, b) => b[0] - a[0]) // top-to-bottom
+        .map(([, items]) => {
+          items.sort((a, b) => a.x - b.x); // left-to-right
+          let text = '';
+          let prevEnd = -Infinity;
+          for (const it of items) {
+            if (text && it.x - prevEnd > 1.5) text += ' ';
+            text += it.str;
+            prevEnd = it.end;
+          }
+          return text.trim();
+        })
         .filter(Boolean);
 
-      const pageText = items.join(' ');
+      const pageText = pageLines.join('\n');
 
       if (pageText.trim().length > 10) {
         extractedPages.push(pageText.trim());
