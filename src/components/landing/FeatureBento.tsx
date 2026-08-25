@@ -54,7 +54,7 @@ export default function FeatureBento() {
         <FadeUp>
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 border-b border-ash pb-10 mb-10 md:mb-14">
             <h2 className="text-ed-h1-sm md:text-ed-h1 text-off-black-ink max-w-[16ch]">
-              Intelligence without the noise.
+              Every scholarship has rules. We read them.
             </h2>
             <p className="text-ed-body text-graphite max-w-[38ch] md:pb-2">
               Our engine reads every eligibility matrix so your time goes into the

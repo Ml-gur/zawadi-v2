@@ -166,13 +166,14 @@ export default function ValueCalculator() {
             <span className="inline-block rounded-full border border-off-black-ink px-4 py-1.5 text-ed-eyebrow uppercase text-off-black-ink">
               Financial impact
             </span>
-            <h2 className="mt-7 text-ed-h1-sm md:text-ed-h1 text-off-black-ink max-w-[14ch]">
-              What a funded seat is actually worth.
+            <h2 className="mt-7 text-ed-h1-sm md:text-ed-h1 text-off-black-ink max-w-[16ch]">
+              Funding is more than a tuition waiver.
             </h2>
             <p className="mt-6 text-ed-sub font-normal text-graphite max-w-[42ch]">
-              Tuition plus living costs for one international Master's degree
-              clears $35,000. Every Techsari match also shows which grants waive
-              English testing entirely.
+              A scholarship can cover tuition, living costs, travel,
+              accommodation, insurance or several of them together. Zawadi
+              shows what each opportunity actually covers, so you understand
+              the real value before you apply.
             </p>
 
             <dl className="mt-8 w-full max-w-md space-y-3 text-ed-body-sm">

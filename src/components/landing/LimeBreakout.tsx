@@ -15,12 +15,13 @@ export default function LimeBreakout({ onGetStarted }: LimeBreakoutProps) {
             <span className="text-ed-eyebrow uppercase text-on-lime">Start your application cycle</span>
 
             <h2 className="mt-4 text-ed-h1-sm md:text-ed-h1 text-off-black-ink max-w-[22ch]">
-              Your global degree starts with knowing you qualify.
+              Your potential. Funded.
             </h2>
 
             <p className="mt-5 text-ed-sub font-normal text-on-lime max-w-[46ch]">
-              Build one free profile. See every verified grant you clear —
-              before you pay an application fee or book an IELTS test.
+              The right scholarship is not the one that looks easiest. It is
+              the one whose requirements you actually meet. Find yours with
+              Zawadi.
             </p>
 
             <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
