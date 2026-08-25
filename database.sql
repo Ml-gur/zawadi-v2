@@ -1426,7 +1426,7 @@ CREATE TABLE IF NOT EXISTS notifications (
 -- 14. SETUP COMPLETE
 -- ============================================================
 
-SELECT 'Zawadi database setup complete!' AS status;
+SELECT 'Techsari database setup complete!' AS status;
 SELECT COUNT(*) || ' scholarships' AS result FROM scholarships;
 SELECT COUNT(*) || ' profiles' AS result FROM profiles;
 SELECT COUNT(*) || ' applications' AS result FROM applications;
