@@ -136,9 +136,37 @@ export default async function handler(req, res) {
   }
 
   // Bill-abuse guard: only signed-in scholars may spend AI credits.
-  const user = await authenticate(req.headers.authorization);
+  const authHeader = req.headers.authorization;
+  const user = await authenticate(authHeader);
   if (!user) {
     return res.status(401).json({ error: 'Sign in to use the AI studio.' });
+  }
+
+  // Durable daily cap — survives serverless cold starts (unlike the
+  // in-memory limiter, which only smooths short bursts).
+  const DAILY_LIMIT = 30;
+  try {
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+    const anonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+    const usageClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const today = new Date().toISOString().slice(0, 10);
+    const { data: usage } = await usageClient
+      .from('ai_usage_daily')
+      .select('count')
+      .eq('user_email', user.email)
+      .eq('day', today)
+      .maybeSingle();
+    if ((usage?.count ?? 0) >= DAILY_LIMIT) {
+      return res.status(429).json({ error: 'Daily AI generation limit reached (30). It resets at midnight UTC.' });
+    }
+    await usageClient
+      .from('ai_usage_daily')
+      .upsert({ user_email: user.email, day: today, count: (usage?.count ?? 0) + 1 });
+  } catch {
+    // Quota tracking must never block a legitimate request entirely —
+    // the per-minute limiter still applies.
   }
 
   const clientIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';

@@ -112,7 +112,7 @@ function ParagraphEssay({ content, highlighted, onToggle }: { content: string; h
           className={`p-3 rounded-lg border cursor-pointer transition-colors text-sm leading-relaxed ${
             highlighted.has(i)
               ? 'bg-status-warning/15 border-status-warning/40 text-status-warning'
-              : 'bg-off-black border-outline-variant/30 hover:border-primary/30'
+              : 'bg-off-black-ink border-outline-variant/30 hover:border-primary/30'
           }`}
         >
           <span className="text-[10px] font-bold text-outline mr-2 select-none">[{i + 1}]</span>
@@ -163,7 +163,7 @@ function RevisedSectionsBuilder({ sections, onChange }: {
         </button>
       </div>
       {sections.map((sec, i) => (
-        <div key={i} className="bg-off-black rounded-lg p-3 border border-outline-variant/30 space-y-2">
+        <div key={i} className="bg-off-black-ink rounded-lg p-3 border border-outline-variant/30 space-y-2">
           <div className="flex items-center justify-between gap-2">
             <input
               value={sec.section}
@@ -388,7 +388,7 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[10px] font-mono font-bold text-outline bg-off-black px-2 py-0.5 rounded">
+              <span className="text-[10px] font-mono font-bold text-outline bg-off-black-ink px-2 py-0.5 rounded">
                 {item.request_reference}
               </span>
               {isUrgent && (
@@ -424,7 +424,7 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
 
         <button
           onClick={onClick}
-          className="w-full bg-transparent text-cream border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-xs font-bold py-2.5 px-4 rounded-lg transition-all hover:scale-[1.01] active:scale-98 cursor-pointer flex items-center justify-center gap-2"
+          className="w-full bg-transparent text-pure-white border border-cream/60 hover:border-pure-white hover:bg-pure-white/[0.06] text-xs font-bold py-2.5 px-4 rounded-lg transition-all hover:scale-[1.01] active:scale-98 cursor-pointer flex items-center justify-center gap-2"
         >
           {buttonLabel}
         </button>
@@ -436,7 +436,7 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
     <div key={item.id} className="bg-canvas border border-outline-variant/60 rounded-lg p-5 space-y-3">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <span className="text-[10px] font-mono font-bold text-outline bg-off-black px-2 py-0.5 rounded">
+          <span className="text-[10px] font-mono font-bold text-outline bg-off-black-ink px-2 py-0.5 rounded">
             {item.request_reference}
           </span>
           <h3 className="font-bold text-primary text-sm mt-1">{item.scholarship_name}</h3>
@@ -614,7 +614,7 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
             return (
               <div className="bg-canvas border border-outline-variant/60 rounded-lg p-6 space-y-4 max-w-xl">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-lg ring-1 ring-cream/40 flex items-center justify-center text-cream text-xl font-black">
+            <div className="w-14 h-14 rounded-lg ring-1 ring-cream/40 flex items-center justify-center text-pure-white text-xl font-black">
               {user.name?.[0] || user.email?.[0] || 'M'}
             </div>
             <div>
@@ -623,19 +623,19 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4 text-xs">
-            <div className="bg-off-black rounded-lg p-3">
+            <div className="bg-off-black-ink rounded-lg p-3">
               <p className="text-outline font-bold uppercase tracking-wider text-[10px]">Plan</p>
               <p className="font-bold text-primary mt-1">{PLAN_LABELS[plan] || plan}</p>
             </div>
-            <div className="bg-off-black rounded-lg p-3">
+            <div className="bg-off-black-ink rounded-lg p-3">
               <p className="text-outline font-bold uppercase tracking-wider text-[10px]">Feedback Type</p>
               <p className="font-bold text-primary mt-1 capitalize">{feedbackType.replace('_', ' ')}</p>
             </div>
-            <div className="bg-off-black rounded-lg p-3">
+            <div className="bg-off-black-ink rounded-lg p-3">
               <p className="text-outline font-bold uppercase tracking-wider text-[10px]">Response Guarantee</p>
               <p className="font-bold text-primary mt-1">{planLimits.response_days_guarantee} day(s)</p>
             </div>
-            <div className="bg-off-black rounded-lg p-3">
+            <div className="bg-off-black-ink rounded-lg p-3">
               <p className="text-outline font-bold uppercase tracking-wider text-[10px]">Reviews / Month</p>
               <p className="font-bold text-primary mt-1">{planLimits.reviews_per_month ?? 'Unlimited'}</p>
             </div>
@@ -848,7 +848,7 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
                 <button
                   onClick={handleSubmitReview}
                   disabled={submitting}
-                  className="w-full bg-transparent text-cream border border-cream/60 hover:border-cream hover:bg-cream/[0.04] text-sm font-bold py-3 px-6 rounded-lg transition-all hover:scale-[1.01] active:scale-98 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full bg-transparent text-pure-white border border-cream/60 hover:border-pure-white hover:bg-pure-white/[0.06] text-sm font-bold py-3 px-6 rounded-lg transition-all hover:scale-[1.01] active:scale-98 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {submitting ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -868,7 +868,7 @@ export default function MentorPortal({ user, onBack }: MentorPortalProps) {
                   Scholarship Context
                 </h4>
 
-                <div className="bg-off-black rounded-lg p-3 space-y-3">
+                <div className="bg-off-black-ink rounded-lg p-3 space-y-3">
                   <div>
                     <p className="text-[10px] text-outline font-bold uppercase tracking-wider">Scholarship</p>
                     <p className="text-xs font-bold text-primary mt-0.5">{activeReview.scholarship_name}</p>

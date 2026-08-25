@@ -7,7 +7,7 @@ interface ForgotPasswordProps {
 }
 
 const inputClass =
-  'w-full bg-canvas border border-hairline rounded-lg px-4 py-3 min-h-[44px] text-cream placeholder:text-muted focus:border-accent-green focus-visible:ring-2 focus-visible:ring-accent-green/40 outline-none transition-colors';
+  'w-full bg-canvas border border-ash rounded-lg px-4 py-3 min-h-[44px] text-pure-white placeholder:text-muted focus:border-accent-green focus-visible:ring-2 focus-visible:ring-accent-green/40 outline-none transition-colors';
 
 export default function ForgotPassword({ onBack }: ForgotPasswordProps) {
   const [email, setEmail] = useState('');
@@ -45,8 +45,8 @@ export default function ForgotPassword({ onBack }: ForgotPasswordProps) {
 
   return (
     <div className="min-h-[85vh] flex items-center justify-center p-6 bg-canvas bg-grid-pattern">
-      <div className="w-full max-w-md bg-off-black border border-hairline rounded-lg p-6 animate-sweep">
-        <h3 className="font-display text-2xl font-black text-cream text-center mb-2">Reset Password</h3>
+      <div className="w-full max-w-md bg-off-black-ink border border-ash rounded-lg p-6 animate-sweep">
+        <h3 className="font-display text-2xl font-black text-pure-white text-center mb-2">Reset Password</h3>
         <p className="text-xs text-muted text-center mb-8">
           Enter your email to receive a password reset link.
         </p>
@@ -77,7 +77,7 @@ export default function ForgotPassword({ onBack }: ForgotPasswordProps) {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-2 block text-sm text-cream">Email Address</label>
+              <label className="mb-2 block text-sm text-pure-white">Email Address</label>
               <input
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}

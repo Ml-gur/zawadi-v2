@@ -82,11 +82,11 @@ export default function ComingSoonPage() {
             <Sparkles className="w-8 h-8 text-accent-green" />
           </div>
 
-          <h1 className="text-3xl font-semibold text-cream tracking-tight mb-2">
+          <h1 className="text-3xl font-semibold text-pure-white tracking-tight mb-2">
             Meet Your New Scholarship Co-Creator. <span className="text-muted">(Coming Soon)</span>
           </h1>
 
-          <p className="text-base font-semibold text-cream mb-5">
+          <p className="text-base font-semibold text-pure-white mb-5">
             Overcome writer's block and build applications that stand out.
           </p>
 
@@ -107,13 +107,13 @@ export default function ComingSoonPage() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 * i }}
-              className="flex items-start gap-4 p-5 rounded-lg bg-off-black border border-hairline/40"
+              className="flex items-start gap-4 p-5 rounded-lg bg-off-black-ink border border-ash/40"
             >
               <div className="w-10 h-10 rounded-lg bg-accent-lilac/10 flex items-center justify-center shrink-0 mt-0.5">
                 <f.icon className="w-5 h-5 text-accent-lilac" />
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-cream tracking-tight mb-1">{f.title}</h3>
+                <h3 className="text-sm font-semibold text-pure-white tracking-tight mb-1">{f.title}</h3>
                 <p className="text-xs text-muted leading-relaxed">{f.body}</p>
               </div>
             </motion.div>
@@ -143,7 +143,7 @@ export default function ComingSoonPage() {
                   onChange={(e) => { setEmail(e.target.value); if (status === 'error' || status === 'duplicate') { setStatus('idle'); setMessage(''); } }}
                   placeholder="Enter your email"
                   disabled={status === 'loading'}
-                  className="flex-1 min-h-[44px] p-3 bg-off-black border border-hairline rounded-lg text-sm text-cream placeholder:text-muted focus:border-accent-green focus:ring-1 focus:ring-accent-green/40 outline-none transition-colors disabled:opacity-50"
+                  className="flex-1 min-h-[44px] p-3 bg-off-black-ink border border-ash rounded-lg text-sm text-pure-white placeholder:text-muted focus:border-accent-green focus:ring-1 focus:ring-accent-green/40 outline-none transition-colors disabled:opacity-50"
                   required
                 />
                 <GhostPillButton

@@ -51,7 +51,7 @@ export default function PWAInstallPrompt() {
 
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-sweep px-4 w-full max-w-md">
-      <div className="bg-canvas border border-hairline rounded-lg p-4 flex flex-col gap-3">
+      <div className="bg-canvas border border-ash rounded-lg p-4 flex flex-col gap-3">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center text-on-primary text-lg font-black shrink-0">
             Z
@@ -65,7 +65,7 @@ export default function PWAInstallPrompt() {
           {!isIosDevice && deferredPrompt && (
             <button
               onClick={handleInstall}
-              className="btn-gradient-stroke inline-flex items-center text-cream text-xs font-semibold px-4 py-2 rounded-full transition-all hover:brightness-110 active:scale-[0.98] cursor-pointer shrink-0"
+              className="btn-gradient-stroke inline-flex items-center text-pure-white text-xs font-semibold px-4 py-2 rounded-full transition-all hover:brightness-110 active:scale-[0.98] cursor-pointer shrink-0"
             >
               Install
             </button>
@@ -80,7 +80,7 @@ export default function PWAInstallPrompt() {
         </div>
 
         {isIosDevice && (
-          <div className="bg-off-black rounded-lg p-3 text-[10px] text-muted leading-relaxed flex items-start gap-2">
+          <div className="bg-off-black-ink rounded-lg p-3 text-[10px] text-muted leading-relaxed flex items-start gap-2">
             <span className="material-symbols-outlined text-base shrink-0 mt-0.5">ios_share</span>
             <span>
               Tap the <strong>Share</strong> button <span className="text-xs">⎙</span> in the Safari toolbar, then scroll down and tap <strong>Add to Home Screen</strong>.

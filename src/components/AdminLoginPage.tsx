@@ -65,10 +65,10 @@ export default function AdminLoginPage() {
   return (
     <div className="min-h-[100dvh] flex items-center justify-center bg-canvas p-6">
       <div className="w-full max-w-sm">
-        <form onSubmit={handleSubmit} className="bg-off-black border border-hairline rounded-lg p-8 space-y-5">
+        <form onSubmit={handleSubmit} className="bg-off-black-ink border border-ash rounded-lg p-8 space-y-5">
           <div className="text-center">
-            <div className="w-10 h-10 rounded-lg border border-hairline flex items-center justify-center font-mono font-bold text-sm text-accent-green mx-auto mb-3">Z</div>
-            <h3 className="text-lg font-bold text-cream">Sign in</h3>
+            <div className="w-10 h-10 rounded-lg border border-ash flex items-center justify-center font-mono font-bold text-sm text-accent-green mx-auto mb-3">Z</div>
+            <h3 className="text-lg font-bold text-pure-white">Sign in</h3>
             <p className="text-xs text-muted mt-1">Enter your credentials to continue</p>
           </div>
 
@@ -83,7 +83,7 @@ export default function AdminLoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full p-3 bg-canvas border border-hairline rounded-lg text-sm text-cream placeholder:text-muted focus:border-accent-green outline-none transition-colors"
+              className="w-full p-3 bg-canvas border border-ash rounded-lg text-sm text-pure-white placeholder:text-muted focus:border-accent-green outline-none transition-colors"
               autoComplete="email"
               required
             />
@@ -96,7 +96,7 @@ export default function AdminLoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter password"
-              className="w-full p-3 bg-canvas border border-hairline rounded-lg text-sm text-cream placeholder:text-muted focus:border-accent-green outline-none transition-colors"
+              className="w-full p-3 bg-canvas border border-ash rounded-lg text-sm text-pure-white placeholder:text-muted focus:border-accent-green outline-none transition-colors"
               autoComplete="current-password"
               required
             />
@@ -105,7 +105,7 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="btn-gradient-stroke w-full py-3 text-cream font-semibold rounded-full transition-all cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
+            className="btn-gradient-stroke w-full py-3 text-pure-white font-semibold rounded-full transition-all cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
           >
             {loading ? 'Signing in...' : 'Sign in'}
           </button>

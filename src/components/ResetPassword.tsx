@@ -7,7 +7,7 @@ interface ResetPasswordProps {
 }
 
 const inputClass =
-  'w-full bg-canvas border border-hairline rounded-lg px-4 py-3 min-h-[44px] text-cream placeholder:text-muted focus:border-accent-green focus-visible:ring-2 focus-visible:ring-accent-green/40 outline-none transition-colors';
+  'w-full bg-canvas border border-ash rounded-lg px-4 py-3 min-h-[44px] text-pure-white placeholder:text-muted focus:border-accent-green focus-visible:ring-2 focus-visible:ring-accent-green/40 outline-none transition-colors';
 
 export default function ResetPassword({ onBackToLogin }: ResetPasswordProps) {
   const [password, setPassword] = useState('');
@@ -61,7 +61,7 @@ export default function ResetPassword({ onBackToLogin }: ResetPasswordProps) {
   if (hasSession === null) {
     return (
       <div className="min-h-[85vh] flex items-center justify-center p-6 bg-canvas bg-grid-pattern">
-        <div className="w-full max-w-md bg-off-black border border-hairline rounded-lg p-6 text-center">
+        <div className="w-full max-w-md bg-off-black-ink border border-ash rounded-lg p-6 text-center">
           <p className="text-xs text-muted">Checking reset link...</p>
         </div>
       </div>
@@ -71,8 +71,8 @@ export default function ResetPassword({ onBackToLogin }: ResetPasswordProps) {
   if (!hasSession) {
     return (
       <div className="min-h-[85vh] flex items-center justify-center p-6 bg-canvas bg-grid-pattern">
-        <div className="w-full max-w-md bg-off-black border border-hairline rounded-lg p-6 animate-sweep">
-          <h3 className="font-display text-2xl font-black text-cream text-center mb-2">Invalid Link</h3>
+        <div className="w-full max-w-md bg-off-black-ink border border-ash rounded-lg p-6 animate-sweep">
+          <h3 className="font-display text-2xl font-black text-pure-white text-center mb-2">Invalid Link</h3>
           <p className="text-xs text-muted text-center mb-8">
             This password reset link is invalid or has expired. Please request a new one.
           </p>
@@ -92,8 +92,8 @@ export default function ResetPassword({ onBackToLogin }: ResetPasswordProps) {
   if (success) {
     return (
       <div className="min-h-[85vh] flex items-center justify-center p-6 bg-canvas bg-grid-pattern">
-        <div className="w-full max-w-md bg-off-black border border-hairline rounded-lg p-6 animate-sweep">
-          <h3 className="font-display text-2xl font-black text-cream text-center mb-2">Password Reset</h3>
+        <div className="w-full max-w-md bg-off-black-ink border border-ash rounded-lg p-6 animate-sweep">
+          <h3 className="font-display text-2xl font-black text-pure-white text-center mb-2">Password Reset</h3>
           <div className="mb-8 rounded-lg border border-status-success/20 bg-status-success/10 p-4 text-xs text-status-success">
             Your password has been reset successfully. You can now sign in with your new password.
           </div>
@@ -112,8 +112,8 @@ export default function ResetPassword({ onBackToLogin }: ResetPasswordProps) {
 
   return (
     <div className="min-h-[85vh] flex items-center justify-center p-6 bg-canvas bg-grid-pattern">
-      <div className="w-full max-w-md bg-off-black border border-hairline rounded-lg p-6 animate-sweep">
-        <h3 className="font-display text-2xl font-black text-cream text-center mb-2">Set New Password</h3>
+      <div className="w-full max-w-md bg-off-black-ink border border-ash rounded-lg p-6 animate-sweep">
+        <h3 className="font-display text-2xl font-black text-pure-white text-center mb-2">Set New Password</h3>
         <p className="text-xs text-muted text-center mb-8">
           Enter your new password below.
         </p>
@@ -126,7 +126,7 @@ export default function ResetPassword({ onBackToLogin }: ResetPasswordProps) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-2 block text-sm text-cream">New Password</label>
+            <label className="mb-2 block text-sm text-pure-white">New Password</label>
             <input
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -138,7 +138,7 @@ export default function ResetPassword({ onBackToLogin }: ResetPasswordProps) {
           </div>
 
           <div>
-            <label className="mb-2 block text-sm text-cream">Confirm Password</label>
+            <label className="mb-2 block text-sm text-pure-white">Confirm Password</label>
             <input
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}

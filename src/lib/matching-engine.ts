@@ -687,7 +687,14 @@ export function computeScholarshipMatch(
 
   const userCountry = user.country || '';
   const scholRequiredDocs = schol.required_documents || [];
-  const eligibleCountries = schol.countries || schol.country || ['ALL'];
+  // Country list semantics: [] means "not yet specified" (e.g. freshly
+  // crawled listings) — treat as review-pass, never as hard disqualification.
+  const specifiedCountries = (Array.isArray(schol.countries) && schol.countries.length > 0)
+    ? schol.countries
+    : (Array.isArray(schol.country) && schol.country.length > 0)
+      ? schol.country
+      : null;
+  const eligibleCountries = specifiedCountries ?? ['ALL'];
   const eligibleDegreeLevels = schol.degree_levels || [];
   const eligibleFields = schol.fields_of_study || schol.fields || [];
 
@@ -721,7 +728,7 @@ export function computeScholarshipMatch(
 
   // 1. GATE G1: Country Eligibility
   const g1 = checkCountryEligibility(userCountry, eligibleCountries);
-  if (!g1.pass) {
+  if (!g1.pass && specifiedCountries) {
     disqualifyingReasons.push(g1.note);
     return {
       score: 0,
@@ -733,6 +740,10 @@ export function computeScholarshipMatch(
   }
 
   // 2. GATE G2: Minimum Work Experience — not hard-disqualifying
+  if (!specifiedCountries) {
+    matchReasons.push('Country eligibility is not yet specified for this listing — verify on the official page before applying');
+  }
+
   if (schol.work_experience_required) {
     const userWorkYrs = parseFloat(user.work_experience_years || '');
     if (isNaN(userWorkYrs)) {
