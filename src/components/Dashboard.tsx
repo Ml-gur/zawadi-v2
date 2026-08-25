@@ -81,7 +81,7 @@ export default function Dashboard({
           <span className="text-ed-eyebrow uppercase tracking-[1px] text-graphite mb-2 block">
             Welcome back, {firstName}
           </span>
-          <h1 className="text-3xl md:text-ed-h1-sm font-medium tracking-tight text-off-black-ink">
+          <h1 className="text-3xl md:text-3xl md:text-ed-h1-sm font-medium tracking-tight text-off-black-ink">
             Your AI Dashboard
           </h1>
         </div>
@@ -93,7 +93,7 @@ export default function Dashboard({
       </header>
 
       {/* Stats Grid (Bento Style) */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 relative">
+      <div className="grid grid-cols-2 md:grid-cols-12 gap-2.5 md:gap-6 relative">
 
         {/* AI Match Center Header (Full Width) */}
         <div
@@ -175,14 +175,14 @@ export default function Dashboard({
         {/* Applied Card */}
         <div
           onClick={() => navigate('/applications?stage=Applied')}
-          className="col-span-1 md:col-span-3 bg-electric-lime border border-ash rounded-ed p-6 flex flex-col justify-between min-h-[140px] cursor-pointer group transition-transform duration-300 hover:-translate-y-1"
+          className="col-span-1 md:col-span-3 bg-electric-lime border border-ash rounded-ed p-4 md:p-6 flex flex-col justify-between min-h-[120px] md:min-h-[140px] cursor-pointer group transition-transform duration-300 hover:-translate-y-1"
         >
           <div className="flex justify-between items-start">
             <CheckCircle2 className="text-off-black-ink w-7 h-7" strokeWidth={1.5} aria-hidden />
             <ArrowRight className="text-off-black-ink/60 opacity-0 group-hover:opacity-100 transition-all w-5 h-5" aria-hidden />
           </div>
           <div className="mt-2">
-            <div className="text-ed-h1-sm font-medium tracking-tight text-off-black-ink mb-0 leading-none">{appliedCount}</div>
+            <div className="text-3xl md:text-ed-h1-sm font-medium tracking-tight text-off-black-ink mb-0 leading-none">{appliedCount}</div>
             <p className="text-ed-caption uppercase tracking-wider text-graphite mt-1">Applied Scholarships</p>
           </div>
         </div>
@@ -190,14 +190,14 @@ export default function Dashboard({
         {/* Drafting Card */}
         <div
           onClick={() => navigate('/applications?stage=Drafting')}
-          className="col-span-1 md:col-span-3 bg-parchment border border-ash rounded-ed p-6 flex flex-col justify-between min-h-[140px] cursor-pointer group transition-transform duration-300 hover:-translate-y-1"
+          className="col-span-1 md:col-span-3 bg-parchment border border-ash rounded-ed p-4 md:p-6 flex flex-col justify-between min-h-[120px] md:min-h-[140px] cursor-pointer group transition-transform duration-300 hover:-translate-y-1"
         >
           <div className="flex justify-between items-start">
             <NotebookPen className="text-graphite w-7 h-7" strokeWidth={1.5} aria-hidden />
             <ArrowRight className="text-graphite opacity-0 group-hover:opacity-100 transition-all w-5 h-5" aria-hidden />
           </div>
           <div className="mt-2">
-            <div className="text-ed-h1-sm font-medium tracking-tight text-off-black-ink mb-0 leading-none">{draftingCount}</div>
+            <div className="text-3xl md:text-ed-h1-sm font-medium tracking-tight text-off-black-ink mb-0 leading-none">{draftingCount}</div>
             <p className="text-ed-caption uppercase tracking-wider text-graphite mt-1">Drafting Applications</p>
           </div>
         </div>
@@ -205,14 +205,14 @@ export default function Dashboard({
         {/* Saved Card */}
         <div
           onClick={() => navigate('/applications?stage=Saved')}
-          className="col-span-1 md:col-span-3 bg-pure-white border border-ash rounded-ed p-6 flex flex-col justify-between min-h-[140px] cursor-pointer group transition-transform duration-300 hover:-translate-y-1"
+          className="col-span-1 md:col-span-3 bg-pure-white border border-ash rounded-ed p-4 md:p-6 flex flex-col justify-between min-h-[120px] md:min-h-[140px] cursor-pointer group transition-transform duration-300 hover:-translate-y-1"
         >
           <div className="flex justify-between items-start">
             <Bookmark className="text-graphite w-7 h-7" strokeWidth={1.5} aria-hidden />
             <ArrowRight className="text-graphite opacity-0 group-hover:opacity-100 transition-all w-5 h-5" aria-hidden />
           </div>
           <div className="mt-2">
-            <div className="text-ed-h1-sm font-medium tracking-tight text-off-black-ink mb-0 leading-none">{savedCount}</div>
+            <div className="text-3xl md:text-ed-h1-sm font-medium tracking-tight text-off-black-ink mb-0 leading-none">{savedCount}</div>
             <p className="text-ed-caption uppercase tracking-wider text-graphite mt-1">Saved Opportunities</p>
           </div>
         </div>
@@ -220,14 +220,14 @@ export default function Dashboard({
         {/* Deadlines Card (Inverted Charcoal Style) */}
         <div
           onClick={() => navigate('/scholarships?sort=deadline')}
-          className="col-span-1 md:col-span-3 bg-deep-charcoal rounded-ed p-6 flex flex-col justify-between min-h-[140px] text-pure-white cursor-pointer group transition-all duration-300 hover:bg-off-black-ink hover:-translate-y-1"
+          className="col-span-1 md:col-span-3 bg-deep-charcoal rounded-ed p-4 md:p-6 flex flex-col justify-between min-h-[120px] md:min-h-[140px] text-pure-white cursor-pointer group transition-all duration-300 hover:bg-off-black-ink hover:-translate-y-1"
         >
           <div className="flex justify-between items-start">
             <CalendarClock className="text-electric-lime w-7 h-7" strokeWidth={1.5} aria-hidden />
             <ArrowRight className="text-smoke opacity-0 group-hover:opacity-100 transition-all w-5 h-5" aria-hidden />
           </div>
           <div className="mt-2">
-            <div className="text-ed-h1-sm font-medium tracking-tight text-electric-lime mb-0 leading-none">{urgentCount}</div>
+            <div className="text-3xl md:text-ed-h1-sm font-medium tracking-tight text-electric-lime mb-0 leading-none">{urgentCount}</div>
             <p className="text-ed-caption uppercase tracking-wider text-smoke mt-1">Critical Deadlines</p>
           </div>
         </div>
@@ -235,8 +235,8 @@ export default function Dashboard({
       </div>
 
       {/* Critical Deadlines Section */}
-      <section className="mb-20">
-        <div className="flex justify-between items-end border-b border-ash pb-4 mb-10">
+      <section className="mb-10 md:mb-20">
+        <div className="flex justify-between items-end border-b border-ash pb-4 mb-5 md:mb-10">
           <div className="flex items-center gap-4">
             <h3 className="text-2xl font-medium text-off-black-ink">Critical Deadlines</h3>
             {urgentCount > 0 && (
@@ -299,8 +299,8 @@ export default function Dashboard({
       </section>
 
       {/* Recent Opportunities Section */}
-      <section className="mb-20">
-        <div className="flex justify-between items-end border-b border-ash pb-4 mb-10">
+      <section className="mb-10 md:mb-20">
+        <div className="flex justify-between items-end border-b border-ash pb-4 mb-5 md:mb-10">
           <h3 className="text-2xl font-medium text-off-black-ink">Recent Opportunities</h3>
           <Link to="/scholarships/browse" className="text-base font-medium text-graphite border-b border-graphite hover:text-off-black-ink hover:border-off-black-ink transition-colors">
             View All

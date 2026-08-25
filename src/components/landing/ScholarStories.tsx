@@ -1,5 +1,4 @@
 import { Quote } from 'lucide-react';
-import { FadeUp } from './primitives';
 
 interface Story {
   initials: string;
@@ -71,80 +70,76 @@ const STORIES: Story[] = [
 
 export default function ScholarStories() {
   return (
-    <section id="scholar-stories" className="bg-pure-white">
+    <section id="scholar-stories" className="bg-pure-white overflow-hidden">
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-20 md:py-32">
-        <FadeUp>
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 border-b border-ash pb-10 mb-10 md:mb-14">
-            <h2 className="text-ed-h1-sm md:text-ed-h1 text-off-black-ink max-w-[16ch]">
-              Scholars, placed worldwide.
-            </h2>
-            <p className="text-ed-body text-graphite max-w-[38ch] md:pb-2">
-              Students across Sub-Saharan Africa used matching, deadline
-              tracking and essay drafts to reach funded programs in the UK,
-              Germany, Japan, Canada and Australia.
-            </p>
-          </div>
-        </FadeUp>
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 border-b border-ash pb-10 mb-10 md:mb-14">
+          <h2 className="text-ed-h1-sm md:text-ed-h1 text-off-black-ink max-w-[16ch]">
+            Scholars, placed worldwide.
+          </h2>
+          <p className="text-ed-body text-graphite max-w-[38ch] md:pb-2">
+            Students across Sub-Saharan Africa used matching, deadline
+            tracking and essay drafts to reach funded programs in the UK,
+            Germany, Japan, Canada and Australia.
+          </p>
+        </div>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
-          {STORIES.map((story, i) => (
-            <FadeUp key={story.initials} delay={i * 0.08}>
-              <figure
-                className={`group h-full rounded-ed p-8 flex flex-col justify-between transition-transform duration-300 hover:-translate-y-1 ${
-                  story.accent ? 'bg-electric-lime' : 'bg-parchment border border-ash'
-                }`}
-              >
-                <div>
-                  <span
-                    aria-hidden
-                    className={`inline-flex items-center justify-center w-9 h-9 rounded-full mb-5 transition-transform duration-500 group-hover:-rotate-6 ${
-                      story.accent ? 'bg-off-black-ink text-electric-lime' : 'bg-electric-lime text-off-black-ink'
-                    }`}
-                  >
-                    <Quote className="w-4 h-4" strokeWidth={2} />
-                  </span>
-                  <div className="flex items-center gap-2 flex-wrap mb-6">
-                    <span
-                      className={`inline-block rounded-full px-3 py-1 text-ed-eyebrow uppercase font-medium ${
-                        story.accent
-                          ? 'bg-off-black-ink text-electric-lime'
-                          : 'bg-electric-lime text-off-black-ink'
-                      }`}
-                    >
-                      {story.tag}
-                    </span>
-                    <span className="text-ed-body-sm text-graphite">{story.program}</span>
-                  </div>
-
-                  <blockquote className={`text-ed-body leading-relaxed ${story.accent ? 'text-off-black-ink' : 'text-on-surface'}`}>
-                    “{story.quote}”
-                  </blockquote>
-                </div>
-
-                <figcaption
-                  className={`mt-8 pt-6 border-t flex items-center gap-3 ${
-                    story.accent ? 'border-off-black-ink/20' : 'border-ash'
+      <div className="pb-20 md:pb-32 -mt-10 md:-mt-16 [mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent)]">
+        <div className="marquee-track gap-5 md:gap-6 pr-5 md:pr-6">
+          {[...STORIES, ...STORIES].map((story, i) => (
+            <figure
+              key={`${story.initials}-${i}`}
+              aria-hidden={i >= STORIES.length}
+              className={`w-[320px] md:w-[400px] shrink-0 rounded-ed p-6 md:p-8 flex flex-col justify-between ${
+                story.accent ? 'bg-electric-lime' : 'bg-parchment border border-ash'
+              }`}
+            >
+              <div>
+                <span
+                  aria-hidden
+                  className={`inline-flex items-center justify-center w-9 h-9 rounded-full mb-5 ${
+                    story.accent ? 'bg-off-black-ink text-electric-lime' : 'bg-electric-lime text-off-black-ink'
                   }`}
                 >
+                  <Quote className="w-4 h-4" strokeWidth={2} />
+                </span>
+                <div className="flex items-center gap-2 flex-wrap mb-6">
                   <span
-                    aria-hidden
-                    className={`w-10 h-10 rounded-full inline-flex items-center justify-center text-xs font-medium shrink-0 ${
+                    className={`inline-block rounded-full px-3 py-1 text-ed-eyebrow uppercase font-medium ${
                       story.accent
-                        ? 'bg-pure-white text-off-black-ink'
+                        ? 'bg-off-black-ink text-electric-lime'
                         : 'bg-electric-lime text-off-black-ink'
                     }`}
                   >
-                    {story.initials}
+                    {story.tag}
                   </span>
-                  <span>
-                    <span className="relative block w-fit text-ed-body-sm font-medium text-off-black-ink after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:w-full after:origin-left after:scale-x-0 after:bg-electric-lime after:transition-transform after:duration-300 group-hover:after:scale-x-100">
-                      {story.name}
-                    </span>
-                    <span className="block text-ed-caption normal-case tracking-normal text-graphite mt-0.5">{story.route}</span>
-                  </span>
-                </figcaption>
-              </figure>
-            </FadeUp>
+                  <span className="text-ed-body-sm text-graphite">{story.program}</span>
+                </div>
+
+                <blockquote className={`text-ed-body leading-relaxed ${story.accent ? 'text-off-black-ink' : 'text-on-surface'}`}>
+                  “{story.quote}”
+                </blockquote>
+              </div>
+
+              <figcaption
+                className={`mt-8 pt-6 border-t flex items-center gap-3 ${
+                  story.accent ? 'border-off-black-ink/20' : 'border-ash'
+                }`}
+              >
+                <span
+                  aria-hidden
+                  className={`w-10 h-10 rounded-full inline-flex items-center justify-center text-xs font-medium shrink-0 ${
+                    story.accent ? 'bg-pure-white text-off-black-ink' : 'bg-electric-lime text-off-black-ink'
+                  }`}
+                >
+                  {story.initials}
+                </span>
+                <span>
+                  <span className="block text-ed-body-sm font-medium text-off-black-ink">{story.name}</span>
+                  <span className="block text-ed-caption normal-case tracking-normal text-graphite mt-0.5">{story.route}</span>
+                </span>
+              </figcaption>
+            </figure>
           ))}
         </div>
       </div>
