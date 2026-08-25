@@ -58,3 +58,37 @@ text extraction → document-analysis fn (DEEPSEEK key) → documents.analysis_s
 completed + profiles.doc_gpa_* enrichment → matching consumes extracted values.
 USER ACTION: supabase functions deploy (all 7) + secrets set on new project; auto-retry
 heals old pending docs on next vault visit after deploy.
+
+## Session 5 — migration chain fix for fresh project (2026-08-25)
+ROOT CAUSE of `42P01 relation "contact_submissions" does not exist`: numbered
+migrations were snapshotted early in the OLD project's life; database.sql holds
+the real evolved schema and the chain never caught up. On fresh project
+(raomkgvnkgvbbezffpyb) 005's CREATE POLICY hit a table no migration creates.
+Latent breaks behind it: 010 INSERTs need renamed columns (countries/
+fields_of_study/host_institution); signup trigger needs profiles.created_at;
+doc pipeline needs documents.analysis_status family; 014 REVOKEs
+increment_view_count/auto_unpublish which migrations never created.
+FIX: new supabase/migrations/0045_schema_parity.sql (idempotent DDL port from
+database.sql: renames, ~76 missing columns incl. created_at, type fixes
+deadline TEXT→DATE / verified_at→TIMESTAMPTZ, bot_ingestions v2 reshape,
+8 missing tables, missing functions+triggers, RLS enable on 5 policy-only
+tables, full index set). Renamed 010 from UTF-16LE/CRLF to UTF-8.
+RUN ORDER: numeric 001→015 (0045 sorts between 004 and 005 under C + UTF-8 locales).
+USER ACTION: paste 0045 then continue 005→015 in SQL editor; then data-copy script.
+FOLLOW-UP: 001-015 applied through 009 OK; 010 then failed 42804 (ARRAY[...] text[]
+literals vs jsonb columns — file was generated for the wrong type). Converted all
+160 ARRAY[...] to '[...]'::jsonb literals (script /tmp/opencode/fix-array-to-jsonb.mjs,
+all 160 JSON-validated); storage mime_types in 004 left as text[] legitimately.
+FOLLOW-UP 2: 012 failed 42883 text = uuid — newer Supabase storage schema has
+storage.objects.owner_id TEXT; cast both sides (owner_id::text = auth.uid()::text)
+in the three docs_owner_* policies. Re-run full 012 (idempotent).
+FOLLOW-UP 3: migrations 001→015 fully applied on new project; super admin created;
+all 7 edge functions deployed via CLI 2.111 (Docker bundling; earlier failure came
+from stale dashboard-editor code). Verified: functions list ACTIVE ×7, OPTIONS→200
+(CORS fix live), unauth GET→401 (JWT gate live). REMAINING: supabase secrets set
+(AI keys, Paystack, ADMIN_EMAIL, SETUP_ADMIN_SECRET), data-copy script, rotate the
+shared access token.
+FOLLOW-UP 4: data-copy failed once — old project has scholarships.slug (postdates
+database.sql). Added slug TEXT + unique index via Management API query endpoint,
+captured as migrations/016_slug_column.sql. Re-run: 237/237 published scholarships
+copied; verified via anon REST (slug/countries/deadline/iso2 all intact).

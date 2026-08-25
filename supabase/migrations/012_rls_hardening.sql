@@ -123,12 +123,14 @@ INSERT INTO storage.buckets (id, name, public)
 VALUES ('scholarship-docs', 'scholarship-docs', false)
 ON CONFLICT (id) DO NOTHING;
 
+-- owner_id is TEXT in newer storage schemas (uuid in older ones); compare
+-- both sides as text so this policy applies on any project vintage.
 DROP POLICY IF EXISTS "docs_owner_select" ON storage.objects;
 CREATE POLICY "docs_owner_select" ON storage.objects
   FOR SELECT TO authenticated
   USING (
     bucket_id = 'scholarship-docs'
-    AND owner_id = auth.uid()
+    AND owner_id::text = auth.uid()::text
   );
 
 DROP POLICY IF EXISTS "docs_owner_insert" ON storage.objects;
@@ -136,7 +138,7 @@ CREATE POLICY "docs_owner_insert" ON storage.objects
   FOR INSERT TO authenticated
   WITH CHECK (
     bucket_id = 'scholarship-docs'
-    AND owner_id = auth.uid()
+    AND owner_id::text = auth.uid()::text
   );
 
 DROP POLICY IF EXISTS "docs_owner_delete" ON storage.objects;
@@ -144,7 +146,7 @@ CREATE POLICY "docs_owner_delete" ON storage.objects
   FOR DELETE TO authenticated
   USING (
     bucket_id = 'scholarship-docs'
-    AND owner_id = auth.uid()
+    AND owner_id::text = auth.uid()::text
   );
 
 -- ── Verification queries (run after applying) ───────────────────
