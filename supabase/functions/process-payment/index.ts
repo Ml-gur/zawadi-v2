@@ -1,6 +1,8 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+let currentOrigin = 'https://www.techsari.online'
+
 // ─── Environment ──────────────────────────────────────────────────
 const ENVIRONMENT = Deno.env.get('ENVIRONMENT') || 'development'
 const PRODUCTION = ENVIRONMENT === 'production'
@@ -15,6 +17,17 @@ function getCorsOrigin(req: Request): string {
   if (ALLOWED_ORIGINS.includes(origin)) return origin
   return ALLOWED_ORIGINS[0]
 }
+
+// ─── CORS: strict origin allowlist ─────────────────────────────
+function allowedOrigin(req: Request): string {
+  const o = req.headers.get('Origin') || ''
+  if (/^https:\/\/(www\.)?techsari\.online$/.test(o)) return o
+  if (/^https:\/\/[a-z0-9-]+\.vercel\.app$/.test(o)) return o
+  if (/^http:\/\/localhost:\d+$/.test(o)) return o
+  return 'https://www.techsari.online'
+}
+
+
 
 function corsResponse(body: unknown, status = 200, req?: Request) {
   const origin = req ? getCorsOrigin(req) : ALLOWED_ORIGINS[0]
@@ -89,6 +102,7 @@ function normalizePaystackMetadata(metadata: any): Record<string, any> {
 
 // ─── Main handler ─────────────────────────────────────────────────
 serve(async (req: Request) => {
+  currentOrigin = allowedOrigin(req)
   if (req.method === 'OPTIONS') {
     const origin = getCorsOrigin(req)
     return new Response(null, {
@@ -111,7 +125,7 @@ serve(async (req: Request) => {
 
     // ── Webhook: no auth required ──
     if (url.pathname.endsWith('/webhook') || body.action === 'webhook') {
-      return handleWebhook(req, supabase, body)
+      return handleWebhook(supabase, body)
     }
 
     // ── Auth for all other actions ──

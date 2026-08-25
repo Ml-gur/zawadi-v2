@@ -1,6 +1,8 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+let currentOrigin = 'https://www.techsari.online'
+
 interface AiConfigRow {
   provider?: string
   openai_key?: string | null
@@ -157,10 +159,21 @@ async function callAiProvider(
 }
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': currentOrigin,
   'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-api-version',
 }
+
+// ─── CORS: strict origin allowlist ─────────────────────────────
+function allowedOrigin(req: Request): string {
+  const o = req.headers.get('Origin') || ''
+  if (/^https:\/\/(www\.)?techsari\.online$/.test(o)) return o
+  if (/^https:\/\/[a-z0-9-]+\.vercel\.app$/.test(o)) return o
+  if (/^http:\/\/localhost:\d+$/.test(o)) return o
+  return 'https://www.techsari.online'
+}
+
+
 
 function corsResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -184,8 +197,9 @@ const PLAN_LABELS: Record<string, string> = {
 }
 
 serve(async (req: Request) => {
+  currentOrigin = allowedOrigin(req)
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { headers: { ...corsHeaders, 'Access-Control-Allow-Origin': allowedOrigin(req) } })
   }
 
   try {

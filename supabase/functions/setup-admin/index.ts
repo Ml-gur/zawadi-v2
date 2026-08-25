@@ -1,17 +1,29 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+let currentOrigin = 'https://www.techsari.online'
+
 serve(async (req: Request) => {
-  const origin = req.headers.get('origin') || ''
-  const corsHeaders = {
-    'Access-Control-Allow-Origin': origin,
+  currentOrigin = allowedOrigin(req)
+function allowedOrigin(req: Request): string {
+  const o = req.headers.get('Origin') || ''
+  if (/^https:\/\/(www\.)?techsari\.online$/.test(o)) return o
+  if (/^https:\/\/[a-z0-9-]+\.vercel\.app$/.test(o)) return o
+  if (/^http:\/\/localhost:\d+$/.test(o)) return o
+  return 'https://www.techsari.online'
+}
+
+
+
+  const corsHeaders = (r: Request) => ({
+    'Access-Control-Allow-Origin': allowedOrigin(r),
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-api-version',
     'Content-Type': 'application/json',
-  }
+  })
 
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders(req) })
   }
 
   try {
@@ -20,7 +32,7 @@ serve(async (req: Request) => {
     if (!expected || setupSecret !== expected) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
-        headers: corsHeaders,
+        headers: corsHeaders(req),
       })
     }
 
@@ -28,7 +40,7 @@ serve(async (req: Request) => {
     if (!email || !password) {
       return new Response(JSON.stringify({ error: 'email and password required' }), {
         status: 400,
-        headers: corsHeaders,
+        headers: corsHeaders(req),
       })
     }
 
@@ -41,7 +53,7 @@ serve(async (req: Request) => {
     if (existing) {
       return new Response(JSON.stringify({ error: 'Admin auth user already exists', user_id: existing.id }), {
         status: 409,
-        headers: corsHeaders,
+        headers: corsHeaders(req),
       })
     }
 
@@ -64,7 +76,7 @@ serve(async (req: Request) => {
     if (createErr || !newUser?.user) {
       return new Response(JSON.stringify({ error: createErr?.message || 'Failed to create user' }), {
         status: 500,
-        headers: corsHeaders,
+        headers: corsHeaders(req),
       })
     }
 

@@ -1,6 +1,8 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+let currentOrigin = 'https://www.techsari.online'
+
 // ─── CORS ─────────────────────────────────────────────────────────
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -8,16 +10,27 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-api-version',
 }
 
+// ─── CORS: strict origin allowlist ─────────────────────────────
+function allowedOrigin(req: Request): string {
+  const o = req.headers.get('Origin') || ''
+  if (/^https:\/\/(www\.)?techsari\.online$/.test(o)) return o
+  if (/^https:\/\/[a-z0-9-]+\.vercel\.app$/.test(o)) return o
+  if (/^http:\/\/localhost:\d+$/.test(o)) return o
+  return 'https://www.techsari.online'
+}
+
+
+
 function ok(data: unknown) {
   return new Response(JSON.stringify({ ok: true, data }), {
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    headers: { ...corsHeaders, 'Access-Control-Allow-Origin': currentOrigin, 'Content-Type': 'application/json' },
   })
 }
 
 function fail(error: string, status = 400) {
   return new Response(JSON.stringify({ ok: false, error }), {
     status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    headers: { ...corsHeaders, 'Access-Control-Allow-Origin': currentOrigin, 'Content-Type': 'application/json' },
   })
 }
 
@@ -335,7 +348,8 @@ async function actionAiTest(supabase: ReturnType<typeof createClient>) {
 
 // ─── Main handler ─────────────────────────────────────────────────
 serve(async (req: Request) => {
-  if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders })
+  currentOrigin = allowedOrigin(req)
+  if (req.method === 'OPTIONS') return new Response(null, { headers: { ...corsHeaders, 'Access-Control-Allow-Origin': allowedOrigin(req) } })
 
   try {
     const authHeader = req.headers.get('Authorization')
