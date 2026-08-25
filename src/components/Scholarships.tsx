@@ -6,13 +6,14 @@ import { Columns2, Download, Bell, RefreshCw, X, CalendarClock, Sparkles } from 
 import toast from 'react-hot-toast';
 import { Scholarship, ApplicationTracker, DocumentVaultItem } from '../types';
 import { AFRICAN_COUNTRIES } from '../config/matching-config';
+import { flagFor } from '../lib/flags';
 import { Lock, Search, GraduationCap, Bookmark, ArrowLeft, ArrowDown } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { SEO } from './SEO';
 import ShareButton from './ShareButton';
 import BrowseCard from '../pages/public/BrowseCard';
 import TrackerTable from './TrackerTable';
-import { LayoutGrid, Rows3 } from 'lucide-react';
+import { LayoutGrid, Rows3, SlidersHorizontal } from 'lucide-react';
 
 interface ScholarshipsProps {
   user?: any;
@@ -47,6 +48,7 @@ export default function Scholarships({
 
   // Public mode filters
   const [publicSearch, setPublicSearch] = useState('');
+  const [publicFiltersOpen, setPublicFiltersOpen] = useState(false);
   const [publicCountry, setPublicCountry] = useState('');
   const [publicDegree, setPublicDegree] = useState('');
   const [publicNoIelts, setPublicNoIelts] = useState(false);
@@ -262,20 +264,39 @@ export default function Scholarships({
           </div>
         </div>
 
-        {/* Filter Bar — editorial white */}
-        <div className="rounded-ed border border-ash/70 bg-pure-white p-6 md:p-8">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-4">
-            <div className="lg:col-span-2 relative">
+        {/* Filter Bar — editorial white; selects collapse behind a toggle on mobile */}
+        <div className="rounded-ed border border-ash/70 bg-pure-white p-4 md:p-8">
+          <div className="flex flex-col md:grid md:grid-cols-4 gap-4 mb-4">
+            <div className="md:col-span-2 relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-graphite pointer-events-none" aria-hidden />
               <input
                 value={publicSearch}
                 onChange={(e) => setPublicSearch(e.target.value)}
                 placeholder="Search scholarships, keywords, or sponsors…"
                 aria-label="Search scholarships"
-                className="w-full pl-12 pr-4 py-3 rounded-lg border border-ash bg-pure-white text-ed-body placeholder:text-graphite focus:outline-none focus:border-graphite hover:border-graphite transition-colors"
+                className="w-full pl-12 pr-4 py-3 min-h-[44px] rounded-lg border border-ash bg-pure-white text-ed-body placeholder:text-graphite focus:outline-none focus:border-graphite hover:border-graphite transition-colors"
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:col-span-2 gap-3">
+            <div className="md:hidden flex items-center justify-between gap-3">
+              <button
+                onClick={() => setPublicFiltersOpen(o => !o)}
+                aria-expanded={publicFiltersOpen}
+                className={`inline-flex items-center gap-2 rounded-lg border px-4 min-h-[44px] text-ed-body-sm font-medium transition-colors cursor-pointer ${
+                  publicFiltersOpen || publicCountry || publicDegree || publicNoIelts
+                    ? 'border-off-black-ink text-off-black-ink bg-mist'
+                    : 'border-ash text-graphite hover:border-graphite'
+                }`}
+              >
+                <SlidersHorizontal className="w-4 h-4" aria-hidden />
+                Filters
+                {(publicCountry ? 1 : 0) + (publicDegree ? 1 : 0) + (publicNoIelts ? 1 : 0) > 0 && (
+                  <span className="inline-flex min-w-5 h-5 px-1 items-center justify-center rounded-full bg-electric-lime text-[10px] font-medium text-off-black-ink tabular-nums">
+                    {(publicCountry ? 1 : 0) + (publicDegree ? 1 : 0) + (publicNoIelts ? 1 : 0)}
+                  </span>
+                )}
+              </button>
+            </div>
+            <div className={`${publicFiltersOpen ? 'grid' : 'hidden'} md:grid grid-cols-1 sm:grid-cols-3 md:col-span-2 gap-3`}>
               <select
                 value={publicCountry}
                 onChange={(e) => setPublicCountry(e.target.value)}
@@ -340,9 +361,9 @@ export default function Scholarships({
 
         {/* Scholarship Cards Grid — editorial */}
         {publicLoading && publicScholarships.length === 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-5 lg:gap-6">
             {[1, 2, 3, 4, 5, 6].map(i => (
-              <div key={i} className="rounded-ed border border-ash/70 bg-pure-white p-8 min-h-[300px] animate-pulse">
+              <div key={i} className="rounded-ed border border-ash/70 bg-pure-white p-4 md:p-8 min-h-[180px] md:min-h-[300px] animate-pulse">
                 <div className="h-4 w-24 bg-mist rounded-full mb-6" />
                 <div className="h-5 w-3/4 bg-mist rounded mb-3" />
                 <div className="h-3 w-1/2 bg-mist rounded mb-6" />
@@ -353,7 +374,7 @@ export default function Scholarships({
           </div>
         ) : filteredPublic.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-5 lg:gap-6">
               {filteredPublic.map((s, idx) => {
                 const isDark = idx % 3 === 2;
                 const urgency = (() => {
@@ -369,38 +390,41 @@ export default function Scholarships({
                 const category = (s.degree_levels?.[0] || s.funding_type || 'Opportunity').toUpperCase();
 
                 return (
-                  <div key={s.id} onClick={() => setSelectedSchol(s)} className={isDark ? 'md:col-span-2 lg:col-span-1 cursor-pointer' : 'cursor-pointer'}>
-                    <article className={`group h-full min-h-[300px] rounded-ed p-7 md:p-8 flex flex-col justify-between transition-transform duration-300 hover:-translate-y-1 ${isDark ? 'bg-deep-charcoal text-pure-white' : 'bg-pure-white border border-ash/70'}`}>
+                  <div key={s.id} onClick={() => setSelectedSchol(s)} className={`h-full ${isDark ? 'col-span-2 md:col-span-2 lg:col-span-1 cursor-pointer' : 'cursor-pointer'}`}>
+                    <article className={`group h-full min-h-0 md:min-h-[300px] rounded-ed p-4 md:p-7 lg:p-8 flex flex-col justify-between transition-transform duration-300 hover:-translate-y-1 ${isDark ? 'bg-deep-charcoal text-pure-white' : 'bg-pure-white border border-ash/70'}`}>
                       <div>
-                        <div className="flex items-start justify-between gap-3 mb-4">
-                          <span className={`text-ed-eyebrow uppercase pt-1 ${isDark ? 'text-smoke' : 'text-graphite'}`}>{category}</span>
+                        <div className="flex items-start justify-between gap-2 mb-2 md:mb-4">
+                          <span className={`text-ed-eyebrow uppercase pt-1 ${isDark ? 'text-smoke' : 'text-graphite'}`}>
+                            <span aria-hidden className="md:hidden">{flagFor(s)}</span>
+                            <span className="hidden md:inline">{category}</span>
+                          </span>
                           {urgency.isClosing ? (
-                            <span className="shrink-0 rounded-full bg-electric-lime px-3 py-1 text-ed-caption uppercase text-off-black-ink">Closing soon</span>
+                            <span className="shrink-0 rounded-full bg-electric-lime px-2 md:px-3 py-0.5 md:py-1 text-[9px] md:text-ed-caption uppercase text-off-black-ink">{urgency.label}</span>
                           ) : (
-                            <span className={`shrink-0 rounded-full border px-3 py-1 text-ed-caption uppercase ${isDark ? 'border-stone text-smoke' : 'border-ash text-graphite'}`}>{urgency.label}</span>
+                            <span className={`shrink-0 rounded-full border px-2 md:px-3 py-0.5 md:py-1 text-[9px] md:text-ed-caption uppercase ${isDark ? 'border-stone text-smoke' : 'border-ash text-graphite'}`}>{urgency.label}</span>
                           )}
                         </div>
-                        <h3 className={`text-ed-h2 leading-tight line-clamp-2 ${isDark ? 'text-pure-white' : 'text-off-black-ink'}`}>{s.name}</h3>
-                        {s.provider && <p className={`mt-1 text-ed-body-sm font-medium ${isDark ? 'text-pure-white/80' : 'text-off-black-ink/80'}`}>{s.provider}</p>}
-                        {hostInfo && <p className={`text-xs flex items-center gap-1 mt-1 ${isDark ? 'text-smoke' : 'text-graphite'}`}><GraduationCap className="w-3 h-3 shrink-0" />{hostInfo}</p>}
+                        <h3 className={`text-[15px] leading-snug font-medium line-clamp-3 md:text-ed-h2 md:leading-tight md:line-clamp-2 ${isDark ? 'text-pure-white' : 'text-off-black-ink'}`}>{s.name}</h3>
+                        {s.provider && <p className={`mt-1 text-[11px] md:text-ed-body-sm font-medium truncate ${isDark ? 'text-pure-white/80' : 'text-off-black-ink/80'}`}>{s.provider}</p>}
+                        {hostInfo && <p className={`hidden md:flex text-xs items-center gap-1 mt-1 ${isDark ? 'text-smoke' : 'text-graphite'}`}><GraduationCap className="w-3 h-3 shrink-0" />{hostInfo}</p>}
                       {(s.countries || s.country) && (s.countries || s.country).length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-3">
+                        <div className="hidden md:flex flex-wrap gap-1 mt-3">
                           {(s.countries || s.country || []).slice(0, 3).map((c: string) => (
                             <span key={c} className={`text-xs px-2 py-0.5 rounded-full border ${isDark ? 'border-stone text-smoke' : 'border-ash text-graphite'}`}>{c}</span>
                           ))}
                           {(s.countries || s.country || []).length > 3 && <span className={`text-xs ${isDark ? 'text-smoke' : 'text-graphite'}`}>+{((s.countries || s.country || []).length - 3)} more</span>}
                         </div>
                       )}
-                      {s.amount && <p className={`mt-3 text-ed-body-sm font-medium ${isDark ? 'text-electric-lime' : 'text-graphite'}`}>{s.amount}</p>}
-                      <div className="mt-3 flex flex-wrap gap-1.5">
+                      {s.amount && <p className={`mt-2 md:mt-3 text-[11px] md:text-ed-body-sm font-medium truncate ${isDark ? 'text-electric-lime' : 'text-graphite'}`}>{s.amount}</p>}
+                      <div className="mt-3 hidden md:flex flex-wrap gap-1.5">
                         {s.funding_type && <span className={`text-xs px-2.5 py-0.5 rounded-full border ${isDark ? 'border-stone text-smoke' : 'border-ash text-graphite'}`}>{s.funding_type === 'Full' ? 'Full Funding' : 'Partial Funding'}</span>}
                         {s.no_ielts && <span className={`text-xs px-2.5 py-0.5 rounded-full border ${isDark ? 'border-electric-lime/50 text-electric-lime' : 'border-ash text-graphite'}`}>No IELTS</span>}
                       </div>
                       </div>
-                      <div className={`mt-6 pt-4 border-t flex items-center justify-between gap-3 ${isDark ? 'border-stone' : 'border-ash'}`}>
+                      <div className={`mt-3 md:mt-6 pt-2.5 md:pt-4 border-t flex items-center justify-between gap-2 md:gap-3 ${isDark ? 'border-stone' : 'border-ash'}`}>
                         <ShareButton url={`/scholarships/browse/${s.slug}`} iconOnly size="sm" tone={isDark ? 'dark' : 'light'} />
-                        <span className={`flex items-center gap-1.5 text-xs ${isDark ? 'text-smoke' : 'text-graphite'}`}><Lock className="w-3 h-3" />Sign up for match score</span>
-                        <span className={`text-sm font-medium ${isDark ? 'text-electric-lime' : 'text-off-black-ink'}`}>Sign Up Free</span>
+                        <span className={`hidden md:flex items-center gap-1.5 text-xs ${isDark ? 'text-smoke' : 'text-graphite'}`}><Lock className="w-3 h-3" />Sign up for match score</span>
+                        <span className={`text-xs md:text-sm font-medium ${isDark ? 'text-electric-lime' : 'text-off-black-ink'}`}>Sign Up Free</span>
                       </div>
                     </article>
                   </div>
