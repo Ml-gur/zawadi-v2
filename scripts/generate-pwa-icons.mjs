@@ -3,35 +3,42 @@ import fs from 'fs';
 import path from 'path';
 
 const publicDir = path.resolve('public');
+const LOGO = path.resolve('Techsari logo.png');
 
-function createSVG(width, height, maskable) {
-  const r = Math.round(width * 0.16);
-  const cx = width / 2;
-  const cy = height / 2;
-  const fontSize = Math.round(height * 0.55);
-  const starR = Math.round(height * 0.12);
-  const starX = Math.round(width * 0.75);
-  const starY = Math.round(height * 0.28);
-  const rx = maskable ? Math.round(width * 0.25) : r;
+// The hexagon mark occupies roughly x 110..400, y 340..660 of the 1024px
+// master logo. Crop it once, then compose onto brand-black squares.
+const MARK = { left: 100, top: 365, width: 258, height: 300 };
+const BRAND_BG = '#0a0a08';
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-    <rect width="${width}" height="${height}" rx="${rx}" fill="#001736"/>
-    <text x="${cx}" y="${Math.round(cy + fontSize * 0.35)}" font-family="Georgia,serif" font-size="${fontSize}" font-weight="bold" fill="#6cf8bb" text-anchor="middle">Z</text>
-    <circle cx="${starX}" cy="${starY}" r="${starR}" fill="#f59e0b"/>
-  </svg>`;
-}
+async function generateIcon(size, name, { maskable = false } = {}) {
+  const mark = await sharp(LOGO)
+    .extract(MARK)
+    .resize(size, size, {
+      fit: 'contain',
+      // Maskable icons need the mark inside the inner 80% safe zone
+      background: BRAND_BG,
+    })
+    .toBuffer();
 
-async function generateIcon(size, name, maskable = false) {
-  const svg = createSVG(size, size, maskable);
-  const pngPath = path.join(publicDir, name);
-  await sharp(Buffer.from(svg)).resize(size, size).png().toFile(pngPath);
-  console.log(`Generated ${name} (${size}x${size})`);
+  const scale = maskable ? 0.72 : 0.86;
+  const inner = Math.round(size * scale);
+  const offset = Math.round((size - inner) / 2);
+
+  await sharp({
+    create: { width: size, height: size, channels: 4, background: BRAND_BG },
+  })
+    .composite([{ input: await sharp(mark).resize(inner, inner).toBuffer(), left: offset, top: offset }])
+    .png()
+    .toFile(path.join(publicDir, name));
+
+  console.log(`Generated ${name} (${size}x${size}${maskable ? ', maskable' : ''})`);
 }
 
 async function main() {
+  if (!fs.existsSync(LOGO)) throw new Error(`Brand logo not found at ${LOGO}`);
   await generateIcon(192, 'pwa-icon-192.png');
   await generateIcon(512, 'pwa-icon-512.png');
-  await generateIcon(512, 'pwa-icon-512-maskable.png', true);
+  await generateIcon(512, 'pwa-icon-512-maskable.png', { maskable: true });
 }
 
-main().catch(console.error);
+main().catch((err) => { console.error(err); process.exit(1); });
