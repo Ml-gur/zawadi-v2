@@ -54,36 +54,45 @@ serve(async (req: Request) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
-    // Auth: admin-only operations
+    // Auth: admin-only operations (the scheduled crawler authenticates via x-cron-secret instead)
     const authHeader = req.headers.get('Authorization')
-    if (!authHeader) return corsResponse({ error: 'Authentication required' }, 401)
-
-    const { data: { user }, error: authError } = await supabase.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    )
-    if (authError || !user) return corsResponse({ error: 'Invalid or expired token' }, 401)
-
-    // Check admin role
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('email', user.email)
-      .single()
-
-    const isAdmin = profile?.role === 'super_admin' || profile?.role === 'content_manager'
-    if (!isAdmin) return corsResponse({ error: 'Admin access required' }, 403)
 
     const body = req.method !== 'GET' ? await req.json().catch(() => ({})) : {}
     const url = new URL(req.url)
     const action = body.action || url.searchParams.get('action')
 
-    if (action === 'ingest') return handleIngest(supabase, user.email!, body)
-    if (action === 'review') return handleReview(supabase, user.email!, body)
+    // Scheduled crawler: authenticated by shared secret instead of a user JWT
+    const cronSecret = req.headers.get('x-cron-secret')
+    const isCron = action === 'trigger' && cronSecret && cronSecret === Deno.env.get('CRON_SECRET')
+
+    let userEmail = ''
+    if (!isCron) {
+      if (!authHeader) return corsResponse({ error: 'Authentication required' }, 401)
+      const { data: { user }, error: authError } = await supabase.auth.getUser(
+        authHeader.replace('Bearer ', '')
+      )
+      if (authError || !user) return corsResponse({ error: 'Invalid or expired token' }, 401)
+      userEmail = user.email!
+
+      // Check admin role
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('email', user.email)
+        .single()
+
+      const isAdmin = profile?.role === 'super_admin' || profile?.role === 'content_manager'
+      if (!isAdmin) return corsResponse({ error: 'Admin access required' }, 403)
+    }
+
+    if (action === 'ingest') return handleIngest(supabase, userEmail, body)
+    if (action === 'trigger') return await handleTrigger(supabase)
+    if (action === 'review') return handleReview(supabase, userEmail, body)
     if (action === 'run') return handleRun(supabase, body)
     if (action === 'stats') return handleStats(supabase)
     if (action === 'status') return handleStatus(supabase)
     if (action === 'bot-queue') return handleBotQueue(supabase, req)
-    if (action === 'publish') return handlePublish(supabase, user.email!, body)
+    if (action === 'publish') return handlePublish(supabase, userEmail, body)
 
     return corsResponse({ error: `Unknown action: ${action}` }, 400)
   } catch (err: any) {
@@ -91,6 +100,73 @@ serve(async (req: Request) => {
     return corsResponse({ error: 'Internal server error: ' + err.message }, 500)
   }
 })
+
+// ─── Scheduled crawler: discover scholarships from curated RSS feeds ──
+const FEED_SOURCES = [
+  'https://opportunitydesk.org/feed/',
+  'https://www.scholarshippositions.com/feed/',
+  'https://www.afterschoolafrica.com/feed/',
+]
+
+async function handleTrigger(supabase: ReturnType<typeof createClient>) {
+  const pipelineRunId = new Date().toISOString()
+  const seen = new Set<string>()
+  const discovered: Record<string, unknown>[] = []
+
+  const results = await Promise.allSettled(
+    FEED_SOURCES.map(async (feed) => {
+      const controller = new AbortController()
+      const timer = setTimeout(() => controller.abort(), 12_000)
+      try {
+        const res = await fetch(feed, { signal: controller.signal, headers: { 'User-Agent': 'TechsariBot/1.0' } })
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        return await res.text()
+      } finally {
+        clearTimeout(timer)
+      }
+    })
+  )
+
+  for (const result of results) {
+    if (result.status !== 'fulfilled') continue
+    const xml = result.value
+    const items = xml.match(/<item>[\s\S]*?<\/item>/g) ?? []
+    for (const item of items.slice(0, 25)) {
+      const title = (item.match(/<title>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/) ?? [])[1]?.trim()
+      const link = (item.match(/<link>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/link>/) ?? [])[1]?.trim()
+      if (!title || !link) continue
+      if (!/scholarship|fellowship|financial aid|study grant/i.test(title)) continue
+      const key = link.replace(/[?#].*$/, '')
+      if (seen.has(key)) continue
+      seen.add(key)
+
+      const providerHost = new URL(link).hostname.replace('www.', '')
+      discovered.push({
+        name: title.replace(/\s+/g, ' ').substring(0, 180),
+        provider: providerHost,
+        source_url: link,
+        apply_url: link,
+        deadline: null,
+        confidence_score: /fully funded|scholarship/i.test(title) ? 0.75 : 0.6,
+        degree_levels: [],
+        countries: [],
+        scam_flags: [],
+      })
+    }
+  }
+
+  if (discovered.length === 0) {
+    return corsResponse({ success: true, inserted: 0, message: 'No new scholarship items found in feeds', sources_ok: results.filter(r => r.status === 'fulfilled').length })
+  }
+
+  // Reuse the ingest path for validation, dedupe and insertion
+  const summary = await handleIngest(supabase, 'cron@techsari.online', {
+    pipeline_run: { timestamp: pipelineRunId },
+    scholarships: discovered,
+  })
+  const payload = await summary.json()
+  return corsResponse({ success: true, sources_ok: results.filter(r => r.status === 'fulfilled').length, ...payload })
+}
 
 // ─── Ingest Scholarships ──────────────────────────────────────────
 async function handleIngest(
