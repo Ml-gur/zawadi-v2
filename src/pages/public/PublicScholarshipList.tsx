@@ -313,7 +313,7 @@ export default function PublicScholarshipList({ user }: { user?: any } = {}) {
         )}
 
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6" aria-hidden>
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-5 lg:gap-6" aria-hidden>
             {[1, 2, 3, 4, 5, 6].map(i => <SkeletonCard key={i} />)}
           </div>
         ) : filtered.length === 0 ? (
@@ -338,11 +338,11 @@ export default function PublicScholarshipList({ user }: { user?: any } = {}) {
         ) : view === 'table' ? (
           <BrowseTable items={filtered} />
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-5 lg:gap-6">
             {filtered.map((s, i) => {
               const isDark = i % 3 === 2;
               return (
-                <div key={s.id} className={isDark ? 'md:col-span-2 lg:col-span-1' : ''}>
+                <div key={s.id} className={`h-full ${isDark ? 'col-span-2 md:col-span-2 lg:col-span-1' : ''}`}>
                   <BrowseCard
                     s={s}
                     dark={isDark}

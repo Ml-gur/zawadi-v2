@@ -80,38 +80,38 @@ const BrowseCard: FC<BrowseCardProps> = ({ s, dark, comparing, onToggleCompare }
 
   if (dark) {
     return (
-      <article className="group h-full min-h-[300px] rounded-ed bg-deep-charcoal p-7 md:p-8 flex flex-col justify-between transition-transform duration-300 hover:-translate-y-1">
+      <article className="group h-full min-h-0 md:min-h-[300px] rounded-ed bg-deep-charcoal p-4 md:p-7 lg:p-8 flex flex-col justify-between transition-transform duration-300 hover:-translate-y-1">
         <div>
-          <div className="flex items-start justify-between gap-3 mb-4">
-            <span className="text-ed-eyebrow uppercase text-smoke pt-1"><span aria-hidden className="mr-1.5 text-base leading-none">{flag}</span>{category}</span>
+          <div className="flex items-start justify-between gap-2 mb-2 md:mb-4">
+            <span className="text-ed-eyebrow uppercase text-smoke pt-1"><span aria-hidden className="mr-1.5 text-base leading-none">{flag}</span><span className="hidden md:inline">{category}</span></span>
             <DeadlinePill s={s} dark />
           </div>
-          <h2 className="text-ed-h2 text-pure-white">
+          <h2 className="text-[15px] leading-snug font-medium text-pure-white line-clamp-3 md:text-ed-h2 md:leading-tight md:line-clamp-none">
             <Link to={href} className="hover:underline underline-offset-4 decoration-stone">{s.name}</Link>
           </h2>
-          {s.provider && <p className="mt-1 text-ed-body-sm font-medium text-pure-white/80">{s.provider}</p>}
-          {s.description && <p className="mt-2.5 text-ed-body-sm text-smoke line-clamp-3">{s.description}</p>}
-          <div className="mt-4 flex flex-wrap gap-1.5">
+          {s.provider && <p className="mt-1 text-[11px] md:text-ed-body-sm font-medium text-pure-white/80 truncate">{s.provider}</p>}
+          {s.description && <p className="mt-2 text-ed-body-sm text-smoke line-clamp-2 md:line-clamp-3 hidden sm:block">{s.description}</p>}
+          <div className="mt-4 hidden md:flex flex-wrap gap-1.5">
             {s.no_ielts && <span className="px-2.5 py-0.5 rounded-full border border-stone text-xs font-medium text-smoke">No IELTS</span>}
             {s.targets_financial_need && <span className="px-2.5 py-0.5 rounded-full border border-stone text-xs font-medium text-smoke">Financial need</span>}
             {s.is_intra_african && <span className="px-2.5 py-0.5 rounded-full border border-stone text-xs font-medium text-smoke">Intra-African</span>}
           </div>
-          <p className="mt-3 text-ed-body-sm text-smoke">
+          <p className="mt-3 hidden md:block text-ed-body-sm text-smoke">
             <span className="text-ed-caption uppercase text-stone mr-1.5">Open to</span>
             <EligibilityList countries={s.countries} max={2} textClass="text-smoke" moreClass="text-pure-white underline underline-offset-4 decoration-stone" />
           </p>
         </div>
-        <div className="mt-6 pt-4 border-t border-stone flex items-center justify-between gap-3">
-          <span className="flex items-center gap-1.5 text-ed-body-sm text-smoke min-w-0">
-            <Clock className="w-3.5 h-3.5 shrink-0" aria-hidden />
+        <div className="mt-3 md:mt-6 pt-2.5 md:pt-4 border-t border-stone flex items-center justify-between gap-3">
+          <span className="flex items-center gap-1.5 text-[10px] md:text-ed-body-sm text-smoke min-w-0">
+            <Clock className="w-3 h-3 md:w-3.5 md:h-3.5 shrink-0" aria-hidden />
             <span className="truncate">
-              {badge.tone === 'rolling' ? 'Rolling deadline' : formatDeadline(s.deadline || null)}
+              {badge.tone === 'rolling' ? 'Rolling' : formatDeadline(s.deadline || null)}
             </span>
           </span>
-          <span className="flex items-center gap-2 shrink-0">
+          <span className="flex items-center gap-1.5 md:gap-2 shrink-0">
             <ComparePill comparing={comparing} onToggleCompare={onToggleCompare} />
             <ShareButton url={href} title={s.name} iconOnly tone="dark" className="bg-deep-charcoal text-smoke border border-stone hover:text-pure-white" />
-            <Link to={href} className="inline-flex items-center gap-1.5 text-base font-medium text-electric-lime hover:text-pure-white transition-colors">
+            <Link to={href} className="hidden md:inline-flex items-center gap-1.5 text-base font-medium text-electric-lime hover:text-pure-white transition-colors">
               View<ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
             </Link>
           </span>
@@ -121,28 +121,28 @@ const BrowseCard: FC<BrowseCardProps> = ({ s, dark, comparing, onToggleCompare }
   }
 
   return (
-    <article className="group h-full min-h-[300px] rounded-ed border border-ash/70 bg-pure-white p-7 md:p-8 flex flex-col justify-between transition-transform duration-300 hover:-translate-y-1">
+    <article className="group h-full min-h-0 md:min-h-[300px] rounded-ed border border-ash/70 bg-pure-white p-4 md:p-7 lg:p-8 flex flex-col justify-between transition-transform duration-300 hover:-translate-y-1">
       <div>
-        <div className="flex items-start justify-between gap-3 mb-4">
-          <span className="text-ed-eyebrow uppercase text-graphite pt-1"><span aria-hidden className="mr-1.5 text-base leading-none">{flag}</span>{category}</span>
+        <div className="flex items-start justify-between gap-2 mb-2 md:mb-4">
+          <span className="text-ed-eyebrow uppercase text-graphite pt-1"><span aria-hidden className="mr-1.5 text-base leading-none">{flag}</span><span className="hidden md:inline">{category}</span></span>
           <DeadlinePill s={s} />
         </div>
 
-        <h2 className="text-ed-h2 text-off-black-ink">
+        <h2 className="text-[15px] leading-snug font-medium text-off-black-ink line-clamp-3 md:text-ed-h2 md:leading-tight md:line-clamp-none">
           <Link to={href} className="hover:underline underline-offset-4 decoration-ash">
             {s.name}
           </Link>
         </h2>
 
         {s.provider && (
-          <p className="mt-1 text-ed-body-sm font-medium text-off-black-ink/80">{s.provider}</p>
+          <p className="mt-1 text-[11px] md:text-ed-body-sm font-medium text-off-black-ink/80 truncate">{s.provider}</p>
         )}
 
         {s.description && (
-          <p className="mt-2.5 text-ed-body-sm text-graphite line-clamp-3">{s.description}</p>
+          <p className="mt-2.5 hidden md:block text-ed-body-sm text-graphite line-clamp-3">{s.description}</p>
         )}
 
-        <div className="mt-4 flex flex-wrap gap-1.5">
+        <div className="mt-4 hidden md:flex flex-wrap gap-1.5">
           {s.no_ielts && (
             <span className="px-2.5 py-0.5 rounded-full border border-ash text-xs font-medium text-graphite">No IELTS</span>
           )}
@@ -153,25 +153,25 @@ const BrowseCard: FC<BrowseCardProps> = ({ s, dark, comparing, onToggleCompare }
             <span className="px-2.5 py-0.5 rounded-full border border-ash text-xs font-medium text-graphite">Intra-African</span>
           )}
         </div>
-        <p className="mt-3 text-ed-body-sm text-graphite">
+        <p className="mt-3 hidden md:block text-ed-body-sm text-graphite">
           <span className="text-ed-caption uppercase text-stone mr-1.5">Open to</span>
           <EligibilityList countries={s.countries} max={2} />
         </p>
       </div>
 
-      <div className="mt-6 pt-4 border-t border-ash flex items-center justify-between gap-3">
-        <span className="flex items-center gap-1.5 text-ed-body-sm text-graphite min-w-0">
-          <Clock className="w-3.5 h-3.5 shrink-0" aria-hidden />
+      <div className="mt-3 md:mt-6 pt-2.5 md:pt-4 border-t border-ash flex items-center justify-between gap-3">
+        <span className="flex items-center gap-1.5 text-[10px] md:text-ed-body-sm text-graphite min-w-0">
+          <Clock className="w-3 h-3 md:w-3.5 md:h-3.5 shrink-0" aria-hidden />
           <span className="truncate">
-            {badge.tone === 'rolling' ? 'Rolling deadline' : formatDeadline(s.deadline || null)}
+            {badge.tone === 'rolling' ? 'Rolling' : formatDeadline(s.deadline || null)}
           </span>
         </span>
-        <span className="flex items-center gap-2 shrink-0">
+        <span className="flex items-center gap-1.5 md:gap-2 shrink-0">
           <ComparePill comparing={comparing} onToggleCompare={onToggleCompare} />
           <ShareButton url={href} title={s.name} iconOnly tone="light" />
           <Link
             to={href}
-            className="inline-flex items-center gap-1.5 text-base font-medium text-off-black-ink hover:text-graphite transition-colors"
+            className="hidden md:inline-flex items-center gap-1.5 text-base font-medium text-off-black-ink hover:text-graphite transition-colors"
           >
             View
             <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" aria-hidden />
