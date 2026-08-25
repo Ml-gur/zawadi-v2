@@ -21,7 +21,7 @@ export default function Hero({ onGetStarted, onLogin, countriesCount }: HeroProp
           </FadeUp>
 
           <FadeUp delay={0.08}>
-            <h1 className="mt-7 text-ed-hero-sm md:text-ed-hero text-off-black-ink max-w-[14ch]">
+            <h1 className="mt-7 text-ed-h1-sm md:text-ed-hero-sm text-off-black-ink max-w-[20ch] lg:max-w-[24ch]">
               Find the scholarships you can actually apply for.
             </h1>
           </FadeUp>
