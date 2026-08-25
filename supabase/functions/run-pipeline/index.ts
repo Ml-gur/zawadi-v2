@@ -101,19 +101,95 @@ serve(async (req: Request) => {
   }
 })
 
-// ─── Scheduled crawler: discover scholarships from curated RSS feeds ──
+// ─── Scheduled crawler: discover + deep-extract scholarship info ──
 const FEED_SOURCES = [
   'https://opportunitydesk.org/feed/',
   'https://www.scholarshippositions.com/feed/',
   'https://www.afterschoolafrica.com/feed/',
 ]
 
+const AFRICAN_COUNTRY_NAMES = [
+  'Algeria','Angola','Benin','Botswana','Burkina Faso','Burundi','Cameroon','Cabo Verde','Central African Republic',
+  'Chad','Comoros','Congo','DR Congo','Democratic Republic of the Congo','Cote d Ivoire',"Côte d'Ivoire",'Ivory Coast',
+  'Djibouti','Egypt','Equatorial Guinea','Eritrea','Eswatini','Ethiopia','Gabon','Gambia','Ghana','Guinea','Guinea-Bissau',
+  'Kenya','Lesotho','Liberia','Libya','Madagascar','Malawi','Mali','Mauritania','Mauritius','Morocco','Mozambique','Namibia',
+  'Niger','Nigeria','Rwanda','Sao Tome and Principe','Senegal','Seychelles','Sierra Leone','Somalia','South Africa',
+  'South Sudan','Sudan','Tanzania','Togo','Tunisia','Uganda','Zambia','Zimbabwe',
+]
+
+const MONTHS = 'january|february|march|april|may|june|july|august|september|october|november|december'
+
+function stripHtml(html: string): string {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&#8217;|&rsquo;/g, "'")
+    .replace(/&quot;/g, '"').replace(/&#[0-9]+;/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function extractDeadline(text: string): string | null {
+  const months = ['january','february','march','april','may','june','july','august','september','october','november','december']
+  const combined = new RegExp(
+    `deadline\\s*:?\\s*[^.:]{0,60}?(?:(\\d{1,2})(?:st|nd|rd|th)?\\s+(${MONTHS})\\s+(\\d{4})|(${MONTHS})\\s+(\\d{1,2})(?:st|nd|rd|th)?,?\\s+(\\d{4})|(\\d{4}-\\d{2}-\\d{2}))`,
+    'gi'
+  )
+  for (const m of text.matchAll(combined)) {
+    if (m[7]) return m[7]
+    const monthToken = (m[2] || m[4] || '').toLowerCase()
+    const mi = months.findIndex(mo => monthToken.startsWith(mo.slice(0, 3)))
+    const day = parseInt(m[1] || m[5], 10)
+    const year = parseInt(m[3] || m[6], 10)
+    if (mi < 0 || isNaN(day) || isNaN(year)) continue
+    if (year < 2024 || year > 2035 || day < 1 || day > 31) continue
+    return `${year}-${String(mi + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+  }
+  return null
+}
+
+function extractDegreeLevels(text: string): string[] {
+  // Scan only the headline + summary — full article bodies mention every
+  // level in "also see" blocks, which over-matches badly.
+  const scope = text.substring(0, 900)
+  const levels: string[] = []
+  if (/undergraduate|bachelors?\b|b\.sc\b/i.test(scope)) levels.push('Bachelors')
+  if (/masters?\b|m\.sc\b|msc\b|mba\b|postgraduate/i.test(scope)) levels.push('Masters')
+  if (/ph\.?d\b|doctoral|doctorate|dissertation|thesis/i.test(scope)) levels.push('PhD')
+  if (/post-?doc(toral)?\b/i.test(scope)) levels.push('Postdoctoral')
+  return levels
+}
+
+function extractFields(text: string): string[] {
+  const map: [RegExp, string][] = [
+    [/engineering/i, 'Engineering'], [/public health|epidemiolog/i, 'Public Health'],
+    [/medicine|medical/i, 'Medicine'], [/agricultur/i, 'Agriculture'],
+    [/computer science|computing|informatics|data science/i, 'Computer Science'],
+    [/law|legal studies/i, 'Law'], [/econom/i, 'Economics'],
+    [/business|management|mba/i, 'Business'], [/education|pedagog/i, 'Education'],
+    [/environment|climate|sustainab/i, 'Environmental Science'],
+    [/water|hydro/i, 'Water Resources'], [/energy/i, 'Energy Studies'],
+  ]
+  return map.filter(([re]) => re.test(text)).map(([, label]) => label).slice(0, 3)
+}
+
+function extractProvider(title: string, siteName: string, body: string): string {
+  const uni = title.match(/(University of [A-Z][\w'-]+(?: [A-Z][\w'-]+){0,3})/)?.[1]
+  const org = title.match(/([A-Z][\w'-]+(?: [A-Z][\w'-]+){0,2}\s+(?:Foundation|Trust|Institute|Academy|Commission|Programme|Program))/)?.[1]
+  if (uni) return uni
+  if (org) return org
+  if (siteName && !/wordpress|opportunitydesk|scholarshippositions|afterschoolafrica/i.test(siteName)) return siteName
+  const bodyUni = body.match(/(University of [A-Z][\w'-]+(?: [A-Z][\w'-]+){0,2})/)?.[1]
+  return bodyUni || ''
+}
+
 async function handleTrigger(supabase: ReturnType<typeof createClient>) {
   const pipelineRunId = new Date().toISOString()
   const seen = new Set<string>()
-  const discovered: Record<string, unknown>[] = []
+  const candidates: { title: string; link: string; snippet: string }[] = []
 
-  const results = await Promise.allSettled(
+  const feedResults = await Promise.allSettled(
     FEED_SOURCES.map(async (feed) => {
       const controller = new AbortController()
       const timer = setTimeout(() => controller.abort(), 12_000)
@@ -127,45 +203,101 @@ async function handleTrigger(supabase: ReturnType<typeof createClient>) {
     })
   )
 
-  for (const result of results) {
+  for (const result of feedResults) {
     if (result.status !== 'fulfilled') continue
-    const xml = result.value
-    const items = xml.match(/<item>[\s\S]*?<\/item>/g) ?? []
+    const items = result.value.match(/<item>[\s\S]*?<\/item>/g) ?? []
     for (const item of items.slice(0, 25)) {
-      const title = (item.match(/<title>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/) ?? [])[1]?.trim()
+      const title = (item.match(/<title>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/) ?? [])[1]?.trim().replace(/\s+/g, ' ')
       const link = (item.match(/<link>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/link>/) ?? [])[1]?.trim()
-      if (!title || !link) continue
-      if (!/scholarship|fellowship|financial aid|study grant/i.test(title)) continue
+      if (!title || !link || !/scholarship|fellowship|financial aid|study grant/i.test(title)) continue
       const key = link.replace(/[?#].*$/, '')
       if (seen.has(key)) continue
       seen.add(key)
-
-      const providerHost = new URL(link).hostname.replace('www.', '')
-      discovered.push({
-        name: title.replace(/\s+/g, ' ').substring(0, 180),
-        provider: providerHost,
-        source_url: link,
-        apply_url: link,
-        deadline: null,
-        confidence_score: /fully funded|scholarship/i.test(title) ? 0.75 : 0.6,
-        degree_levels: [],
-        countries: [],
-        scam_flags: [],
-      })
+      const snippet = stripHtml((item.match(/<description>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/description>/) ?? [])[1] || '').substring(0, 400)
+      candidates.push({ title, link, snippet })
     }
   }
 
-  if (discovered.length === 0) {
-    return corsResponse({ success: true, inserted: 0, message: 'No new scholarship items found in feeds', sources_ok: results.filter(r => r.status === 'fulfilled').length })
+  // Deep-fetch the newest 12 articles for real structured data
+  const toFetch = candidates.slice(0, 12)
+  const pages = await Promise.allSettled(
+    toFetch.map(async (c) => {
+      const controller = new AbortController()
+      const timer = setTimeout(() => controller.abort(), 8_000)
+      try {
+        const res = await fetch(c.link, { signal: controller.signal, headers: { 'User-Agent': 'TechsariBot/1.0' } })
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        return { c, html: await res.text() }
+      } finally {
+        clearTimeout(timer)
+      }
+    })
+  )
+
+  // Cross-dedupe against listings already on the platform
+  const { data: existingNames } = await supabase
+    .from('scholarships').select('name').limit(2000)
+  const existingSet = new Set((existingNames ?? []).map((r: any) => (r.name || '').toLowerCase().replace(/\s+/g, ' ').trim()))
+
+  const discovered: Record<string, unknown>[] = []
+  for (const result of pages) {
+    const base = result.status === 'fulfilled' ? result.value.c : null
+    if (!base) continue
+    const html = result.status === 'fulfilled' ? result.value.html : ''
+    const siteName = (html.match(/<meta\s+property="og:site_name"\s+content="([^"]+)"/i) ?? [])[1] || ''
+    const ogDesc = (html.match(/<meta\s+property="og:description"\s+content="([^"]+)"/i) ?? [])[1] || ''
+    const metaDesc = (html.match(/<meta\s+name="description"\s+content="([^"]+)"/i) ?? [])[1] || ''
+    const bodyText = stripHtml(html)
+    const haystack = `${base.title} ${ogDesc || metaDesc || base.snippet} ${bodyText.substring(0, 6000)}`
+
+    const description = stripHtml(ogDesc || metaDesc || base.snippet)
+    const summaryText = `${base.title} ${description}`
+    const deadline = extractDeadline(summaryText) ?? extractDeadline(bodyText.substring(0, 6000))
+    const funding = /fully[- ]funded/i.test(haystack) ? 'Full' : (/partial|tuition (?:waiver|only)|50% (?:tuition|discount)/i.test(haystack) ? 'Partial' : null)
+    const degreeLevels = extractDegreeLevels(summaryText)
+    const fields = extractFields(haystack)
+    const provider = extractProvider(base.title, siteName, bodyText.substring(0, 3000))
+    const eligMatch = haystack.match(/(?:open to|eligible (?:to|for)|applicants must (?:be|have))[^.!?]{10,240}/i)
+    const countries = AFRICAN_COUNTRY_NAMES.filter(c => new RegExp(`\\b${c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i').test(haystack.substring(0, 8000))).slice(0, 8)
+
+    const normalizedName = base.title.toLowerCase().replace(/\s+/g, ' ').trim()
+    if (existingSet.has(normalizedName)) continue
+
+    let confidence = 0.5
+    if (deadline) confidence += 0.15
+    if (funding) confidence += 0.1
+    if (degreeLevels.length) confidence += 0.1
+    if (description.length >= 80) confidence += 0.05
+    if (provider) confidence += 0.05
+
+    discovered.push({
+      name: base.title.substring(0, 180),
+      provider: provider || new URL(base.link).hostname.replace('www.', ''),
+      host_institution: /university|institute|college/i.test(provider) ? provider : null,
+      source_url: base.link,
+      apply_url: base.link,
+      deadline,
+      funding_type: funding,
+      degree_levels: degreeLevels,
+      fields_of_study: fields,
+      countries,
+      description: description.length > 60 ? description.substring(0, 600) : null,
+      eligibility: eligMatch ? eligMatch[0].substring(0, 300) : null,
+      confidence_score: Math.min(0.95, Math.round(confidence * 100) / 100),
+      scam_flags: [],
+    })
   }
 
-  // Reuse the ingest path for validation, dedupe and insertion
+  if (discovered.length === 0) {
+    return corsResponse({ success: true, inserted: 0, message: 'No new scholarship items found', sources_ok: feedResults.filter(r => r.status === 'fulfilled').length, candidates_seen: candidates.length })
+  }
+
   const summary = await handleIngest(supabase, 'cron@techsari.online', {
     pipeline_run: { timestamp: pipelineRunId },
     scholarships: discovered,
   })
   const payload = await summary.json()
-  return corsResponse({ success: true, sources_ok: results.filter(r => r.status === 'fulfilled').length, ...payload })
+  return corsResponse({ success: true, sources_ok: feedResults.filter(r => r.status === 'fulfilled').length, candidates_seen: candidates.length, deep_fetched: pages.length, ...payload })
 }
 
 // ─── Ingest Scholarships ──────────────────────────────────────────
@@ -187,7 +319,9 @@ async function handleIngest(
   const total_received = scholarships.length
 
   for (const schol of scholarships) {
-    const fingerprint = await sha256(`${schol.name}${schol.provider}${schol.deadline}`)
+    // Identity = source URL: stable across extraction improvements. Name- and
+    // deadline-based fingerprints churned whenever extraction got better.
+    const fingerprint = await sha256(schol.source_url || `${schol.name}${schol.provider}${schol.deadline}`)
 
     // Duplicate check
     const { data: existing } = await supabase
