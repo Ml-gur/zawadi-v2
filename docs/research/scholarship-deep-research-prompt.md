@@ -18,6 +18,20 @@ volume. A smaller verified list beats a long invented one.**
 soon" judgement is relative to this date. Never rely on your training memory
 for deadlines — dates change every cycle.
 
+## The one rule above all: requirements are data, not disqualifiers
+
+Collect EVERY scholarship where Africans are eligible — including ones that
+require IELTS/TOEFL, a high GPA, work experience, publications, research
+proposals, leadership records, specific fields of study, or that impose age
+limits. **A demanding scholarship is a listed scholarship.** Our students
+filter these in the UI, and our matching engine uses the exact requirements
+to tell each student honestly whether they qualify. Skipping a scholarship
+because "it requires IELTS" or "it's very competitive" is a data loss and a
+failure of this task. Capture the requirement precisely in its field instead:
+`no_ielts: false`, `work_experience_required: 2`, `age_limit_masters: 35` —
+whatever the page states. The ONLY things that disqualify a listing are in
+the publishing criteria and exclusion list below.
+
 ## Research tooling (use exactly this workflow)
 
 1. **Discover** candidates with web search:
@@ -56,6 +70,9 @@ the official page before publishing.
 requires prior enrolment at a specific institution; has scam flags or an
 application fee; cannot be verified on an official site; is a loan, not a
 scholarship; is a conference/essay-competition prize with no study funding.
+**Never exclude** for IELTS/TOEFL requirements, GPA thresholds, age limits,
+work experience, publications, field restrictions, or competitiveness —
+those are requirements to record, not reasons to skip.
 
 ## Output schema — every scholarship, exactly these fields
 
@@ -105,8 +122,12 @@ cannot be verified — **never invent, never approximate a deadline**.
 4. **Intra-African Scholarships** — study hosted at an African institution
    (African Union, African Development Bank, UCT, Makerere, Univ. of Nairobi, etc.).
 5. **No IELTS Scholarships** — page confirms MOI letter / Duolingo / other
-   waiver accepted. (A scholarship can be in this AND another category's shape —
-   still assign ONE primary category; the `no_ielts` flag carries the rest.)
+   waiver accepted. This is a HIGHLIGHT category for one segment of our
+   students — it does NOT mean IELTS-requiring scholarships are excluded from
+   the research. They belong in their natural category with
+   `no_ielts: false` and their English requirements captured in
+   `min_english_test_type` / `min_english_score`. (Assign ONE primary
+   category; the `no_ielts` flag carries the rest.)
 6. **Undergraduate Scholarships** — bachelor's-level access.
 7. **Corporate & Foundation Scholarships** — Google, Microsoft, Mastercard
    Foundation, Aga Khan, Mo Ibrahim, Tony Elumelu, MWF, etc.
@@ -148,6 +169,7 @@ For each category: a markdown table (Name | Provider | Host country | Degrees | 
 - [ ] Every scholarship has `source_url` on an official domain that you fetched this run
 - [ ] Zero deadlines without on-page evidence; zero invented amounts
 - [ ] Every entry passes ALL publishing criteria; exclusions applied
+- [ ] Requirements-heavy scholarships (IELTS, GPA, age, experience) are PRESENT with their requirements captured in the correct fields — they were never a reason to skip
 - [ ] ≥100 entries, ≥30 providers, every category populated
 - [ ] `category` values match the enum exactly; `countries: ["ALL"]` only when the page says all-Africa
 - [ ] Every `verification_status` sentence includes what was confirmed and the fetch date
