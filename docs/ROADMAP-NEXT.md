@@ -36,24 +36,17 @@ _Last updated: 2026-08-25. All items below are committed and pushed unless marke
 
 ---
 
-## 🔴 Next: ship blockers (from the audit — do before scaling spend/users)
+## ✅ Ship blockers (from the audit — COMPLETED 2026-08-25, deployed + verified)
 
-1. **Payment sandbox bypass** — set Vercel/Supabase secret `ENVIRONMENT=production` on `process-payment`, then verify a `sandbox_` reference gets rejected.
-   Verify: attempt upgrade with test ref → expect failure.
-2. **Privilege escalation via profiles INSERT** — migration 013's trigger guards UPDATE only. Extend the privileged-column guard to INSERT (new migration), so a fresh auth user cannot INSERT `role='super_admin'`.
-   Verify: sign up, try inserting a profile with role super_admin via anon key → expect RLS rejection.
-3. **Wildcard CORS on all 7 edge functions** — replace `Access-Control-Allow-Origin: *` with the techsari.online + preview-domain allowlist.
-   Verify: preflight from a foreign origin → expect no ACAO header.
-4. **AI spend abuse** — `api/ai-generate.js` has in-memory-only quotas; `generate-essay` lets clients override the model string. Remove client model override; move quota to durable store (Supabase table).
-   Verify: 30 rapid calls from one session → expect hard 429.
-5. **Add CSP + rotate the Supabase access token shared in chat** (treat as exposed).
+1. ✅ `ENVIRONMENT=production` secret set on `process-payment` — sandbox upgrade path closed.
+2. ✅ Migration 020 applied live: profiles INSERT guard forces role='user'/plan='explorer'/status='active' for non-service-role inserts — self-promotion to super_admin is dead.
+3. ✅ CORS origin allowlist deployed on ALL 8 edge functions (techsari.online + www + vercel.app previews + localhost dev; everything else defaults to www). Verified: allowlisted origin echoed, foreign origin gets default.
+4. ✅ Client model override removed from `generate-essay`; `api/ai-generate.js` now has a durable 30/day per-user cap (`ai_usage_daily` table + RLS) on top of the per-minute limiter.
+5. ⬜ CSP header + rotate the Supabase access token shared in chat — still open (token rotation is yours; CSP needs a careful pass).
 
-## 🟡 Next: design consistency pass (the "say the word" item)
+## ✅ Design consistency pass (COMPLETED 2026-08-25)
 
-**Legacy dark-token sweep** — these files still pair the dead `bg-off-black` with `text-cream` (renders transparent cards + dark-on-dark text in today's theme):
-`ForgotPassword.tsx`, `ResetPassword.tsx`, `MentorPortal.tsx`, `ContactPage.tsx`, `ComingSoonPage.tsx`, `AdminLoginPage.tsx`, `PWAInstallPrompt.tsx`, `ConfirmationDialog.tsx`, `ErrorBoundary.tsx` (uses `text-status-urgent` — valid), plus `PrivacyPolicy.tsx`/`TermsOfService.tsx` legacy sections if any remain.
-
-Recipe per file: `bg-off-black` → `bg-off-black-ink`; `text-cream` → `text-pure-white` (or `text-smoke` for secondary); `border-hairline` → `border-ash`; then screenshot the page in mobile + desktop before moving on. Do NOT blind-replace — `text-cream` on light backgrounds means `text-off-black-ink`.
+Legacy `bg-off-black` + `text-cream` swept across ForgotPassword, ResetPassword, AdminLoginPage, ComingSoonPage, PWAInstallPrompt, MentorPortal — dark cards now render correctly (verified on ForgotPassword). Matching engine: freshly crawled listings with unspecified countries now REVIEW-pass with a visible note instead of hard-failing every student.
 
 ## 🟡 Next: product verification checklist (founder, 15 min)
 
