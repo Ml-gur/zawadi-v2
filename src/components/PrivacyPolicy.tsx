@@ -8,202 +8,210 @@ interface PrivacyPolicyProps {
 
 export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
   return (
-    <div className="bg-canvas text-cream min-h-[100dvh]">
+    <div className="bg-pure-white text-off-black-ink min-h-[100dvh]">
       <SEO
         title="Privacy Policy — Techsari Zawadi"
-        description="Techsari Zawadi Privacy Policy — how we collect, use, and protect your data as an African student using our scholarship platform."
+        description="How Techsari Zawadi collects, uses, and protects the personal information of African students who use our scholarship platform."
         path="/privacy"
       />
-      <section className="px-6 py-20 md:py-24">
+      <section className="px-4 sm:px-6 py-16 md:py-24">
         <div className="max-w-[800px] mx-auto">
           <Breadcrumbs items={[{ name: 'Privacy policy', path: '/privacy' }]} />
 
-          <h1 className="text-3xl md:text-5xl font-display font-semibold text-cream tracking-tight mb-2">Privacy Policy</h1>
-          <p className="text-sm text-muted mb-2">Last updated: May 27, 2026</p>
-          <p className="text-sm text-muted mb-8">Effective date: May 27, 2026</p>
+          <h1 className="text-ed-h1-sm font-display font-semibold tracking-tight text-off-black-ink mb-2">Privacy Policy</h1>
+          <p className="text-ed-body-sm text-graphite mb-8">Last updated: August 25, 2026</p>
 
-          <div className="prose prose-sm max-w-none space-y-8 text-muted leading-relaxed">
+          <p className="text-ed-body text-graphite leading-relaxed mb-10">
+            This policy explains what information Zawadi collects, why we collect it,
+            who may process it, and the choices you have. We have written it in plain
+            language because it applies to real people making real applications.
+          </p>
 
-            <Section title="1. Who We Are">
+          <div className="space-y-12">
+
+            <Section title="1. Who we are">
               <p>
-                <strong>Techsari Zawadi</strong> ("we," "our," "us") is a scholarship discovery and application management platform operated by Techsari, serving African students worldwide.
+                Zawadi is a scholarship discovery and application platform operated by
+                Techsari, a company based in Kenya serving African students.
               </p>
-              <div className="bg-off-black border border-hairline/40 rounded-lg p-4 space-y-1">
-                <p><strong>Contact:</strong></p>
-                <p>Email: <a href="mailto:privacy@techsari.online" className="text-accent-green hover:underline">privacy@techsari.online</a></p>
-                <p>Website: <a href="https://www.techsari.online" className="text-accent-green hover:underline">https://www.techsari.online</a></p>
+              <div className="bg-parchment border border-ash rounded-ed p-6 space-y-1">
+                <p><strong className="text-off-black-ink">Questions about your privacy?</strong></p>
+                <p>Email: <a href="mailto:privacy@techsari.online" className="font-medium text-off-black-ink underline decoration-ash underline-offset-4 hover:decoration-off-black-ink transition-colors">privacy@techsari.online</a></p>
+                <p>Contact page: <a href="https://www.techsari.online/contact" className="font-medium text-off-black-ink underline decoration-ash underline-offset-4 hover:decoration-off-black-ink transition-colors">www.techsari.online/contact</a></p>
               </div>
             </Section>
 
-            <Section title="2. What Data We Collect">
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs border-collapse">
+            <Section title="2. What we collect">
+              <div className="overflow-x-auto -mx-1 px-1">
+                <table className="w-full text-ed-body-sm border-collapse">
                   <thead>
-                    <tr className="bg-off-black border-b border-hairline/40">
-                      <th className="text-left p-3 font-bold text-cream">Data</th>
-                      <th className="text-left p-3 font-bold text-cream">When Collected</th>
-                      <th className="text-left p-3 font-bold text-cream">Purpose</th>
+                    <tr className="bg-parchment border-b border-ash">
+                      <th className="text-left p-3 text-ed-eyebrow uppercase tracking-wider font-medium text-graphite">Information</th>
+                      <th className="text-left p-3 text-ed-eyebrow uppercase tracking-wider font-medium text-graphite">Why we need it</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    <tr className="border-b border-hairline/30"><td className="p-3">Full name</td><td className="p-3">Registration</td><td className="p-3">Account identification; essay personalization</td></tr>
-                    <tr className="border-b border-hairline/30"><td className="p-3">Email address</td><td className="p-3">Registration</td><td className="p-3">Account login; password reset; service notifications</td></tr>
-                    <tr className="border-b border-hairline/30"><td className="p-3">Password (hashed)</td><td className="p-3">Registration</td><td className="p-3">Account authentication (we never see your password)</td></tr>
-                    <tr className="border-b border-hairline/30"><td className="p-3">Country</td><td className="p-3">Registration</td><td className="p-3">Scholarship eligibility filtering; localized pricing</td></tr>
-                    <tr className="border-b border-hairline/30"><td className="p-3">Application tracking data</td><td className="p-3">Platform usage</td><td className="p-3">Scholarship management; match score improvement</td></tr>
-                    <tr className="border-b border-hairline/30"><td className="p-3">Uploaded documents</td><td className="p-3">User upload</td><td className="p-3">Document vault for application support</td></tr>
-                    <tr className="border-b border-hairline/30"><td className="p-3">Essay prompts and content</td><td className="p-3">Essay generator usage</td><td className="p-3">AI essay generation</td></tr>
-                    <tr className="border-b border-hairline/30"><td className="p-3">Payment transaction references</td><td className="p-3">Payment checkout</td><td className="p-3">Subscription management; receipts</td></tr>
-                    <tr className="border-b border-hairline/30"><td className="p-3">Usage analytics</td><td className="p-3">Platform interaction</td><td className="p-3">Product improvement (aggregated, anonymized)</td></tr>
-                  </tbody>
-                </table>
-              </div>
-              <p className="text-status-warning font-semibold mt-4">We do NOT collect: Date of birth, physical address, phone number, government ID numbers, credit card numbers, bank account details, or biometric data.</p>
-            </Section>
-
-            <Section title="3. How We Use Your Data">
-              <ul className="list-disc pl-6 space-y-2">
-                <li><strong>To provide the service:</strong> Match you with scholarships, generate essays, track applications</li>
-                <li><strong>To improve the product:</strong> Analyze usage patterns (aggregated and anonymized) to improve features</li>
-                <li><strong>To communicate:</strong> Send service updates, deadline alerts, and (with your consent) newsletters</li>
-                <li><strong>To process payments:</strong> Facilitate Paystack subscription payments (we never see your card details)</li>
-                <li><strong>To comply with legal obligations:</strong> Tax records, regulatory requirements</li>
-              </ul>
-              <p className="text-accent-green font-semibold">We do NOT sell, rent, or share your personal data with third parties for their marketing purposes.</p>
-            </Section>
-
-            <Section title="4. Legal Basis for Processing">
-              <p>Under applicable data protection laws (including Kenya's Data Protection Act 2019, Nigeria's NDPR, and the GDPR for EU residents), we process your data on these legal bases:</p>
-              <ul className="list-disc pl-6 space-y-2">
-                <li><strong>Contractual necessity:</strong> To provide the Zawadi service you signed up for</li>
-                <li><strong>Legitimate interest:</strong> To improve and secure our platform</li>
-                <li><strong>Consent:</strong> For optional communications (newsletters, product updates)</li>
-                <li><strong>Legal obligation:</strong> Tax records and regulatory compliance</li>
-              </ul>
-            </Section>
-
-            <Section title="5. Data Storage & Security">
-              <ul className="list-disc pl-6 space-y-2">
-                <li><strong>Where:</strong> Data is stored on Supabase servers (EU and US regions) and Vercel's global edge network</li>
-                <li><strong>Encryption:</strong> All data encrypted at rest (AES-256) and in transit (TLS 1.2+)</li>
-                <li><strong>Passwords:</strong> Hashed using bcrypt via Supabase Auth — we cannot recover your password</li>
-                <li><strong>Access control:</strong> Your data is accessible only to you (via authentication) and to authorized Techsari administrators for support purposes</li>
-                <li><strong>Row-level security:</strong> Database policies ensure each user can only access their own data</li>
-              </ul>
-            </Section>
-
-            <Section title="6. Data Retention">
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs border-collapse">
-                  <thead>
-                    <tr className="bg-off-black border-b border-hairline/40">
-                      <th className="text-left p-3 font-bold text-cream">Data</th>
-                      <th className="text-left p-3 font-bold text-cream">How Long We Keep It</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="border-b border-hairline/30"><td className="p-3">Active account data</td><td className="p-3">Until you delete your account</td></tr>
-                    <tr className="border-b border-hairline/30"><td className="p-3">Inactive account (12+ months no login)</td><td className="p-3">12 months, then anonymized or deleted</td></tr>
-                    <tr className="border-b border-hairline/30"><td className="p-3">Payment records</td><td className="p-3">7 years (tax compliance)</td></tr>
-                    <tr className="border-b border-hairline/30"><td className="p-3">Deleted account data</td><td className="p-3">Purged within 30 days of deletion request</td></tr>
+                  <tbody className="text-graphite">
+                    <tr className="border-b border-ash"><td className="p-3 align-top">Full name</td><td className="p-3 align-top">Creating your account and identifying your applications.</td></tr>
+                    <tr className="border-b border-ash"><td className="p-3 align-top">Email address</td><td className="p-3 align-top">Signing in, password resets, security notices, and deadline reminders.</td></tr>
+                    <tr className="border-b border-ash"><td className="p-3 align-top">Country</td><td className="p-3 align-top">Applying eligibility rules that differ by nationality and residence.</td></tr>
+                    <tr className="border-b border-ash"><td className="p-3 align-top">Age or age range</td><td className="p-3 align-top">Checking scholarship eligibility, since many programs have age limits, and improving matching accuracy.</td></tr>
+                    <tr className="border-b border-ash"><td className="p-3 align-top">Gender</td><td className="p-3 align-top">Determining eligibility for gender-specific scholarships and matching you with relevant opportunities.</td></tr>
+                    <tr className="border-b border-ash"><td className="p-3 align-top">Academic and application information (degree level, field of study, GPA)</td><td className="p-3 align-top">Matching you with scholarships and helping you prepare applications.</td></tr>
+                    <tr className="border-b border-ash"><td className="p-3 align-top">Uploaded documents (transcripts, CVs, certificates)</td><td className="p-3 align-top">Storing them in your document vault and attaching them where an application requires them.</td></tr>
+                    <tr className="border-b border-ash"><td className="p-3 align-top">Essay prompts and content</td><td className="p-3 align-top">Drafting and reviewing essays with our AI writing tools.</td></tr>
+                    <tr className="border-b border-ash"><td className="p-3 align-top">Payment information and transaction references</td><td className="p-3 align-top">Managing subscriptions and receipts. Payments are handled by our payment processor; we do not receive your full card number.</td></tr>
+                    <tr className="border-b border-ash"><td className="p-3 align-top">Technical information</td><td className="p-3 align-top">Keeping the service working and secure, such as sign-in sessions, device and browser type, and basic diagnostics.</td></tr>
                   </tbody>
                 </table>
               </div>
             </Section>
 
-            <Section title="7. Your Rights">
-              <p>You have the right to:</p>
+            <Section title="3. How we use your information">
+              <ul className="list-disc pl-6 space-y-2">
+                <li>To match you with scholarships and manage your applications</li>
+                <li>To power tools such as deadline tracking, document storage, and essay drafting</li>
+                <li>To process subscriptions and send receipts</li>
+                <li>To send service updates and reminders. We send marketing emails only with your consent, which you can withdraw at any time</li>
+                <li>To detect abuse, keep accounts secure, and comply with our legal obligations</li>
+                <li>To understand how the service is used so we can improve it</li>
+              </ul>
+            </Section>
+
+            <Section title="4. Artificial intelligence">
+              <p>
+                Some features of Zawadi use artificial intelligence to assist with
+                scholarship matching, application preparation, and essay drafting.
+                Information you provide to these features may be processed by our AI
+                service providers to generate responses or recommendations.
+              </p>
+              <p>We do not use your personal information to train our own AI models without your consent.</p>
+              <p className="bg-parchment border border-ash rounded-ed p-5">
+                AI-generated content may not always be accurate and should be reviewed
+                before being submitted to a scholarship provider.
+              </p>
+            </Section>
+
+            <Section title="5. Who may process your information">
+              <p>To operate Zawadi, we rely on categories of service providers:</p>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>Cloud infrastructure providers (hosting, databases, authentication, and file storage)</li>
+                <li>Payment processors</li>
+                <li>AI service providers</li>
+                <li>Communications providers (for example, email delivery)</li>
+              </ul>
+              <p>
+                These providers only receive information necessary to perform the
+                services they provide to us and are subject to appropriate contractual
+                and security obligations.
+              </p>
+              <p>
+                We do not sell your personal information or share it with third parties
+                for their own advertising or marketing purposes. We may share
+                information with service providers that process information on our
+                behalf to operate and improve Zawadi. We may also disclose information
+                where we are required to do so by law.
+              </p>
+            </Section>
+
+            <Section title="6. International transfers">
+              <p>
+                Your information may be processed in Kenya and other countries where
+                our service providers operate. Where personal information is
+                transferred internationally, we take appropriate steps required by
+                applicable law to protect it.
+              </p>
+            </Section>
+
+            <Section title="7. How long we keep your information">
+              <div className="overflow-x-auto -mx-1 px-1">
+                <table className="w-full text-ed-body-sm border-collapse">
+                  <thead>
+                    <tr className="bg-parchment border-b border-ash">
+                      <th className="text-left p-3 text-ed-eyebrow uppercase tracking-wider font-medium text-graphite">Information</th>
+                      <th className="text-left p-3 text-ed-eyebrow uppercase tracking-wider font-medium text-graphite">How long we keep it</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-graphite">
+                    <tr className="border-b border-ash"><td className="p-3 align-top">Account and profile information</td><td className="p-3 align-top">Until you delete your account</td></tr>
+                    <tr className="border-b border-ash"><td className="p-3 align-top">Applications, documents, and essay drafts</td><td className="p-3 align-top">Until you delete them or close your account</td></tr>
+                    <tr className="border-b border-ash"><td className="p-3 align-top">Payment records</td><td className="p-3 align-top">As long as we are required to keep them for tax and accounting purposes</td></tr>
+                    <tr className="border-b border-ash"><td className="p-3 align-top">Copies in backups</td><td className="p-3 align-top">Removed within a reasonable period after deletion, typically within 90 days</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </Section>
+
+            <Section title="8. How we protect your information">
+              <ul className="list-disc pl-6 space-y-2">
+                <li>Data is encrypted while in transit and while stored</li>
+                <li>Access to personal information is limited to authorized people who need it to run the service</li>
+                <li>Accounts are protected by authentication controls, and we monitor for misuse</li>
+                <li>No system is perfectly secure, so we also encourage you to use a strong, unique password</li>
+              </ul>
+            </Section>
+
+            <Section title="9. Cookies">
+              <p>
+                We use only the small number of cookies needed to run the service,
+                mainly to keep you signed in securely. We do not use advertising or
+                cross-site tracking cookies.
+              </p>
+            </Section>
+
+            <Section title="10. Your rights">
+              <p>You can ask us to:</p>
               <ul className="list-disc pl-6 space-y-1">
-                <li><strong>Access:</strong> Request a copy of all data we hold about you</li>
-                <li><strong>Correct:</strong> Update inaccurate or incomplete data</li>
-                <li><strong>Delete:</strong> Request deletion of your account and all associated data</li>
-                <li><strong>Export:</strong> Receive your data in a portable format (JSON)</li>
-                <li><strong>Withdraw consent:</strong> Opt out of non-essential communications</li>
-                <li><strong>Complain:</strong> Lodge a complaint with your local data protection authority</li>
+                <li><strong className="text-off-black-ink">Access:</strong> give you a copy of the personal information we hold about you</li>
+                <li><strong className="text-off-black-ink">Correct:</strong> fix information that is inaccurate or incomplete</li>
+                <li><strong className="text-off-black-ink">Delete:</strong> delete your account and associated personal information</li>
+                <li><strong className="text-off-black-ink">Object:</strong> object to certain processing, including direct marketing</li>
+                <li><strong className="text-off-black-ink">Withdraw consent:</strong> stop processing you previously consented to</li>
+                <li><strong className="text-off-black-ink">Portability:</strong> where applicable, receive your data in a portable format</li>
+                <li><strong className="text-off-black-ink">Complain:</strong> lodge a complaint with a data protection authority</li>
               </ul>
-              <p>To exercise any of these rights, email <a href="mailto:privacy@techsari.online" className="text-accent-green hover:underline">privacy@techsari.online</a>. We will respond within 30 days.</p>
-              <p>For Kenya residents: You may also contact the Office of the Data Protection Commissioner (ODPC) at info@odpc.go.ke.</p>
-              <p>For Nigeria residents: You may contact the Nigeria Data Protection Commission (NDPC) at info@ndpc.gov.ng.</p>
+              <p>
+                To exercise any of these rights, email{' '}
+                <a href="mailto:privacy@techsari.online" className="font-medium text-off-black-ink underline decoration-ash underline-offset-4 hover:decoration-off-black-ink transition-colors">privacy@techsari.online</a>{' '}
+                or reach us through our contact page. We will respond within 30 days.
+              </p>
+              <p>
+                In Kenya, you may also complain to the Office of the Data Protection
+                Commission (ODPC), the national data protection regulator.
+              </p>
             </Section>
 
-            <Section title="8. Cookies">
-              <p>Zawadi uses only <strong>essential cookies</strong> required for the platform to function:</p>
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs border-collapse">
-                  <thead>
-                    <tr className="bg-off-black border-b border-hairline/40">
-                      <th className="text-left p-3 font-bold text-cream">Cookie</th>
-                      <th className="text-left p-3 font-bold text-cream">Purpose</th>
-                      <th className="text-left p-3 font-bold text-cream">Duration</th>
-                      <th className="text-left p-3 font-bold text-cream">Type</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="border-b border-hairline/30"><td className="p-3"><code>sb-access-token</code></td><td className="p-3">Authentication (Supabase)</td><td className="p-3">Session</td><td className="p-3">Essential</td></tr>
-                    <tr className="border-b border-hairline/30"><td className="p-3"><code>sb-refresh-token</code></td><td className="p-3">Session renewal (Supabase)</td><td className="p-3">30 days</td><td className="p-3">Essential</td></tr>
-                  </tbody>
-                </table>
-              </div>
-              <p>We do NOT use tracking cookies, advertising cookies, or third-party analytics cookies. No cookie consent banner is required because we only use essential cookies.</p>
+            <Section title="11. Age requirements">
+              <p>
+                Zawadi is intended for people aged 16 and older, consistent with our
+                Terms of Service. We do not knowingly collect personal information
+                from anyone under 16. If we learn that we have, we will delete it.
+              </p>
+              <p>
+                Where a user is under 18, we handle their personal information with
+                the additional protections required under Kenya's Data Protection Act.
+              </p>
             </Section>
 
-            <Section title="9. Third-Party Services">
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs border-collapse">
-                  <thead>
-                    <tr className="bg-off-black border-b border-hairline/40">
-                      <th className="text-left p-3 font-bold text-cream">Service</th>
-                      <th className="text-left p-3 font-bold text-cream">Purpose</th>
-                      <th className="text-left p-3 font-bold text-cream">Data Shared</th>
-                      <th className="text-left p-3 font-bold text-cream">Privacy Policy</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="border-b border-hairline/30"><td className="p-3">Supabase</td><td className="p-3">Database, auth, file storage</td><td className="p-3">All platform data</td><td className="p-3"><a href="https://supabase.com/privacy" className="text-accent-green hover:underline">supabase.com/privacy</a></td></tr>
-                    <tr className="border-b border-hairline/30"><td className="p-3">Paystack</td><td className="p-3">Payment processing</td><td className="p-3">Payment references, amounts</td><td className="p-3"><a href="https://paystack.com/privacy" className="text-accent-green hover:underline">paystack.com/privacy</a></td></tr>
-                    <tr className="border-b border-hairline/30"><td className="p-3">Vercel</td><td className="p-3">Hosting</td><td className="p-3">All platform data</td><td className="p-3"><a href="https://vercel.com/legal/privacy-policy" className="text-accent-green hover:underline">vercel.com/legal/privacy-policy</a></td></tr>
-                    <tr className="border-b border-hairline/30"><td className="p-3">OpenRouter (DeepSeek)</td><td className="p-3">AI essay generation</td><td className="p-3">Essay prompts (transient)</td><td className="p-3"><a href="https://openrouter.ai/privacy" className="text-accent-green hover:underline">openrouter.ai/privacy</a></td></tr>
-                  </tbody>
-                </table>
-              </div>
+            <Section title="12. Changes to this policy">
+              <p>
+                We may update this policy as the service evolves. If a change is
+                material, we will tell you through the platform or by email before it
+                takes effect. Continuing to use Zawadi after a change means you accept
+                the updated policy.
+              </p>
             </Section>
 
-            <Section title="10. Children's Privacy">
-              <p>Zawadi is intended for users aged 16 and above. We do not knowingly collect data from children under 16. If you believe a child under 16 has provided us with personal data, please contact us immediately.</p>
-            </Section>
-
-            <Section title="11. International Data Transfers">
-              <p>Your data may be transferred to and processed in countries outside your country of residence (including the United States and European Union). We ensure appropriate safeguards are in place (standard contractual clauses, provider SOC 2 certifications) for any such transfers.</p>
-            </Section>
-
-            <Section title="12. Changes to This Policy">
-              <p>We will notify you of material changes to this Privacy Policy via email and/or a prominent notice on our platform. Continued use after changes constitutes acceptance.</p>
-            </Section>
-
-            <Section title="13. Compliance">
-              <p>Zawadi complies with:</p>
-              <ul className="list-disc pl-6 space-y-1">
-                <li><strong>Kenya Data Protection Act (DPA) 2019</strong></li>
-                <li><strong>Nigeria Data Protection Regulation (NDPR)</strong></li>
-                <li><strong>EU General Data Protection Regulation (GDPR)</strong></li>
-              </ul>
-            </Section>
-
-            <Section title="14. Contact Us">
-              <div className="bg-off-black border border-hairline/40 rounded-lg p-4 space-y-2">
-                <p><strong>Privacy inquiries:</strong> <a href="mailto:privacy@techsari.online" className="text-accent-green hover:underline">privacy@techsari.online</a> — Response within 30 days</p>
-                <p><strong>Security vulnerabilities:</strong> <a href="mailto:security@techsari.online" className="text-accent-green hover:underline">security@techsari.online</a> — Response within 48 hours</p>
+            <Section title="13. Contact us">
+              <div className="bg-parchment border border-ash rounded-ed p-6 space-y-1">
+                <p><strong className="text-off-black-ink">Techsari</strong> · Nairobi, Kenya</p>
+                <p>Privacy inquiries: <a href="mailto:privacy@techsari.online" className="font-medium text-off-black-ink underline decoration-ash underline-offset-4 hover:decoration-off-black-ink transition-colors">privacy@techsari.online</a></p>
+                <p>Contact page: <a href="https://www.techsari.online/contact" className="font-medium text-off-black-ink underline decoration-ash underline-offset-4 hover:decoration-off-black-ink transition-colors">www.techsari.online/contact</a></p>
               </div>
             </Section>
           </div>
 
-          <div className="mt-12 pt-8 border-t border-hairline">
-            <p className="text-xs text-muted">
-              <strong>Last updated:</strong> May 27, 2026 &middot; <strong>Effective date:</strong> May 27, 2026
-            </p>
-            <p className="text-sm text-muted italic mt-2">
-              <em>Techsari Zawadi — Your data is yours. We protect it accordingly.</em>
-            </p>
+          <div className="mt-12 pt-8 border-t border-ash">
+            <p className="text-ed-caption text-graphite">Last updated: August 25, 2026</p>
           </div>
         </div>
       </section>
@@ -214,8 +222,8 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <h2 className="text-xl md:text-2xl font-display font-semibold text-cream tracking-tight mb-4">{title}</h2>
-      <div className="space-y-3 text-sm">{children}</div>
+      <h2 className="text-ed-sub font-display font-semibold tracking-tight text-off-black-ink mb-4">{title}</h2>
+      <div className="space-y-3 text-ed-body text-graphite leading-relaxed">{children}</div>
     </div>
   );
 }

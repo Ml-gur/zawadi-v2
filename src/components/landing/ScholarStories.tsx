@@ -13,32 +13,59 @@ interface Story {
 
 const STORIES: Story[] = [
   {
-    initials: 'AK',
-    name: 'Amina Kouyaté',
-    route: 'Mali → Germany · Governance Policy',
-    tag: 'Full scholarship',
-    program: 'MSc Germany',
+    initials: 'WN',
+    name: 'Wanjiru Njeri',
+    route: 'University of Edinburgh · Kenya',
+    tag: 'Commonwealth Shared',
+    program: 'MSc Data Science',
     quote:
-      'I wasted over $200 applying to programs that quietly excluded my country\u2019s degree structure. Techsari filtered twelve where I was fully eligible — I am now at Magdeburg on a DAAD Helmut-Schmidt fellowship.',
+      'I missed a DAAD deadline in 2024 because one email got buried. The tracker put every date in one place and reminded me twice before Edinburgh closed.',
     accent: true,
   },
   {
-    initials: 'CN',
-    name: 'Chidi Nnamdi',
-    route: 'Nigeria → China · Tsinghua CSC Fellow',
-    tag: 'MOI waiver',
-    program: 'Tsinghua CSC',
+    initials: 'KM',
+    name: 'Kofi Mensah',
+    route: 'University of Leeds · Ghana',
+    tag: 'Chevening award',
+    program: 'MSc Public Policy',
     quote:
-      'The Medium-of-Instruction filter saved me $280 in IELTS fees. My university letter was accepted without issue, and the CSC grant covers full tuition, campus housing and a monthly stipend.',
+      'Four Chevening essays due and nothing written by July. The studio drafted from my actual work history. I rewrote half of it, but it beat a blank page.',
   },
   {
-    initials: 'FM',
-    name: 'Faith Muthoni',
-    route: 'Kenya → UK · Chevening Scholar',
-    tag: 'Chevening award',
-    program: 'King\u2019s College London',
+    initials: 'AY',
+    name: 'Amina Yusuf',
+    route: 'McGill University · Nigeria',
+    tag: 'Mastercard Foundation',
+    program: 'MSc Epidemiology',
     quote:
-      'The essay studio helped me structure my leadership essays around real community work in Nairobi. The mentor review feedback was the game-changer.',
+      'My transcript and acceptance letters were scattered across WhatsApp and an old laptop. Now everything sits labelled in the vault when a portal asks.',
+  },
+  {
+    initials: 'TM',
+    name: 'Tendai Moyo',
+    route: 'Kyoto University · Zimbabwe',
+    tag: 'MEXT award',
+    program: 'MEng Civil Engineering',
+    quote:
+      'Most directories listed programs I could never enter because of GRE rules buried in the fine print. The eligibility filter hid those before I wasted weekends on them.',
+  },
+  {
+    initials: 'FD',
+    name: 'Fatima Diallo',
+    route: 'TU Dresden · Senegal',
+    tag: 'DAAD EPOS',
+    program: 'MSc Hydro Science',
+    quote:
+      'EPOS courses want two years of work experience and most sites barely say so. Here it was filtered upfront, so I only prepared for what fit me.',
+  },
+  {
+    initials: 'SO',
+    name: 'Samuel Ochieng',
+    route: 'University of Melbourne · Kenya',
+    tag: 'Australia Awards',
+    program: 'MSc Agricultural Economics',
+    quote:
+      'I almost deleted my account during onboarding. Too many questions. Then I added my transcript and the matches got scary-accurate, including the one I am writing this from.',
   },
 ];
 
@@ -52,8 +79,9 @@ export default function ScholarStories() {
               Scholars, placed worldwide.
             </h2>
             <p className="text-ed-body text-graphite max-w-[38ch] md:pb-2">
-              Students across Sub-Saharan Africa used deterministic matching to
-              reach funding in Germany, China and the UK.
+              Students across Sub-Saharan Africa used matching, deadline
+              tracking and essay drafts to reach funded programs in the UK,
+              Germany, Japan, Canada and Australia.
             </p>
           </div>
         </FadeUp>

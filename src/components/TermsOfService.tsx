@@ -8,146 +8,205 @@ interface TermsOfServiceProps {
 
 export default function TermsOfService({ onBack }: TermsOfServiceProps) {
   return (
-    <div className="bg-canvas text-cream min-h-[100dvh]">
+    <div className="bg-pure-white text-off-black-ink min-h-[100dvh]">
       <SEO
         title="Terms of Service — Techsari Zawadi"
-        description="Techsari Zawadi Terms of Service — the terms governing your use of our AI-powered scholarship platform for African students."
+        description="The Terms of Service governing your use of Techsari Zawadi, a scholarship discovery and application platform for African students."
         path="/terms"
       />
-      <section className="px-6 py-20 md:py-24">
+      <section className="px-4 sm:px-6 py-16 md:py-24">
         <div className="max-w-[800px] mx-auto">
           <Breadcrumbs items={[{ name: 'Terms of service', path: '/terms' }]} />
 
-          <h1 className="text-3xl md:text-5xl font-display font-semibold text-cream tracking-tight mb-2">Terms of Service</h1>
-          <p className="text-sm text-muted mb-8">Last updated: May 27, 2026</p>
+          <h1 className="text-ed-h1-sm font-display font-semibold tracking-tight text-off-black-ink mb-2">Terms of Service</h1>
+          <p className="text-ed-body-sm text-graphite mb-8">Last updated: August 25, 2026</p>
 
-          <div className="prose prose-sm max-w-none space-y-8 text-muted leading-relaxed">
+          <p className="text-ed-body text-graphite leading-relaxed mb-10">
+            These Terms govern your use of Zawadi, operated by Techsari ("we", "us",
+            "our"). By creating an account or using the Service, you agree to them.
+          </p>
 
-            <Section title="1. Acceptance of Terms">
-              <p>By accessing or using Techsari Zawadi ("the Service"), you agree to be bound by these Terms of Service. If you do not agree, do not use the Service.</p>
+          <div className="space-y-12">
+
+            <Section title="1. What Zawadi is — and is not">
+              <p>
+                Zawadi provides scholarship discovery, matching, and application-support
+                tools, including deadline tracking, document storage, essay drafting
+                assistance, and application management.
+              </p>
+              <p className="bg-parchment border border-ash rounded-ed p-5 font-medium text-off-black-ink">
+                Zawadi does not award scholarships, determine scholarship eligibility,
+                or guarantee admission, funding, or selection by any scholarship provider.
+              </p>
             </Section>
 
-            <Section title="2. Description of Service">
-              <p>Zawadi is a scholarship discovery and application management platform. We provide AI-powered tools including scholarship matching, essay generation, document management, and application tracking. The Service is provided on a freemium basis with paid subscription tiers.</p>
-              <p className="text-status-warning font-semibold">Zawadi does NOT:</p>
-              <ul className="list-disc pl-6 space-y-1">
-                <li>Guarantee scholarship awards</li>
-                <li>Submit applications on your behalf without your review</li>
-                <li>Replace official scholarship application processes</li>
-                <li>Provide financial aid, loans, or direct funding</li>
-              </ul>
-            </Section>
-
-            <Section title="3. User Accounts">
+            <Section title="2. Eligibility and accounts">
               <ul className="list-disc pl-6 space-y-2">
-                <li>You must provide accurate and complete registration information</li>
-                <li>You are responsible for maintaining the confidentiality of your password</li>
-                <li>You must be at least 16 years old to use the Service</li>
-                <li>One account per person; shared accounts are prohibited</li>
-                <li>You are responsible for all activity under your account</li>
-                <li>We reserve the right to suspend or terminate accounts that violate these terms</li>
+                <li>Zawadi is intended for individuals aged 16 and older. By creating an account, you confirm that you meet this requirement</li>
+                <li>You must provide accurate and complete registration information and keep it up to date</li>
+                <li>You are responsible for keeping your password confidential and for all activity under your account</li>
+                <li>One account per person; shared accounts are not permitted</li>
               </ul>
             </Section>
 
-            <Section title="4. Acceptable Use">
-              <p>You agree NOT to:</p>
+            <Section title="3. Scholarship listings">
+              <p>
+                We make reasonable efforts to identify and maintain accurate
+                scholarship information. However, scholarship information may change
+                without notice, and we cannot guarantee that every listing, deadline,
+                eligibility requirement, funding amount, or application link is always
+                accurate or current.
+              </p>
+              <p>
+                Always confirm details with the official scholarship provider before
+                relying on them or submitting an application.
+              </p>
+            </Section>
+
+            <Section title="4. Third-party scholarship providers">
+              <p>
+                Zawadi is independent from the scholarship organizations listed on the
+                platform unless expressly stated otherwise.
+              </p>
+              <p>
+                Scholarship providers are solely responsible for their own application
+                processes, eligibility decisions, communications, selection decisions,
+                and awards.
+              </p>
+            </Section>
+
+            <Section title="5. External links">
+              <p>
+                The Service links to external websites, including official scholarship
+                pages. Those sites have their own terms and privacy policies, and we do
+                not control or endorse their content or practices.
+              </p>
+            </Section>
+
+            <Section title="6. AI-assisted tools">
+              <ul className="list-disc pl-6 space-y-2">
+                <li>AI features assist with matching, preparation, and drafting. You remain responsible for the final content you submit to any provider</li>
+                <li>AI output does not guarantee accuracy, completeness, or originality. Review and personalize it before use</li>
+                <li>You are responsible for reviewing the rules of each scholarship provider and ensuring that any application you submit complies with its requirements concerning AI assistance, originality, authorship, and disclosure</li>
+              </ul>
+            </Section>
+
+            <Section title="7. Subscriptions, pricing, and cancellation">
+              <ul className="list-disc pl-6 space-y-2">
+                <li>Paid plans are billed monthly or annually through our payment processor</li>
+                <li>Charges are processed in Kenyan Shillings (KES). Prices may also be displayed in USD for convenience. The amount actually charged will be the KES amount shown at checkout</li>
+                <li>Subscriptions renew automatically unless cancelled before the next billing date</li>
+                <li>Before you pay, checkout shows the price, currency, renewal schedule, and how to cancel</li>
+                <li>Cancellation stops future renewals. Unless otherwise required by law or stated at checkout, cancellation does not automatically create a right to a refund for the current billing period</li>
+                <li>We will give at least 30 days' notice before changing prices</li>
+                <li>Failed payments may result in your account moving to the free plan</li>
+              </ul>
+            </Section>
+
+            <Section title="8. Acceptable use">
+              <p>You agree not to:</p>
               <ul className="list-disc pl-6 space-y-1">
                 <li>Use the Service for any unlawful purpose</li>
+                <li>Submit fraudulent applications or misrepresent your identity or qualifications</li>
                 <li>Attempt to gain unauthorized access to any part of the Service</li>
-                <li>Use automated tools to scrape, harvest, or extract data without permission</li>
-                <li>Upload malicious content or attempt to disrupt the Service</li>
-                <li>Generate essays for fraudulent applications or misrepresentation</li>
-                <li>Resell or redistribute AI-generated content as your own AI service</li>
-                <li>Use the Service to spam or harass others</li>
-                <li>Impersonate any person or entity</li>
-                <li>Violate any applicable laws or regulations</li>
+                <li>Scrape, harvest, or extract data without permission</li>
+                <li>Upload malicious content or disrupt the Service</li>
+                <li>Use the Service or its outputs to build, train, operate, or market a competing service without our permission</li>
+                <li>Spam, harass, or impersonate any person or entity</li>
               </ul>
             </Section>
 
-            <Section title="5. AI-Generated Content">
+            <Section title="9. Intellectual property">
               <ul className="list-disc pl-6 space-y-2">
-                <li>AI-generated essays are tools to <strong>assist</strong> your application. You remain responsible for the final content submitted to scholarship providers</li>
-                <li>We do not guarantee that AI-generated essays will result in scholarship awards</li>
-                <li>You should <strong>review and personalize</strong> all AI-generated content before submission</li>
-                <li>AI-generated content may contain errors or inaccuracies — always verify</li>
-                <li>Some scholarship providers may have policies regarding AI-assisted applications. It is your responsibility to comply</li>
+                <li>The Zawadi platform, including its code, design, branding, and name, belongs to Techsari</li>
+                <li>You own the documents and application data you upload to the Service</li>
+                <li>You may use content generated through our AI tools for your personal educational and scholarship application purposes, subject to applicable law and the rules of the relevant scholarship provider</li>
+                <li>You grant Zawadi a limited license to store and process your content solely to provide the Service, and to maintain, secure, troubleshoot, and improve the Service as described in our Privacy Policy</li>
               </ul>
             </Section>
 
-            <Section title="6. Scholarship Listings">
-              <ul className="list-disc pl-6 space-y-2">
-                <li>We strive to verify all scholarship listings, but we cannot guarantee 100% accuracy</li>
-                <li>Deadlines, eligibility criteria, and application links may change — always verify on the official website</li>
-                <li>We are not responsible for the content or practices of external websites linked from our platform</li>
-                <li>"Apply Now" links direct you to official scholarship pages; Zawadi does not process applications directly</li>
-              </ul>
+            <Section title="10. No professional advice">
+              <p>
+                Content on Zawadi is provided for informational and educational
+                purposes only. It is not legal, financial, immigration, or academic
+                advice, and should not be treated as a substitute for guidance from a
+                qualified professional.
+              </p>
             </Section>
 
-            <Section title="7. Payments & Subscriptions">
-              <ul className="list-disc pl-6 space-y-2">
-                <li>Paid plans are billed monthly or annually via Paystack</li>
-                <li>Payments are processed in Kenyan Shillings (KES) at the displayed rate</li>
-                <li>Prices displayed in USD are approximate; actual charges are in KES</li>
-                <li>Subscription fees are <strong>non-refundable</strong> except as required by law</li>
-                <li>You may cancel your subscription at any time. Access continues until the end of the current billing period</li>
-                <li>We reserve the right to change pricing with <strong>30 days notice</strong></li>
-                <li>Failed payments may result in downgrade to the free Explorer plan</li>
-              </ul>
+            <Section title="11. Disclaimers and limitation of liability">
+              <p>
+                The Service is provided "as is" and "as available". We do not guarantee
+                that listings are always accurate or current, that you will receive any
+                award, that the Service will be uninterrupted or error-free, or that AI
+                output will suit your specific needs.
+              </p>
+              <p>
+                To the maximum extent permitted by law, Techsari shall not be liable
+                for any indirect, incidental, special, consequential, or punitive
+                damages arising from your use of the Service. Our total liability for
+                any claim relating to the Service is limited to the amount you paid us
+                in the 12 months before the claim arose.
+              </p>
+              <p className="font-medium text-off-black-ink">
+                Nothing in these Terms excludes or limits liability that cannot
+                lawfully be excluded or limited under applicable law.
+              </p>
             </Section>
 
-            <Section title="8. Intellectual Property">
-              <ul className="list-disc pl-6 space-y-2">
-                <li>The Zawadi platform, including its code, design, branding, and name, is owned by Techsari</li>
-                <li>Scholarship listings are curated from publicly available information</li>
-                <li>You retain ownership of your uploaded documents and application data</li>
-                <li>AI-generated essays: You own the content you create using our tools, subject to our right to use anonymized data for service improvement</li>
-                <li>You grant Zawadi a limited license to store and process your content solely to provide the Service</li>
-              </ul>
+            <Section title="12. Suspension and termination">
+              <p>
+                <strong className="text-off-black-ink">By you:</strong> you may close your account at any time through the platform or by contacting us.
+              </p>
+              <p>
+                <strong className="text-off-black-ink">By us:</strong> we may suspend or terminate an account where we reasonably believe that the account has violated these Terms, created a security risk, engaged in fraudulent or abusive activity, or exposed Techsari or other users to legal or operational risk. Where reasonably practical, we will notify you.
+              </p>
+              <p>After termination, your data is handled as described in our Privacy Policy.</p>
             </Section>
 
-            <Section title="9. Limitation of Liability">
-              <p>Zawadi is provided <strong>"as is"</strong> and <strong>"as available."</strong> We do not guarantee:</p>
-              <ul className="list-disc pl-6 space-y-1">
-                <li>That scholarship listings are always accurate or current (though we strive to verify)</li>
-                <li>That you will be awarded any scholarship</li>
-                <li>That the Service will be uninterrupted or error-free</li>
-                <li>That AI-generated content will be suitable for your specific needs</li>
-              </ul>
-              <p><strong>To the maximum extent permitted by law, Techsari shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from use of the Service.</strong></p>
-              <p>Our total liability for any claim arising from the Service shall not exceed the amount you paid us in the 12 months preceding the claim.</p>
+            <Section title="13. Changes to these Terms">
+              <p>
+                We may update these Terms over time. Material changes will be
+                communicated through the platform or by email before they take effect.
+                Continued use after changes take effect constitutes acceptance.
+              </p>
             </Section>
 
-            <Section title="10. Termination">
-              <p><strong>By you:</strong> You may terminate your account at any time through the platform or by contacting us. Upon termination, your data will be handled per our Privacy Policy.</p>
-              <p><strong>By us:</strong> We may terminate or suspend your account for violation of these terms, with or without notice. Upon termination, your right to use the Service immediately ceases.</p>
+            <Section title="14. Governing law and disputes">
+              <p>
+                If something goes wrong, please contact us first at{' '}
+                <a href="mailto:legal@techsari.online" className="font-medium text-off-black-ink underline decoration-ash underline-offset-4 hover:decoration-off-black-ink transition-colors">legal@techsari.online</a>{' '}
+                so we can try to resolve it informally. We will respond within 30
+                days. This is a service commitment, not a precondition for exercising
+                your rights.
+              </p>
+              <p>
+                Nothing in this section prevents a user from exercising any rights or
+                remedies available under applicable law.
+              </p>
+              <p>
+                These Terms are governed by the laws of Kenya, and disputes shall be
+                resolved in the courts of Kenya.
+              </p>
+              <p>
+                For users outside Kenya, you may also be entitled to protections under
+                your local consumer protection laws.
+              </p>
             </Section>
 
-            <Section title="11. Changes to Terms">
-              <p>We may update these terms from time to time. Material changes will be communicated via email and/or a prominent notice on our platform. Continued use after changes constitutes acceptance.</p>
-            </Section>
-
-            <Section title="12. Governing Law">
-              <p>These terms are governed by the laws of <strong>Kenya</strong>. Any disputes shall be resolved in Kenyan courts.</p>
-              <p>For users outside Kenya, you may also be entitled to protections under your local consumer protection laws.</p>
-            </Section>
-
-            <Section title="13. Dispute Resolution">
-              <p>Before filing a formal legal claim, we encourage you to contact us at <a href="mailto:legal@techsari.online" className="text-accent-green hover:underline">legal@techsari.online</a> to resolve the dispute informally. We will respond within 30 days.</p>
-            </Section>
-
-            <Section title="14. Contact">
-              <div className="bg-off-black border border-hairline/40 rounded-lg p-4 space-y-1">
-                <p><strong>Questions about these terms:</strong></p>
-                <p>Email: <a href="mailto:legal@techsari.online" className="text-accent-green hover:underline">legal@techsari.online</a></p>
-                <p>Website: <a href="https://www.techsari.online/contact" className="text-accent-green hover:underline">https://www.techsari.online/contact</a></p>
+            <Section title="15. Contact">
+              <div className="bg-parchment border border-ash rounded-ed p-6 space-y-1">
+                <p><strong className="text-off-black-ink">Questions about these Terms?</strong></p>
+                <p>Email: <a href="mailto:legal@techsari.online" className="font-medium text-off-black-ink underline decoration-ash underline-offset-4 hover:decoration-off-black-ink transition-colors">legal@techsari.online</a></p>
+                <p>Contact page: <a href="https://www.techsari.online/contact" className="font-medium text-off-black-ink underline decoration-ash underline-offset-4 hover:decoration-off-black-ink transition-colors">www.techsari.online/contact</a></p>
               </div>
             </Section>
           </div>
 
-          <div className="mt-12 pt-8 border-t border-hairline">
-            <p className="text-xs text-muted">Last updated: May 27, 2026</p>
-            <p className="text-sm text-muted italic mt-2">
-              <em>Techsari Zawadi — Built for African students, by Africans.</em>
+          <div className="mt-12 pt-8 border-t border-ash">
+            <p className="text-ed-caption text-graphite">Last updated: August 25, 2026</p>
+            <p className="text-ed-body-sm text-graphite italic mt-2">
+              <em>Techsari Zawadi · Built for African students, by Africans.</em>
             </p>
           </div>
         </div>
@@ -159,8 +218,8 @@ export default function TermsOfService({ onBack }: TermsOfServiceProps) {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <h2 className="text-xl md:text-2xl font-display font-semibold text-cream tracking-tight mb-4">{title}</h2>
-      <div className="space-y-3 text-sm">{children}</div>
+      <h2 className="text-ed-sub font-display font-semibold tracking-tight text-off-black-ink mb-4">{title}</h2>
+      <div className="space-y-3 text-ed-body text-graphite leading-relaxed">{children}</div>
     </div>
   );
 }
