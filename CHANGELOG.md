@@ -1,5 +1,45 @@
 # Changelog
 
+## 2026-08-25 — Platform Hardening, Admin Rebuild, Mobile Bento, Live Scholarship Bot
+
+### Fixed (root-caused against the live database)
+- **Document analysis pipeline** — live DB lacked `documents.extraction_method`; every analysis failed its final write and docs sat on "pending" forever (migration 017). Edge function now reads provider/key/model from `ai_config`; client stops retrying 4xx and surfaces real errors as toasts.
+- **Tracker stages never persisted** — `applications.id` had no default and the client sent none (23502 on every write, silently swallowed). Default added (migration 017); stage errors now toast. Verified end-to-end under RLS with a real account.
+- **Scholarship detail page horizontal overflow on mobile** — breadcrumb min-content chain forced 432px on 390px screens; now exactly 390 (verified).
+- **Profile setup wizard** — rebuilt on live tokens (was a transparent card rendering the literal word "close" via an uninstalled icon font).
+
+### Added: Admin portal rebuild (`admin-api` edge function + 8 tabs)
+- New `admin-api` Deno function: overview stats, timeseries, user list with engagement counts, plan/suspend/delete (audit-logged), payments, audit trail, AI connection test. Service-role inside, caller-role-verified.
+- Tabs: Overview (headline stats + "Needs attention" strip + charts), Users (search/filters/detail drawer with working controls), Scholarships (CRUD slide-over + **bulk publish/unpublish/delete**), Bot Queue, Payments, Audit, AI Config (+ Test connection), Mentor Queue.
+- 15s polling with "updated" stamp; error banner keeps last-good data. Legacy panels deleted.
+
+### Added: Live scholarship crawler (no longer an external stub)
+- `run-pipeline` `trigger` action: fetches 3 RSS feeds, deep-fetches up to 12 articles, extracts deadline/funding/degree levels/fields/provider/countries/eligibility, confidence-scored, URL-fingerprint dedupe, cross-dedupe vs published listings.
+- Daily schedule: `pg_cron` + `pg_net` at 02:00 UTC; cron secret stored in Supabase Vault; function auth = admin JWT or `x-cron-secret`.
+- Admin "Run crawler campaign" now hits the real action (was a nonexistent `trigger` → always 400).
+
+### Changed: Mobile experience (bento system)
+- Public browse, logged-in finder, and dashboard all render 2-column compact bento tiles on mobile (full-width feature tile every 3rd for rhythm); rich cards preserved on md+.
+- Filters collapsed on mobile in both finders: one row = search + Filters toggle (active-count badge) + view switch.
+- Scholar stories → single auto-scrolling marquee row (pause on hover, reduced-motion safe).
+
+### Changed: Profile data model
+- Onboarding + profile ask **Age + Gender** instead of date of birth (migration 018); matching engine prefers explicit age, falls back to DOB for legacy rows.
+
+### Added: Brand, PWA, launch
+- Real Techsari logo mark powers PWA icons (192/512/maskable); android-chrome icons + manifest wired.
+- Canonical origin unified to `www.techsari.online` (Cloudflare apex→www 308 was breaking service-worker registration).
+- Product Hunt launch kit in `launch/producthunt/` — 8 gallery screenshots (1270×760 @2x), 240×240 product icon, full copy pack + day checklist.
+
+### Changed: Legal & content
+- Privacy Policy + Terms rewritten (user-facing; age/gender disclosed with purpose; third parties by category, not stack; Kenya/ODPC/CAK-aligned; AI transparency). 6 realistic testimonials.
+
+### Docs
+- `docs/security-audit-2026-08-25.md` — 70-check audit (38 PASS / 19 FAIL / 4 UNKNOWN / 9 N/A) with ship blockers.
+- `docs/ROADMAP-NEXT.md` — prioritized next steps + founder verification checklist.
+- `docs/research/scholarship-deep-research-prompt.md` — v2 research prompt, schema-aligned, "requirements are data, not disqualifiers".
+- `.env` restructured for direct paste into Vercel.
+
 ## 2026-06-16 — Vercel Web Analytics Integration
 
 ### Added: @vercel/analytics React Component
