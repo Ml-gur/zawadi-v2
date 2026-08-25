@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronDown, Columns2, LayoutGrid, Rows3, Search, X } from 'lucide-react';
+import { ChevronDown, Columns2, LayoutGrid, Rows3, Search, SlidersHorizontal, X } from 'lucide-react';
 import { useCompare } from '../../components/compare/useCompare';
 import CompareModal from '../../components/compare/CompareModal';
 import { SEO } from '../../components/SEO';
@@ -50,6 +50,7 @@ export default function PublicScholarshipList({ user }: { user?: any } = {}) {
   const [noIeltsOnly, setNoIeltsOnly] = useState(false);
   const [closingSoonOnly, setClosingSoonOnly] = useState(false);
   const [view, setView] = useState<'grid' | 'table'>('grid');
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const { ids: compareIds, open: compareOpen, setOpen: setCompareOpen, toggle: toggleCompare, clear: clearCompare } = useCompare();
 
@@ -198,10 +199,10 @@ export default function PublicScholarshipList({ user }: { user?: any } = {}) {
           </section>
         )}
 
-        {/* Filters panel */}
-        <section aria-label="Filters" className="rounded-ed border border-ash/70 bg-pure-white p-6 md:p-8 mb-8">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
-            <div className="lg:col-span-2 relative">
+        {/* Filters panel — selects + quick chips collapse behind a toggle on mobile */}
+        <section aria-label="Filters" className="rounded-ed border border-ash/70 bg-pure-white p-4 md:p-8 mb-8">
+          <div className="flex flex-col md:grid md:grid-cols-4 gap-4 mb-4">
+            <div className="md:col-span-2 relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-graphite pointer-events-none" aria-hidden />
               <input
                 type="search"
@@ -209,10 +210,48 @@ export default function PublicScholarshipList({ user }: { user?: any } = {}) {
                 onChange={e => setQuery(e.target.value)}
                 placeholder="Search scholarships, keywords, or sponsors…"
                 aria-label="Search scholarships"
-                className="w-full pl-12 pr-4 py-3 rounded-lg border border-ash bg-pure-white text-ed-body placeholder:text-graphite focus:outline-none focus:border-graphite hover:border-graphite transition-colors"
+                className="w-full pl-12 pr-4 py-3 min-h-[44px] rounded-lg border border-ash bg-pure-white text-ed-body placeholder:text-graphite focus:outline-none focus:border-graphite hover:border-graphite transition-colors"
               />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:col-span-2 gap-3">
+            <div className="md:hidden flex items-center justify-between gap-2">
+              <button
+                onClick={() => setFiltersOpen(o => !o)}
+                aria-expanded={filtersOpen}
+                className={`inline-flex items-center gap-2 rounded-lg border px-4 min-h-[44px] text-ed-body-sm font-medium transition-colors cursor-pointer ${
+                  filtersOpen || country || level || region || funding || noIeltsOnly || closingSoonOnly
+                    ? 'border-off-black-ink text-off-black-ink bg-mist'
+                    : 'border-ash text-graphite hover:border-graphite'
+                }`}
+              >
+                <SlidersHorizontal className="w-4 h-4" aria-hidden />
+                Filters
+                {(() => {
+                  const n = (country ? 1 : 0) + (level ? 1 : 0) + (region ? 1 : 0) + (funding ? 1 : 0) + (noIeltsOnly ? 1 : 0) + (closingSoonOnly ? 1 : 0);
+                  return n > 0 ? (
+                    <span className="inline-flex min-w-5 h-5 px-1 items-center justify-center rounded-full bg-electric-lime text-[10px] font-medium text-off-black-ink tabular-nums">{n}</span>
+                  ) : null;
+                })()}
+              </button>
+              <div className="flex items-center gap-1 bg-mist border border-ash/80 rounded-lg p-1 ml-auto" role="group" aria-label="View mode">
+                <button
+                  onClick={() => setView('grid')}
+                  aria-pressed={view === 'grid'}
+                  aria-label="Grid view"
+                  className={`p-2.5 rounded-md transition-colors cursor-pointer inline-flex ${view === 'grid' ? 'bg-pure-white border border-ash text-off-black-ink hover:border-graphite' : 'text-graphite hover:text-off-black-ink'}`}
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setView('table')}
+                  aria-pressed={view === 'table'}
+                  aria-label="Table view"
+                  className={`p-2.5 rounded-md transition-colors cursor-pointer inline-flex ${view === 'table' ? 'bg-pure-white border border-ash text-off-black-ink hover:border-graphite' : 'text-graphite hover:text-off-black-ink'}`}
+                >
+                  <Rows3 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+            <div className={`${filtersOpen ? 'grid' : 'hidden'} md:grid grid-cols-1 sm:grid-cols-3 md:col-span-2 gap-3`}>
               <div className="relative">
                 <select
                   value={country}
@@ -256,7 +295,7 @@ export default function PublicScholarshipList({ user }: { user?: any } = {}) {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className={`${filtersOpen ? 'flex' : 'hidden'} md:flex flex-wrap items-center justify-between gap-4`}>
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-ed-caption uppercase text-graphite mr-1">Quick filters:</span>
               <button onClick={() => { setFunding(''); setNoIeltsOnly(false); }} aria-pressed={!funding && !noIeltsOnly} className={chipClass(!funding && !noIeltsOnly)}>
@@ -276,7 +315,7 @@ export default function PublicScholarshipList({ user }: { user?: any } = {}) {
               </button>
             </div>
 
-            <div className="flex items-center gap-1 bg-mist border border-ash/80 rounded-lg p-1" role="group" aria-label="View mode">
+            <div className="hidden md:flex items-center gap-1 bg-mist border border-ash/80 rounded-lg p-1" role="group" aria-label="View mode">
               <button
                 onClick={() => setView('grid')}
                 aria-pressed={view === 'grid'}
