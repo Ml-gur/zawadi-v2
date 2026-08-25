@@ -77,6 +77,9 @@ export interface UserProfile {
   status: 'active' | 'suspended';
   
   // Expanded matching variables
+  age?: number | null;
+  gender?: string | null;
+  date_of_birth?: string | null;
   gpa?: number;
   gpa_scale?: string;
   institution?: string;

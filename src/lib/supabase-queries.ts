@@ -73,6 +73,10 @@ export async function bulkDeleteScholarships(ids: string[]) {
   return supabase.from('scholarships').update({ published: false }).in('id', ids);
 }
 
+export async function bulkSetPublished(ids: string[], published: boolean) {
+  return supabase.from('scholarships').update({ published }).in('id', ids).select();
+}
+
 export async function togglePublishScholarship(id: string, currentPublished: boolean) {
   return supabase
     .from('scholarships')

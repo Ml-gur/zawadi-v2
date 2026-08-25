@@ -37,6 +37,7 @@ interface AdminPortalProps {
   onAddScholarship: (schol: Partial<Scholarship>) => void;
   onRemoveScholarship: (id: string) => void;
   onBulkRemoveScholarships: (ids: string[]) => void;
+  onBulkSetPublished: (ids: string[], published: boolean) => Promise<void>;
   onTogglePublish: (id: string) => Promise<void>;
   onTriggerScrapeCampaign: () => Promise<void>;
   onReviewBotItem: (id: string, status: 'approved' | 'rejected', notes?: string) => Promise<void>;
@@ -133,7 +134,7 @@ const NavButton: FC<{ label: string; icon: LucideIcon; active: boolean; badge: n
 
 function SectionContent({
   section, scholarships, botQueue,
-  onAddScholarship, onRemoveScholarship, onBulkRemoveScholarships,
+  onAddScholarship, onRemoveScholarship, onBulkRemoveScholarships, onBulkSetPublished,
   onTogglePublish, onTriggerScrapeCampaign, onReviewBotItem,
   overview, timeseries, loading, onNavigate,
 }: AdminPortalProps & {
@@ -152,6 +153,7 @@ function SectionContent({
           onAddScholarship={onAddScholarship}
           onRemoveScholarship={onRemoveScholarship}
           onBulkRemoveScholarships={onBulkRemoveScholarships}
+          onBulkSetPublished={onBulkSetPublished}
           onTogglePublish={onTogglePublish}
         />
       );

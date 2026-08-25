@@ -15,6 +15,7 @@ import {
   upsertScholarship,
   deleteScholarship,
   bulkDeleteScholarships,
+  bulkSetPublished,
   togglePublishScholarship,
   autoUnpublishExpiredScholarships,
   getProfileByEmail,
@@ -212,7 +213,7 @@ export default function App() {
       setProfileReady(true);
       return;
     }
-    const hasProfileFields = user.degree_level && user.field_of_study && user.date_of_birth && user.gpa && user.country;
+    const hasProfileFields = user.degree_level && user.field_of_study && user.age && user.gpa && user.country;
     if (hasProfileFields) {
       setShowProfileSetup(false);
       setProfileReady(true);
@@ -484,7 +485,7 @@ export default function App() {
     if (!user?.email) { toast.error('Session expired. Please log in again.'); return; }
     try {
       const sanitized = { ...updatedFields };
-      const numericFields = ['gpa', 'work_experience_years', 'publications'];
+      const numericFields = ['gpa', 'work_experience_years', 'publications', 'age'];
       for (const key of numericFields) {
         if (sanitized[key] === '' || sanitized[key] === undefined || sanitized[key] === null) {
           sanitized[key] = null;
@@ -684,6 +685,19 @@ export default function App() {
     } catch (err) { console.error("Toggle publish error", err); }
   };
 
+  const handleBulkSetPublished = async (ids: string[], published: boolean) => {
+    if (!user) return;
+    try {
+      const { error } = await bulkSetPublished(ids, published);
+      if (!error) {
+        setScholarships(prev => prev.map(s => ids.includes(s.id) ? { ...s, published } : s));
+        toast.success(`${published ? 'Published' : 'Unpublished'} ${ids.length} listing${ids.length === 1 ? '' : 's'}`);
+      } else {
+        toast.error(`Bulk update failed: ${error.message || 'Server error'}`);
+      }
+    } catch (err) { console.error("Bulk publish error", err); }
+  };
+
   const handleBulkRemoveScholarships = async (ids: string[]) => {
     if (!user) return;
     try {
@@ -782,7 +796,7 @@ export default function App() {
                   : user.role !== 'super_admin'
                     ? <Navigate to="/admin/login" replace />
                     : <Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading admin...</div>}>
-                        <AdminPortal user={user} scholarships={scholarships} botQueue={botQueue} auditLogs={auditLogs} onAddScholarship={handleAddScholarship} onRemoveScholarship={handleRemoveScholarship} onBulkRemoveScholarships={handleBulkRemoveScholarships} onTogglePublish={handleTogglePublish} onTriggerScrapeCampaign={handleTriggerScrapeCampaign} onReviewBotItem={handleReviewBotItem} />
+                        <AdminPortal user={user} scholarships={scholarships} botQueue={botQueue} auditLogs={auditLogs} onAddScholarship={handleAddScholarship} onRemoveScholarship={handleRemoveScholarship} onBulkRemoveScholarships={handleBulkRemoveScholarships} onBulkSetPublished={handleBulkSetPublished} onTogglePublish={handleTogglePublish} onTriggerScrapeCampaign={handleTriggerScrapeCampaign} onReviewBotItem={handleReviewBotItem} />
                       </Suspense>
               } />
 

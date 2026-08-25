@@ -28,7 +28,7 @@ export default function StudentProfile({ user, onUpdateProfile, onNavigateToTab 
     // Step 1: Identity & Origin
     name: u.name || '',
     country: u.country || '',
-    date_of_birth: u.date_of_birth || '',
+    age: u.age ?? '',
     gender: u.gender || '',
     is_rural_origin: !!u.is_rural_origin,
 
@@ -273,12 +273,15 @@ export default function StudentProfile({ user, onUpdateProfile, onNavigateToTab 
                 </div>
 
                 <div>
-                  <label className={labelCls}>Date of Birth</label>
+                  <label className={labelCls}>Age</label>
                   <input
-                    type="date"
-                    value={formData.date_of_birth || ''}
-                    onChange={e => handleChange('date_of_birth', e.target.value)}
+                    type="number"
+                    min={16}
+                    max={80}
+                    value={formData.age || ''}
+                    onChange={e => handleChange('age', e.target.value === '' ? null : Number(e.target.value))}
                     className={fieldCls}
+                    placeholder="e.g. 22"
                   />
                 </div>
 

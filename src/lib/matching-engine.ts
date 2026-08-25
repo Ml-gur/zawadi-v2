@@ -705,9 +705,11 @@ export function computeScholarshipMatch(
     };
   }
 
-  // Compute user age from date_of_birth if available
+  // Resolve user age: explicit age field first, derive from DOB for legacy rows
   let userAge: number | null = null;
-  if (user.date_of_birth) {
+  if (typeof user.age === 'number' && user.age > 0) {
+    userAge = user.age;
+  } else if (user.date_of_birth) {
     const birthDate = new Date(user.date_of_birth);
     const today = new Date();
     userAge = today.getFullYear() - birthDate.getFullYear();
@@ -756,7 +758,7 @@ export function computeScholarshipMatch(
       };
     }
   } else if (schol.age_limit_masters || schol.age_limit_phd) {
-    matchReasons.push(`Set your date of birth in your profile to verify age requirements for this scholarship`);
+    matchReasons.push(`Set your age in your profile to verify age requirements for this scholarship`);
   }
 
   // 4. GATE G4: Degree Level — skip if user hasn't set a degree level

@@ -11,6 +11,7 @@ interface ScholarshipsTabProps {
   onAddScholarship: (schol: Partial<Scholarship>) => void;
   onRemoveScholarship: (id: string) => void;
   onBulkRemoveScholarships: (ids: string[]) => void;
+  onBulkSetPublished: (ids: string[], published: boolean) => Promise<void>;
   onTogglePublish: (id: string) => Promise<void>;
 }
 
@@ -35,12 +36,12 @@ function downloadCSV(scholarships: Scholarship[]) {
   document.body.removeChild(link);
 }
 
-export function ScholarshipsTab({ scholarships, onAddScholarship, onRemoveScholarship, onBulkRemoveScholarships, onTogglePublish }: ScholarshipsTabProps) {
+export function ScholarshipsTab({ scholarships, onAddScholarship, onRemoveScholarship, onBulkRemoveScholarships, onBulkSetPublished, onTogglePublish }: ScholarshipsTabProps) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'published' | 'draft'>('all');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-  const [bulkConfirm, setBulkConfirm] = useState(false);
+  const [bulkConfirm, setBulkConfirm] = useState<'unpublish' | 'publish' | 'delete' | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Scholarship | null>(null);
 
@@ -110,13 +111,30 @@ export function ScholarshipsTab({ scholarships, onAddScholarship, onRemoveSchola
           <option value="draft">Drafts</option>
         </select>
         {selectedIds.length > 0 && (
-          <button
-            onClick={() => setBulkConfirm(true)}
-            className="inline-flex items-center gap-2 rounded-full border border-error/30 bg-error/5 px-4 min-h-[44px] text-ed-body-sm font-medium text-error hover:bg-error/10 transition-colors cursor-pointer"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-            Unpublish {selectedIds.length}
-          </button>
+          <div className="inline-flex items-center gap-2 rounded-full bg-off-black-ink px-2 py-1.5">
+            <span className="text-ed-body-sm font-medium text-pure-white pl-3 tabular-nums">{selectedIds.length} selected</span>
+            <button
+              onClick={() => { onBulkSetPublished(selectedIds, true); setSelectedIds([]); }}
+              className="inline-flex items-center gap-1.5 rounded-full bg-electric-lime px-4 min-h-[36px] text-ed-body-sm font-medium text-off-black-ink hover:bg-lime-hover transition-colors cursor-pointer"
+            >
+              <Eye className="w-3.5 h-3.5" />
+              Publish
+            </button>
+            <button
+              onClick={() => { onBulkSetPublished(selectedIds, false); setSelectedIds([]); }}
+              className="inline-flex items-center gap-1.5 rounded-full border border-stone px-4 min-h-[36px] text-ed-body-sm font-medium text-smoke hover:text-pure-white hover:border-pure-white transition-colors cursor-pointer"
+            >
+              <EyeOff className="w-3.5 h-3.5" />
+              Unpublish
+            </button>
+            <button
+              onClick={() => setBulkConfirm('delete')}
+              aria-label="Unpublish selected permanently from finder"
+              className="icon-btn inline-flex items-center justify-center rounded-full text-smoke hover:text-error transition-colors cursor-pointer"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
         )}
       </div>
 
@@ -205,12 +223,12 @@ export function ScholarshipsTab({ scholarships, onAddScholarship, onRemoveSchola
         onCancel={() => setDeleteTarget(null)}
       />
       <ConfirmationDialog
-        isOpen={bulkConfirm}
+        isOpen={bulkConfirm === 'delete'}
         title={`Unpublish ${selectedIds.length} listings?`}
         message="They will be removed from the public finder in one action."
         confirmText="Unpublish all"
-        onConfirm={() => { onBulkRemoveScholarships(selectedIds); setSelectedIds([]); setBulkConfirm(false); }}
-        onCancel={() => setBulkConfirm(false)}
+        onConfirm={() => { onBulkRemoveScholarships(selectedIds); setSelectedIds([]); setBulkConfirm(null); }}
+        onCancel={() => setBulkConfirm(null)}
       />
     </AdminSectionShell>
   );

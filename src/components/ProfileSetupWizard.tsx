@@ -28,7 +28,8 @@ const chipUnselected = 'bg-pure-white border-ash text-graphite hover:border-grap
 export default function ProfileSetupWizard({ user, onSave, onDismiss }: ProfileSetupWizardProps) {
   const [profile, setProfile] = useState({
     // MVSP — asked on first login
-    date_of_birth: user?.date_of_birth || '',
+    age: user?.age || '',
+    gender: user?.gender || '',
     country: user?.country || '',
     degree_level: user?.degree_level || '',
     field_of_study: user?.field_of_study || '',
@@ -49,7 +50,7 @@ export default function ProfileSetupWizard({ user, onSave, onDismiss }: ProfileS
 
   const update = (field: string, value: any) => setProfile(p => ({ ...p, [field]: value }));
 
-  const allFilled = profile.date_of_birth && profile.country && profile.degree_level && profile.field_of_study && profile.gpa;
+  const allFilled = profile.age && profile.country && profile.degree_level && profile.field_of_study && profile.gpa;
 
   const handleFinish = async () => {
     await onSave(profile);
@@ -78,15 +79,36 @@ export default function ProfileSetupWizard({ user, onSave, onDismiss }: ProfileS
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-5">
-          {/* 1. Date of Birth */}
-          <div>
-            <label className="mb-2 block text-ed-body-sm font-medium text-off-black-ink">Date of Birth *</label>
-            <input
-              type="date"
-              value={profile.date_of_birth}
-              onChange={e => update('date_of_birth', e.target.value)}
-              className={inputClass}
-            />
+          {/* 1. Age + Gender */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label htmlFor="wiz-age" className="mb-2 block text-ed-body-sm font-medium text-off-black-ink">Age *</label>
+              <input
+                id="wiz-age"
+                type="number"
+                min={16}
+                max={80}
+                inputMode="numeric"
+                value={profile.age}
+                onChange={e => update('age', e.target.value === '' ? '' : Math.max(16, Math.min(80, Number(e.target.value))))}
+                placeholder="e.g. 22"
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label htmlFor="wiz-gender" className="mb-2 block text-ed-body-sm font-medium text-off-black-ink">Gender *</label>
+              <select
+                id="wiz-gender"
+                value={profile.gender}
+                onChange={e => update('gender', e.target.value)}
+                className={`${inputClass} cursor-pointer`}
+              >
+                <option value="">Select…</option>
+                <option value="Female">Female</option>
+                <option value="Male">Male</option>
+                <option value="Prefer not to say">Prefer not to say</option>
+              </select>
+            </div>
           </div>
 
           {/* 2. Nationality */}
