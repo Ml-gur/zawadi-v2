@@ -3,7 +3,7 @@
 // They only read the static HTML. This middleware intercepts their requests,
 // fetches the SPA's index.html, and injects route-specific OG tags server-side.
 
-const SITE_URL = 'https://techsari.online';
+const SITE_URL = 'https://www.techsari.online';
 
 const CRAWLER_PATTERNS = [
   'whatsapp', 'facebookexternalhit', 'twitterbot', 'linkedinbot',

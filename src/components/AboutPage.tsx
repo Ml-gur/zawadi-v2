@@ -13,7 +13,7 @@ export default function AboutPage({ onBack }: AboutPageProps) {
         title="About Zawadi — Scholarship Platform Built for African Students"
         description="Zawadi was built to fix the scholarship access gap for African students. We filter out irrelevant results, remove the IELTS barrier, and pair AI essay tools with human mentor review."
         path="/about"
-        image="https://techsari.online/og-about.png"
+        image="https://www.techsari.online/og-about.png"
         ogTitle="About Zawadi — Built for African Students"
         ogDescription="Most scholarship platforms sell student data to advertisers. Zawadi does not. We match students to funding they qualify for and help them apply without wasting time on irrelevant results."
       />

@@ -653,7 +653,7 @@ export default function App() {
         });
         toast.success("Listing saved successfully!");
         fetchUserData(user.email);
-        fetch('https://www.google.com/ping?sitemap=https://techsari.online/sitemap.xml').catch(() => {});
+        fetch('https://www.google.com/ping?sitemap=https://www.techsari.online/sitemap.xml').catch(() => {});
       }
     } catch (err) { console.error("CRUD insertion error", err); }
   };
@@ -677,7 +677,7 @@ export default function App() {
       const { data, error } = await togglePublishScholarship(id, current?.published ?? false);
       if (!error && data) {
         setScholarships(prev => prev.map(s => s.id === id ? { ...s, published: data.published ?? !s.published } : s));
-        fetch('https://www.google.com/ping?sitemap=https://techsari.online/sitemap.xml').catch(() => {});
+        fetch('https://www.google.com/ping?sitemap=https://www.techsari.online/sitemap.xml').catch(() => {});
         toast.success(data.published ? "Opportunity published" : "Opportunity unpublished");
       } else {
         toast.error(`Toggle failed: ${error?.message || 'Server error'}`);

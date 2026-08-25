@@ -26,7 +26,7 @@ export function ScholarshipSchema({ scholarship }: ScholarshipSchemaProps) {
       '@type': 'EducationalOccupationalCredential',
       name: scholarship.name,
       description: (scholarship.description || '').slice(0, 300),
-      url: `https://techsari.online/scholarships/browse/${scholarship.slug}`,
+      url: `https://www.techsari.online/scholarships/browse/${scholarship.slug}`,
       dateModified: scholarship.updated_at,
       offers: {
         '@type': 'Offer',
@@ -42,7 +42,7 @@ export function ScholarshipSchema({ scholarship }: ScholarshipSchemaProps) {
       provider: {
         '@type': 'Organization',
         name: 'Zawadi by Techsari',
-        url: 'https://techsari.online',
+        url: 'https://www.techsari.online',
       },
     });
 

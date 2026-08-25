@@ -29,14 +29,14 @@ export default async function handler(req, res) {
     xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
 
     const staticPages = [
-      { loc: 'https://techsari.online/', freq: 'weekly', priority: '1.0' },
-      { loc: 'https://techsari.online/scholarships/browse', freq: 'daily', priority: '0.9' },
-      { loc: 'https://techsari.online/about', freq: 'monthly', priority: '0.5' },
-      { loc: 'https://techsari.online/faq', freq: 'monthly', priority: '0.5' },
-      { loc: 'https://techsari.online/how-it-works', freq: 'monthly', priority: '0.6' },
-      { loc: 'https://techsari.online/contact', freq: 'monthly', priority: '0.4' },
-      { loc: 'https://techsari.online/privacy', freq: 'yearly', priority: '0.3' },
-      { loc: 'https://techsari.online/terms', freq: 'yearly', priority: '0.3' },
+      { loc: 'https://www.techsari.online/', freq: 'weekly', priority: '1.0' },
+      { loc: 'https://www.techsari.online/scholarships/browse', freq: 'daily', priority: '0.9' },
+      { loc: 'https://www.techsari.online/about', freq: 'monthly', priority: '0.5' },
+      { loc: 'https://www.techsari.online/faq', freq: 'monthly', priority: '0.5' },
+      { loc: 'https://www.techsari.online/how-it-works', freq: 'monthly', priority: '0.6' },
+      { loc: 'https://www.techsari.online/contact', freq: 'monthly', priority: '0.4' },
+      { loc: 'https://www.techsari.online/privacy', freq: 'yearly', priority: '0.3' },
+      { loc: 'https://www.techsari.online/terms', freq: 'yearly', priority: '0.3' },
     ];
 
     for (const page of staticPages) {
@@ -52,7 +52,7 @@ export default async function handler(req, res) {
       for (const s of data) {
         const lastmod = s.updated_at ? s.updated_at.split('T')[0] : today;
         xml += '  <url>\n';
-        xml += `    <loc>https://techsari.online/scholarships/browse/${encodeURIComponent(s.slug)}</loc>\n`;
+        xml += `    <loc>https://www.techsari.online/scholarships/browse/${encodeURIComponent(s.slug)}</loc>\n`;
         xml += `    <lastmod>${lastmod}</lastmod>\n`;
         xml += '    <changefreq>weekly</changefreq>\n';
         xml += '    <priority>0.8</priority>\n';

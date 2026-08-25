@@ -15,7 +15,7 @@ Disallow: /profile
 Disallow: /billing
 Disallow: /admin
 Disallow: /mentor
-Sitemap: https://techsari.online/sitemap.xml
+Sitemap: https://www.techsari.online/sitemap.xml
 
 User-agent: GPTBot
 Allow: /

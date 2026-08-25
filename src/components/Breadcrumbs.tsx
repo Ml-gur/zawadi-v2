@@ -9,7 +9,7 @@ interface BreadcrumbsProps {
   items: Crumb[];
 }
 
-const SITE_URL = 'https://techsari.online';
+const SITE_URL = 'https://www.techsari.online';
 
 /** Visible breadcrumb trail + BreadcrumbList JSON-LD for search engines. */
 export function Breadcrumbs({ items }: BreadcrumbsProps) {

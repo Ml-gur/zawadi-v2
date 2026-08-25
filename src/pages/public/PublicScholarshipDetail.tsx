@@ -236,7 +236,7 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
   const ogDeadline = formatDeadline(scholarship.deadline).slice(0, 40);
   const ogUpdated = scholarship.updated_at ? `&_=${scholarship.updated_at.slice(0, 10)}` : '';
 
-  const ogImageUrl = `https://techsari.online/api/og-scholarship?name=${encodeURIComponent(ogName)}&provider=${encodeURIComponent(ogProvider)}&funding_type=${encodeURIComponent(scholarship.funding_type || '')}&deadline=${encodeURIComponent(ogDeadline)}&countries=${encodeURIComponent(ogCountries)}&degree_levels=${encodeURIComponent(ogDegrees)}&no_ielts=${scholarship.no_ielts ? 'true' : ''}${ogUpdated}`;
+  const ogImageUrl = `https://www.techsari.online/api/og-scholarship?name=${encodeURIComponent(ogName)}&provider=${encodeURIComponent(ogProvider)}&funding_type=${encodeURIComponent(scholarship.funding_type || '')}&deadline=${encodeURIComponent(ogDeadline)}&countries=${encodeURIComponent(ogCountries)}&degree_levels=${encodeURIComponent(ogDegrees)}&no_ielts=${scholarship.no_ielts ? 'true' : ''}${ogUpdated}`;
 
   const categoryEyebrow = scholarship.fields_of_study?.[0]
     || (scholarship.stem_focus ? 'Engineering & Technology' : '')
@@ -280,9 +280,9 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
             '@context': 'https://schema.org',
             '@type': 'BreadcrumbList',
             itemListElement: [
-              { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://techsari.online/' },
-              { '@type': 'ListItem', position: 2, name: 'Scholarships', item: 'https://techsari.online/scholarships/browse' },
-              { '@type': 'ListItem', position: 3, name: scholarship.name, item: `https://techsari.online/scholarships/browse/${scholarship.slug || scholarship.id}` },
+              { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.techsari.online/' },
+              { '@type': 'ListItem', position: 2, name: 'Scholarships', item: 'https://www.techsari.online/scholarships/browse' },
+              { '@type': 'ListItem', position: 3, name: scholarship.name, item: `https://www.techsari.online/scholarships/browse/${scholarship.slug || scholarship.id}` },
             ],
           })}
         </script>

@@ -15,7 +15,7 @@ export default function handler(_req, res) {
     'Disallow: /mentor',
     'Disallow: /api/',
     '',
-    'Sitemap: https://techsari.online/sitemap.xml',
+    'Sitemap: https://www.techsari.online/sitemap.xml',
     '',
   ].join('\n');
   res.setHeader('Content-Type', 'text/plain');

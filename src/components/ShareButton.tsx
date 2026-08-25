@@ -17,7 +17,7 @@ export default function ShareButton({ url, title, className = '', iconOnly, size
   const handleShare = useCallback(async (e: ReactMouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const shareUrl = url.startsWith('http') ? url : `https://techsari.online${url}`;
+    const shareUrl = url.startsWith('http') ? url : `https://www.techsari.online${url}`;
     if (navigator.share && window.innerWidth < 768) {
       try { await navigator.share({ url: shareUrl, title }); return; }
       catch { /* fall through to clipboard */ }

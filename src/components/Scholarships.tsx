@@ -237,7 +237,7 @@ export default function Scholarships({
           ogTitle="Scholarships for African Students — Zawadi"
           ogDescription="Verified scholarships open to African students. Every listing is checked for active deadlines and real eligibility. See funding from UK, Germany, USA, Japan, and African universities."
           path="/scholarships"
-          image="https://techsari.online/og-scholarships.png"
+          image="https://www.techsari.online/og-scholarships.png"
         />
 
         {/* Guest Banner — dark island */}

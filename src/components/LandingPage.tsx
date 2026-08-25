@@ -25,14 +25,14 @@ const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
   "name": "Techsari",
-  "url": "https://techsari.online",
+  "url": "https://www.techsari.online",
 };
 
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
   "name": "Zawadi",
-  "url": "https://techsari.online",
+  "url": "https://www.techsari.online",
 };
 
 const FAQS = [
@@ -92,7 +92,7 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
         description="Find scholarships you are eligible to win across all 54 African countries. Strict eligibility filtering removes scholarships you do not qualify for. No IELTS required options included."
         keywords="scholarships for African students, Africa scholarship matching, no IELTS scholarships Africa, fully funded scholarships Africa, scholarship application Africa"
         path="/"
-        image="https://techsari.online/og-home.png"
+        image="https://www.techsari.online/og-home.png"
         ogTitle="Techsari — Find Scholarships You Actually Qualify For"
         ogDescription="Strict eligibility matching for African students. See only scholarships where you meet every requirement. No spam. No data selling. No IELTS barrier."
         schema={[websiteSchema, organizationSchema]}

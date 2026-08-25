@@ -109,6 +109,6 @@ export default async function handler(req, res) {
     res.status(200).send(png);
   } catch (e) {
     console.error('og-scholarship: sharp unavailable, redirecting to static fallback', e.message || e);
-    return res.redirect(302, 'https://techsari.online/og-scholarships.png');
+    return res.redirect(302, 'https://www.techsari.online/og-scholarships.png');
   }
 }

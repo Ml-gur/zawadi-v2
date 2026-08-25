@@ -45,7 +45,7 @@ export default function HowItWorksPage({ onBack, onGetStarted }: HowItWorksPageP
         title="How Zawadi Works — Scholarship Matching for African Students"
         description="Create a profile in three minutes. See scholarships you qualify for. Build your application with AI that learns your writing style. Get mentor review before you submit."
         path="/how-it-works"
-        image="https://techsari.online/og-how-it-works.png"
+        image="https://www.techsari.online/og-how-it-works.png"
         ogTitle="How Zawadi Works — From Profile to Scholarship Application"
         ogDescription="Five steps from registration to submitted application. Zawadi handles eligibility filtering, essay drafting, and document tracking so African students can focus on applying."
       />
