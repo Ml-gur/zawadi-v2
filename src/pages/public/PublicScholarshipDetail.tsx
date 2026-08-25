@@ -253,17 +253,17 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
       />
       <ScholarshipSchema scholarship={scholarship} />
 
-      <main className="max-w-[1200px] mx-auto px-4 md:px-10 py-12 flex flex-col gap-10">
+      <main className="max-w-[1200px] mx-auto px-4 md:px-10 py-12 flex flex-col gap-10 min-w-0 [overflow-wrap:anywhere]">
         
         {/* Navigation Breadcrumb */}
-        <div className="flex items-center justify-between gap-4">
-          <nav aria-label="Breadcrumb" className="min-w-0">
-            <ol className="flex items-center gap-2 text-ed-body-sm text-graphite whitespace-nowrap overflow-x-auto">
+        <div className="flex items-center justify-between gap-4 min-w-0">
+          <nav aria-label="Breadcrumb" className="flex min-w-0 flex-1">
+            <ol className="flex min-w-0 flex-1 items-center gap-2 text-ed-body-sm text-graphite whitespace-nowrap overflow-x-auto">
               <li><Link to="/" className="hover:text-off-black-ink transition-colors">Home</Link></li>
               <li aria-hidden>/</li>
-              <li><Link to="/scholarships/browse" className="hover:text-off-black-ink transition-colors">Scholarships</Link></li>
-              <li aria-hidden>/</li>
-              <li aria-current="page" className="text-off-black-ink font-medium truncate max-w-[320px] sm:max-w-[480px]">{scholarship.name}</li>
+              <li className="hidden sm:inline"><Link to="/scholarships/browse" className="hover:text-off-black-ink transition-colors">Scholarships</Link></li>
+              <li aria-hidden className="hidden sm:inline">/</li>
+              <li aria-current="page" className="text-off-black-ink font-medium truncate min-w-0 max-w-[200px] sm:max-w-[320px] lg:max-w-[480px]">{scholarship.name}</li>
             </ol>
           </nav>
           <div className="flex items-center gap-2 shrink-0">
