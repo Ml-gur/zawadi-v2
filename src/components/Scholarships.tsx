@@ -455,8 +455,8 @@ export default function Scholarships({
             )}
           </>
         ) : (
-          <div className="text-center py-20 bg-canvas border border-hairline/60 rounded-lg">
-            <Search className="w-8 h-8 text-muted-variant mx-auto mb-3" />
+          <div className="text-center py-20 bg-parchment border border-ash rounded-lg">
+            <Search className="w-8 h-8 text-graphite mx-auto mb-3" />
             <p className="text-sm text-muted font-medium">No scholarships match your filters.</p>
             <p className="text-xs text-muted/50 mt-1">Try adjusting your search criteria or check back later.</p>
             <div className="mt-5 inline-flex items-center gap-2 px-5 py-2.5 bg-primary/5 border border-primary/20 rounded-full">
@@ -476,7 +476,7 @@ export default function Scholarships({
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close button */}
-              <div className="sticky top-0 bg-canvas/90 backdrop-blur-sm flex items-center justify-between p-4 border-b border-hairline/20 z-10">
+              <div className="sticky top-0 bg-parchment/90 backdrop-blur-sm flex items-center justify-between p-4 border-b border-ash z-10">
                 <button onClick={() => setSelectedSchol(null)} className="flex items-center gap-1.5 text-xs font-bold text-muted hover:text-primary transition-colors cursor-pointer">
                   <ArrowLeft className="w-3.5 h-3.5" /> Back
                 </button>
@@ -516,7 +516,7 @@ export default function Scholarships({
                     <h4 className="text-[10px] font-bold text-muted uppercase tracking-wider mb-1.5">Eligible Countries</h4>
                     <div className="flex flex-wrap gap-1">
                       {(selectedSchol.countries || selectedSchol.country || []).map((c: string) => (
-                        <span key={c} className="text-[11px] px-2 py-0.5 rounded-full bg-off-black text-muted font-medium">{c}</span>
+                        <span key={c} className="text-[11px] px-2 py-0.5 rounded-full bg-off-black-ink text-pure-white font-medium">{c}</span>
                       ))}
                     </div>
                   </div>
