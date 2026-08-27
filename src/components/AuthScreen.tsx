@@ -78,17 +78,24 @@ export default function AuthScreen({ onLoginSuccess, countries, onClose }: AuthS
           });
           if (signInData?.session) {
             await onLoginSuccess(email, signInData.session.access_token);
-          } else if (signInErr?.message?.includes('Email not confirmed')) {
-            setErrorMsg('Account created! Please check your email for a confirmation link.');
           } else {
-            // Account exists — try to sign in after brief delay
-            setErrorMsg('Account created! Signing you in automatically...');
-            await new Promise(r => setTimeout(r, 1500));
-            const retrySignIn = await supabase.auth.signInWithPassword({ email, password });
-            if (retrySignIn.data?.session) {
-              await onLoginSuccess(email, retrySignIn.data.session.access_token);
-              setLoading(false);
-              return;
+            // Sign-in failed after successful sign-up — most likely email
+            // confirmation is required.  Supabase may surface this as
+            // "Email not confirmed", "email_not_confirmed", or a generic
+            // "Invalid login credentials" error depending on project config.
+            const msg = signInErr?.message ?? '';
+            const needsConfirmation =
+              msg.includes('Email not confirmed') ||
+              msg.includes('email_not_confirmed') ||
+              msg.toLowerCase().includes('email') && msg.toLowerCase().includes('confirm');
+            if (needsConfirmation) {
+              setErrorMsg('Account created! Please check your email for a confirmation link.');
+            } else if (msg.includes('Invalid login credentials')) {
+              // Auto-login failed for another reason — still tell the user
+              // the account was created so they can try signing in manually.
+              setErrorMsg('Account created! Please check your email, then sign in with your credentials.');
+            } else {
+              setErrorMsg('Account created! Please check your email for a confirmation link.');
             }
           }
         }
