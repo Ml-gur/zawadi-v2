@@ -36,8 +36,12 @@ export default function AuthScreen({ onLoginSuccess, countries, onClose }: AuthS
       setEmailError("Please enter a valid email address");
       return;
     }
-    if (!password || password.length < 6) {
-      setPasswordError("Password must be at least 6 characters");
+    if (!password || password.length < 8) {
+      setPasswordError("Password must be at least 8 characters");
+      return;
+    }
+    if (!/[a-z]/.test(password) || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+      setPasswordError("Password must include uppercase, lowercase, and a number");
       return;
     }
 
@@ -225,8 +229,7 @@ export default function AuthScreen({ onLoginSuccess, countries, onClose }: AuthS
           <input
             id="auth-password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="At least 6 characters"
+            onChange={(e) => setPassword(e.target.value)}              placeholder="At least 8 characters, mixed case + number"
             className={passwordError ? inputErrorClass : inputClass}
             type="password"
             autoComplete={isSignUp ? 'new-password' : 'current-password'}
