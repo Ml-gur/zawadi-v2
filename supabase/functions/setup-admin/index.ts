@@ -115,7 +115,7 @@ function allowedOrigin(req: Request): string {
   } catch (err: any) {
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
-      headers: { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' },
+      headers: { 'Access-Control-Allow-Origin': allowedOrigin(req), 'Content-Type': 'application/json' },
     })
   }
 })

@@ -103,7 +103,9 @@ export default async function handler(req, res) {
   try {
     const { default: sharp } = await import('sharp');
     const png = await sharp(Buffer.from(svg)).png().toBuffer();
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    const allowedOrigins = ['https://www.techsari.online', 'https://techsari.online'];
+    const origin = req.headers.origin;
+    if (allowedOrigins.includes(origin)) res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=86400');
     res.setHeader('Content-Type', 'image/png');
     res.status(200).send(png);
