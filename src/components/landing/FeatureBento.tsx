@@ -15,7 +15,7 @@ const CARDS: Array<Feature & { surface: string; numberPill: string; bodyClass?: 
   {
     n: '01',
     icon: ScanSearch,
-    title: 'Deterministic matching',
+    title: 'AI-powered scholarship matching',
     body: 'Nationality, degree level, field of study and GPA are checked against each listing\u2019s exact criteria. If we say you qualify, you qualify.',
     surface: 'bg-parchment',
     numberPill: 'border-ash text-graphite',
@@ -40,7 +40,7 @@ const CARDS: Array<Feature & { surface: string; numberPill: string; bodyClass?: 
     n: '04',
     icon: PenLine,
     title: 'AI essay partner',
-    body: 'The essay studio drafts with you, not for you — mentor-reviewed feedback keeps every word authentically yours.',
+    body: 'use AI to prepare your essays, and get guidance from mentors to strengthen your resume and application.',
     surface: 'bg-electric-lime',
     numberPill: 'border-off-black-ink/25 text-off-black-ink',
     bodyClass: 'text-on-lime',
@@ -57,8 +57,7 @@ export default function FeatureBento() {
               Every scholarship has rules. We read them.
             </h2>
             <p className="text-ed-body text-graphite max-w-[38ch] md:pb-2">
-              Our engine reads every eligibility matrix so your time goes into the
-              application, not the search.
+              From scholarship discovery to a stronger application.
             </p>
           </div>
         </FadeUp>
