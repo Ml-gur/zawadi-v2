@@ -654,6 +654,12 @@ export default function App() {
         toast.success("Listing saved successfully!");
         fetchUserData(user.email);
         fetch('https://www.google.com/ping?sitemap=https://www.techsari.online/sitemap.xml').catch(() => {});
+        // Trigger notification system when creating a published scholarship
+        if (scholPayload.published) {
+          supabase.functions.invoke('process-new-listing', {
+            body: { scholarship_id: data.id }
+          }).catch(() => {}); // fire-and-forget
+        }
       }
     } catch (err) { console.error("CRUD insertion error", err); }
   };
@@ -679,6 +685,12 @@ export default function App() {
         setScholarships(prev => prev.map(s => s.id === id ? { ...s, published: data.published ?? !s.published } : s));
         fetch('https://www.google.com/ping?sitemap=https://www.techsari.online/sitemap.xml').catch(() => {});
         toast.success(data.published ? "Opportunity published" : "Opportunity unpublished");
+        // Trigger notification system when publishing
+        if (data.published) {
+          supabase.functions.invoke('process-new-listing', {
+            body: { scholarship_id: id }
+          }).catch(() => {}); // fire-and-forget
+        }
       } else {
         toast.error(`Toggle failed: ${error?.message || 'Server error'}`);
       }
@@ -692,6 +704,12 @@ export default function App() {
       if (!error) {
         setScholarships(prev => prev.map(s => ids.includes(s.id) ? { ...s, published } : s));
         toast.success(`${published ? 'Published' : 'Unpublished'} ${ids.length} listing${ids.length === 1 ? '' : 's'}`);
+        // Trigger notification system when bulk publishing
+        if (published) {
+          supabase.functions.invoke('process-new-listing', {
+            body: { scholarship_ids: ids }
+          }).catch(() => {}); // fire-and-forget
+        }
       } else {
         toast.error(`Bulk update failed: ${error.message || 'Server error'}`);
       }

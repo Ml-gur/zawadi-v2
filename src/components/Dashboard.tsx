@@ -14,6 +14,7 @@ import {
 import { SEO } from './SEO';
 import { Scholarship, ApplicationTracker } from '../types';
 import { flagFor } from '../lib/flags';
+import NotificationSettings from './NotificationSettings';
 
 interface DashboardProps {
   user: any;
@@ -367,6 +368,11 @@ export default function Dashboard({
             })}
           </div>
         )}
+      </section>
+
+      {/* Notification Settings */}
+      <section>
+        <NotificationSettings userEmail={user?.email || ''} />
       </section>
 
     </div>

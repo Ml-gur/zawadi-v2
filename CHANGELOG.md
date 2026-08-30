@@ -1,5 +1,72 @@
 # Changelog
 
+## 2026-08-30 — Scholarship Notification System + 13 Verified Global Scholarships
+
+### Added: Scholarship Notification System (Resend + Supabase Edge Functions)
+
+**Architecture:** Database → Edge Function → Queue → Resend → User
+
+When a scholarship is published (via admin form, bulk publish, or bot queue approve + publish), the system:
+1. Finds users whose notification preferences match (opted in, minimum score threshold met)
+2. Runs a simplified eligibility check (country, degree, field, IELTS waiver)
+3. Creates `user_matches` records with match scores and reasons
+4. Queues email notifications based on user frequency preference (instant/daily/weekly)
+5. Queue workers send emails via Resend API
+
+**Database migration (`019_notification_system.sql`):**
+- `notification_preferences` — per-user opt-in, frequency (instant/daily/weekly/none), minimum match score threshold
+- `user_matches` — records why a scholarship was recommended (score, eligibility status, reasons)
+- `notification_queue` — pending emails with retry tracking (max 3 attempts), scheduled_for for delayed delivery
+- `email_events` — delivery analytics (sent/delivered/opened/clicked/bounced)
+- RLS policies: users read/write own preferences; queue and events are service_role only
+- Auto-create notification preferences on user signup via trigger
+
+**Edge Functions:**
+- `process-new-listing` — triggered on publish; matches users, creates matches, queues notifications
+- `send-notifications` — queue worker (runs every 5 min via pg_cron); sends pending emails via Resend
+- `send-daily-digest` — groups daily matches per user into one consolidated email
+
+**Frontend (`NotificationSettings.tsx`):**
+- Notification settings panel on Dashboard — toggle alerts, choose frequency, set minimum match score
+- Instant/Daily/Weekly/Off frequency options
+- Range slider for match score threshold (0-100%)
+- Save with confirmation feedback
+
+**Wired into publish flow:**
+- `handleTogglePublish` — triggers `process-new-listing` when publishing
+- `handleBulkSetPublished` — triggers `process-new-listing` with batch of IDs
+- `handleAddScholarship` — triggers when creating a published scholarship
+
+**Email templates:**
+- New matching scholarship (instant): card layout with match score, reasons, CTA
+- Daily/Weekly digest: consolidated list of matches with scores and links
+- Footer with manage preferences + unsubscribe links
+
+**Env var:** `RESEND_API_KEY` added to `.env.example`
+
+### Added: 13 Verified Global Scholarships (August 2026 Cycle)
+
+**SQL seed (`scripts/seed-13-scholarships.sql`):**
+All 13 mathematically verified, actively open or upcoming scholarships inserted into `scholarships` table with `published: true`, `verified: true`, clean URL slugs, and full eligibility metadata.
+
+| # | Scholarship | Country | Deadline | Category |
+|---|-------------|---------|----------|----------|
+| 1 | Knight-Hennessy Scholars 2027 | USA | 2026-10-06 | Open Now |
+| 2 | Schwarzman Scholars 2027-28 | China | 2026-09-09 | Open Now |
+| 3 | Swiss Government Excellence 2027-28 | Switzerland | Varies (opened 08-20) | Open Now |
+| 4 | Lester B. Pearson International 2027 | Canada | 2026-11-06 | Open Now |
+| 5 | Singapore International Graduate Award (SINGA) | Singapore | 2026-10-10 | Open Now |
+| 6 | Chevening Scholarships 2027-28 | UK | 2026-10-06 | Open Now |
+| 7 | Gates Cambridge Scholarship 2027 | UK | Expected Sep 2026 | Opening Soon |
+| 8 | Commonwealth Master's Scholarships 2027/28 | UK | 2026-10-20 (opens 09-08) | Opening Soon |
+| 9 | ETH Zurich Excellence Scholarship (ESOP) | Switzerland | 2026-11-30 (opens 11-01) | Opening Soon |
+| 10 | Imperial College President's PhD Scholarships | UK | Expected Oct 2026 | Opening Soon |
+| 11 | Clarendon Fund Scholarships | UK | Expected Sep 2026 | Opening Soon |
+| 12 | KAIST International Graduate Admission | South Korea | Expected Sep 2026 | Opening Soon |
+| 13 | Beit Trust Scholarships | UK/South Africa | 2027-02-12 (opens 12-01) | Opening Soon |
+
+**Key metadata per scholarship:** `no_ielts` flag, `requires_leadership`, `min_gpa_normalised`, `age_limit_masters`, `requires_research`, `targets_financial_need`, `is_intra_african`, `host_country` (jsonb), `host_region`, `sponsor_type`, `category`
+
 ## 2026-08-25 — Platform Hardening, Admin Rebuild, Mobile Bento, Live Scholarship Bot
 
 ### Fixed (root-caused against the live database)
