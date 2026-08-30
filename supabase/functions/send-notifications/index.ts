@@ -75,11 +75,7 @@ function emailShell(headerTitle: string, headerSubtitle: string, bodyContent: st
           .mobile-full-width { width: 100% !important; display: block !important; }
           .mobile-center { text-align: center !important; }
           .mobile-hide { display: none !important; }
-          .mobile-stack { display: block !important; width: 100% !important; }
-          .mobile-stack td { display: block !important; width: 100% !important; padding: 8px 0 !important; text-align: center !important; }
-          .mobile-btn { display: block !important; width: 100% !important; box-sizing: border-box !important; text-align: center !important; padding: 14px 20px !important; margin-top: 12px !important; }
-          .mobile-header-badge { display: block !important; text-align: center !important; margin-top: 10px !important; }
-          .mobile-header-table td { display: block !important; text-align: center !important; padding: 4px 0 !important; }
+          .mobile-stack { display: block !important; width: 100% !important; }              td.mobile-stack, .mobile-stack { display: block !important; width: 100% !important; padding: 8px 0 !important; text-align: center !important; box-sizing: border-box !important; }              .mobile-btn { display: block !important; width: 100% !important; box-sizing: border-box !important; text-align: center !important; padding: 14px 20px !important; margin-top: 12px !important; max-width: 100% !important; }              .mobile-header-badge, td.mobile-header-badge { display: block !important; text-align: center !important; margin-top: 10px !important; }              .mobile-header-table td, .mobile-header-table { display: block !important; text-align: center !important; padding: 4px 0 !important; }
           .mobile-header-logo { display: inline-block !important; margin: 0 auto !important; }
           .mobile-card-pad { padding: 16px !important; }
           .mobile-font-lg { font-size: 16px !important; }
