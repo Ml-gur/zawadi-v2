@@ -1,5 +1,34 @@
 # Changelog
 
+## 2026-08-30 — Notification Emails: Mobile Optimization + Safer Eligibility Wording
+
+### Improved: Mobile-responsive notification emails
+- Added `<style>` block with `@media` queries for screens ≤600px
+- Scholarship cards stack vertically on mobile (text on top, button below full-width)
+- Header padding reduced from 36px to 16px on mobile
+- Body padding reduced from 36px to 16px on mobile
+- Footer padding reduced from 36px to 20px on mobile
+- "View →" buttons become full-width blocks on mobile with 14px padding (44px touch target)
+- CTA buttons scale up to 15px font on mobile
+- Font sizes bump up on mobile: greeting 16px, body 14px, reasons 12px, labels 11px
+- Added email reset styles for Outlook/Apple Mail compatibility
+- Added `X-UA-Compatible` and `x-apple-disable-message-reformatting` meta tags
+- Applied to both `send-notifications` and `send-daily-digest` Edge Functions
+
+### Improved: Safer eligibility wording in notification emails
+- Changed "We found new scholarship opportunities that match your profile" to "Based on your profile, we found X opportunities you may be eligible for"
+- Changed "Why it matches:" to "Why you're seeing this" with ✓ checkmarks per reason
+- Changed subject lines to "3 scholarships that may match your profile"
+- Replaced "Ready to apply?" with "📋 Before you apply" disclaimer encouraging verification
+- Subject: "You may be eligible for: [scholarship]" instead of "New scholarship match: [scholarship]"
+
+### Fixed: JSONB auto-parsing bug in Edge Functions
+- Added `safeJsonParse()` helper to handle Supabase JS client auto-parsing JSONB columns
+- Prevents "Unexpected token o" errors when `JSON.parse()` receives an already-parsed object
+- Fixed in `send-notifications`, `send-daily-digest`, and `process-new-listing`
+
+---
+
 ## 2026-08-30 — Scholarship Notification System + 13 Verified Global Scholarships
 
 ### Added: Scholarship Notification System (Resend + Supabase Edge Functions)

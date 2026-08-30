@@ -153,21 +153,21 @@ serve(async (req: Request) => {
         const matchLabel = m.match_score >= 80 ? 'Strong match' : m.match_score >= 60 ? 'Good match' : 'Possible match'
         const matchBg = m.match_score >= 80 ? '#e8f5e9' : m.match_score >= 60 ? '#fff8e1' : '#f5f5f5'
         const matchColor = m.match_score >= 80 ? '#2e7d32' : m.match_score >= 60 ? '#f57f17' : '#616161'
-        const reasonsList = (m.reasons || []).map((r: string) => `<div style="font-size:12px;color:#40403a;line-height:1.6;">✓ ${r}</div>`).join('')
+        const reasonsList = (m.reasons || []).map((r: string) => `<div class="mobile-font-sm" style="font-size:12px;color:#40403a;line-height:1.6;">✓ ${r}</div>`).join('')
 
         return `
-          <div style="background-color:#fafaf6;border:1px solid #e0e0d6;border-radius:14px;padding:20px;margin-bottom:14px;">
+          <div class="mobile-card-pad mobile-section-gap" style="background-color:#fafaf6;border:1px solid #e0e0d6;border-radius:14px;padding:20px;margin-bottom:14px;">
             <table width="100%" border="0" cellspacing="0" cellpadding="0"><tr>
               <td>
                 <div style="margin-bottom:8px;">
                   <span style="display:inline-block;background-color:#14140f;color:#ffffff;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;padding:4px 10px;border-radius:9999px;">${m.scholarship_name}</span>
-                  <span style="display:inline-block;margin-left:6px;font-size:11px;font-weight:600;color:${matchColor};background-color:${matchBg};padding:3px 8px;border-radius:9999px;">● ${matchLabel}</span>
+                  <span class="mobile-font-xs" style="display:inline-block;margin-left:6px;font-size:11px;font-weight:600;color:${matchColor};background-color:${matchBg};padding:3px 8px;border-radius:9999px;">● ${matchLabel}</span>
                 </div>
-                <div style="font-size:12px;font-weight:600;color:#14140f;margin:10px 0 6px 0;letter-spacing:0.03em;">Why you're seeing this</div>
+                <div class="mobile-font-sm" style="font-size:12px;font-weight:600;color:#14140f;margin:10px 0 6px 0;letter-spacing:0.03em;">Why you're seeing this</div>
                 <div style="padding:0 0 0 2px;">${reasonsList}</div>
               </td>
-              <td align="right" valign="top" style="white-space:nowrap;padding-left:12px;">
-                <a href="${SITE_URL}/scholarships/browse/${m.scholarship_id}" style="display:inline-block;padding:8px 16px;background-color:#14140f;color:#ffffff;text-decoration:none;border-radius:9999px;font-size:12px;font-weight:600;border:1px solid #14140f;">View →</a>
+              <td align="right" valign="top" class="mobile-stack" style="white-space:nowrap;padding-left:12px;">
+                <a href="${SITE_URL}/scholarships/browse/${m.scholarship_id}" class="mobile-btn" style="display:inline-block;padding:10px 20px;background-color:#14140f;color:#ffffff;text-decoration:none;border-radius:9999px;font-size:13px;font-weight:600;border:1px solid #14140f;">View →</a>
               </td>
             </tr></table>
           </div>
@@ -179,47 +179,76 @@ serve(async (req: Request) => {
       const html = `
         <!DOCTYPE html>
         <html lang="en">
-        <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
-        <body style="margin:0;padding:0;background-color:#f4f4ec;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#14140f;-webkit-font-smoothing:antialiased;">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width,initial-scale=1.0">
+          <meta http-equiv="X-UA-Compatible" content="IE=edge">
+          <meta name="x-apple-disable-message-reformatting">
+          <title>Daily Digest</title>
+          <style>
+            body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+            table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+            img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+            body { margin: 0; padding: 0; width: 100% !important; height: 100% !important; }
+            @media only screen and (max-width: 600px) {
+              .email-container { width: 100% !important; max-width: 100% !important; }
+              .mobile-padding { padding: 20px 16px !important; }
+              .mobile-padding-footer { padding: 20px 20px !important; }
+              .mobile-stack td { display: block !important; width: 100% !important; padding: 8px 0 !important; text-align: center !important; }
+              .mobile-btn { display: block !important; width: 100% !important; box-sizing: border-box !important; text-align: center !important; padding: 14px 20px !important; margin-top: 12px !important; }
+              .mobile-header-badge { display: block !important; text-align: center !important; margin-top: 10px !important; }
+              .mobile-header-table td { display: block !important; text-align: center !important; padding: 4px 0 !important; }
+              .mobile-header-logo { display: inline-block !important; margin: 0 auto !important; }
+              .mobile-card-pad { padding: 16px !important; }
+              .mobile-font-lg { font-size: 16px !important; }
+              .mobile-font-md { font-size: 14px !important; }
+              .mobile-font-sm { font-size: 12px !important; }
+              .mobile-font-xs { font-size: 11px !important; }
+              .mobile-cta-btn { padding: 16px 32px !important; font-size: 15px !important; }
+              .mobile-section-gap { margin-bottom: 20px !important; }
+            }
+          </style>
+        </head>
+        <body style="margin:0;padding:0;background-color:#f4f4ec;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#14140f;-webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%;">
         <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color:#f4f4ec;padding:40px 12px;">
           <tr><td align="center">
-            <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width:580px;background-color:#ffffff;border-radius:20px;border:1px solid #dcdcd0;overflow:hidden;box-shadow:0 10px 30px rgba(20,20,15,0.04);">
+            <table class="email-container" width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width:580px;background-color:#ffffff;border-radius:20px;border:1px solid #dcdcd0;overflow:hidden;box-shadow:0 10px 30px rgba(20,20,15,0.04);">
               <!-- Header -->
-              <tr><td style="padding:24px 36px;background-color:#14140f;">
+              <tr><td class="mobile-padding" style="padding:24px 36px;background-color:#14140f;">
                 <table width="100%" border="0" cellspacing="0" cellpadding="0"><tr>
-                  <td><table border="0" cellspacing="0" cellpadding="0"><tr>
-                    <td style="padding-right:12px;"><span style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;background-color:#beff50;color:#14140f;border-radius:50%;font-weight:700;font-size:17px;line-height:1;">T</span></td>
+                  <td class="mobile-header-table"><table border="0" cellspacing="0" cellpadding="0"><tr>
+                    <td style="padding-right:12px;"><span class="mobile-header-logo" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;background-color:#beff50;color:#14140f;border-radius:50%;font-weight:700;font-size:17px;line-height:1;">T</span></td>
                     <td>
                       <span style="color:#ffffff;font-weight:600;font-size:18px;letter-spacing:-0.02em;display:block;line-height:1.1;">Techsari</span>
-                      <span style="color:#919183;font-size:9px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;display:block;margin-top:3px;">Daily Digest</span>
+                      <span class="mobile-font-xs" style="color:#919183;font-size:9px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;display:block;margin-top:3px;">Daily Digest</span>
                     </td>
                   </tr></table></td>
-                  <td align="right"><span style="background-color:rgba(190,255,80,0.15);color:#beff50;border:1px solid rgba(190,255,80,0.3);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;padding:5px 12px;border-radius:9999px;display:inline-block;">Verified Match</span></td>
+                  <td align="right" class="mobile-header-badge"><span style="background-color:rgba(190,255,80,0.15);color:#beff50;border:1px solid rgba(190,255,80,0.3);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;padding:5px 12px;border-radius:9999px;display:inline-block;">Verified Match</span></td>
                 </tr></table>
               </td></tr>
               <!-- Body -->
-              <tr><td style="padding:36px 36px 32px 36px;font-size:15px;line-height:1.6;color:#14140f;">
-                <p style="margin:0 0 16px 0;font-size:17px;color:#14140f;font-weight:500;">${greeting}</p>
-                <p style="margin:0 0 24px 0;color:#40403a;font-size:15px;line-height:1.65;">
+              <tr><td class="mobile-padding" style="padding:36px 36px 32px 36px;font-size:15px;line-height:1.6;color:#14140f;">
+                <p class="mobile-font-lg" style="margin:0 0 16px 0;font-size:17px;color:#14140f;font-weight:500;">${greeting}</p>
+                <p class="mobile-font-md" style="margin:0 0 24px 0;color:#40403a;font-size:15px;line-height:1.65;">
                   Based on your profile, we found ${count === 1 ? 'an opportunity' : `${count} opportunities`} you may be eligible for today. These scholarships appear to match several of your key requirements — but please review the full eligibility criteria on each scholarship's page before applying.
                 </p>
-                <div style="margin:0 0 12px 0;font-size:11px;font-weight:600;letter-spacing:0.1em;color:#6e6e64;text-transform:uppercase;">Scholarships that may match your profile</div>
+                <div class="mobile-font-xs" style="margin:0 0 12px 0;font-size:11px;font-weight:600;letter-spacing:0.1em;color:#6e6e64;text-transform:uppercase;">Scholarships that may match your profile</div>
                 ${scholarshipCards}
 
                 <!-- CTA -->
                 <div style="text-align:center;margin:32px 0 28px 0;">
-                  <a href="${SITE_URL}/scholarships/browse" style="background-color:#beff50;color:#14140f !important;text-decoration:none;padding:16px 36px;border-radius:9999px;font-weight:600;font-size:14px;display:inline-block;border:1px solid #14140f;letter-spacing:-0.01em;box-shadow:0 2px 0 #14140f;">View my matches &rarr;</a>
-                  <div style="font-size:11px;color:#6e6e64;margin-top:10px;">Review full eligibility requirements, deadlines, and application details before applying.</div>
+                  <a href="${SITE_URL}/scholarships/browse" class="mobile-cta-btn" style="background-color:#beff50;color:#14140f !important;text-decoration:none;padding:16px 36px;border-radius:9999px;font-weight:600;font-size:14px;display:inline-block;border:1px solid #14140f;letter-spacing:-0.01em;box-shadow:0 2px 0 #14140f;">View my matches &rarr;</a>
+                  <div class="mobile-font-xs" style="font-size:11px;color:#6e6e64;margin-top:10px;">Review full eligibility requirements, deadlines, and application details before applying.</div>
                 </div>
 
                 <!-- Disclaimer -->
-                <div style="background-color:#fafaf6;border:1px solid #e0e0d6;border-left:4px solid #beff50;padding:18px 20px;border-radius:12px;font-size:13px;color:#30302a;margin-top:28px;">
-                  <div style="font-weight:600;font-size:14px;color:#14140f;margin-bottom:4px;">📋 Before you apply</div>
-                  <div style="line-height:1.55;color:#40403a;">
+                <div class="mobile-card-pad" style="background-color:#fafaf6;border:1px solid #e0e0d6;border-left:4px solid #beff50;padding:18px 20px;border-radius:12px;font-size:13px;color:#30302a;margin-top:28px;">
+                  <div class="mobile-font-md" style="font-weight:600;font-size:14px;color:#14140f;margin-bottom:4px;">📋 Before you apply</div>
+                  <div class="mobile-font-sm" style="line-height:1.55;color:#40403a;">
                     Scholarship requirements can be detailed and may change. We match based on the information you provided and the eligibility data we have — but we recommend checking the official scholarship page for the most up-to-date requirements. Techsari helps you prepare your application with <strong>AI-assisted writing tools</strong> and gives you access to <strong>mentors</strong> who can strengthen your materials.
                   </div>
                   <div style="margin-top:12px;">
-                    <a href="${SITE_URL}/essays" style="display:inline-block;padding:8px 20px;background-color:#14140f;color:#ffffff;text-decoration:none;border-radius:9999px;font-size:12px;font-weight:600;">Prepare my application &rarr;</a>
+                    <a href="${SITE_URL}/essays" class="mobile-btn" style="display:inline-block;padding:8px 20px;background-color:#14140f;color:#ffffff;text-decoration:none;border-radius:9999px;font-size:12px;font-weight:600;">Prepare my application &rarr;</a>
                   </div>
                 </div>
 
@@ -232,13 +261,13 @@ serve(async (req: Request) => {
                 </div>
               </td></tr>
               <!-- Footer -->
-              <tr><td style="padding:24px 36px;background-color:#14140f;text-align:center;font-size:11px;color:#919183;border-top:1px solid #282820;">
+              <tr><td class="mobile-padding-footer" style="padding:24px 36px;background-color:#14140f;text-align:center;font-size:11px;color:#919183;border-top:1px solid #282820;">
                 <div style="margin-bottom:12px;color:#ffffff;font-weight:500;font-size:12px;">Techsari — Scholarships matched to you. Applications supported by AI and mentors.</div>
                 <div style="margin-bottom:14px;line-height:1.6;">You received this email because scholarship notifications are enabled for your profile.<br>
                   <a href="${SITE_URL}/dashboard" style="color:#beff50;text-decoration:none;">Manage preferences</a> &nbsp;&bull;&nbsp;
                   <a href="${SITE_URL}/unsubscribe" style="color:#919183;text-decoration:underline;">Unsubscribe</a>
                 </div>
-                <div style="font-size:10px;color:#6e6e64;letter-spacing:0.05em;">&copy; 2026 TECHSARI. ALL RIGHTS RESERVED.</div>
+                <div class="mobile-font-xs" style="font-size:10px;color:#6e6e64;letter-spacing:0.05em;">&copy; 2026 TECHSARI. ALL RIGHTS RESERVED.</div>
               </td></tr>
             </table>
           </td></tr>
