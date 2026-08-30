@@ -36,6 +36,12 @@ function fail(error: string, status = 400) {
   })
 }
 
+function safeJsonParse(val: any, fallback: any = []) {
+  if (val === null || val === undefined) return fallback
+  if (typeof val === 'object') return val // already parsed by Supabase JS client
+  try { return JSON.parse(val) } catch { return fallback }
+}
+
 const RESEND_API_URL = 'https://api.resend.com/emails'
 const FROM_EMAIL = 'Techsari <notifications@techsari.online>'
 const SITE_URL = 'https://www.techsari.online'
@@ -322,7 +328,7 @@ serve(async (req: Request) => {
         .update({ status: 'processing', last_attempt_at: new Date().toISOString() })
         .eq('id', notification.id)
 
-      const matchData = JSON.parse(notification.match_data || '[]')
+      const matchData = safeJsonParse(notification.match_data)
       const isDigest = notification.notification_type === 'daily_digest' || notification.notification_type === 'weekly_digest'
 
       // Fetch user name

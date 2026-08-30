@@ -9,6 +9,12 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+function safeJsonParse(val: any, fallback: any = []) {
+  if (val === null || val === undefined) return fallback
+  if (typeof val === 'object') return val
+  try { return JSON.parse(val) } catch { return fallback }
+}
+
 let currentOrigin = 'https://www.techsari.online'
 
 const corsHeaders = {
@@ -260,8 +266,8 @@ serve(async (req: Request) => {
 
         if (existing) {
           // Append to existing daily digest
-          const existingIds = JSON.parse(existing.scholarship_ids || '[]')
-          const existingData = JSON.parse(existing.match_data || '[]')
+          const existingIds = safeJsonParse(existing.scholarship_ids)
+          const existingData = safeJsonParse(existing.match_data)
           if (!existingIds.includes(scholarship.id)) {
             existingIds.push(scholarship.id)
             existingData.push({
@@ -307,8 +313,8 @@ serve(async (req: Request) => {
           .maybeSingle()
 
         if (existingWeekly) {
-          const existingIds = JSON.parse(existingWeekly.scholarship_ids || '[]')
-          const existingData = JSON.parse(existingWeekly.match_data || '[]')
+          const existingIds = safeJsonParse(existingWeekly.scholarship_ids)
+          const existingData = safeJsonParse(existingWeekly.match_data)
           if (!existingIds.includes(scholarship.id)) {
             existingIds.push(scholarship.id)
             existingData.push({

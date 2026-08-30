@@ -37,6 +37,12 @@ function fail(error: string, status = 400) {
   })
 }
 
+function safeJsonParse(val: any, fallback: any = []) {
+  if (val === null || val === undefined) return fallback
+  if (typeof val === 'object') return val // already parsed by Supabase JS client
+  try { return JSON.parse(val) } catch { return fallback }
+}
+
 const RESEND_API_URL = 'https://api.resend.com/emails'
 const FROM_EMAIL = 'Techsari <notifications@techsari.online>'
 const SITE_URL = 'https://www.techsari.online'
@@ -110,8 +116,8 @@ serve(async (req: Request) => {
       const allMatches: any[] = []
       const allIds: string[] = []
       for (const n of notifications) {
-        const matches = JSON.parse(n.match_data || '[]')
-        const ids = JSON.parse(n.scholarship_ids || '[]')
+        const matches = safeJsonParse(n.match_data)
+        const ids = safeJsonParse(n.scholarship_ids)
         for (const m of matches) {
           if (!allMatches.some(am => am.scholarship_id === m.scholarship_id)) {
             allMatches.push(m)
