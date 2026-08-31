@@ -17,10 +17,39 @@ export default function ResetPassword({ onBackToLogin }: ResetPasswordProps) {
   const [success, setSuccess] = useState(false);
   const [hasSession, setHasSession] = useState<boolean | null>(null);
 
+  // Check for auth errors in the URL hash (e.g. #error=access_denied&error_code=otp_expired)
   useEffect(() => {
+    const hash = window.location.hash;
+    if (hash && hash.includes('error=')) {
+      const params = new URLSearchParams(hash.substring(1));
+      const errorCode = params.get('error_code');
+      const errorDesc = params.get('error_description');
+      if (errorCode === 'otp_expired' || errorCode === 'access_denied') {
+        setError('This password reset link has expired or is invalid. Please request a new one.');
+      } else if (errorDesc) {
+        setError(decodeURIComponent(errorDesc));
+      }
+      // Clean up the hash from the URL
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Check for session — the PKCE exchange may have already established it
     supabase.auth.getSession().then(({ data: { session } }) => {
       setHasSession(!!session);
     });
+
+    // Also listen for auth state changes in case the PKCE exchange
+    // completes after the initial getSession check
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event) => {
+        if (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN') {
+          setHasSession(true);
+        }
+      },
+    );
+    return () => subscription.unsubscribe();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {

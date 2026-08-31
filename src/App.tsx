@@ -163,6 +163,45 @@ export default function App() {
     else if (tab === 'home') { navigate('/'); setShowAuth(false); }
   };
 
+  // Listen for Supabase auth state changes — handles PKCE redirects
+  // (password reset, email confirmation, OAuth callbacks) at any URL.
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === 'PASSWORD_RECOVERY') {
+          // The PKCE exchange succeeded — navigate to the reset form
+          navigate('/reset-password', { replace: true });
+        }
+        if (event === 'SIGNED_IN' && session?.user) {
+          // Session established from a PKCE redirect (e.g. email confirm)
+          // If on a public page, load the user profile
+          const userEmail = session.user.email || '';
+          supabase
+            .from('profiles')
+            .select('*')
+            .or(`email.eq.${userEmail},id.eq.${session.user.id}`)
+            .maybeSingle()
+            .then(({ data: profile, error }) => {
+              if (!error && profile) {
+                setUser(profile as UserProfile);
+              } else {
+                setUser({
+                  email: session.user.email!,
+                  name: session.user.user_metadata?.name || '',
+                  country: session.user.user_metadata?.country || '',
+                  role: 'user',
+                  plan: 'explorer',
+                  joined_at: session.user.created_at ?? new Date().toISOString(),
+                  status: 'active',
+                });
+              }
+            });
+        }
+      },
+    );
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
