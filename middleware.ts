@@ -66,17 +66,17 @@ const ROUTE_META: Record<string, RouteMeta> = {
     title: 'Contact Techsari — Get Help or Partner With Us',
     description: 'Contact the Techsari team for student support, scholarship provider listings, institutional partnerships, or press inquiries.',
     image: `${SITE_URL}/og-image.png`,
-    ogTitle: 'Contact Techsari — We\'re Here to Help',
+    ogTitle: "Contact Techsari — We're Here to Help",
     ogDescription: 'Reach out to the Techsari team for student support, institutional partnerships, or scholarship provider inquiries. We respond within 24 hours.',
   },
   '/privacy': {
-    title: 'Privacy Policy — Techsari Techsari',
-    description: 'Techsari Techsari Privacy Policy — how we collect, use, and protect your data as an African student using our scholarship platform.',
+    title: 'Privacy Policy — Techsari',
+    description: 'Techsari Privacy Policy — how we collect, use, and protect your data as an African student using our scholarship platform.',
     image: `${SITE_URL}/og-image.png`,
   },
   '/terms': {
-    title: 'Terms of Service — Techsari Techsari',
-    description: 'Techsari Techsari Terms of Service — the terms governing your use of our AI-powered scholarship platform for African students.',
+    title: 'Terms of Service — Techsari',
+    description: 'Techsari Terms of Service — the terms governing your use of our AI-powered scholarship platform for African students.',
     image: `${SITE_URL}/og-image.png`,
   },
 };
@@ -87,8 +87,9 @@ function getMeta(pathname: string): RouteMeta {
 }
 
 function slugFromPath(pathname: string): string | null {
-  const match = pathname.match(/^\/scholarships\/browse\/([^/]+)$/);
-  return match ? decodeURIComponent(match[1]).slice(0, 100) : null;
+  // Match /scholarships/browse/:slug (with optional trailing slash)
+  const match = pathname.match(/^\/scholarships\/browse\/([^/]+)/);
+  return match ? decodeURIComponent(match[1]).replace(/\/$/, '').slice(0, 100) : null;
 }
 
 function encodeQueryValue(s: string): string {
@@ -120,33 +121,11 @@ function formatDeadlineEdge(dateStr: string): string {
 function buildMetaTags(meta: RouteMeta, url: string): string {
   const title = meta.ogTitle || meta.title;
   const desc = meta.ogDescription || meta.description;
-  return `
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>${escapeHtml(meta.title)}</title>
-<meta name="description" content="${escapeHtml(meta.description)}" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="${escapeHtml(url)}" />
-<meta property="og:title" content="${escapeHtml(title)}" />
-<meta property="og:description" content="${escapeHtml(desc)}" />
-<meta property="og:image" content="${escapeHtml(meta.image)}" />
-<meta property="og:image:width" content="1200" />
-<meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="${escapeHtml(title)}" />
-<meta property="og:site_name" content="Techsari" />
-<meta property="og:locale" content="en_US" />
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="${escapeHtml(title)}" />
-<meta name="twitter:description" content="${escapeHtml(desc)}" />
-<meta name="twitter:image" content="${escapeHtml(meta.image)}" />
-<meta name="twitter:image:alt" content="${escapeHtml(title)}" />
-<meta name="twitter:site" content="@techsari" />
-<meta name="twitter:creator" content="@techsari" />
-`;
+  return `\n<meta charset="UTF-8" />\n<meta name="viewport" content="width=device-width, initial-scale=1.0" />\n<title>${escapeHtml(meta.title)}</title>\n<meta name="description" content="${escapeHtml(meta.description)}" />\n<meta property="og:type" content="website" />\n<meta property="og:url" content="${escapeHtml(url)}" />\n<meta property="og:title" content="${escapeHtml(title)}" />\n<meta property="og:description" content="${escapeHtml(desc)}" />\n<meta property="og:image" content="${escapeHtml(meta.image)}" />\n<meta property="og:image:width" content="1200" />\n<meta property="og:image:height" content="630" />\n<meta property="og:image:alt" content="${escapeHtml(title)}" />\n<meta property="og:site_name" content="Techsari" />\n<meta property="og:locale" content="en_US" />\n<meta name="twitter:card" content="summary_large_image" />\n<meta name="twitter:title" content="${escapeHtml(title)}" />\n<meta name="twitter:description" content="${escapeHtml(desc)}" />\n<meta name="twitter:image" content="${escapeHtml(meta.image)}" />\n<meta name="twitter:image:alt" content="${escapeHtml(title)}" />\n<meta name="twitter:site" content="@techsari" />\n<meta name="twitter:creator" content="@techsari" />\n`;
 }
 
 function escapeHtml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 export const config = {
@@ -212,9 +191,25 @@ export default async function middleware(request: Request): Promise<Response> {
             ogTitle: data.name,
             ogDescription: seoDesc.slice(0, 200),
           };
+        } else {
+          // API returned non-200 — use a scholarship-aware fallback
+          meta = {
+            title: `${slug.replace(/-/g, ' ')} | Techsari`,
+            description: `Browse this scholarship opportunity on Techsari. Find verified scholarships for African students with strict eligibility matching.`,
+            image: `${SITE_URL}/og-scholarships.png`,
+            ogTitle: `${slug.replace(/-/g, ' ')} | Techsari`,
+            ogDescription: `View this scholarship on Techsari — verified opportunities for African students with eligibility matching.`,
+          };
         }
       } catch {
-        // fall back to generic meta
+        // API fetch failed — use a scholarship-aware fallback
+        meta = {
+          title: `${slug.replace(/-/g, ' ')} | Techsari`,
+          description: `Browse this scholarship opportunity on Techsari. Find verified scholarships for African students with strict eligibility matching.`,
+          image: `${SITE_URL}/og-scholarships.png`,
+          ogTitle: `${slug.replace(/-/g, ' ')} | Techsari`,
+          ogDescription: `View this scholarship on Techsari — verified opportunities for African students with eligibility matching.`,
+        };
       }
     }
 

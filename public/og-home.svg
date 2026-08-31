@@ -35,8 +35,8 @@
   <!-- Logo -->
   <g transform="translate(60, 50)">
     <rect width="48" height="48" rx="12" fill="url(#accent)"/>
-    <text x="24" y="33" font-family="Georgia, serif" font-size="28" font-weight="bold" fill="#001736" text-anchor="middle">Z</text>
-    <text x="60" y="32" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#6cf8bb">Zawadi</text>
+    <text x="24" y="33" font-family="Georgia, serif" font-size="28" font-weight="bold" fill="#001736" text-anchor="middle">T</text>
+    <text x="60" y="32" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#6cf8bb">Techsari</text>
   </g>
 
   <!-- Hero Headline -->
@@ -44,7 +44,7 @@
     Unlock Your Academic Future
   </text>
   <text x="60" y="250" font-family="Arial, sans-serif" font-size="52" font-weight="bold" fill="white">
-    with <tspan fill="#6cf8bb">Techsari Zawadi</tspan>
+    with <tspan fill="#6cf8bb">Techsari</tspan>
   </text>
 
   <!-- Subtitle -->
@@ -97,5 +97,5 @@
   <text x="775" y="559" font-family="Arial, sans-serif" font-size="14" fill="rgba(255,255,255,0.5)">2,500+ Verified Scholarships</text>
 
   <!-- URL -->
-  <text x="920" y="600" font-family="Arial, sans-serif" font-size="12" fill="rgba(255,255,255,0.3)" text-anchor="end">techsari.online</text>
+  <text x="920" y="600" font-family="Arial, sans-serif" font-size="12" fill="rgba(255,255,255,0.3)" text-anchor="end">www.techsari.online</text>
 </svg>

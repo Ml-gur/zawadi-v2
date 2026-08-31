@@ -9,7 +9,7 @@
   </defs>
   <circle cx="200" cy="120" r="300" fill="#006c49" opacity="0.1"/>
   <circle cx="1000" cy="500" r="250" fill="#6cf8bb" opacity="0.08"/>
-  <text x="600" y="240" font-family="system-ui, sans-serif" font-size="86" font-weight="900" fill="white" text-anchor="middle" letter-spacing="-2">Zawadi</text>
+  <text x="600" y="240" font-family="system-ui, sans-serif" font-size="86" font-weight="900" fill="white" text-anchor="middle" letter-spacing="-2">Techsari</text>
   <text x="600" y="300" font-family="system-ui, sans-serif" font-size="26" fill="#6cf8bb" text-anchor="middle" letter-spacing="3" font-weight="400">AI SCHOLARSHIP MATCHING</text>
   <rect x="500" y="325" width="200" height="3" rx="1.5" fill="#006c49"/>
   <text x="600" y="380" font-family="system-ui, sans-serif" font-size="20" fill="rgba(255,255,255,0.7)" text-anchor="middle">For African Students</text>
