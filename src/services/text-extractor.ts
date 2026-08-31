@@ -2,6 +2,8 @@ export interface ExtractionResult {
   text: string;
   method: 'pdf-text' | 'docx';
   warning?: string;
+  /** Base64 data URLs of rendered page images (for OCR fallback on scanned PDFs/images) */
+  renderedPages?: string[];
 }
 
 function cleanText(raw: string): string {
@@ -15,6 +17,26 @@ function cleanText(raw: string): string {
     .map(l => l.trim())
     .join('\n')
     .trim();
+}
+
+async function renderPdfPageToDataUrl(
+  page: any,
+  scale = 2
+): Promise<string> {
+  const viewport = page.getViewport({ scale });
+  const canvas = new OffscreenCanvas(viewport.width, viewport.height);
+  const ctx = canvas.getContext('2d')!;
+  await page.render({
+    canvas: canvas as unknown as HTMLCanvasElement,
+    canvasContext: ctx as unknown as CanvasRenderingContext2D,
+    viewport,
+  }).promise;
+  const blob = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.85 });
+  const arrayBuf = await blob.arrayBuffer();
+  const base64 = btoa(
+    new Uint8Array(arrayBuf).reduce((data, byte) => data + String.fromCharCode(byte), '')
+  );
+  return `data:image/jpeg;base64,${base64}`;
 }
 
 export async function extractTextFromBuffer(
@@ -43,6 +65,11 @@ export async function extractTextFromBuffer(
     const pdf = await pdfjsLib.getDocument({ data: copy }).promise;
 
     let extractedPages: string[] = [];
+    const renderedPages: string[] = [];
+    let totalTextLength = 0;
+
+    // Render up to 5 pages for OCR fallback (scanned docs are often 1-3 pages)
+    const pagesToRender = Math.min(pdf.numPages, 5);
 
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
@@ -76,40 +103,56 @@ export async function extractTextFromBuffer(
         .filter(Boolean);
 
       const pageText = pageLines.join('\n');
+      totalTextLength += pageText.trim().length;
 
       if (pageText.trim().length > 10) {
         extractedPages.push(pageText.trim());
       }
 
-      if (pdf.numPages === 1 && pageText.trim().length <= 50) {
-        const viewport = page.getViewport({ scale: 2 });
-        const canvas = new OffscreenCanvas(viewport.width, viewport.height);
-        const ctx = canvas.getContext('2d')!;
-        await page.render({ canvas: canvas as unknown as HTMLCanvasElement, canvasContext: ctx as unknown as CanvasRenderingContext2D, viewport }).promise;
-        await canvas.convertToBlob({ type: 'image/png' });
-        const warnMsg = 'This PDF appears to be a scanned image. Only text-based PDFs are supported for extraction.';
-        return { text: cleanText(pageText), method: 'pdf-text', warning: warnMsg };
+      // Render pages for OCR fallback (first few pages only to limit memory)
+      if (i <= pagesToRender) {
+        try {
+          const dataUrl = await renderPdfPageToDataUrl(page);
+          renderedPages.push(dataUrl);
+        } catch {
+          // Rendering failed — skip this page for OCR
+        }
       }
     }
 
     const fullText = extractedPages.join('\n');
 
-    if (fullText.trim().length < 50) {
+    // If very little text was extracted, this is likely a scanned PDF
+    if (totalTextLength < 50 || renderedPages.length > 0 && extractedPages.length === 0) {
+      const warnMsg = renderedPages.length > 0
+        ? 'SCANNED_PDF: This PDF appears to be a scanned image. OCR will be used to extract text.'
+        : 'SCANNED_PDF: Could not extract meaningful text. OCR will be used.';
       return {
         text: cleanText(fullText),
         method: 'pdf-text',
-        warning: 'Could not extract meaningful text. This may be a scanned document.'
+        warning: warnMsg,
+        renderedPages,
       };
     }
 
     return { text: cleanText(fullText), method: 'pdf-text' };
   }
 
+  // Handle image files (JPG, PNG) — render to base64 for OCR
   if (lowerMime.startsWith('image/') || lowerName.match(/\.(png|jpg|jpeg|gif|bmp|tiff|webp)$/i)) {
-    throw new Error(
-      'Image-based documents cannot be processed directly. Please upload a PDF or DOCX version of this document.'
+    const bytes = new Uint8Array(buffer instanceof ArrayBuffer ? buffer : buffer as Uint8Array);
+    const base64 = btoa(
+      bytes.reduce((data, byte) => data + String.fromCharCode(byte), '')
     );
+    const mimeForDataUrl = lowerMime.startsWith('image/') ? lowerMime : 'image/png';
+    const dataUrl = `data:${mimeForDataUrl};base64,${base64}`;
+    return {
+      text: '',
+      method: 'pdf-text',
+      warning: `IMAGE_FILE: This is an image file. OCR will be used to extract text.`,
+      renderedPages: [dataUrl],
+    };
   }
 
-  throw new Error('Unsupported file type: ' + mimetype + '. Supported formats: PDF, DOCX.');
+  throw new Error('Unsupported file type: ' + mimetype + '. Supported formats: PDF, DOCX, JPG, PNG.');
 }

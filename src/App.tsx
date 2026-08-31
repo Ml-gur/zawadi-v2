@@ -474,14 +474,17 @@ export default function App() {
             const { extractTextFromBuffer } = await import('./services/text-extractor');
             const extraction = await extractTextFromBuffer(buffer, file.type, file.name);
             const trimmed = extraction.text?.trim() || '';
-            if (trimmed.length < 50) {
+            const hasImages = extraction.renderedPages && extraction.renderedPages.length > 0;
+            if (trimmed.length < 50 && !hasImages) {
+              // No text AND no renderable pages — truly unreadable
               await supabase.from('documents').update({
                 analysis_status: 'failed',
                 analysis_error: extraction.warning || `Could not extract sufficient text (${trimmed.length} chars). Try uploading a text-based PDF or DOCX.`,
                 last_analyzed_at: new Date().toISOString(),
               }).eq('id', insertedDoc.id);
             } else {
-              const analysis = await invokeDocAnalysis(insertedDoc.id, docType, trimmed, user.email);
+              // Send text (may be empty for scanned PDFs) + rendered page images for OCR
+              const analysis = await invokeDocAnalysis(insertedDoc.id, docType, trimmed, user.email, hasImages ? extraction.renderedPages : undefined);
               await supabase.from('documents').update({
                 analysis_status: analysis.ok ? 'completed' : (analysis.retryable ? 'pending' : 'failed'),
                 analysis_error: analysis.ok ? null : (analysis.error || 'Analysis will retry automatically.'),
@@ -552,7 +555,7 @@ export default function App() {
 
   interface DocAnalysisResult { ok: boolean; error?: string; retryable?: boolean }
 
-  async function invokeDocAnalysis(documentId: string, docType: string, textContent: string, userEmail: string): Promise<DocAnalysisResult> {
+  async function invokeDocAnalysis(documentId: string, docType: string, textContent: string, userEmail: string, images?: string[]): Promise<DocAnalysisResult> {
     const fnUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/document-analysis`;
 
     for (let attempt = 0; attempt < 2; attempt++) {
@@ -566,8 +569,8 @@ export default function App() {
             'Authorization': `Bearer ${token || import.meta.env.VITE_SUPABASE_ANON_KEY}`,
             'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
           },
-          body: JSON.stringify({ action: 'analyze', documentId, docType, textContent }),
-          signal: AbortSignal.timeout(25000),
+          body: JSON.stringify({ action: 'analyze', documentId, docType, textContent, images }),
+          signal: AbortSignal.timeout(60000),
         });
         if (!res.ok) {
           const errBody = await res.json().catch(() => ({}));
@@ -603,7 +606,8 @@ export default function App() {
       const extraction = await extractTextFromBuffer(buffer, doc.mime_type || 'application/pdf', doc.name);
       const textContent = extraction.text;
       const trimmed = textContent?.trim() || '';
-      if (trimmed.length < 50) {
+      const hasImages = extraction.renderedPages && extraction.renderedPages.length > 0;
+      if (trimmed.length < 50 && !hasImages) {
         await supabase.from('documents').update({
           analysis_status: 'failed',
           analysis_error: 'Could not extract sufficient text for analysis',
@@ -611,7 +615,7 @@ export default function App() {
         }).eq('id', doc.id);
         toast.error('Could not extract enough text from this document');
       } else {
-        const analysis = await invokeDocAnalysis(doc.id, doc.type, trimmed, user.email);
+        const analysis = await invokeDocAnalysis(doc.id, doc.type, trimmed, user.email, hasImages ? extraction.renderedPages : undefined);
         if (!analysis.ok) {
           toast.error(analysis.error || 'Document analysis failed. The document will be retried automatically.');
         } else {

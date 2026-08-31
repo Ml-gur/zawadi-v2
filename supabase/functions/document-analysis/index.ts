@@ -12,9 +12,7 @@ const corsHeaders = {
 // ─── CORS: strict origin allowlist ─────────────────────────────
 function allowedOrigin(req: Request): string {
   const o = req.headers.get('Origin') || ''
-  if (/^https:\/\/(www\.)?techsari\.online$/.test(o)) return o
-  if (/^https:\/\/[a-z0-9-]+\.vercel\.app$/.test(o)) return o
-  if (/^http:\/\/localhost:\d+$/.test(o)) return o
+  if (/^https:\/(www\.)?techsari\.online$/.test(o)) return o
   return 'https://www.techsari.online'
 }
 
@@ -582,7 +580,7 @@ function extractFromPDFText(rawText: string, docType: string): PatternResult {
 
 // ─── AI fallback (DeepSeek) ────────────────────────────────────
 
-const AI_FETCH_TIMEOUT_MS = 8_000
+const AI_FETCH_TIMEOUT_MS = 15_000
 
 async function callDeepSeek(systemPrompt: string, textContent: string, aiCfg: Record<string, unknown> | null): Promise<string | null> {
   const apiKey = (aiCfg?.deepseek_key as string) || Deno.env.get('DEEPSEEK_API_KEY')
@@ -629,6 +627,73 @@ function tryParseJson(text: string): any | null {
     try { return JSON.parse(jsonMatch[0]) } catch {}
   }
   return null
+}
+
+// ─── Vision OCR via DeepSeek (scanned/image docs) ──────────────
+
+const VISION_TIMEOUT_MS = 30_000
+
+async function ocrWithDeepSeekVision(
+  images: string[],
+  docType: string,
+  aiCfg: Record<string, unknown> | null,
+): Promise<string | null> {
+  const apiKey = (aiCfg?.deepseek_key as string) || Deno.env.get('DEEPSEEK_API_KEY')
+  if (!apiKey) return null
+
+  const model = 'deepseek-v4-flash-vision-exp'
+
+  // Build multimodal content: system prompt + all page images
+  const docHint = docType.toLowerCase().includes('transcript')
+    ? 'academic transcript or academic record'
+    : docType.toLowerCase().includes('cv') || docType.toLowerCase().includes('resume')
+    ? 'CV or resume'
+    : 'student document'
+
+  const contentParts: any[] = [
+    {
+      type: 'text',
+      text: `You are an OCR engine. Extract ALL visible text from this ${docHint}.\n` +
+        'Preserve the original structure: tables, columns, headers, and line breaks.\n' +
+        'For transcripts, keep course names, grades, credits, and GPA summary rows intact.\n' +
+        'Return ONLY the extracted text — no commentary, no markdown formatting.',
+    },
+  ]
+
+  // Add up to 5 page images (limit to prevent token overflow)
+  for (const img of images.slice(0, 5)) {
+    contentParts.push({
+      type: 'image_url',
+      image_url: { url: img },
+    })
+  }
+
+  try {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), VISION_TIMEOUT_MS)
+    const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
+      method: 'POST',
+      signal: controller.signal,
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model,
+        messages: [{ role: 'user', content: contentParts }],
+        temperature: 0.05,
+        max_tokens: 4096,
+      }),
+    })
+    clearTimeout(timer)
+    if (!res.ok) {
+      const errText = await res.text()
+      console.error('[document-analysis] DeepSeek Vision API error:', res.status, errText)
+      return null
+    }
+    const json = await res.json()
+    return json?.choices?.[0]?.message?.content || null
+  } catch (err) {
+    console.error('[document-analysis] DeepSeek Vision call failed:', err)
+    return null
+  }
 }
 
 async function extractRemainingFieldsWithAI(rawText: string, patternResult: PatternResult, aiCfg: Record<string, unknown> | null): Promise<Record<string, unknown>> {
@@ -703,7 +768,7 @@ serve(async (req: Request) => {
     const userEmail = user.email!
 
     const body = await req.json()
-    const { documentId, docType, textContent, action } = body
+    const { documentId, docType, textContent, action, images } = body
 
     // AI provider settings are admin-managed via the AI Config panel
     // (ai_config table) — same source generate-essay reads.
@@ -714,25 +779,55 @@ serve(async (req: Request) => {
       .maybeSingle()
 
     if (action === 'analyze') {
-      if (!documentId || !docType || !textContent) {
-        return corsResponse({ error: 'documentId, docType, and textContent are required' }, 400)
+      if (!documentId || !docType) {
+        return corsResponse({ error: 'documentId and docType are required' }, 400)
       }
 
       const t = docType.toLowerCase()
       const isTranscript = t.includes('transcript')
       const isCV = t.includes('cv') || t.includes('resume')
 
+      // Determine text source: either from client extraction or OCR
+      let workingText = textContent || ''
+      let extractionMethod: 'pattern' | 'ai' | 'hybrid' = 'pattern'
+
+      // If text is too short but we have images, OCR via DeepSeek Vision
+      if ((!workingText || workingText.trim().length < 50) && images && images.length > 0) {
+        console.log(`[document-analysis] Text too short (${workingText.length} chars), running OCR on ${images.length} page image(s)...`)
+        const ocrText = await ocrWithDeepSeekVision(images, docType, aiCfg ?? null)
+        if (ocrText && ocrText.trim().length > 20) {
+          workingText = ocrText
+          extractionMethod = 'ai'
+          console.log(`[document-analysis] OCR produced ${ocrText.length} chars of text`)
+        } else {
+          console.log('[document-analysis] OCR returned no usable text')
+          extractionMethod = 'ai'
+        }
+      }
+
+      if (!workingText || workingText.trim().length < 20) {
+        return corsResponse({ error: 'Could not extract sufficient text from the document. The file may be password-protected or contain only images.' }, 400)
+      }
+
       // Step 1: Pattern matching
-      const patternResult = extractFromPDFText(textContent, docType)
+      const patternResult = extractFromPDFText(workingText, docType)
       let merged: Record<string, unknown> = { ...patternResult } as unknown as Record<string, unknown>
-      let extractionMethod = patternResult.extraction_method
+
+      // If OCR was used, upgrade extraction method
+      if (extractionMethod === 'ai' && patternResult.extraction_method === 'ai') {
+        extractionMethod = 'ai'
+      } else if (extractionMethod === 'ai' && patternResult.extraction_method !== 'pattern') {
+        extractionMethod = 'hybrid'
+      } else {
+        extractionMethod = patternResult.extraction_method
+      }
 
       // Step 2: AI fallback for low-confidence fields
-      if (isTranscript && patternResult.extraction_method !== 'pattern') {
-        const aiFields = await extractRemainingFieldsWithAI(textContent, patternResult, aiCfg ?? null)
+      if (isTranscript && extractionMethod !== 'pattern') {
+        const aiFields = await extractRemainingFieldsWithAI(workingText, patternResult, aiCfg ?? null)
         Object.assign(merged, aiFields)
         if (Object.keys(aiFields).length > 0) {
-          extractionMethod = patternResult.extraction_method === 'ai' ? 'ai' : 'hybrid'
+          extractionMethod = extractionMethod === 'ai' ? 'ai' : 'hybrid'
         }
       }
 
