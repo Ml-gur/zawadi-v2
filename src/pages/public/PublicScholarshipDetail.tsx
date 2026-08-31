@@ -225,9 +225,16 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
   const isClosed = Boolean(scholarship.deadline && scholarship.deadline < today);
   const closingSoon = !isClosed && isClosingSoon(scholarship.deadline, scholarship.urgency);
   const cleanDesc = stripHtml(scholarship.description || '');
-  const seoDesc = cleanDesc
-    ? `${cleanDesc.slice(0, 155).trim()}... Deadline: ${formatDeadline(scholarship.deadline)}. Open to students from ${scholarship.countries?.join(', ') || 'multiple African countries'}.`
-    : `Apply for ${scholarship.name}. Deadline: ${formatDeadline(scholarship.deadline)}.`;
+  // Factual description for social previews — no "100% eligible" claims
+  const fundingLabel = scholarship.funding_type === 'Full' ? 'Fully funded' : scholarship.funding_type === 'Partial' ? 'Partially funded' : '';
+  const degreeLabel = scholarship.degree_levels?.length ? scholarship.degree_levels.join(', ') : '';
+  const countryLabel = scholarship.countries?.length ? scholarship.countries.join(', ') : 'eligible African students';
+  const seoDesc = [
+    fundingLabel || degreeLabel ? `${fundingLabel ? fundingLabel + ' ' : ''}${degreeLabel ? degreeLabel + ' scholarship' : 'scholarship'}`.trim() : 'Scholarship opportunity',
+    `for eligible African students from ${countryLabel}.`,
+    scholarship.deadline ? `Deadline: ${formatDeadline(scholarship.deadline)}.` : '',
+    'View eligibility requirements, funding details and application information.',
+  ].filter(Boolean).join(' ').slice(0, 200);
 
   const ogName = (scholarship.name || '').slice(0, 60);
   const ogProvider = (scholarship.provider || '').slice(0, 50);
