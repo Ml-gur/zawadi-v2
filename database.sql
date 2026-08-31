@@ -566,6 +566,57 @@ CREATE TRIGGER trg_scholarships_urgency
   FOR EACH ROW EXECUTE FUNCTION compute_urgency();
 
 -- 4c. Auto-unpublish expired scholarships
+-- 4c. Auth signup trigger: Auto-create profile on new user signup
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger AS $$
+BEGIN
+  INSERT INTO public.profiles (
+    id,
+    auth_user_id,
+    email,
+    name,
+    country,
+    plan,
+    role,
+    status,
+    created_at
+  )
+  VALUES (
+    NEW.id,
+    NEW.id,
+    NEW.email,
+    COALESCE(NEW.raw_user_meta_data->>'name', ''),
+    COALESCE(NEW.raw_user_meta_data->>'country', 'Kenya'),
+    'explorer',
+    'user',
+    'active',
+    NOW()
+  )
+  ON CONFLICT (email) DO UPDATE SET
+    id = EXCLUDED.id,
+    auth_user_id = EXCLUDED.auth_user_id,
+    name = CASE
+      WHEN EXCLUDED.name IS NOT NULL AND EXCLUDED.name != ''
+      THEN EXCLUDED.name ELSE profiles.name
+    END,
+    country = CASE
+      WHEN EXCLUDED.country IS NOT NULL AND EXCLUDED.country != ''
+      THEN EXCLUDED.country ELSE profiles.country
+    END,
+    updated_at = NOW()::text;
+  RETURN NEW;
+EXCEPTION WHEN OTHERS THEN
+  RAISE WARNING 'handle_new_user failed for email %: %', NEW.email, SQLERRM;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- 4d. Auto-unpublish expired scholarships
 CREATE OR REPLACE FUNCTION auto_unpublish_expired_scholarships()
 RETURNS INTEGER LANGUAGE plpgsql SECURITY DEFINER AS $$
 DECLARE
