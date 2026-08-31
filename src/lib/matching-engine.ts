@@ -341,7 +341,7 @@ export function scoreAcademicField(
   schol: any
 ): number {
   if (scholFields.length === 0 || scholFields.some(f => f.toLowerCase() === 'all fields' || f.toLowerCase() === 'all')) {
-    return 0.60;
+    return 0.65;
   }
 
   const allUserFields = [userField, ...userTargetFields].filter(Boolean);
@@ -352,31 +352,61 @@ export function scoreAcademicField(
   );
   if (exactMatch) return 1.00;
 
+  // Substring match — e.g. user "Computer Science" matches scholarship "Computer Science and Engineering"
+  const substringMatch = allUserFields.some(uf =>
+    scholFields.some(sf => {
+      const ufl = uf.toLowerCase();
+      const sfl = sf.toLowerCase();
+      return ufl.includes(sfl) || sfl.includes(ufl);
+    })
+  );
+  if (substringMatch) return 0.92;
+
   // Group match — same field group
   const userGroups = new Set(allUserFields.map(f => FIELD_TO_GROUP[f]).filter(Boolean));
   const scholGroups = new Set(scholFields.map(f => FIELD_TO_GROUP[f]).filter(Boolean));
   const groupOverlap = [...userGroups].some(g => scholGroups.has(g));
-  if (groupOverlap) return 0.78;
+  if (groupOverlap) return 0.80;
 
-  // Focus flag matches
+  // Adjacent group match — nearby groups in the same broad category
+  const ADJACENT_GROUPS: Record<string, string[]> = {
+    'Computer Science & Technology': ['Engineering', 'Mathematics & Statistics'],
+    'Engineering': ['Computer Science & Technology', 'Mathematics & Statistics', 'Architecture & Built Environment'],
+    'Mathematics & Statistics': ['Computer Science & Technology', 'Engineering', 'Physics'],
+    'Medicine & Health': ['Nursing & Midwifery', 'Pharmacy', 'Public Health'],
+    'Public Health': ['Medicine & Health', 'Development Studies', 'Environmental Science'],
+    'Development Studies': ['Social Sciences', 'Economics', 'Public Health'],
+    'Social Sciences': ['Development Studies', 'Law', 'Economics'],
+    'Law': ['Social Sciences', 'Development Studies', 'Peace & Conflict'],
+    'Economics': ['Social Sciences', 'Development Studies', 'Mathematics & Statistics'],
+    'Agriculture & Food Systems': ['Environment & Climate', 'Biology'],
+    'Environment & Climate': ['Agriculture & Food Systems', 'Geography'],
+  }
+  const hasAdjacent = [...userGroups].some(ug => {
+    const adjacent = ADJACENT_GROUPS[ug] || [];
+    return [...scholGroups].some(sg => adjacent.includes(sg));
+  });
+  if (hasAdjacent) return 0.68;
+
+  // Focus flag matches (broad scholarship focus areas)
   const userIsStem = [...userGroups].some(g =>
     ['Computer Science & Technology','Engineering','Medicine & Health',
-     'Agriculture & Food Systems','Environment & Climate'].includes(g)
+     'Agriculture & Food Systems','Environment & Climate','Mathematics & Statistics'].includes(g)
   );
   const userIsDev = [...userGroups].some(g =>
-    ['Development Studies','Social Sciences','Law','Peace & Conflict'].includes(g)
+    ['Development Studies','Social Sciences','Law','Peace & Conflict','Economics'].includes(g)
   );
   const userIsHum = [...userGroups].some(g =>
     ['Arts & Humanities','Islamic & Religious Studies',
      'Indigenous Knowledge & Heritage'].includes(g)
   );
 
-  if (userIsStem && schol.stem_focus) return 0.52;
-  if (userIsDev && (schol.development_focus || schol.social_sciences_focus)) return 0.52;
-  if (userIsHum && schol.humanities_focus) return 0.52;
-  if (userIsDev && schol.peace_conflict_focus) return 0.60;
+  if (userIsStem && schol.stem_focus) return 0.55;
+  if (userIsDev && (schol.development_focus || schol.social_sciences_focus)) return 0.55;
+  if (userIsHum && schol.humanities_focus) return 0.55;
+  if (userIsDev && schol.peace_conflict_focus) return 0.62;
 
-  return 0.10;
+  return 0.20;
 }
 
 export function scoreAcademicAchievement(user: any, schol: any): number {
@@ -395,17 +425,18 @@ export function scoreAcademicAchievement(user: any, schol: any): number {
     : normBase;
   const minNorm  = schol.min_gpa_normalised !== undefined ? schol.min_gpa_normalised : null;
 
-  if (userNorm === null && minNorm === null) return 0.60;
+  if (userNorm === null && minNorm === null) return 0.65;
 
   if (minNorm === null) {
-    if (userNorm === null) return 0.60;
+    if (userNorm === null) return 0.65;
     if (userNorm >= 0.90) return 0.92;
     if (userNorm >= 0.75) return 0.78;
     if (userNorm >= 0.60) return 0.65;
     return 0.55;
   }
 
-  if (userNorm === null) return 0.40;
+  // User hasn't provided GPA — can't verify eligibility, moderate penalty
+  if (userNorm === null) return 0.42;
 
   if (userNorm >= minNorm) {
     const surplus = userNorm - minNorm;
@@ -639,17 +670,58 @@ export function scoreDocumentCompleteness(
   const required = scholRequiredDocs ?? [];
   if (required.length === 0) return 0.70;
 
-  const userSet = new Set(userDocTypes.map(d => d.toLowerCase().trim()));
-  let covered = 0;
+  // Normalize document type aliases for fuzzy matching
+  const DOC_ALIASES: Record<string, string> = {
+    'transcript': 'academic transcript',
+    'academic transcript': 'academic transcript',
+    'academic record': 'academic transcript',
+    'result': 'academic transcript',
+    'results': 'academic transcript',
+    'cv': 'cv / resume',
+    'resume': 'cv / resume',
+    'curriculum vitae': 'cv / resume',
+    'motivation letter': 'motivation letter',
+    'motivational letter': 'motivation letter',
+    'cover letter': 'motivation letter',
+    'statement of purpose': 'statement of purpose',
+    'sop': 'statement of purpose',
+    'personal statement': 'statement of purpose',
+    'reference letter': 'reference letter',
+    'recommendation letter': 'reference letter',
+    'recommendation': 'reference letter',
+    'passport': 'passport / id',
+    'passport / id': 'passport / id',
+    'national id': 'passport / id',
+    'id card': 'passport / id',
+    'financial evidence': 'financial evidence',
+    'bank statement': 'financial evidence',
+    'financial statement': 'financial evidence',
+    'proof of funds': 'financial evidence',
+    'admission letter': 'admission letter',
+    'admission offer': 'admission letter',
+    'offer letter': 'admission letter',
+    'english test': 'english test',
+    'ielts': 'english test',
+    'toefl': 'english test',
+    'english proficiency': 'english test',
+  }
+
+  const normalizeDocType = (d: string): string => {
+    const lower = d.toLowerCase().trim()
+    return DOC_ALIASES[lower] || lower
+  }
+
+  const userSet = new Set(userDocTypes.map(normalizeDocType))
+  let covered = 0
 
   required.forEach(r => {
-    const rawR = r.toLowerCase().trim();
-    if (userSet.has(rawR)) {
-      covered++;
+    const normalizedR = normalizeDocType(r)
+    if (userSet.has(normalizedR)) {
+      covered++
     } else {
       // Fuzzy contains match
-      const found = [...userSet].some(u => u.includes(rawR) || rawR.includes(u));
-      if (found) covered++;
+      const found = [...userSet].some(u => u.includes(normalizedR) || normalizedR.includes(u))
+      if (found) covered++
     }
   });
 
@@ -804,13 +876,15 @@ export function computeScholarshipMatch(
   const d7 = scoreDestinationPreference(user, schol);
   const d8 = scoreDocumentCompleteness(userDocs.map(d => d.type), scholRequiredDocs);
 
-  // No-IELTS bonus dimension
+  // No-IELTS bonus dimension — reduced weight (convenience feature, not core eligibility)
   const userHasEnglishTest = !!(user.english_test_type && user.english_score);
-  const noIeltsBonus = schol.no_ielts ? (userHasEnglishTest ? 0.90 : 1.00) : 0;
+  const noIeltsBonus = schol.no_ielts ? (userHasEnglishTest ? 0.85 : 1.00) : 0;
   const d9 = noIeltsBonus;
 
-  // Weightings (adjusted to include no_ielts)
-  const rawScore = d1*0.22 + d2*0.18 + d3*0.14 + d4*0.09 + d5*0.09 + d6*0.07 + d7*0.06 + d8*0.05 + d9*0.10;
+  // Weightings: field match boosted, no_ielts reduced from 10% to 5%
+  // d1=country 0.22, d2=field 0.22, d3=gpa 0.14, d4=degree 0.08,
+  // d5=language 0.09, d6=experience 0.07, d7=destination 0.06, d8=docs 0.04, d9=no_ielts 0.05
+  const rawScore = d1*0.22 + d2*0.22 + d3*0.14 + d4*0.08 + d5*0.09 + d6*0.07 + d7*0.06 + d8*0.04 + d9*0.05;
   const totalScore = Math.max(0, Math.min(100, Math.round(rawScore * 100)));
 
   // Generate Match Reasons
@@ -818,7 +892,9 @@ export function computeScholarshipMatch(
   else if (d1 >= 0.65) matchReasons.push(`Open to African students`);
 
   if (d2 >= 0.90) matchReasons.push(`Exact study field match — ${user.field_of_study}`);
-  else if (d2 >= 0.70) matchReasons.push(`Strong academic field alignment`);
+  else if (d2 >= 0.78) matchReasons.push(`Strong academic field alignment — same discipline group`);
+  else if (d2 >= 0.65) matchReasons.push(`Related academic field — adjacent discipline`);
+  else if (d2 >= 0.50) matchReasons.push(`Partial field overlap — may still be eligible`);
 
   if (d3 >= 0.82) matchReasons.push(`GPA profile meets or exceeds academic benchmarks`);
   else if (d3 <= 0.28 && schol.min_gpa_normalised) {

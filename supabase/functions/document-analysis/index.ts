@@ -71,16 +71,29 @@ interface GpaMatch {
   confidence: number
 }
 
-const GPA_PATTERNS: { pattern: RegExp; classify: (m: RegExpMatchArray) => GpaMatch }[] = [
-  // Explicit CGPA/GPA with denominator: "CGPA: 3.75/4.0", "GPA 4.85/5.0"
+const GPA_PATTERNS: { pattern: RegExp; classify: (m: RegExpMatchArray) => GpaMatch; priority?: number }[] = [
+  // Explicit CGPA with denominator — highest priority (cumulative, not semester)
   {
-    pattern: /(?:CGPA|GPA|Grade Point Average|G\.P\.A)[:\s]*(\d+\.?\d*)\s*\/\s*(\d+\.?\d*)/i,
+    pattern: /(?:CGPA|C\.G\.P\.A|Cumulative\s+Grade\s+Point\s+Average)[:\s]*(\d+\.?\d*)\s*\/\s*(\d+\.?\d*)/i,
+    priority: 10,
     classify: (m) => {
       const raw = parseFloat(m[1])
       const denom = parseFloat(m[2])
       if (isNaN(raw) || isNaN(denom)) return { value: null, scale: null, system: null, classification: null, confidence: 0 }
       let system = denom === 4.0 ? 'us4' : denom === 5.0 ? 'ngcgpa' : `scale_${denom}`
       return { value: raw, scale: String(denom), system, classification: null, confidence: 0.95 }
+    },
+  },
+  // Generic GPA with denominator: "GPA: 3.75/4.0", "GPA 4.85/5.0"
+  {
+    pattern: /(?:GPA|Grade\s+Point\s+Average|G\.P\.A)[:\s]*(\d+\.?\d*)\s*\/\s*(\d+\.?\d*)/i,
+    priority: 7,
+    classify: (m) => {
+      const raw = parseFloat(m[1])
+      const denom = parseFloat(m[2])
+      if (isNaN(raw) || isNaN(denom)) return { value: null, scale: null, system: null, classification: null, confidence: 0 }
+      let system = denom === 4.0 ? 'us4' : denom === 5.0 ? 'ngcgpa' : `scale_${denom}`
+      return { value: raw, scale: String(denom), system, classification: null, confidence: 0.93 }
     },
   },
   // "3.75/4.0" standalone
@@ -198,12 +211,16 @@ const GPA_PATTERNS: { pattern: RegExp; classify: (m: RegExpMatchArray) => GpaMat
 
 function extractGPA(text: string): GpaMatch {
   let best: GpaMatch = { value: null, scale: null, system: null, classification: null, confidence: 0 }
-  for (const { pattern, classify } of GPA_PATTERNS) {
+  let bestScore = -1
+  for (const { pattern, classify, priority } of GPA_PATTERNS) {
     const match = text.match(pattern)
     if (!match) continue
     const result = classify(match)
-    if (result.confidence > best.confidence) {
+    // Score = confidence * 10 + priority bonus (CGPA gets priority 10, GPA gets 7)
+    const score = result.confidence * 10 + (priority || 0)
+    if (score > bestScore) {
       best = result
+      bestScore = score
     }
   }
   return best
@@ -275,9 +292,23 @@ function extractDegreeLevel(text: string): { value: string | null; confidence: n
 // ─── Institution name extraction ───────────────────────────────
 
 const INSTITUTION_PATTERNS: { pattern: RegExp; confidence: number }[] = [
-  // English patterns
+  // Common African university abbreviations (match before full-name patterns)
+  { pattern: /\b(KNUST|UNILAG|OAU|UI|UNN|ABU|BUK|UNIMAID|UNIJOS|UNIUYO|AAU|FUTO|LASU|OOU|MAPOLY|ILARO|ABPCO|UDUS|UNIPORT|UNICAL|FUTA|FUPRE|NSUK|BSU|KSU|CRUTECH|MOUAU|NDU|DELSU|EDSU|JOOS|PLASU|SAU|TASUED|ABUAD|CU|Babcock|Covenant|Al-Hikmah|Afe\s+Babalola)\b/i,
+    confidence: 0.92 },
+  // South African universities
+  { pattern: /\b(UCT|Wits|Witswatersrand|Stellenbosch|UKZN|UP|UFS|Rhodes|NWU|UJ|CPUT|TUT|Durban\s+University|Cape\s+Peninsula|University\s+of\s+Johannesburg)\b/i,
+    confidence: 0.92 },
+  // East African universities
+  { pattern: /\b(UDSM|MUHAS|ARI|SUA|ARU|CUHAS|Mzumbe|OPEN\s+University\s+of\+Tanzania|Kenyatta|Strathmore|USIU|Daystar|Kabarak|Moi|Maseno|Karatina|Dedan\s+Kimathi|Technical\s+University\s+of\+Kenya|JKUAT|Pwani\+University)\b/i,
+    confidence: 0.92 },
+  // West African universities
+  { pattern: /\b(LEGON|UG|KNUST|Cape\s+Coast|Valley\s+View|Ashesi|GIMPA|CU|Central\s+University|Bluecrest|ACCGH|Ghana\s+Technology)\b/i,
+    confidence: 0.92 },
+  // "University of X" pattern — most common globally
   { pattern: /(?:University\s+of\s+[A-Z][A-Za-z\s]{2,50})(?:\n|,|\.|$)/i, confidence: 0.90 },
+  // "X University" / "X College" / "X Institute" pattern
   { pattern: /([A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+){1,3}\s+(?:University|College|Institute|Polytechnic|Academy|School\s+of))(?:\n|,|\.|$)/i, confidence: 0.88 },
+  // "studied at X" / "from X"
   { pattern: /(?:studied?\s+(?:at|from)\s+)([A-Z][A-Za-z\s]{3,50})(?:\n|,|\.|$)/i, confidence: 0.85 },
   // French patterns
   { pattern: /(?:Université\s+(?:de\s+)?[A-ZÉÈÊËÎÏÔÛÙ][A-Za-zéèêëîïôûù\s-]{2,50})(?:\n|,|\.|$)/i, confidence: 0.90 },
@@ -323,10 +354,16 @@ function extractInstitutionName(text: string): { value: string | null; confidenc
 // ─── Field of study extraction ─────────────────────────────────
 
 const FIELD_PATTERNS: { pattern: RegExp; confidence: number }[] = [
-  // English
+  // English — "Bachelor of Science in Computer Science"
+  { pattern: /(?:bachelor\s+of\s+[A-Za-z\s]+?|master\s+of\s+[A-Za-z\s]+?|doctor\s+of\s+[A-Za-z\s]+?)\s+(?:in|of)\s+([A-Za-z\s&]{3,60}?)(?:\n|,|\.|$)/i, confidence: 0.92 },
+  // English — programme/course/major
   { pattern: /(?:programme|program|course|major|degree in|faculty of|department of|school of)[:\s]+([A-Za-z\s&]{3,60}?)(?:\n|,|\.|and|$)/i, confidence: 0.90 },
+  // English — "bachelor in X" / "master in X"
   { pattern: /(?:bachelor|master|doctor|phd)[^\n]{0,30}?(?:in|of)\s+([A-Za-z\s&]{3,50}?)(?:\n|,|$)/i, confidence: 0.85 },
+  // English — field of study / specialization
   { pattern: /(?:field of study|discipline|area of study|specialization|major field)[:\s]*([A-Za-z\s&]{3,50}?)(?:\n|,|\.|$)/i, confidence: 0.85 },
+  // English — " programme:" or " course:" on same line
+  { pattern: /(?:programme|course|program)\s*:\s*([A-Za-z\s&]{3,60}?)(?:\n|,|\.|$)/i, confidence: 0.88 },
   // French
   { pattern: /(?:filière|spécialité|domaine|section|matière principale)[:\s]*([A-Za-zéèêëîïôùû\s]{3,50}?)(?:\n|,|\.|$)/i, confidence: 0.85 },
   { pattern: /(?:licence|master|doctorat)\s+(?:en\s+)?([A-Za-zéèêëîïôùû\s]{3,50}?)(?:\n|,|\.|$)/i, confidence: 0.85 },
@@ -656,7 +693,13 @@ async function ocrWithDeepSeekVision(
       text: `You are an OCR engine. Extract ALL visible text from this ${docHint}.\n` +
         'Preserve the original structure: tables, columns, headers, and line breaks.\n' +
         'For transcripts, keep course names, grades, credits, and GPA summary rows intact.\n' +
-        'Return ONLY the extracted text — no commentary, no markdown formatting.',
+        'Pay special attention to:\n' +
+        '- GPA/CGPA values (look for summary rows at bottom of tables)\n' +
+        '- Institution name (usually at the top)\n' +
+        '- Student name and registration number\n' +
+        '- Course codes, titles, credit units, and letter/grade points\n' +
+        '- For CVs: work dates, job titles, company names, skills sections\n' +
+        'Return ONLY the extracted text — no commentary, no markdown formatting, no interpretations.',
     },
   ]
 
