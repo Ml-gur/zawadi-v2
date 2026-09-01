@@ -666,78 +666,7 @@ function tryParseJson(text: string): any | null {
   return null
 }
 
-// ─── Vision OCR via DeepSeek (scanned/image docs) ──────────────
-
-const VISION_TIMEOUT_MS = 30_000
-
-async function ocrWithDeepSeekVision(
-  images: string[],
-  docType: string,
-  aiCfg: Record<string, unknown> | null,
-): Promise<string | null> {
-  const apiKey = (aiCfg?.deepseek_key as string) || Deno.env.get('DEEPSEEK_API_KEY')
-  if (!apiKey) return null
-
-  const model = 'deepseek-v4-flash-vision-exp'
-
-  // Build multimodal content: system prompt + all page images
-  const docHint = docType.toLowerCase().includes('transcript')
-    ? 'academic transcript or academic record'
-    : docType.toLowerCase().includes('cv') || docType.toLowerCase().includes('resume')
-    ? 'CV or resume'
-    : 'student document'
-
-  const contentParts: any[] = [
-    {
-      type: 'text',
-      text: `You are an OCR engine. Extract ALL visible text from this ${docHint}.\n` +
-        'Preserve the original structure: tables, columns, headers, and line breaks.\n' +
-        'For transcripts, keep course names, grades, credits, and GPA summary rows intact.\n' +
-        'Pay special attention to:\n' +
-        '- GPA/CGPA values (look for summary rows at bottom of tables)\n' +
-        '- Institution name (usually at the top)\n' +
-        '- Student name and registration number\n' +
-        '- Course codes, titles, credit units, and letter/grade points\n' +
-        '- For CVs: work dates, job titles, company names, skills sections\n' +
-        'Return ONLY the extracted text — no commentary, no markdown formatting, no interpretations.',
-    },
-  ]
-
-  // Add up to 5 page images (limit to prevent token overflow)
-  for (const img of images.slice(0, 5)) {
-    contentParts.push({
-      type: 'image_url',
-      image_url: { url: img },
-    })
-  }
-
-  try {
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), VISION_TIMEOUT_MS)
-    const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
-      method: 'POST',
-      signal: controller.signal,
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({
-        model,
-        messages: [{ role: 'user', content: contentParts }],
-        temperature: 0.05,
-        max_tokens: 4096,
-      }),
-    })
-    clearTimeout(timer)
-    if (!res.ok) {
-      const errText = await res.text()
-      console.error('[document-analysis] DeepSeek Vision API error:', res.status, errText)
-      return null
-    }
-    const json = await res.json()
-    return json?.choices?.[0]?.message?.content || null
-  } catch (err) {
-    console.error('[document-analysis] DeepSeek Vision call failed:', err)
-    return null
-  }
-}
+// ─── AI fallback for low-confidence fields ──────────────────────
 
 async function extractRemainingFieldsWithAI(rawText: string, patternResult: PatternResult, aiCfg: Record<string, unknown> | null): Promise<Record<string, unknown>> {
   const missingFields: string[] = []
@@ -811,7 +740,7 @@ serve(async (req: Request) => {
     const userEmail = user.email!
 
     const body = await req.json()
-    const { documentId, docType, textContent, action, images } = body
+    const { documentId, docType, textContent, action } = body
 
     // AI provider settings are admin-managed via the AI Config panel
     // (ai_config table) — same source generate-essay reads.
@@ -828,25 +757,9 @@ serve(async (req: Request) => {
 
       const t = docType.toLowerCase()
       const isTranscript = t.includes('transcript')
-      const isCV = t.includes('cv') || t.includes('resume')
 
-      // Determine text source: either from client extraction or OCR
-      let workingText = textContent || ''
+      const workingText = textContent || ''
       let extractionMethod: 'pattern' | 'ai' | 'hybrid' = 'pattern'
-
-      // If text is too short but we have images, OCR via DeepSeek Vision
-      if ((!workingText || workingText.trim().length < 50) && images && images.length > 0) {
-        console.log(`[document-analysis] Text too short (${workingText.length} chars), running OCR on ${images.length} page image(s)...`)
-        const ocrText = await ocrWithDeepSeekVision(images, docType, aiCfg ?? null)
-        if (ocrText && ocrText.trim().length > 20) {
-          workingText = ocrText
-          extractionMethod = 'ai'
-          console.log(`[document-analysis] OCR produced ${ocrText.length} chars of text`)
-        } else {
-          console.log('[document-analysis] OCR returned no usable text')
-          extractionMethod = 'ai'
-        }
-      }
 
       if (!workingText || workingText.trim().length < 20) {
         return corsResponse({ error: 'Could not extract sufficient text from the document. The file may be password-protected or contain only images.' }, 400)
@@ -856,14 +769,7 @@ serve(async (req: Request) => {
       const patternResult = extractFromPDFText(workingText, docType)
       let merged: Record<string, unknown> = { ...patternResult } as unknown as Record<string, unknown>
 
-      // If OCR was used, upgrade extraction method
-      if (extractionMethod === 'ai' && patternResult.extraction_method === 'ai') {
-        extractionMethod = 'ai'
-      } else if (extractionMethod === 'ai' && patternResult.extraction_method !== 'pattern') {
-        extractionMethod = 'hybrid'
-      } else {
-        extractionMethod = patternResult.extraction_method
-      }
+      extractionMethod = patternResult.extraction_method
 
       // Step 2: AI fallback for low-confidence fields
       if (isTranscript && extractionMethod !== 'pattern') {
@@ -915,63 +821,10 @@ serve(async (req: Request) => {
         return corsResponse({ error: 'Failed to save analysis results' }, 500)
       }
 
-      // Build profile enrichment
-      const enrichment: Record<string, unknown> = {
-        doc_extraction_method: extractionMethod,
-      }
-
-      if (isTranscript) {
-        enrichment.doc_gpa_normalised_extracted = extractionPayload.gpa
-        enrichment.doc_institution_extracted = extractionPayload.institution_name
-        enrichment.doc_field_of_study_extracted = extractionPayload.field_of_study
-        enrichment.doc_degree_level_extracted = extractionPayload.degree_level
-      }
-
-      if (isCV) {
-        enrichment.doc_work_years_extracted = extractionPayload.work_experience_years
-        enrichment.doc_skills_extracted = extractionPayload.skills
-        enrichment.doc_leadership_roles_extracted = extractionPayload.leadership_roles
-      }
-
-      // Merge enrichment into profile
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('email', userEmail)
-        .single()
-
-      if (profile) {
-        const profileUpdate: Record<string, unknown> = {}
-        for (const [key, val] of Object.entries(enrichment)) {
-          if (val !== null && val !== undefined) {
-            profileUpdate[key] = val
-          }
-        }
-        if (enrichment.doc_gpa_normalised_extracted && !profile.doc_gpa_user_confirmed) {
-          const current = profile.gpa ? parseFloat(profile.gpa) : null
-          if (!current || (enrichment.doc_gpa_normalised_extracted as number) > current) {
-            profileUpdate.gpa = enrichment.doc_gpa_normalised_extracted
-          }
-        }
-        if (enrichment.doc_institution_extracted && !profile.institution) {
-          profileUpdate.institution = enrichment.doc_institution_extracted
-        }
-        if (enrichment.doc_field_of_study_extracted && !profile.field_of_study) {
-          profileUpdate.field_of_study = enrichment.doc_field_of_study_extracted
-        }
-        if (enrichment.doc_degree_level_extracted && !profile.degree_level) {
-          profileUpdate.degree_level = enrichment.doc_degree_level_extracted
-        }
-        if (Object.keys(profileUpdate).length > 0) {
-          await supabase.from('profiles').update(profileUpdate).eq('email', userEmail)
-        }
-      }
-
       return corsResponse({
         success: true,
         result: extractionPayload,
         extraction: { method: extractionMethod },
-        enrichment,
       })
     }
 
