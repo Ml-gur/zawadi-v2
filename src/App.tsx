@@ -466,46 +466,12 @@ export default function App() {
       if (data) {
         const insertedDoc = data as DocumentVaultItem;
         setDocuments(prev => [...prev, insertedDoc]);
-        // Fire-and-forget AI document analysis via Edge Function + client fallback
-        (async () => {
-          try {
-            const arrayBuf = await file.arrayBuffer();
-            const buffer = new Uint8Array(arrayBuf);
-            const { extractTextFromBuffer } = await import('./services/text-extractor');
-            const extraction = await extractTextFromBuffer(buffer, file.type, file.name);
-            const trimmed = extraction.text?.trim() || '';
-            const hasImages = extraction.renderedPages && extraction.renderedPages.length > 0;
-            if (trimmed.length < 50 && !hasImages) {
-              // No text AND no renderable pages — truly unreadable
-              await supabase.from('documents').update({
-                analysis_status: 'failed',
-                analysis_error: extraction.warning || `Could not extract sufficient text (${trimmed.length} chars). Try uploading a text-based PDF or DOCX.`,
-                last_analyzed_at: new Date().toISOString(),
-              }).eq('id', insertedDoc.id);
-            } else {
-              // Send text (may be empty for scanned PDFs) + rendered page images for OCR
-              const analysis = await invokeDocAnalysis(insertedDoc.id, docType, trimmed, user.email, hasImages ? extraction.renderedPages : undefined);
-              await supabase.from('documents').update({
-                analysis_status: analysis.ok ? 'completed' : (analysis.retryable ? 'pending' : 'failed'),
-                analysis_error: analysis.ok ? null : (analysis.error || 'Analysis will retry automatically.'),
-                last_analyzed_at: new Date().toISOString(),
-              }).eq('id', insertedDoc.id);
-            }
-            handleRefreshDocuments();
-          } catch (err) {
-            console.error("AI document analysis failed", err);
-            const errMsg = err instanceof Error ? err.message : 'Unknown error';
-            if (!errMsg.includes('Unsupported file type')) {
-              try {
-                await supabase.from('documents').update({
-                  analysis_status: 'pending',
-                  analysis_error: 'Analysis service unavailable. Document saved successfully.',
-                  last_analyzed_at: new Date().toISOString(),
-                }).eq('id', insertedDoc.id);
-              } catch {}
-            }
-          }
-        })();
+        // Document saved to vault — extraction disabled for now.
+        // Matching uses user-provided profile data instead.
+        await supabase.from('documents').update({
+          analysis_status: 'stored',
+          last_analyzed_at: new Date().toISOString(),
+        }).eq('id', insertedDoc.id);
       }
     } catch (err: any) {
       console.error("Upload handler error", err);
@@ -594,39 +560,8 @@ export default function App() {
   }
 
   const handleReanalyzeDocument = async (doc: DocumentVaultItem) => {
-    if (!user) return;
-    try {
-      const { data: fileData, error: dlError } = await supabase.storage
-        .from('scholarship-docs')
-        .download(doc.file_path!);
-      if (dlError || !fileData) throw new Error(dlError?.message || 'Could not download file');
-      const arrayBuf = await fileData.arrayBuffer();
-      const buffer = new Uint8Array(arrayBuf);
-      const { extractTextFromBuffer } = await import('./services/text-extractor');
-      const extraction = await extractTextFromBuffer(buffer, doc.mime_type || 'application/pdf', doc.name);
-      const textContent = extraction.text;
-      const trimmed = textContent?.trim() || '';
-      const hasImages = extraction.renderedPages && extraction.renderedPages.length > 0;
-      if (trimmed.length < 50 && !hasImages) {
-        await supabase.from('documents').update({
-          analysis_status: 'failed',
-          analysis_error: 'Could not extract sufficient text for analysis',
-          last_analyzed_at: new Date().toISOString(),
-        }).eq('id', doc.id);
-        toast.error('Could not extract enough text from this document');
-      } else {
-        const analysis = await invokeDocAnalysis(doc.id, doc.type, trimmed, user.email, hasImages ? extraction.renderedPages : undefined);
-        if (!analysis.ok) {
-          toast.error(analysis.error || 'Document analysis failed. The document will be retried automatically.');
-        } else {
-          toast.success('Document analyzed successfully!');
-        }
-      }
-      handleRefreshDocuments();
-    } catch (err: any) {
-      console.error("Re-analysis failed", err);
-      toast.error(err?.message || 'Re-analysis failed');
-    }
+    // Document extraction is disabled — matching uses user profile data.
+    toast.success('Your profile information is used for scholarship matching. Document extraction is currently disabled.');
   };
 
   const handleRefreshDocuments = async () => {

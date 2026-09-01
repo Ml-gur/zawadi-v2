@@ -420,8 +420,6 @@ export function scoreAcademicAchievement(user: any, schol: any): number {
   const userConfirmed = user.doc_gpa_user_confirmed;
   const userNorm = userConfirmed !== undefined && userConfirmed !== null
     ? userConfirmed
-    : user.doc_gpa_normalised_extracted !== undefined
-    ? user.doc_gpa_normalised_extracted
     : normBase;
   const minNorm  = schol.min_gpa_normalised !== undefined ? schol.min_gpa_normalised : null;
 
@@ -460,59 +458,94 @@ export function scoreDegreeLevelFit(userTargetDegree: string, eligibleLevels: st
   if (exactMatch) return 1.00;
 
   return 0.72;
-}
-
-export function scoreLanguageStrength(user: any, schol: any): number {
+}export function scoreLanguageStrength(user: any, schol: any): number {
   const instrLang = schol.instruction_language ?? 'English';
 
+  // --- French instruction ---
   if (instrLang === 'French') {
     const isFrNative = user.french_test_type === 'Native' ||
                        (user.country && FRANCOPHONE_NAMES.has(user.country.toLowerCase().trim()));
     if (isFrNative) return 1.00;
     const userFr = normaliseFrenchLevel(user.french_level || null);
     const minFr  = normaliseFrenchLevel(schol.min_french_level || 'B2');
+    if (userFr === 0) return 0.30; // No French declared — significant penalty
     const surplus = userFr - minFr;
-    return Math.min(1.00, 0.72 + surplus * 1.0);
+    if (surplus >= 0) return Math.min(1.00, 0.78 + surplus * 0.9);
+    // Below minimum — penalise proportionally
+    return Math.max(0.15, 0.55 + surplus * 0.8);
   }
 
+  // --- Arabic instruction ---
   if (instrLang === 'Arabic') {
     const isArNative = user.arabic_test_type === 'Native' ||
                        (user.country && ARABOPHONE_NAMES.has(user.country.toLowerCase().trim()));
     if (isArNative) return 1.00;
     const userAr = normaliseArabicLevel(user.arabic_level || null);
     const minAr  = normaliseArabicLevel(schol.min_arabic_level || 'B2');
-    return Math.min(1.00, 0.72 + (userAr - minAr));
+    if (userAr === 0) return 0.30;
+    const surplus = userAr - minAr;
+    if (surplus >= 0) return Math.min(1.00, 0.78 + surplus * 0.9);
+    return Math.max(0.15, 0.55 + surplus * 0.8);
   }
 
+  // --- Portuguese instruction ---
   if (instrLang === 'Portuguese') {
     const isPtNative = user.portuguese_test_type === 'Native' ||
-                       (user.country && LUSOPHONE_NAMES.has(user.country.toLowerCase().trim()));
+                         (user.country && LUSOPHONE_NAMES.has(user.country.toLowerCase().trim()));
     if (isPtNative) return 1.00;
     const userPt = normalisePortugueseLevel(user.portuguese_level || null);
     const minPt  = normalisePortugueseLevel(schol.min_portuguese_level || 'B2');
-    return Math.min(1.00, 0.72 + (userPt - minPt));
+    if (userPt === 0) return 0.30;
+    const surplus = userPt - minPt;
+    if (surplus >= 0) return Math.min(1.00, 0.78 + surplus * 0.9);
+    return Math.max(0.15, 0.55 + surplus * 0.8);
   }
 
+  // --- Bilingual instruction (English OR French) ---
   if (instrLang === 'Bilingual') {
     const frScore = normaliseFrenchLevel(user.french_level || null);
     const enScore = user.english_score
       ? normaliseEnglishScore(user.english_test_type ?? 'IELTS', parseFloat(user.english_score) || 0)
-      : 0;
-    return Math.max(frScore, enScore);
+      : (user.english_test_type === 'Native' ? 1.0 : 0);
+    const best = Math.max(frScore, enScore);
+    // Bonus if both languages are strong (B2+ in both)
+    if (frScore >= 0.70 && enScore >= 0.70) return Math.min(1.00, best + 0.10);
+    return best;
   }
 
-  // English-instruction
-  if (schol.no_ielts) return 0.90;
+  // --- English instruction (default) ---
+
+  // No IELTS required — scholarship accepts MOI certificate or Duolingo
+  if (schol.no_ielts) {
+    // If user already has an English test, give them full credit
+    if (user.english_test_type === 'Native' || (user.country && ANGLOPHONE_NAMES.has(user.country.toLowerCase().trim()))) {
+      return 1.00;
+    }
+    if (user.english_score) {
+      const userEn = normaliseEnglishScore(user.english_test_type ?? 'IELTS', parseFloat(user.english_score) || 0);
+      return Math.min(1.00, 0.85 + userEn * 0.15);
+    }
+    // No test needed AND no test taken — this is a genuine benefit
+    return 0.88;
+  }
+
+  // Native English speaker
   if (user.english_test_type === 'Native' || (user.country && ANGLOPHONE_NAMES.has(user.country.toLowerCase().trim()))) {
     return 1.00;
   }
-  if (!user.english_score) return 0.60;
+
+  // No English score provided — penalty
+  if (!user.english_score) return 0.45;
+
   const userEn = normaliseEnglishScore(user.english_test_type ?? 'IELTS', parseFloat(user.english_score) || 0);
   const minEn  = schol.min_english_score
     ? normaliseEnglishScore(schol.min_english_test_type ?? 'IELTS', parseFloat(schol.min_english_score))
     : 0.65;
+
   const surplus = userEn - minEn;
-  return Math.min(1.00, 0.72 + surplus * 1.2);
+  if (surplus >= 0) return Math.min(1.00, 0.78 + surplus * 1.0);
+  // Below minimum — penalise proportionally
+  return Math.max(0.15, 0.55 + surplus * 0.8);
 }
 
 export function scoreResearchExperienceBackground(
@@ -522,7 +555,7 @@ export function scoreResearchExperienceBackground(
   let score = 0.50;
 
   // Research experience
-  const hasResearch = user.doc_has_research_extracted !== undefined ? user.doc_has_research_extracted : !!user.has_research;
+  const hasResearch = !!user.has_research;
   if (schol.requires_research) {
     score = hasResearch ? 0.88 : 0.18;
   } else if (hasResearch) {
@@ -530,7 +563,7 @@ export function scoreResearchExperienceBackground(
   }
 
   // Publications
-  const pubCount = user.doc_publication_count_extracted !== undefined ? user.doc_publication_count_extracted : (parseInt(user.publications) || 0);
+  const pubCount = parseInt(user.publications) || 0;
   if (schol.requires_publications) {
     if (pubCount >= (schol.min_publication_count || 1)) score = Math.min(1.0, score + 0.10);
     else score = Math.max(0.10, score - 0.20);
@@ -539,7 +572,7 @@ export function scoreResearchExperienceBackground(
   }
 
   // Work experience
-  const workYrs = user.doc_work_years_extracted !== undefined ? user.doc_work_years_extracted : (parseFloat(user.work_experience_years) || 0);
+  const workYrs = parseFloat(user.work_experience_years) || 0;
   if (schol.min_work_years > 0) {
     if (workYrs >= schol.min_work_years) score = Math.min(1.0, score + 0.10);
     else score = Math.max(0.10, score - 0.14);
@@ -549,7 +582,7 @@ export function scoreResearchExperienceBackground(
   }
 
   // Leadership & community
-  const hasLeadership = user.doc_has_leadership_extracted !== undefined ? user.doc_has_leadership_extracted : !!user.has_leadership;
+  const hasLeadership = !!user.has_leadership;
   if (schol.requires_leadership && hasLeadership) score = Math.min(1.0, score + 0.08);
   if (schol.requires_community && user.has_community_service) score = Math.min(1.0, score + 0.06);
 
@@ -621,19 +654,23 @@ export function scoreDestinationPreference(
 ): number {
   const openness = user.destination_openness || 'anywhere';
 
+  // "anywhere" — open to all destinations
   if (openness === 'anywhere') {
-    return 1.0;
+    // Slight boost for fully funded: user has no restrictions so funding matters more
+    return schol.funding_type === 'Full' ? 0.95 : 0.85;
   }
 
+  // "intra_african" — wants to study within Africa
   if (openness === 'intra_african') {
     if (isIntraAfrican(schol)) return 1.0;
-    if (schol.funding_type === 'Full') return 0.5;
-    return 0.2;
+    // Fully funded elsewhere is still attractive but less preferred
+    if (schol.funding_type === 'Full') return 0.45;
+    return 0.15;
   }
 
+  // "specific" — user picked preferred countries/regions
   if (openness === 'specific') {
     const selectedRegions: string[] = user.destination_regions || [];
-
     const studentCountries = new Set<string>();
     for (const region of selectedRegions) {
       const resolved = resolveDestinationRegion(region);
@@ -644,23 +681,31 @@ export function scoreDestinationPreference(
 
     const scholCountryNames = getScholarshipCountryNames(schol);
 
+    // Exact country match — best possible
     if (scholCountryNames.length > 0) {
       for (const name of scholCountryNames) {
         if (studentCountries.has(name)) return 1.0;
       }
-      return 0.4;
+      // No country match — check if scholarship is in a preferred region
+      const scholHostRegion = schol.host_region || '';
+      if (selectedRegions.includes(scholHostRegion)) return 0.85;
+      // Not in preferred region, but fully funded — still worth considering
+      const includeAnywhere = user.include_fully_funded_anywhere !== false;
+      if (includeAnywhere && schol.funding_type === 'Full') return 0.60;
+      return 0.25;
     }
 
+    // Scholarship has no specific country — check region
     const scholRegion = schol.host_region || '';
-    if (selectedRegions.includes(scholRegion)) return 1.0;
+    if (selectedRegions.includes(scholRegion)) return 0.90;
 
+    // No region match — fully funded fallback
     const includeAnywhere = user.include_fully_funded_anywhere !== false;
-    if (includeAnywhere && schol.funding_type === 'Full') return 0.8;
-
-    return 0.4;
+    if (includeAnywhere && schol.funding_type === 'Full') return 0.55;
+    return 0.20;
   }
 
-  return 0.6;
+  return 0.60;
 }
 
 export function scoreDocumentCompleteness(
@@ -807,7 +852,7 @@ export function computeScholarshipMatch(
       reasons: [],
       disqualifying_reasons: disqualifyingReasons,
       is_eligible: false,
-      breakdown: { country: 0, degree: 0, field: 0, gpa: 0, languages: 0, experience: 0, destination: 0, documents: 0, no_ielts: 0 }
+      breakdown: { country: 0, degree: 0, field: 0, gpa: 0, languages: 0, experience: 0, destination: 0, documents: 0 }
     };
   }
 
@@ -837,7 +882,7 @@ export function computeScholarshipMatch(
         reasons: [],
         disqualifying_reasons: disqualifyingReasons,
         is_eligible: false,
-        breakdown: { country: 100, degree: 0, field: 0, gpa: 0, languages: 0, experience: 0, destination: 0, documents: 0, no_ielts: 0 }
+        breakdown: { country: 100, degree: 0, field: 0, gpa: 0, languages: 0, experience: 0, destination: 0, documents: 0 }
       };
     }
   } else if (schol.age_limit_masters || schol.age_limit_phd) {
@@ -876,15 +921,13 @@ export function computeScholarshipMatch(
   const d7 = scoreDestinationPreference(user, schol);
   const d8 = scoreDocumentCompleteness(userDocs.map(d => d.type), scholRequiredDocs);
 
-  // No-IELTS bonus dimension — reduced weight (convenience feature, not core eligibility)
   const userHasEnglishTest = !!(user.english_test_type && user.english_score);
-  const noIeltsBonus = schol.no_ielts ? (userHasEnglishTest ? 0.85 : 1.00) : 0;
-  const d9 = noIeltsBonus;
 
-  // Weightings: field match boosted, no_ielts reduced from 10% to 5%
-  // d1=country 0.22, d2=field 0.22, d3=gpa 0.14, d4=degree 0.08,
-  // d5=language 0.09, d6=experience 0.07, d7=destination 0.06, d8=docs 0.04, d9=no_ielts 0.05
-  const rawScore = d1*0.22 + d2*0.22 + d3*0.14 + d4*0.08 + d5*0.09 + d6*0.07 + d7*0.06 + d8*0.04 + d9*0.05;
+  // AHP-inspired weightings — no single criterion exceeds 25%
+  // Hard gates (country, degree) get higher weight; soft factors (GPA, docs) get less.
+  // d1=country 0.25, d2=field 0.18, d3=gpa 0.08, d4=degree 0.15,
+  // d5=language 0.12, d6=experience 0.05, d7=destination 0.15, d8=docs 0.02
+  const rawScore = d1*0.25 + d2*0.18 + d3*0.08 + d4*0.15 + d5*0.12 + d6*0.05 + d7*0.15 + d8*0.02;
   const totalScore = Math.max(0, Math.min(100, Math.round(rawScore * 100)));
 
   // Generate Match Reasons
@@ -953,8 +996,7 @@ export function computeScholarshipMatch(
       languages: Math.round(d5 * 100),
       experience: Math.round(d6 * 100),
       destination: Math.round(d7 * 100),
-      documents: Math.round(d8 * 100),
-      no_ielts: Math.round(d9 * 100)
+      documents: Math.round(d8 * 100)
     }
   };
 }
