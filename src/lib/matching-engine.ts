@@ -457,7 +457,8 @@ export function scoreDegreeLevelFit(userTargetDegree: string, eligibleLevels: st
   );
   if (exactMatch) return 1.00;
 
-  return 0.72;
+  // Degree mismatch is a significant penalty — user can't apply to this scholarship
+  return 0.30;
 }export function scoreLanguageStrength(user: any, schol: any): number {
   const instrLang = schol.instruction_language ?? 'English';
 
@@ -534,8 +535,8 @@ export function scoreDegreeLevelFit(userTargetDegree: string, eligibleLevels: st
     return 1.00;
   }
 
-  // No English score provided — penalty
-  if (!user.english_score) return 0.45;
+  // Scholarship requires English test but user has none — significant penalty
+  if (!user.english_score) return 0.20;
 
   const userEn = normaliseEnglishScore(user.english_test_type ?? 'IELTS', parseFloat(user.english_score) || 0);
   const minEn  = schol.min_english_score
