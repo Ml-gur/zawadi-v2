@@ -467,8 +467,8 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
                     <h3 className="font-headline text-lg font-medium text-deep-charcoal">Prepare your documents</h3>
                     <p className="font-body-sm text-sm text-secondary mt-1">
                       {scholarship.required_documents?.length
-                        ? `Gather the ${scholarship.required_documents.length} item${scholarship.required_documents.length === 1 ? '' : 's'} listed above — upload them to your Document Vault and the engine reads them automatically.`
-                        : 'Upload your transcripts and CV to your Document Vault for automated parsing.'}
+                        ? `Gather the ${scholarship.required_documents.length} item${scholarship.required_documents.length === 1 ? '' : 's'} listed above — store them in your Document Vault for safekeeping.`
+                        : 'Upload your transcripts and CV to your Document Vault for safekeeping.'}
                     </p>
                   </div>
                 </div>
