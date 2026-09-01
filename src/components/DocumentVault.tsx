@@ -42,7 +42,7 @@ export default function DocumentVault({
   const [docToDelete, setDocToDelete] = useState<string | null>(null);
   const [aiExtractionDoc, setAiExtractionDoc] = useState<DocumentVaultItem | null>(null);
   const [aiExtractionData, setAiExtractionData] = useState<any>(null);
-  const [aiExtracting, setAiExtracting] = useState<string | null>(null);
+  // aiExtracting removed — extraction disabled
   const [refreshSpin, setRefreshSpin] = useState(false);
   const [confirmDoc, setConfirmDoc] = useState<DocumentVaultItem | null>(null);
   const [confirmData, setConfirmData] = useState<ExtractionConfirmationData | null>(null);
@@ -54,22 +54,7 @@ export default function DocumentVault({
     graduation_year: null, work_experience_years: null, skills: [],
   });
 
-  // Honest auto-retry: analysis_status 'pending' used to sit there forever with a
-  // claim that it would "retry automatically". Make that true — docs pending for
-  // over 90s get one silent re-analysis attempt per session.
-  const autoRetriedRef = useRef<Set<string>>(new Set());
-  useEffect(() => {
-    if (!onReanalyzeDocument) return;
-    const stuck = (documents || []).filter(d =>
-      d.analysis_status === 'pending' &&
-      !autoRetriedRef.current.has(d.id) &&
-      Date.parse(d.uploaded_at) < Date.now() - 90_000
-    );
-    for (const doc of stuck.slice(0, 3)) {
-      autoRetriedRef.current.add(doc.id);
-      onReanalyzeDocument(doc).catch(() => {});
-    }
-  }, [documents, onReanalyzeDocument]);
+  // Document extraction is disabled — matching uses user profile data.
 
   const docTypes = [
     "CV / Resume", "Academic Transcript", "Motivation Letter", "Statement of Purpose",
@@ -417,66 +402,23 @@ export default function DocumentVault({
                     </button>
                   </>
                 )}
-                {doc.analysis_status === 'failed' && (
-                  <span
-                    title={doc.analysis_error || 'Analysis failed'}
-                    className="inline-flex items-center gap-1 bg-error/10 text-error text-[9px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border border-error/20 cursor-help"
-                  >
-                    <CircleAlert className="w-3 h-3" />
-                    Failed
-                  </span>
-                )}
-                {doc.analysis_status === 'pending' && (
-                  <span
-                    title={doc.analysis_error || 'Extracting and matching your document'}
-                    className="inline-flex items-center gap-1 bg-parchment text-graphite text-[9px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border border-ash"
-                  >
-                    <span className="inline-block w-2.5 h-2.5 border-2 border-graphite border-t-transparent rounded-full animate-spin" />
-                    Analyzing…
-                  </span>
-                )}
-                {doc.analysis_status === 'completed' && !doc.ai_extraction_result && (
+                {doc.analysis_status === 'stored' && (
                   <span className="inline-flex items-center gap-1 bg-electric-lime text-off-black-ink text-[9px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border border-off-black-ink">
                     <CheckCircle2 className="w-3 h-3" />
-                    Analyzed
+                    Stored
                   </span>
                 )}
-                {(doc.analysis_status === 'unreadable' || doc.analysis_status === 'failed' || doc.analysis_status === null) && (
-                  <button
-                    onClick={() => {
-                      setManualForm({
-                        institution_name: null, degree_level: null, field_of_study: null,
-                        gpa: null, gpa_scale: null, gpa_system: null,
-                        graduation_year: null, work_experience_years: null, skills: [],
-                      });
-                      setManualEntryDoc(doc);
-                    }}
-                    className="inline-flex items-center gap-1 bg-pure-white text-graphite text-[9px] font-medium uppercase tracking-wider px-2 py-1 rounded-full border border-ash cursor-pointer hover:text-off-black-ink hover:border-graphite transition-colors"
-                  >
-                    <Pencil className="w-3 h-3" />
-                    Enter manually
-                  </button>
+                {doc.analysis_status === 'completed' && doc.ai_extraction_result && (
+                  <span className="inline-flex items-center gap-1 bg-electric-lime text-off-black-ink text-[9px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border border-off-black-ink">
+                    <CheckCircle2 className="w-3 h-3" />
+                    Stored
+                  </span>
                 )}
-                {(doc.analysis_status === 'pending') && onReanalyzeDocument && (
-                  <button
-                    onClick={async () => {
-                      setAiExtracting(doc.id);
-                      try {
-                        await onReanalyzeDocument(doc);
-                      } finally {
-                        setAiExtracting(null);
-                      }
-                    }}
-                    disabled={aiExtracting === doc.id}
-                    className="inline-flex items-center gap-1 bg-pure-white text-graphite text-[9px] font-medium uppercase tracking-wider px-2 py-1 rounded-full border border-ash cursor-pointer hover:text-off-black-ink hover:border-graphite transition-colors disabled:opacity-50"
-                  >
-                    {aiExtracting === doc.id ? (
-                      <span className="inline-block w-2.5 h-2.5 border-2 border-off-black-ink border-t-transparent rounded-full animate-spin"></span>
-                    ) : (
-                      <RotateCcw className="w-3 h-3" />
-                    )}
-                    {aiExtracting === doc.id ? 'Analyzing...' : 'Re-analyze'}
-                  </button>
+                {(doc.analysis_status === 'pending' || doc.analysis_status === 'failed' || doc.analysis_status === 'unreadable' || doc.analysis_status === null) && (
+                  <span className="inline-flex items-center gap-1 bg-parchment text-graphite text-[9px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full border border-ash">
+                    <FolderOpen className="w-3 h-3" />
+                    Stored
+                  </span>
                 )}
               </div>
 
