@@ -34,7 +34,7 @@ export default function AboutPage({ onBack }: AboutPageProps) {
             </p>
 
             <p>
-              Our platform pairs a deterministic matching engine with automated document parsing and AI essay co-creation. You only see opportunities for which you satisfy 100% of the fine-print criteria. All your transcripts, test waivers, and drafts remain organized in one encrypted Document Vault, tracked seamlessly in your personal workspace.
+              Our platform pairs a deterministic matching engine with AI essay co-creation. You only see opportunities for which you satisfy the fine-print criteria based on your profile. All your transcripts, test waivers, and drafts remain organized in one encrypted Document Vault, tracked seamlessly in your personal workspace.
             </p>
 
             <p>

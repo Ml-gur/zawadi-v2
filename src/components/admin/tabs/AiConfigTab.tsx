@@ -87,7 +87,7 @@ export function AiConfigTab() {
   return (
     <AdminSectionShell
       title="AI Config"
-      description="One provider powers essay generation, document analysis and the connection test. Keys are stored server-side and never shown again."
+      description="One provider powers essay generation and the connection test. Keys are stored server-side and never shown again."
       actions={!editMode ? (
         <button
           onClick={() => setEditMode(true)}

@@ -53,7 +53,7 @@ export const PLAN_TIERS: PlanTier[] = [
       '15 document vault uploads total',
       'Deadline urgency check indicators',
       '1 mentor review per month (basic)',
-      'Document AI Intelligence (transcripts & essays)',
+      'Document vault for storing transcripts & certificates',
       'Community & FAQ support'
     ]
   },
@@ -76,7 +76,7 @@ export const PLAN_TIERS: PlanTier[] = [
       '50 document vault uploads total',
       'Detailed match score breakdown',
       'Document gap analysis & reporting',
-      'Advanced Document AI Intelligence (transcripts, CV, essays)',
+      'Extended document vault storage (50 uploads)',
       '2 structured mentor reviews per month',
       'Priority inclusion in new crawls',
       'Email support (within 48h)'
@@ -99,7 +99,7 @@ export const PLAN_TIERS: PlanTier[] = [
       'Everything in Scholar Plus',
       '25 AI essay drafts per day',
       'Unlimited document vault uploads',
-      'Full Interactive Document Intelligence AI',
+      'Unlimited document vault storage',
       'Essay voice machine learning (from 3+ samples)',
       'Advanced strategy and admission insights',
       '4 full mentor reviews per month (with revised sections)',
@@ -670,11 +670,11 @@ export default function SubscriptionPlans({ user, onPlanUpdated, onNavigateToTab
                   <td className="py-3.5 px-4"><CheckCircle2 className="w-4 h-4 text-graphite" strokeWidth={1.5} aria-hidden /><span className="sr-only">Included</span></td>
                 </tr>
                 <tr>
-                  <td className="py-3.5 px-4 font-medium">Document intelligence (AI assistance)</td>
-                  <td className="py-3.5 px-4 text-graphite">Transcripts only</td>
-                  <td className="py-3.5 px-4">Basic (transcripts, CV, essays)</td>
-                  <td className="py-3.5 px-4">Full processing</td>
-                  <td className="py-3.5 px-4 text-graphite">Full processing</td>
+                  <td className="py-3.5 px-4 font-medium">Document vault storage</td>
+                  <td className="py-3.5 px-4">15 uploads</td>
+                  <td className="py-3.5 px-4">50 uploads</td>
+                  <td className="py-3.5 px-4">Unlimited</td>
+                  <td className="py-3.5 px-4 text-graphite">Unlimited</td>
                 </tr>
                 <tr>
                   <td className="py-3.5 px-4 font-medium">Robotic Auto-Apply Engine</td>

@@ -28,7 +28,7 @@ const faqData = [
     items: [
       { q: "Is Techsari free for students?", a: "The core matching, filtering, and application tracking features are free on the Explorer plan. Premium features including unlimited essay generation and priority mentor review are available on paid plans. We will never sell your personal data to third parties." },
       { q: "Does Techsari share my personal data with scholarship providers or advertisers?", a: "No. We do not sell student data. Our business model is built on subscription plans and institutional partnerships, not on monetizing your personal information." },
-      { q: "How much do paid plans cost?", a: "Scholar Plus: $5/month — 10 essays/day, 50 documents, detailed match scores, basic AI document intelligence. Application Pro: $12/month — 25 essays/day, unlimited documents, auto-apply engine, essay voice learning, full AI document intelligence. Techsari Institutional: custom pricing for universities and NGOs — unlimited everything, dedicated support. All prices shown in USD. Payments processed via Paystack." }
+      { q: "How much do paid plans cost?", a: "Scholar Plus: $5/month — 10 essays/day, 50 document vault uploads, detailed match scores. Application Pro: $12/month — 25 essays/day, unlimited documents, auto-apply engine, essay voice learning. Techsari Institutional: custom pricing for universities and NGOs — unlimited everything, dedicated support. All prices shown in USD. Payments processed via Paystack." }
     ]
   },
   {
@@ -43,7 +43,7 @@ const faqData = [
     category: "Application Tracking",
     items: [
       { q: "Can I track multiple scholarship applications at once?", a: "Yes. The application tracker lets you manage every scholarship you are pursuing from a single dashboard. You can update your status at each stage from saved through to awarded or rejected, add notes, and set priority levels." },
-      { q: "What documents do I need to apply for scholarships?", a: "Most scholarships require academic transcripts, a CV, a statement of purpose, and proof of English proficiency. Some require recommendation letters. The document checklist on each scholarship page shows exactly what is required and whether you have already uploaded each item to your vault." }
+      { q: "What documents do I need to apply for scholarships?", a: "Most scholarships require academic transcripts, a CV, a statement of purpose, and proof of English proficiency. Some require recommendation letters. The document checklist on each scholarship page shows exactly what is required — you can store them in your Document Vault for safekeeping." }
     ]
   },
   {

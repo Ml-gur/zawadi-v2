@@ -38,8 +38,6 @@ export function OverviewTab({ overview, timeseries, loading, onNavigate }: Overv
   const userDelta = overview.users.new_7d - overview.users.prev_7d;
   const attentionItems: { label: string; count: number; icon: typeof Bot; section?: AdminSection }[] = [
     { label: 'bot items awaiting review', count: overview.bot_queue.pending, icon: Bot, section: 'bot_queue' },
-    { label: 'documents stuck analyzing', count: overview.documents.pending, icon: FileWarning },
-    { label: 'document analyses failed', count: overview.documents.failed, icon: FileWarning },
     { label: 'scholarships closing within 7 days', count: overview.scholarships.expiring_7d, icon: CalendarClock, section: 'scholarships' },
     { label: 'unread contact messages', count: overview.contact.unread, icon: Mail },
   ];

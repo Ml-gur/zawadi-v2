@@ -64,7 +64,7 @@ const STORIES: Story[] = [
     tag: 'Australia Awards',
     program: 'MSc Agricultural Economics',
     quote:
-      'I almost deleted my account during onboarding. Too many questions. Then I added my transcript and the matches got scary-accurate, including the one I am writing this from.',
+      'I almost deleted my account during onboarding. Too many questions. Then I completed my profile and the matches got scary-accurate, including the one I am writing this from.',
   },
 ];
 
