@@ -22,16 +22,15 @@ export default function Hero({ onGetStarted, onLogin, countriesCount }: HeroProp
 
           <FadeUp delay={0.08}>
             <h1 className="mt-7 text-ed-h1-sm md:text-ed-hero-sm text-off-black-ink max-w-[20ch] lg:max-w-[24ch]">
-              Find the scholarships you can actually apply for.
+              End-to-end scholarship platform for African students.
             </h1>
           </FadeUp>
 
           <FadeUp delay={0.16}>
             <p className="mt-6 text-ed-sub font-normal text-graphite max-w-[48ch]">
-              One profile. Thousands of eligibility rules. Techsari checks your
-              nationality, degree, field, grades, experience and English
-              requirements against verified scholarship opportunities — so you
-              spend less time searching and more time applying.
+              Find scholarships matched to your profile, prepare your
+              application with AI, and get guidance from mentors to strengthen
+              your resume and application materials.
             </p>
           </FadeUp>
 

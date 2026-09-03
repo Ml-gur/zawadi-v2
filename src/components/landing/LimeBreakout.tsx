@@ -19,9 +19,9 @@ export default function LimeBreakout({ onGetStarted }: LimeBreakoutProps) {
             </h2>
 
             <p className="mt-5 text-ed-sub font-normal text-on-lime max-w-[46ch]">
-              The right scholarship is not the one that looks easiest. It is
-              the one whose requirements you actually meet. Find yours with
-              Techsari.
+              Find opportunities you qualify for, strengthen your application
+              with AI and mentors, and take the next step toward funding your
+              education.
             </p>
 
             <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
