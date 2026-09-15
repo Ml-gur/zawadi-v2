@@ -852,7 +852,7 @@ export default function App() {
             </div>
             <div className="flex items-center gap-2 font-mono text-[11px] text-graphite">
               <span className="w-1.5 h-1.5 rounded-full bg-electric-lime" aria-hidden />
-              <span>© 2026 Techsari — Deterministic matching for African scholars</span>
+              <span>© 2026 Techsari — AI-powered scholarship matching for African scholars</span>
             </div>
           </div>
         </footer>

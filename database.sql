@@ -34,6 +34,10 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- component (StudentProfile, ProfileSetupWizard, matching-engine, Dashboard, admin, etc.)
 CREATE TABLE IF NOT EXISTS profiles (
   -- Core identity
+  -- Surrogate key. `email` stays the PRIMARY KEY (many FKs point at it), but
+  -- the auth signup trigger writes `id`, so the column must exist on a fresh
+  -- database or signup fails with "Database error saving new user".
+  id                       UUID DEFAULT gen_random_uuid(),
   email                    TEXT PRIMARY KEY,
   name                     TEXT,
   country                  TEXT DEFAULT '',
@@ -414,6 +418,23 @@ CREATE TABLE IF NOT EXISTS notifications (
   created_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 2l2. Notification Preferences
+-- Per-user email notification settings. `user_id` is the Supabase AUTH user id,
+-- not `profiles.id` — it carries a foreign key to auth.users, so a profile row
+-- with no auth user must not try to create one (see handle_new_user_notification_prefs).
+CREATE TABLE IF NOT EXISTS notification_preferences (
+  id                     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id                UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  email                  TEXT NOT NULL,
+  new_listing_alerts     BOOLEAN NOT NULL DEFAULT true,
+  notification_frequency TEXT NOT NULL DEFAULT 'instant'
+    CHECK (notification_frequency IN ('instant', 'daily', 'weekly', 'none')),
+  minimum_match_score    NUMERIC(5,2) DEFAULT 50.0,
+  created_at             TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at             TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE(user_id)
+);
+
 -- 2m. Contact Submissions
 CREATE TABLE IF NOT EXISTS contact_submissions (
   id          TEXT PRIMARY KEY,
@@ -489,6 +510,8 @@ END $$;
 CREATE INDEX IF NOT EXISTS idx_profiles_email      ON profiles(email);
 CREATE INDEX IF NOT EXISTS idx_profiles_plan        ON profiles(plan);
 CREATE INDEX IF NOT EXISTS idx_profiles_auth_user   ON profiles(auth_user_id);
+-- Name matches migration 007 so either path is a no-op on the other.
+CREATE UNIQUE INDEX IF NOT EXISTS profiles_id_idx   ON profiles(id);
 CREATE INDEX IF NOT EXISTS idx_applications_user    ON applications(user_email);
 CREATE INDEX IF NOT EXISTS idx_applications_scholar ON applications(scholarship_id);
 CREATE INDEX IF NOT EXISTS idx_documents_user       ON documents(user_email);
@@ -581,11 +604,110 @@ BEGIN
 END;
 $$;
 
+-- 4d. Auth signup trigger: create the profile row
+-- `profiles` is keyed on `email`; the auth id is also mirrored into `id` and
+-- `auth_user_id`. ON CONFLICT + the exception handler are what stop a
+-- duplicate email (or any profile-side failure) from aborting the auth.users
+-- INSERT — GoTrue reports any such abort to the user as
+-- "Database error saving new user". The handler logs the real cause instead.
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS trigger AS $$
+BEGIN
+  INSERT INTO public.profiles (
+    id,
+    auth_user_id,
+    email,
+    name,
+    country,
+    plan,
+    role,
+    status,
+    created_at
+  )
+  VALUES (
+    NEW.id,
+    NEW.id,
+    NEW.email,
+    COALESCE(NEW.raw_user_meta_data->>'name', ''),
+    COALESCE(NEW.raw_user_meta_data->>'country', 'Kenya'),
+    'explorer',
+    'user',
+    'active',
+    NOW()
+  )
+  ON CONFLICT (email) DO UPDATE SET
+    id = EXCLUDED.id,
+    auth_user_id = EXCLUDED.auth_user_id,
+    name = CASE
+      WHEN EXCLUDED.name IS NOT NULL AND EXCLUDED.name != ''
+      THEN EXCLUDED.name ELSE profiles.name
+    END,
+    country = CASE
+      WHEN EXCLUDED.country IS NOT NULL AND EXCLUDED.country != ''
+      THEN EXCLUDED.country ELSE profiles.country
+    END,
+    updated_at = NOW()::text;
+  RETURN NEW;
+EXCEPTION WHEN OTHERS THEN
+  -- Signup must not fail because of a profile-side problem, but the failure has
+  -- to be findable: search the Postgres log for 'handle_new_user failed'.
+  RAISE WARNING 'handle_new_user failed for email % [%]: %', NEW.email, SQLSTATE, SQLERRM;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- 4e. Auth signup trigger: default notification preferences
+-- The old version inserted the profile's surrogate id; the column has a
+-- foreign key to auth.users(id), so it needs the AUTH id, and profiles with no
+-- auth user (seeded, or created by the app before signup completes) must be
+-- skipped rather than allowed to fail the FK.
+CREATE OR REPLACE FUNCTION public.handle_new_user_notification_prefs()
+RETURNS trigger AS $$
+BEGIN
+  IF NEW.auth_user_id IS NULL THEN
+    RETURN NEW;
+  END IF;
+
+  INSERT INTO notification_preferences (user_id, email, new_listing_alerts, notification_frequency)
+  VALUES (NEW.auth_user_id, NEW.email, true, 'instant')
+  ON CONFLICT (user_id) DO NOTHING;
+  RETURN NEW;
+EXCEPTION WHEN OTHERS THEN
+  RAISE WARNING 'handle_new_user_notification_prefs failed for % [%]: %', NEW.email, SQLSTATE, SQLERRM;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS trg_auto_notif_prefs ON profiles;
+CREATE TRIGGER trg_auto_notif_prefs
+  AFTER INSERT ON profiles
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user_notification_prefs();
+
+-- 4f. Keep notification_preferences.updated_at current
+CREATE OR REPLACE FUNCTION update_notification_preferences_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_notif_prefs_updated ON notification_preferences;
+CREATE TRIGGER trg_notif_prefs_updated
+  BEFORE UPDATE ON notification_preferences
+  FOR EACH ROW EXECUTE FUNCTION update_notification_preferences_updated_at();
+
 -- ============================================================
 -- 5. ROW LEVEL SECURITY
 -- ============================================================
 
 ALTER TABLE profiles                ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notification_preferences ENABLE ROW LEVEL SECURITY;
 ALTER TABLE scholarships            ENABLE ROW LEVEL SECURITY;
 ALTER TABLE applications            ENABLE ROW LEVEL SECURITY;
 ALTER TABLE documents               ENABLE ROW LEVEL SECURITY;
@@ -625,6 +747,14 @@ CREATE POLICY profiles_update_own ON profiles
       AND status = (SELECT p.status FROM profiles p WHERE p.email = auth.email())
     )
   );
+
+-- Notification preferences: users manage their own rows only
+CREATE POLICY notif_prefs_select_own ON notification_preferences
+  FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY notif_prefs_insert_own ON notification_preferences
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY notif_prefs_update_own ON notification_preferences
+  FOR UPDATE USING (auth.uid() = user_id);
 
 -- Applications: users manage own
 CREATE POLICY applications_select_own ON applications

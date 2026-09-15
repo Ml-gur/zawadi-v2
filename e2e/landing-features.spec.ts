@@ -62,10 +62,10 @@ test('404 page is branded editorial with working links', async ({ page }) => {
 test('hero uses research-grounded copy', async ({ page }) => {
   await page.goto('/');
   await expect(
-    page.getByRole('heading', { name: /find the scholarships you can actually apply for/i }),
+    page.getByRole('heading', { name: /end-to-end scholarship platform for african students/i }),
   ).toBeVisible();
   await expect(
-    page.getByText(/thousands of eligibility rules/i),
+    page.getByText(/find scholarships matched to your profile/i),
   ).toBeVisible();
   await expect(page.getByRole('button', { name: /find my scholarships/i }).first()).toBeVisible();
 });
