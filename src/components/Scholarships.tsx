@@ -237,7 +237,7 @@ export default function Scholarships({
           ogTitle="Scholarships for African Students — Techsari"
           ogDescription="Verified scholarships open to African students. Every listing is checked for active deadlines and real eligibility. See funding from UK, Germany, USA, Japan, and African universities."
           path="/scholarships"
-          image="https://www.techsari.online/og-scholarships.png"
+          image="https://www.techsari.online/og-scholarships-v2.png"
         />
 
         {/* Guest Banner — dark island */}

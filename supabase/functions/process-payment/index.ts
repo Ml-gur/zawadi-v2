@@ -1,44 +1,61 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-let currentOrigin = 'https://www.techsari.online'
-
 // ─── Environment ──────────────────────────────────────────────────
 const ENVIRONMENT = Deno.env.get('ENVIRONMENT') || 'development'
 const PRODUCTION = ENVIRONMENT === 'production'
 
 // ─── CORS ─────────────────────────────────────────────────────────
-const ALLOWED_ORIGINS = PRODUCTION
-  ? ['https://www.techsari.online']
-  : ['http://localhost:5173', 'http://127.0.0.1:5173']
+// CORS is defence-in-depth here, NOT authorisation: every non-webhook
+// action is gated on a verified user JWT (auth.getUser below) and the
+// webhook is gated on a valid Paystack HMAC signature. What matters is
+// that we ECHO the caller's own origin back for every allowed host. A
+// mismatched Access-Control-Allow-Origin makes the browser drop the
+// response, and supabase-js then reports the useless
+// "Failed to send a request to the Edge Function" (see commit 69e5869).
+const CANONICAL_ORIGIN = 'https://www.techsari.online'
 
-function getCorsOrigin(req: Request): string {
-  const origin = req.headers.get('origin') || ''
-  if (ALLOWED_ORIGINS.includes(origin)) return origin
-  return ALLOWED_ORIGINS[0]
+const DEFAULT_ALLOWED_ORIGIN_PATTERNS: RegExp[] = [
+  /^https:\/\/(www\.)?techsari\.online$/,
+  /^https:\/\/[a-z0-9-]+\.vercel\.app$/,
+  /^http:\/\/(localhost|127\.0\.0\.1):\d+$/,
+]
+
+// Additional exact origins, comma separated, e.g.
+// supabase secrets set ALLOWED_ORIGINS="https://staging.techsari.online"
+const EXTRA_ALLOWED_ORIGINS = (Deno.env.get('ALLOWED_ORIGINS') || '')
+  .split(',')
+  .map((origin) => origin.trim().replace(/\/$/, ''))
+  .filter(Boolean)
+
+function resolveCorsOrigin(req: Request): string {
+  const origin = (req.headers.get('origin') || '').replace(/\/$/, '')
+  if (!origin) return CANONICAL_ORIGIN
+  if (EXTRA_ALLOWED_ORIGINS.includes(origin)) return origin
+  return DEFAULT_ALLOWED_ORIGIN_PATTERNS.some((pattern) => pattern.test(origin))
+    ? origin
+    : CANONICAL_ORIGIN
 }
 
-// ─── CORS: strict origin allowlist ─────────────────────────────
-function allowedOrigin(req: Request): string {
-  const o = req.headers.get('Origin') || ''
-  if (/^https:\/\/(www\.)?techsari\.online$/.test(o)) return o
-  if (/^https:\/\/[a-z0-9-]+\.vercel\.app$/.test(o)) return o
-  if (/^http:\/\/localhost:\d+$/.test(o)) return o
-  return 'https://www.techsari.online'
+function corsHeaders(req: Request): Record<string, string> {
+  return {
+    'Access-Control-Allow-Origin': resolveCorsOrigin(req),
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers':
+      'authorization, x-client-info, apikey, content-type, x-supabase-api-version, x-paystack-signature',
+    // Responses vary by Origin — without this a proxy or browser cache can
+    // replay the wrong allow-origin header to a different host.
+    'Vary': 'Origin',
+  }
 }
 
-
-
-function corsResponse(body: unknown, status = 200, req?: Request) {
-  const origin = req ? getCorsOrigin(req) : ALLOWED_ORIGINS[0]
+// Single response helper: every response (success AND error) must carry the
+// caller's origin, otherwise the browser hides the body and the client only
+// ever sees a generic fetch failure.
+function json(req: Request, body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: {
-      'Access-Control-Allow-Origin': origin,
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-api-version, x-paystack-signature',
-      'Content-Type': 'application/json',
-    },
+    headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
   })
 }
 
@@ -102,17 +119,20 @@ function normalizePaystackMetadata(metadata: any): Record<string, any> {
 
 // ─── Main handler ─────────────────────────────────────────────────
 serve(async (req: Request) => {
-  currentOrigin = allowedOrigin(req)
   if (req.method === 'OPTIONS') {
-    const origin = getCorsOrigin(req)
-    return new Response(null, {
-      headers: {
-        'Access-Control-Allow-Origin': origin,
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, PATCH, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-api-version, x-paystack-signature',
-      },
-    })
+    return new Response(null, { status: 200, headers: corsHeaders(req) })
   }
+
+  // Read the body exactly once. The webhook needs the raw text for HMAC
+  // verification, and `request.clone()` throws once the body has been
+  // consumed — so parse from the raw string instead of re-reading `req`.
+  const rawBody = req.method === 'GET' ? '' : await req.text()
+  let body: any = {}
+  if (rawBody) {
+    try { body = JSON.parse(rawBody) } catch { body = {} }
+  }
+
+  let action = 'unknown'
 
   try {
     const supabase = createClient(
@@ -121,44 +141,52 @@ serve(async (req: Request) => {
     )
 
     const url = new URL(req.url)
-    const body = req.method !== 'GET' ? await req.json().catch(() => ({})) : {}
+    const isWebhook = url.pathname.endsWith('/webhook') || body.action === 'webhook'
+    action = isWebhook ? 'webhook' : (body.action || url.searchParams.get('action') || 'unknown')
 
-    // ── Webhook: no auth required ──
-    if (url.pathname.endsWith('/webhook') || body.action === 'webhook') {
-      return handleWebhook(supabase, body)
+    // ── Webhook: no auth required (Paystack HMAC is the auth) ──
+    if (isWebhook) {
+      return await handleWebhook(req, rawBody, supabase, body)
     }
 
     // ── Auth for all other actions ──
     const authHeader = req.headers.get('Authorization')
-    if (!authHeader) return corsResponse({ error: 'Authentication required' }, 401)
+    if (!authHeader) return json(req, { error: 'Authentication required' }, 401)
 
     const { data: { user }, error: authError } = await supabase.auth.getUser(
       authHeader.replace('Bearer ', '')
     )
-    if (authError || !user) return corsResponse({ error: 'Invalid or expired token' }, 401)
+    if (authError || !user) return json(req, { error: 'Invalid or expired token' }, 401)
 
-    const action = body.action || url.searchParams.get('action')
+    // `await` every handler: returning a rejected promise from inside a
+    // try block does NOT reach the catch, it just becomes an opaque 500.
+    if (action === 'initialize') return await handleInitialize(req, supabase, user.email!, body)
+    if (action === 'verify') return await handleVerify(req, supabase, user.email!, body)
+    if (action === 'abandon') return await handleAbandon(req, supabase, user.email!, body)
+    if (action === 'checkout') return await handleCheckout(req, supabase, user.email!, body)
 
-    if (action === 'initialize') return handleInitialize(supabase, user.email!, body)
-    if (action === 'verify') return handleVerify(supabase, user.email!, body)
-    if (action === 'abandon') return handleAbandon(supabase, user.email!, body)
-    if (action === 'checkout') return handleCheckout(supabase, user.email!, body)
-
-    return corsResponse({ error: `Unknown action: ${action}` }, 400)
+    return json(req, { error: `Unknown action: ${action}` }, 400)
   } catch (err: any) {
-    console.error('[process-payment] Error:', err.message)
-    return corsResponse({ error: 'Internal server error' }, 500)
+    // Actionable log: the action, the message and the stack. Without this a
+    // 500 is indistinguishable from a platform/gateway failure.
+    console.error('[process-payment] Unhandled error', {
+      action,
+      message: err?.message ?? String(err),
+      stack: err?.stack,
+    })
+    return json(req, { error: 'Internal server error', action }, 500)
   }
 })
 
 // ─── Initialize Payment ───────────────────────────────────────────
 async function handleInitialize(
+  req: Request,
   supabase: ReturnType<typeof createClient>,
   userEmail: string,
   body: any
 ) {
   const intent = resolvePaymentIntent(body.plan_name, body.billing_period)
-  if ((intent as any).error) return corsResponse({ error: (intent as any).error }, 400)
+  if ((intent as any).error) return json(req, { error: (intent as any).error }, 400)
 
   const paymentMethod = body.payment_method === 'mobile_money' ? 'mobile_money' : 'card'
   const phoneNumber = typeof body.phone_number === 'string'
@@ -177,10 +205,10 @@ async function handleInitialize(
   const currentRank = PLAN_HIERARCHY[currentPlan] ?? 0
 
   if (targetRank < currentRank) {
-    return corsResponse({ error: 'Plan downgrades are not permitted via this endpoint.' }, 403)
+    return json(req, { error: 'Plan downgrades are not permitted via this endpoint.' }, 403)
   }
   if (targetRank === currentRank) {
-    return corsResponse({ error: `You are already subscribed to the ${PLAN_CATALOG[intent.planName].name} tier.` }, 403)
+    return json(req, { error: `You are already subscribed to the ${PLAN_CATALOG[intent.planName].name} tier.` }, 403)
   }
 
   const paystackKey = Deno.env.get('PAYSTACK_SECRET_KEY')
@@ -221,7 +249,7 @@ async function handleInitialize(
       const initData = await initRes.json()
 
       if (!initData.status) {
-        return corsResponse({ error: `Paystack init failed: ${initData.message}` }, 502)
+        return json(req, { error: `Paystack init failed: ${initData.message}` }, 502)
       }
 
       // Persist payment record
@@ -239,7 +267,7 @@ async function handleInitialize(
         updated_at: new Date().toISOString(),
       }, { onConflict: 'paystack_reference' })
 
-      return corsResponse({
+      return json(req, {
         access_code: initData.data.access_code,
         reference: initData.data.reference,
         authorization_url: initData.data.authorization_url,
@@ -250,13 +278,13 @@ async function handleInitialize(
       })
     } catch (e: any) {
       console.error('[Payment] Paystack init error:', e)
-      return corsResponse({ error: 'Failed to initialize payment with Paystack.' }, 502)
+      return json(req, { error: 'Failed to initialize payment with Paystack.' }, 502)
     }
   }
 
   // Production: fail if Paystack key is missing
   if (PRODUCTION) {
-    return corsResponse({ error: 'Payment gateway not configured. Please contact support.' }, 500)
+    return json(req, { error: 'Payment gateway not configured. Please contact support.' }, 500)
   }
 
   // Sandbox fallback (development only)
@@ -274,7 +302,7 @@ async function handleInitialize(
     updated_at: new Date().toISOString(),
   }, { onConflict: 'paystack_reference' })
 
-  return corsResponse({
+  return json(req, {
     access_code: sandboxRef,
     reference: sandboxRef,
     authorization_url: null,
@@ -287,12 +315,13 @@ async function handleInitialize(
 
 // ─── Verify Payment ───────────────────────────────────────────────
 async function handleVerify(
+  req: Request,
   supabase: ReturnType<typeof createClient>,
   userEmail: string,
   body: any
 ) {
   const { reference } = body
-  if (!reference) return corsResponse({ error: 'Payment reference is required.' }, 400)
+  if (!reference) return json(req, { error: 'Payment reference is required.' }, 400)
 
   // Get stored payment
   const { data: payment } = await supabase
@@ -302,7 +331,7 @@ async function handleVerify(
     .single()
 
   if (payment?.user_email?.toLowerCase() !== userEmail.toLowerCase()) {
-    return corsResponse({ error: 'This payment reference belongs to another account.' }, 403)
+    return json(req, { error: 'This payment reference belongs to another account.' }, 403)
   }
 
   if (payment?.status === 'success') {
@@ -311,7 +340,7 @@ async function handleVerify(
       .select('*')
       .eq('email', userEmail)
       .single()
-    return corsResponse({ success: true, user: user ? { ...user, password_hash: undefined } : null, idempotent: true })
+    return json(req, { success: true, user: user ? { ...user, password_hash: undefined } : null, idempotent: true })
   }
 
   const paystackKey = Deno.env.get('PAYSTACK_SECRET_KEY')
@@ -329,7 +358,7 @@ async function handleVerify(
         await supabase.from('payments')
           .update({ status: 'failed', failure_reason: verifyData.message || 'Verification failed' })
           .eq('paystack_reference', reference)
-        return corsResponse({ error: 'Payment could not be verified with Paystack.' }, 402)
+        return json(req, { error: 'Payment could not be verified with Paystack.' }, 402)
       }
 
       if (paystackData.status !== 'success') {
@@ -337,7 +366,7 @@ async function handleVerify(
         await supabase.from('payments')
           .update({ status: terminalStatus, failure_reason: `Paystack status: ${paystackData.status}` })
           .eq('paystack_reference', reference)
-        return corsResponse({ error: `Payment is not successful. Status: ${paystackData.status}.` }, 402)
+        return json(req, { error: `Payment is not successful. Status: ${paystackData.status}.` }, 402)
       }
 
       const metadata = normalizePaystackMetadata(paystackData.metadata)
@@ -353,14 +382,14 @@ async function handleVerify(
         await supabase.from('payments')
           .update({ status: 'failed', failure_reason: 'Customer email mismatch' })
           .eq('paystack_reference', reference)
-        return corsResponse({ error: 'Verified payment belongs to another Paystack customer.' }, 403)
+        return json(req, { error: 'Verified payment belongs to another Paystack customer.' }, 403)
       }
 
       if ((intent as any).error || paidAmount !== intent.amount || paidCurrency !== intent.currency) {
         await supabase.from('payments')
           .update({ status: 'failed', failure_reason: `Amount/currency mismatch` })
           .eq('paystack_reference', reference)
-        return corsResponse({ error: 'Verified payment amount does not match the selected plan.' }, 402)
+        return json(req, { error: 'Verified payment amount does not match the selected plan.' }, 402)
       }
 
       // Complete the payment — upgrade user plan
@@ -393,16 +422,16 @@ async function handleVerify(
         .eq('email', userEmail)
         .single()
 
-      return corsResponse({ success: true, user: updatedUser ? { ...updatedUser, password_hash: undefined } : null })
+      return json(req, { success: true, user: updatedUser ? { ...updatedUser, password_hash: undefined } : null })
     } catch (e: any) {
       console.error('[Payment] Verify error:', e)
-      return corsResponse({ error: 'Could not reach Paystack verification service.' }, 502)
+      return json(req, { error: 'Could not reach Paystack verification service.' }, 502)
     }
   }
 
   // Production: fail if verify-without-paystack
   if (PRODUCTION) {
-    return corsResponse({ error: 'Payment verification service unavailable.' }, 502)
+    return json(req, { error: 'Payment verification service unavailable.' }, 502)
   }
 
   // Sandbox verification (development only)
@@ -410,7 +439,7 @@ async function handleVerify(
     await supabase.from('payments')
       .update({ status: 'failed', failure_reason: 'Sandbox requires sandbox_ prefix' })
       .eq('paystack_reference', reference)
-    return corsResponse({ error: "Payment could not be verified. For testing, reference must start with 'sandbox_'." }, 402)
+    return json(req, { error: "Payment could not be verified. For testing, reference must start with 'sandbox_'." }, 402)
   }
 
   // Sandbox success
@@ -428,17 +457,18 @@ async function handleVerify(
     .eq('email', userEmail)
     .single()
 
-  return corsResponse({ success: true, user: sandboxUser ? { ...sandboxUser, password_hash: undefined } : null })
+  return json(req, { success: true, user: sandboxUser ? { ...sandboxUser, password_hash: undefined } : null })
 }
 
 // ─── Abandon Payment ──────────────────────────────────────────────
 async function handleAbandon(
+  req: Request,
   supabase: ReturnType<typeof createClient>,
   userEmail: string,
   body: any
 ) {
   const { reference } = body
-  if (!reference) return corsResponse({ error: 'Payment reference is required.' }, 400)
+  if (!reference) return json(req, { error: 'Payment reference is required.' }, 400)
 
   const { data: payment } = await supabase
     .from('payments')
@@ -446,11 +476,11 @@ async function handleAbandon(
     .eq('paystack_reference', reference)
     .single()
 
-  if (!payment) return corsResponse({ error: 'Payment reference not found.' }, 404)
+  if (!payment) return json(req, { error: 'Payment reference not found.' }, 404)
   if (payment.user_email?.toLowerCase() !== userEmail.toLowerCase()) {
-    return corsResponse({ error: 'This payment reference belongs to another account.' }, 403)
+    return json(req, { error: 'This payment reference belongs to another account.' }, 403)
   }
-  if (payment.status === 'success') return corsResponse({ success: true, status: 'success' })
+  if (payment.status === 'success') return json(req, { success: true, status: 'success' })
 
   await supabase.from('payments')
     .update({
@@ -460,34 +490,39 @@ async function handleAbandon(
     })
     .eq('paystack_reference', reference)
 
-  return corsResponse({ success: true, status: 'abandoned' })
+  return json(req, { success: true, status: 'abandoned' })
 }
 
 // ─── Checkout ─────────────────────────────────────────────────────
 async function handleCheckout(
+  req: Request,
   supabase: ReturnType<typeof createClient>,
   userEmail: string,
   body: any
 ) {
-  return handleInitialize(supabase, userEmail, body)
+  return await handleInitialize(req, supabase, userEmail, body)
 }
 
-// ─── Webhook ─────────────────────────────────────────────────────
+// ─── Webhook ──────────────────────────────────────────────────────
+// NOTE: the signature is over the *raw* request body, so we take the text
+// already read by the caller. Calling `req.clone()` after the body has been
+// parsed throws ("body already used") and made every webhook 500.
 async function handleWebhook(
   req: Request,
+  rawBody: string,
   supabase: ReturnType<typeof createClient>,
   body: any
 ) {
   // Verify Paystack signature
-  const paystackKey = Deno.env.get('PAYSTACK_SECRET_KEY')!
+  const paystackKey = Deno.env.get('PAYSTACK_SECRET_KEY')
   const signature = req.headers.get('x-paystack-signature')
 
   if (!paystackKey) {
     console.error('[process-payment] Missing PAYSTACK_SECRET_KEY — webhook cannot verify')
     return new Response(null, { status: 500 })
   }
-  if (!signature) {
-    console.error('[process-payment] Missing x-paystack-signature header')
+  if (!signature || !/^[0-9a-f]+$/i.test(signature) || signature.length % 2 !== 0) {
+    console.error('[process-payment] Missing or malformed x-paystack-signature header')
     return new Response(null, { status: 401 })
   }
 
@@ -499,18 +534,20 @@ async function handleWebhook(
     false,
     ['verify']
   )
-  const rawBody = await req.clone().text()
   const valid = await crypto.subtle.verify(
     'HMAC',
     key,
     hexToBytes(signature),
     encoder.encode(rawBody)
   )
-  if (!valid) return new Response(null, { status: 401 })
+  if (!valid) {
+    console.error('[process-payment] Webhook signature verification failed')
+    return new Response(null, { status: 401 })
+  }
 
   const event = body.event
   const data = body.data
-  if (!event || !data) return corsResponse({ error: 'Invalid webhook payload' }, 400)
+  if (!event || !data) return json(req, { error: 'Invalid webhook payload' }, 400)
 
   const metadata = normalizePaystackMetadata(data.metadata)
   const reference = data.reference || metadata.reference || ''
@@ -550,10 +587,16 @@ async function handleWebhook(
         details: `Webhook: upgraded to ${planName} plan via payment ${reference}`,
         created_at: new Date().toISOString(),
       })
+
+      console.log('[process-payment] Webhook upgraded plan', { email, planName, reference })
+    } else {
+      console.warn('[process-payment] Webhook ignored — unidentifiable plan/user', {
+        reference, planName, hasEmail: Boolean(email),
+      })
     }
   }
 
-  return corsResponse({ received: true })
+  return json(req, { received: true })
 }
 
 // ─── Hex to bytes helper ──────────────────────────────────────────

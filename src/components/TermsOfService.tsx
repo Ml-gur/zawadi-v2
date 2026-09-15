@@ -10,8 +10,8 @@ export default function TermsOfService({ onBack }: TermsOfServiceProps) {
   return (
     <div className="bg-pure-white text-off-black-ink min-h-[100dvh]">
       <SEO
-        title="Terms of Service — Techsari Techsari"
-        description="The Terms of Service governing your use of Techsari Techsari, a scholarship discovery and application platform for African students."
+        title="Terms of Service — Techsari"
+        description="The Terms of Service governing your use of Techsari, a scholarship discovery and application platform for African students."
         path="/terms"
       />
       <section className="px-4 sm:px-6 py-16 md:py-24">
@@ -206,7 +206,7 @@ export default function TermsOfService({ onBack }: TermsOfServiceProps) {
           <div className="mt-12 pt-8 border-t border-ash">
             <p className="text-ed-caption text-graphite">Last updated: August 25, 2026</p>
             <p className="text-ed-body-sm text-graphite italic mt-2">
-              <em>Techsari Techsari · Built for African students, by Africans.</em>
+              <em>Techsari · Built for African students, by Africans.</em>
             </p>
           </div>
         </div>

@@ -30,54 +30,54 @@ const ROUTE_META: Record<string, RouteMeta> = {
   '/': {
     title: 'Techsari | Scholarships Matched to You',
     description: 'An end-to-end scholarship platform for African students. Find scholarships matched to your profile, prepare applications with AI, and get support from mentors.',
-    image: `${SITE_URL}/og-home.png`,
+    image: `${SITE_URL}/og-home-v2.png`,
     ogTitle: 'Techsari | Scholarships Matched to You',
     ogDescription: 'An end-to-end scholarship platform for African students. Find scholarships matched to your profile, prepare applications with AI, and get support from mentors.',
   },
   '/scholarships': {
     title: 'Scholarships for African Students | Techsari',
     description: 'Browse verified scholarships open to students from all 54 African countries. Every listing checked for active deadlines and real eligibility. Full funding and partial funding available.',
-    image: `${SITE_URL}/og-scholarships.png`,
+    image: `${SITE_URL}/og-scholarships-v2.png`,
     ogTitle: 'Scholarships for African Students | Techsari',
     ogDescription: 'Browse verified scholarships open to African students. Every listing is checked for active deadlines and real eligibility. Full and partial funding from universities worldwide.',
   },
   '/about': {
     title: 'About Techsari | Scholarship Platform for African Students',
     description: 'Techsari was built to fix the scholarship access gap for African students. We filter out irrelevant results, remove the IELTS barrier, and pair AI essay tools with human mentor review.',
-    image: `${SITE_URL}/og-about.png`,
+    image: `${SITE_URL}/og-about-v2.png`,
     ogTitle: 'About Techsari | Built for African Students',
     ogDescription: 'Most scholarship platforms sell student data to advertisers. Techsari does not. We match students to funding they qualify for and help them apply without wasting time.',
   },
   '/how-it-works': {
     title: 'How Techsari Works | Scholarship Matching for African Students',
     description: 'Create a profile in three minutes. See scholarships you qualify for. Build your application with AI that learns your writing style. Get mentor review before you submit.',
-    image: `${SITE_URL}/og-how-it-works.png`,
+    image: `${SITE_URL}/og-how-it-works-v2.png`,
     ogTitle: 'How Techsari Works | Profile to Application',
     ogDescription: 'Four steps from registration to submitted application. Techsari handles eligibility filtering, essay drafting, and human mentor review so you can focus on applying.',
   },
   '/faq': {
     title: 'Scholarship FAQ for African Students | Techsari',
     description: 'Answers to common questions about finding scholarships as an African student. Covers IELTS alternatives, eligibility matching, how to apply, and which countries qualify.',
-    image: `${SITE_URL}/og-faq.png`,
+    image: `${SITE_URL}/og-faq-v2.png`,
     ogTitle: 'Scholarship FAQ | Techsari',
     ogDescription: 'Common questions about scholarships for African students. IELTS requirements, application tips, eligibility criteria, and how the Techsari matching system works.',
   },
   '/contact': {
     title: 'Contact Techsari | Get Help or Partner With Us',
     description: 'Contact the Techsari team for student support, scholarship provider listings, institutional partnerships, or press inquiries.',
-    image: `${SITE_URL}/og-image.png`,
+    image: `${SITE_URL}/og-image-v2.png`,
     ogTitle: 'Contact Techsari',
     ogDescription: 'Reach out to the Techsari team for student support, institutional partnerships, or scholarship provider inquiries. We respond within 24 hours.',
   },
   '/privacy': {
     title: 'Privacy Policy | Techsari',
     description: 'How Techsari collects, uses, and protects your data as an African student using our scholarship platform.',
-    image: `${SITE_URL}/og-image.png`,
+    image: `${SITE_URL}/og-image-v2.png`,
   },
   '/terms': {
     title: 'Terms of Service | Techsari',
     description: 'The terms governing your use of Techsari, an AI-powered scholarship platform for African students.',
-    image: `${SITE_URL}/og-image.png`,
+    image: `${SITE_URL}/og-image-v2.png`,
   },
 };
 
@@ -222,7 +222,7 @@ export default async function middleware(request: Request): Promise<Response> {
           meta = {
             title: `${displayName} | Techsari`,
             description: `Scholarship opportunity for eligible African students. View eligibility requirements, funding details, deadline and application information.`,
-            image: `${SITE_URL}/og-scholarships.png`,
+            image: `${SITE_URL}/og-scholarships-v2.png`,
             ogTitle: `${displayName} | Techsari`,
             ogDescription: `Scholarship opportunity for eligible African students. View eligibility, funding details and application information.`,
           };
@@ -233,7 +233,7 @@ export default async function middleware(request: Request): Promise<Response> {
         meta = {
           title: `${displayName} | Techsari`,
           description: `Scholarship opportunity for eligible African students. View eligibility requirements, funding details, deadline and application information.`,
-          image: `${SITE_URL}/og-scholarships.png`,
+          image: `${SITE_URL}/og-scholarships-v2.png`,
           ogTitle: `${displayName} | Techsari`,
           ogDescription: `Scholarship opportunity for eligible African students. View eligibility, funding details and application information.`,
         };

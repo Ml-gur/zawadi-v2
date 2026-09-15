@@ -13,7 +13,7 @@ export default function AboutPage({ onBack }: AboutPageProps) {
         title="About Techsari — Scholarship Platform Built for African Students"
         description="Techsari is an eligibility-first scholarship matching engine for African students. We read every listing's actual requirements, check them against your profile, and pair AI tools with human mentor review."
         path="/about"
-        image="https://www.techsari.online/og-about.png"
+        image="https://www.techsari.online/og-about-v2.png"
         ogTitle="About Techsari — Built for African Students"
         ogDescription="Most scholarship platforms sell student data to advertisers. Techsari does not. We match students to funding they qualify for and help them apply without wasting time on irrelevant results."
       />

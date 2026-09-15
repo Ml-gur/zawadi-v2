@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "noResolve": true,
+    "noEmit": true,
+    "skipLibCheck": true
+  },
+  "files": [
+    "types/deno-edge.d.ts",
+    "supabase/functions/process-payment/index.ts"
+  ]
+}

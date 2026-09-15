@@ -1,5 +1,89 @@
 # Changelog
 
+## 2026-09-15 — Social previews: refreshed cards and fixed SEO metadata defects
+
+### Fixed: shared links previewed a screenshot of the old site
+- The social cards were built on the retired navy/mint palette (`#001736` / `#6cf8bb`) from
+  before the editorial rebrand, so a link shared to WhatsApp showed the previous design.
+- `scripts/gen-og.mjs` now *generates* each card (rather than rasterising a hand-drawn SVG)
+  from the same tokens as `src/index.css` — ink `#14140f`, electric lime `#beff50`,
+  parchment `#f5f5eb` — with per-page headlines, a category chip and word-wrapped titles.
+- Cards are written to versioned filenames (`og-*-v2.png`). Social crawlers cache a card by
+  **URL**, so replacing the bytes behind an unchanged URL changes nothing for them; the
+  versioned name is what forces WhatsApp / Facebook / X to re-fetch. Bump `VERSION` in the
+  generator when the art changes again.
+- The generator fails loudly if a card rasterises blank (e.g. no fonts available) instead of
+  silently shipping an empty image, and `npm run generate:og` drives it.
+- Every reference was repointed: `index.html`, `middleware.ts`, `src/components/SEO.tsx`,
+  the per-page `image=` props (home, about, FAQ, how-it-works, scholarships) and the
+  `api/og-scholarship.js` fallback. The stale pre-rebrand assets were deleted.
+
+### Fixed: duplicated brand name in titles and headings
+- Three pages rendered the brand twice in the tab title and in search results:
+  `Scholarship FAQ for African Students — Techsari Techsari`, `Privacy Policy — Techsari
+  Techsari` and `Terms of Service — Techsari Techsari`. The duplication also leaked into the
+  meta descriptions, the FAQ `ogTitle`, the how-it-works `<h1>` and the terms footer.
+
+### Outstanding: `process-payment` still cannot take a payment
+- The Supabase project has **no `PAYSTACK_SECRET_KEY`**. Confirmed via `supabase secrets list`
+  and reproducible with `npm run check:payment-edge`, which reports the webhook 500ing on a
+  malformed signature instead of returning 401.
+- Consequences while the secret is unset: `initialize` can never reach Paystack; the webhook
+  refuses every event (`Missing PAYSTACK_SECRET_KEY`); and a user-visible checkout falls through
+  to the sandbox branch. With `ENVIRONMENT != production` that branch completes `verify` and
+  upgrades the plan **without payment**. Set `PAYSTACK_SECRET_KEY` (and `PAYSTACK_CALLBACK_URL`,
+  `ENVIRONMENT=production`) before launch, and hard-gate or delete the sandbox branch.
+- The client also needs `VITE_PAYSTACK_PUBLIC_KEY`; it is absent from `.env`, so the hosted
+  checkout cannot open even once the server secret is set.
+
+---
+
+## 2026-09-15 — Payments: browser calls and Paystack webhooks were both failing
+
+### Fixed: CORS allow-list hid every response from non-canonical origins
+- `process-payment` returned `https://www.techsari.online` as `Access-Control-Allow-Origin`
+  for *every* origin it did not recognise, including Vercel preview deployments and
+  `http://localhost:*`. The browser then drops the response and supabase-js reports the
+  generic `Failed to send a request to the Edge Function` with no status code.
+- The permissive `allowedOrigin()` helper added in `ec990a1` was dead code (assigned to an
+  unused, request-shared `currentOrigin` global); it is now the single source of truth and
+  echoes the caller's own origin.
+- Every response, including 4xx/5xx, is now built through one helper that receives the
+  request, so an error body can no longer become invisible to the browser. Added `Vary: Origin`.
+- Extra exact origins can be allowed without a redeploy via the `ALLOWED_ORIGINS` secret
+  (comma separated).
+
+### Fixed: Paystack webhooks rejected before reaching the function
+- The Supabase gateway answered every webhook with `401 UNAUTHORIZED_NO_AUTH_HEADER`
+  (`verify_jwt: true` was active on the deployed function). No `charge.success` event ever
+  reached `handleWebhook`, so plan upgrades relied entirely on the client `verify` call.
+- The previous `--no-verify-jwt` fix was a one-off CLI flag and was lost on the next deploy.
+  It is now pinned in `supabase/config.toml` as `[functions.process-payment] verify_jwt = false`.
+
+### Fixed: webhook handler called with wrong arguments (`ec990a1` regression)
+- `handleWebhook(supabase, body)` passed the Supabase client as `req`, so
+  `req.headers.get(...)` threw immediately and the request died in the outer catch as an
+  opaque 500 — the error reported after the last `process-payment` deploy.
+- The handler also re-read the body with `req.clone().text()` *after* `req.json()` had already
+  consumed it, which throws on Deno. The raw body is now read once and reused for the
+  HMAC-SHA512 check.
+- Malformed/odd-length `x-paystack-signature` values are rejected with 401 instead of
+  throwing inside `hexToBytes`.
+
+### Improved: 500s are now diagnosable
+- The outer catch logs the offending `action`, message and stack, and all handlers are
+  `await`ed so a rejected promise reaches that log instead of becoming a blank 500.
+- Webhook outcomes (plan upgraded / payload ignored) are logged.
+
+### Added: regression guards
+- `tsconfig.edge.json` + `types/deno-edge.d.ts` type-check Edge Functions from `npm run lint`
+  (`supabase/` was excluded from the root tsconfig, which is why a wrong-arity call could
+  ship). The old code fails this check with `TS2554: Expected 3 arguments, but got 2`.
+- `npm run check:payment-edge` — read-only post-deploy probe for origin echoing, gateway
+  JWT blocking and webhook handling (2/5 checks were failing before this fix).
+
+---
+
 ## 2026-08-30 — Notification Emails: Mobile Optimization + Safer Eligibility Wording
 
 ### Improved: Mobile-responsive notification emails

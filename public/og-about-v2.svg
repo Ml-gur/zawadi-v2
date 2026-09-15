@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <radialGradient id="glow" cx="88%" cy="8%" r="72%">
+      <stop offset="0%" stop-color="#beff50" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#beff50" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="mark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#beff50"/>
+      <stop offset="100%" stop-color="#aef53d"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="#14140f"/>
+  <rect width="1200" height="630" fill="url(#glow)"/>
+
+  <!-- Hairline frame -->
+  <rect x="0.5" y="0.5" width="1199" height="629"
+        fill="none" stroke="#f5f5eb" stroke-opacity="0.10"/>
+
+  <!-- Logo lockup -->
+  <g transform="translate(80, 74)">
+    <rect width="46" height="46" rx="13" fill="url(#mark)"/>
+    <text x="23" y="32" font-family="Inter Tight, Arial, Helvetica, sans-serif" font-size="26" font-weight="700"
+          fill="#14140f" text-anchor="middle">T</text>
+    <text x="62" y="31" font-family="Inter Tight, Arial, Helvetica, sans-serif" font-size="27" font-weight="600"
+          fill="#f5f5eb" letter-spacing="-0.5">Techsari</text>
+  </g>
+
+  <!-- Category chip -->
+  <g transform="translate(80, 194)">
+    <rect width="158" height="38" rx="19"
+          fill="#beff50" fill-opacity="0.12" stroke="#beff50" stroke-opacity="0.32"/>
+    <circle cx="21" cy="19" r="4" fill="#beff50"/>
+    <text x="38" y="25" font-family="Inter Tight, Arial, Helvetica, sans-serif" font-size="16" font-weight="500"
+          fill="#beff50">About Techsari</text>
+  </g>
+
+  <!-- Headline -->
+  <text font-family="Inter Tight, Arial, Helvetica, sans-serif" font-size="66" font-weight="600"
+        fill="#f5f5eb" letter-spacing="-1.6"><tspan x="80" y="260">Built for African students</tspan></text>
+
+  <!-- Accent rule -->
+  <rect x="80" y="347.24" width="88" height="5" rx="2.5" fill="#beff50"/>
+
+  <!-- Subtitle -->
+  <text font-family="Inter Tight, Arial, Helvetica, sans-serif" font-size="27" font-weight="400"
+        fill="#f5f5eb" fill-opacity="0.62"><tspan x="80" y="395.24">We read each listing's actual requirements and match them to your profile.</tspan><tspan x="80" y="434.39">We never sell student data.</tspan></text>
+
+  <!-- Footer -->
+  <text x="80" y="578" font-family="Inter Tight, Arial, Helvetica, sans-serif" font-size="21" font-weight="500"
+        fill="#beff50">www.techsari.online</text>
+  <text x="1120" y="578" font-family="Inter Tight, Arial, Helvetica, sans-serif" font-size="18"
+        fill="#f5f5eb" fill-opacity="0.38" text-anchor="end">Eligibility-checked. Never sold.</text>
+</svg>

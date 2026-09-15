@@ -45,7 +45,7 @@ export default function HowItWorksPage({ onBack, onGetStarted }: HowItWorksPageP
         title="How Techsari Works — Scholarship Matching for African Students"
         description="Create a profile in three minutes. See scholarships you qualify for. Build your application with AI that learns your writing style. Get mentor review before you submit."
         path="/how-it-works"
-        image="https://www.techsari.online/og-how-it-works.png"
+        image="https://www.techsari.online/og-how-it-works-v2.png"
         ogTitle="How Techsari Works — From Profile to Scholarship Application"
         ogDescription="Five steps from registration to submitted application. Techsari handles eligibility filtering, essay drafting, and document tracking so African students can focus on applying."
       />
@@ -54,7 +54,7 @@ export default function HowItWorksPage({ onBack, onGetStarted }: HowItWorksPageP
           <Breadcrumbs items={[{ name: 'How it works', path: '/how-it-works' }]} />
 
           <span className="font-eyebrow text-eyebrow uppercase tracking-wider text-graphite block mb-2">Step-by-Step Guide</span>
-          <h1 className="font-display text-4xl md:text-5xl font-medium text-on-surface tracking-tight mb-4">How Techsari Techsari Works</h1>
+          <h1 className="font-display text-4xl md:text-5xl font-medium text-on-surface tracking-tight mb-4">How Techsari Works</h1>
           <p className="font-body text-base md:text-lg text-secondary mb-14 max-w-2xl">
             From initial registration to verified submission. Five simple steps to discover and apply for scholarships you actually qualify for.
           </p>

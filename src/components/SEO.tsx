@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Helmet } from 'react-helmet-async';
 
 const SITE_URL = 'https://www.techsari.online';
-const OG_IMAGE = 'https://www.techsari.online/og-home.png';
+const OG_IMAGE = 'https://www.techsari.online/og-home-v2.png';
 const TWITTER_HANDLE = '@techsari';
 
 interface SEOMeta {

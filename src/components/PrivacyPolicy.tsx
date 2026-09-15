@@ -10,8 +10,8 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
   return (
     <div className="bg-pure-white text-off-black-ink min-h-[100dvh]">
       <SEO
-        title="Privacy Policy — Techsari Techsari"
-        description="How Techsari Techsari collects, uses, and protects the personal information of African students who use our scholarship platform."
+        title="Privacy Policy — Techsari"
+        description="How Techsari collects, uses, and protects the personal information of African students who use our scholarship platform."
         path="/privacy"
       />
       <section className="px-4 sm:px-6 py-16 md:py-24">

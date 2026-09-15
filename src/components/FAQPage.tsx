@@ -104,11 +104,11 @@ export default function FAQPage({ onBack }: FAQPageProps) {
   return (
     <div className="min-h-[100dvh] bg-surface-container-lowest text-on-surface font-body antialiased">
       <SEO
-        title="Scholarship FAQ for African Students — Techsari Techsari"
+        title="Scholarship FAQ for African Students — Techsari"
         description="Answers to common questions about finding scholarships as an African student. Covers IELTS alternatives, eligibility matching, how to apply, and which countries qualify."
         path="/faq"
-        image="https://www.techsari.online/og-faq.png"
-        ogTitle="Scholarship FAQ for African Students — Techsari Techsari"
+        image="https://www.techsari.online/og-faq-v2.png"
+        ogTitle="Scholarship FAQ for African Students — Techsari"
         ogDescription="Common questions about scholarships for African students. IELTS requirements, application tips, eligibility criteria, and how the Techsari matching system works."
         schema={faqSchema}
       />

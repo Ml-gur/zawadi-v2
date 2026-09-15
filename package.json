@@ -5,11 +5,14 @@
   "type": "module",
   "scripts": {
     "generate-icons": "node scripts/generate-pwa-icons.mjs",
+    "generate:og": "node scripts/gen-og.mjs",
     "dev": "npm run generate-icons && vite",
     "build": "vite build",
     "start": "vite preview",
     "clean": "rm -rf dist",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit && tsc -p tsconfig.edge.json",
+    "lint:edge": "tsc -p tsconfig.edge.json",
+    "check:payment-edge": "node scripts/check-payment-edge.mjs"
   },
   "dependencies": {
     "@fontsource/inter-tight": "^5.3.0",

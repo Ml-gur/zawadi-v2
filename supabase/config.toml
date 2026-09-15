@@ -385,6 +385,16 @@ deno_version = 2
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
+# Declare per-function JWT verification so deploys cannot silently change it.
+# Without this section every `supabase functions deploy` falls back to the CLI
+# default (verify_jwt = true), which is what re-enabled JWT verification on
+# process-payment and made the Supabase gateway reject Paystack webhooks with
+# `UNAUTHORIZED_NO_AUTH_HEADER` before the function body ever ran.
+# process-payment does its own auth: user JWT via auth.getUser() for browser
+# actions, Paystack HMAC-SHA512 signature for /webhook.
+[functions.process-payment]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327
