@@ -1,5 +1,79 @@
 # Changelog
 
+## 2026-09-15 — Cookie consent, form error states, and the 2027 scholarship import
+
+### Configured: `PAYSTACK_SECRET_KEY` is now set
+- It was absent from the Supabase project, which is why no payment could ever be authorised:
+  `initialize` never reached Paystack, the webhook refused every event, and — with
+  `ENVIRONMENT != production` — the sandbox branch would have completed `verify` and upgraded
+  a plan **without payment**.
+- `npm run check:payment-edge` went from 4/5 to **5/5** immediately after setting it, which is
+  the most direct proof the key is now wired up. The remaining pre-launch steps are
+  `VITE_PAYSTACK_PUBLIC_KEY` and confirming `ENVIRONMENT=production`.
+
+### Added: cookie consent banner with real analytics gating
+- `src/lib/consent.ts` (store) + `src/components/CookieConsent.tsx` (banner). Default is
+  **denied**, so the banner is a gate rather than a notice: no analytics script is fetched and
+  no analytics cookie is set until a visitor chooses "Accept all".
+- Google Analytics and Vercel Analytics both wait on that decision, and react if it later
+  changes. A "Cookie settings" button in the footer re-opens the banner, and the choice can be
+  withdrawn — consent has to be as easy to take back as to give, per GDPR and Kenya's Data
+  Protection Act 2019.
+
+### Fixed: analytics could never load — the CSP header and meta tag disagreed
+- The site ships a Content-Security-Policy **both** as a response header (`vercel.json`) and as
+  a `<meta http-equiv>` in `index.html`. When both are present the browser enforces the
+  *intersection*, so the narrower one silently wins.
+- The header allowed `https://www.googletagmanager.com`; the meta tag did not. Google
+  Analytics was therefore blocked in production even for visitors who had consented. The two
+  policies are now identical, with a comment in `index.html` recording why they must stay that
+  way. This also stopped the meta tag from blocking Vite's inline scripts in development (
+  `npm run dev` rendered a blank page).
+
+### Fixed: the reset-password form accepted passwords the server rejects
+- `ResetPassword` enforced a 6-character minimum while Supabase (per `supabase/config.toml`)
+  enforces 8 plus mixed case and a digit — so a password that passed client validation failed
+  with a raw backend error. Sign-up had the correct rules, duplicated inline.
+- Both screens now share `src/lib/password.ts`, so the rules cannot drift apart again. Sign-in
+  deliberately checks only that a password was entered, so an existing account is never locked
+  out by a policy change.
+
+### Fixed: the contact form reported errors only as toasts
+- Toasts disappear and name no field. Validation problems are now rendered inline under the
+  input, marked `role="alert"` and `aria-invalid`, linked by `aria-describedby`, and focus
+  moves to the first invalid field. Errors clear as soon as the field is corrected.
+- `ComingSoonPage` got the same treatment (announced error, `aria-describedby`, live label).
+
+### Added: the 2027-cycle scholarships, imported without duplicates
+- `scripts/import-2027-scholarships.mjs` + `scripts/data/scholarships-2027.json`.
+- Three of the eighteen records were **already in the catalogue under different ids**
+  (Commonwealth, Gates Cambridge, Knight-Hennessy). A migration that upserts on `id` alone — as
+  the original 2027 SQL did — would have created three duplicate listings. The importer instead
+  skips a record when the id, the slug *or* the normalised name already exists.
+- Result: 15 inserted, 3 skipped, 262 → 277 rows. Re-running is a no-op, which is asserted by
+  the script itself; `--dry-run` previews and `--verify` re-checks duplicates.
+- The importer also surfaced a **pre-existing** duplicate unrelated to this batch:
+  `Clarendon Fund Scholarships` exists as both `schol-c6c4ec08` and `schol-clarendon-2026`.
+  It is reported as a warning rather than a failure so it is not misattributed to this run.
+
+### Fixed: stale assertions and one regression in the e2e suite
+- `landing-features.spec.ts` asserted copy that no longer exists — `Amina Kouyaté` (now
+  `Amina Yusuf`) and a `KES 31,000` hero figure. These were already failing before this work.
+- `button-audit.spec.ts` "footer links resolve" now dismisses the consent banner first: the
+  banner is fixed to the bottom of the viewport and legitimately intercepts clicks on the footer
+  until a choice is made.
+- Added `e2e/consent-and-form-errors.spec.ts`: 6 tests covering the consent gate (nothing loads
+  before a decision, the choice persists, it can be reopened and withdrawn) and the contact
+  form's error states.
+
+### Known issue, deliberately not changed: colour contrast on the landing page
+- `e2e/a11y.spec.ts` fails on `/` for 6 `color-contrast` nodes. `--color-graphite` (`#6e6e64`)
+  measures 4.36:1 on `--color-parchment` (`#f5f5eb`) and 4.31:1 on `--color-electric-lime`
+  against the 4.5:1 AA threshold. This predates this batch and is a brand-token decision, so it
+  is left for a conscious design change rather than a silent one.
+
+---
+
 ## 2026-09-15 — Social previews: refreshed cards and fixed SEO metadata defects
 
 ### Fixed: shared links previewed a screenshot of the old site

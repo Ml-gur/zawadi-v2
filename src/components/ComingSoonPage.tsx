@@ -136,15 +136,17 @@ export default function ComingSoonPage() {
                 Join the waitlist to be the first to know when we launch.
               </p>
 
-              <form onSubmit={handleSubmit} className="flex items-center gap-2 max-w-sm mx-auto">
+              <form onSubmit={handleSubmit} noValidate className="flex items-center gap-2 max-w-sm mx-auto">
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => { setEmail(e.target.value); if (status === 'error' || status === 'duplicate') { setStatus('idle'); setMessage(''); } }}
                   placeholder="Enter your email"
+                  aria-label="Email address"
+                  aria-invalid={status === 'error' ? true : undefined}
+                  aria-describedby={status === 'error' && message ? 'waitlist-error' : undefined}
                   disabled={status === 'loading'}
-                  className="flex-1 min-h-[44px] p-3 bg-off-black-ink border border-ash rounded-lg text-sm text-pure-white placeholder:text-muted focus:border-accent-green focus:ring-1 focus:ring-accent-green/40 outline-none transition-colors disabled:opacity-50"
-                  required
+                  className={`flex-1 min-h-[44px] p-3 bg-off-black-ink border rounded-lg text-sm text-pure-white placeholder:text-muted focus:ring-1 focus:ring-accent-green/40 outline-none transition-colors disabled:opacity-50 ${status === 'error' ? 'border-error' : 'border-ash focus:border-accent-green'}`}
                 />
                 <GhostPillButton
                   type="submit"
@@ -165,7 +167,13 @@ export default function ComingSoonPage() {
               </form>
 
               {(status === 'error' || status === 'duplicate') && message && (
-                <p className="mt-3 text-xs font-medium text-error">{message}</p>
+                <p
+                  id="waitlist-error"
+                  role="alert"
+                  className={`mt-3 text-xs font-medium ${status === 'error' ? 'text-error' : 'text-status-success'}`}
+                >
+                  {message}
+                </p>
               )}
             </>
           )}

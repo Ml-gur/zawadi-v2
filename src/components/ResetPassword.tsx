@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { GhostPillButton } from './ui/GhostPillButton';
+import { PASSWORD_HINT, validatePassword } from '../lib/password';
 
 interface ResetPasswordProps {
   onBackToLogin: () => void;
@@ -55,8 +56,11 @@ export default function ResetPassword({ onBackToLogin }: ResetPasswordProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+    // Same rules the server enforces — validation here must not be looser, or
+    // the user only discovers the problem via a raw error from the backend.
+    const passwordProblem = validatePassword(password);
+    if (passwordProblem) {
+      setError(passwordProblem);
       return;
     }
     if (password !== confirmPassword) {
@@ -148,33 +152,44 @@ export default function ResetPassword({ onBackToLogin }: ResetPasswordProps) {
         </p>
 
         {error && (
-          <div className="mb-6 flex items-center gap-2 rounded-lg border border-error/20 bg-error/10 p-4 text-xs text-error">
+          <div
+            id="reset-error"
+            role="alert"
+            aria-live="assertive"
+            className="mb-6 flex items-center gap-2 rounded-lg border border-error/20 bg-error/10 p-4 text-xs text-error"
+          >
             <span>{error}</span>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-2 block text-sm text-pure-white">New Password</label>
+            <label htmlFor="reset-new-password" className="mb-2 block text-sm text-pure-white">New Password</label>
             <input
+              id="reset-new-password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="At least 6 characters"
+              onChange={(e) => { setPassword(e.target.value); if (error) setError(''); }}
+              placeholder={PASSWORD_HINT}
               className={inputClass}
               type="password"
-              required
+              autoComplete="new-password"
+              aria-invalid={error ? true : undefined}
+              aria-describedby={error ? 'reset-error' : undefined}
             />
           </div>
 
           <div>
-            <label className="mb-2 block text-sm text-pure-white">Confirm Password</label>
+            <label htmlFor="reset-confirm-password" className="mb-2 block text-sm text-pure-white">Confirm Password</label>
             <input
+              id="reset-confirm-password"
               value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
+              onChange={(e) => { setConfirmPassword(e.target.value); if (error) setError(''); }}
               placeholder="Re-enter your new password"
               className={inputClass}
               type="password"
-              required
+              autoComplete="new-password"
+              aria-invalid={error ? true : undefined}
+              aria-describedby={error ? 'reset-error' : undefined}
             />
           </div>
 

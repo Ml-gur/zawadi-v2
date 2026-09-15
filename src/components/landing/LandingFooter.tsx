@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { openCookieSettings } from '../../lib/consent';
 
 const FOOTER_LINKS = [
   { label: 'Privacy Policy', to: '/privacy' },
@@ -29,6 +30,16 @@ export default function LandingFooter() {
               </Link>
             </li>
           ))}
+          <li>
+            {/* Consent must be as easy to withdraw as it was to give. */}
+            <button
+              type="button"
+              onClick={openCookieSettings}
+              className="text-ed-body-sm text-pure-white underline decoration-smoke/50 underline-offset-4 hover:text-electric-lime hover:decoration-electric-lime transition-colors cursor-pointer"
+            >
+              Cookie settings
+            </button>
+          </li>
         </ul>
       </div>
     </footer>

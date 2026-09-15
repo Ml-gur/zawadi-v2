@@ -134,7 +134,7 @@ export default function FAQPage({ onBack }: FAQPageProps) {
             placeholder="Search questions across eligibility, IELTS, pricing, essays..."
             className="w-full p-4 pl-12 bg-surface-container-low border border-outline-variant rounded-xl font-body text-sm text-on-surface placeholder:text-secondary focus:border-primary focus:ring-1 focus:ring-primary/40 outline-none transition-colors"
           />
-          <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           {search && (
@@ -180,7 +180,7 @@ export default function FAQPage({ onBack }: FAQPageProps) {
                             {faq.q}
                           </span>
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center border transition-all duration-300 shrink-0 ml-4 ${isOpen ? 'border-primary bg-primary-container text-on-surface rotate-180' : 'border-outline-variant text-secondary group-hover:border-primary group-hover:text-primary'}`}>
-                            <svg className="w-4 h-4 text-inherit" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <svg className="w-4 h-4 text-inherit" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
                               <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                             </svg>
                           </div>

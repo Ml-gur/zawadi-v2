@@ -2,10 +2,10 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { HelmetProvider } from 'react-helmet-async';
 import { BrowserRouter } from 'react-router-dom';
-import { Analytics as VercelAnalytics } from '@vercel/analytics/react';
 import App from './App';
 import ErrorBoundary from './components/ErrorBoundary';
 import Analytics from './components/Analytics';
+import CookieConsent from './components/CookieConsent';
 import '@fontsource/inter-tight/400.css';
 import '@fontsource/inter-tight/500.css';
 import '@fontsource/inter-tight/600.css';
@@ -46,10 +46,10 @@ createRoot(document.getElementById('root')!).render(
     <HelmetProvider>
       <BrowserRouter>
         <Analytics />
-        <VercelAnalytics />
         <ErrorBoundary>
           <App />
         </ErrorBoundary>
+        <CookieConsent />
       </BrowserRouter>
     </HelmetProvider>
   </StrictMode>,

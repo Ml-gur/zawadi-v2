@@ -26,8 +26,11 @@ test('scholar stories animate in and show all three scholars', async ({ page }) 
   await page.goto('/');
   const stories = page.locator('#scholar-stories');
   await stories.scrollIntoViewIfNeeded();
-  for (const name of ['Amina Kouyaté', 'Chidi Nnamdi', 'Faith Muthoni']) {
-    await expect(page.getByText(name)).toBeVisible();
+  // Names come from STORIES in src/components/landing/ScholarStories.tsx. The
+  // marquee renders the set twice (the second copy is aria-hidden), so match
+  // the first occurrence.
+  for (const name of ['Wanjiru Njeri', 'Kofi Mensah', 'Amina Yusuf']) {
+    await expect(stories.getByText(name).first()).toBeVisible();
   }
   await expect(stories.locator('figure').first()).toBeVisible();
 });
@@ -58,6 +61,11 @@ test('404 page is branded editorial with working links', async ({ page }) => {
 
 test('hero uses research-grounded copy', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByText(/KES 31,000/)).toBeVisible();
-  await expect(page.getByRole('button', { name: /find my matches/i }).first()).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: /find the scholarships you can actually apply for/i }),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/thousands of eligibility rules/i),
+  ).toBeVisible();
+  await expect(page.getByRole('button', { name: /find my scholarships/i }).first()).toBeVisible();
 });

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import toast from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
 import { SEO } from './SEO';
 import { Breadcrumbs } from './Breadcrumbs';
@@ -21,6 +20,30 @@ const SUBJECTS = [
   { value: 'Other', label: 'Other' },
 ];
 
+type FieldErrors = { name?: string; email?: string; message?: string };
+
+/**
+ * Field-level validation. Errors are returned per field so each one can be
+ * rendered next to the input it belongs to and announced to screen readers —
+ * a toast alone disappears and names no field.
+ */
+function validateContact(values: { name: string; email: string; message: string }): FieldErrors {
+  const errors: FieldErrors = {};
+  const trimmedMessage = values.message.trim();
+
+  if (!values.name.trim()) errors.name = 'Enter your name so we know who to reply to.';
+
+  if (!values.email.trim()) errors.email = 'Enter your email address.';
+  else if (!/^\S+@\S+\.\S+$/.test(values.email.trim()))
+    errors.email = 'Enter a valid email address, like you@example.com.';
+
+  if (!trimmedMessage) errors.message = 'Tell us how we can help.';
+  else if (trimmedMessage.length < 20)
+    errors.message = `Please add ${20 - trimmedMessage.length} more character${20 - trimmedMessage.length === 1 ? '' : 's'} — 20 is the minimum.`;
+
+  return errors;
+}
+
 export default function ContactPage({ onBack }: { onBack: () => void }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -28,13 +51,26 @@ export default function ContactPage({ onBack }: { onBack: () => void }) {
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [errors, setErrors] = useState<FieldErrors>({});
+  const [submitError, setSubmitError] = useState('');
+
+  const clearFieldError = (field: keyof FieldErrors) =>
+    setErrors((prev) => (prev[field] ? { ...prev, [field]: undefined } : prev));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError('');
 
-    if (!name.trim()) { toast.error('Name is required'); return; }
-    if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) { toast.error('Valid email is required'); return; }
-    if (!message.trim() || message.trim().length < 20) { toast.error('Message must be at least 20 characters'); return; }
+    const found = validateContact({ name, email, message });
+    if (Object.keys(found).length > 0) {
+      setErrors(found);
+      // Focus the first problem so keyboard and screen-reader users are not
+      // left hunting for the field that failed.
+      const firstInvalid = (['name', 'email', 'message'] as const).find((field) => found[field]);
+      if (firstInvalid) document.getElementById(`contact-${firstInvalid}`)?.focus();
+      return;
+    }
+    setErrors({});
 
     setSending(true);
     try {
@@ -55,9 +91,10 @@ export default function ContactPage({ onBack }: { onBack: () => void }) {
       setEmail('');
       setSubject('Student Support');
       setMessage('');
-      toast.success('Message sent! We\'ll respond within 24 hours.');
     } catch (err: any) {
-      toast.error(err.message || 'Something went wrong');
+      setSubmitError(
+        err?.message || 'We could not send your message. Please try again, or email hello@techsari.online.',
+      );
     } finally {
       setSending(false);
     }
@@ -94,15 +131,38 @@ export default function ContactPage({ onBack }: { onBack: () => void }) {
                 <button onClick={() => setSent(false)} className="mt-6 font-body text-xs font-semibold text-primary underline hover:text-on-surface cursor-pointer">Send another message</button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="bg-surface-container-low rounded-card border border-outline-variant p-6 md:p-8 space-y-5">
+              <form onSubmit={handleSubmit} noValidate className="bg-surface-container-low rounded-card border border-outline-variant p-6 md:p-8 space-y-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block font-label text-xs font-medium text-on-surface mb-1.5 uppercase tracking-wider">Name <span className="text-error">*</span></label>
-                    <input value={name} onChange={(e) => setName(e.target.value)} required placeholder="Your full name" className="w-full p-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-sm text-on-surface placeholder:text-secondary focus:outline-none focus:border-primary focus-visible:ring-1 focus-visible:ring-primary/40" />
+                    <label htmlFor="contact-name" className="block font-label text-xs font-medium text-on-surface mb-1.5 uppercase tracking-wider">Name <span className="text-error">*</span></label>
+                    <input
+                      id="contact-name"
+                      value={name}
+                      onChange={(e) => { setName(e.target.value); clearFieldError('name'); }}
+                      placeholder="Your full name"
+                      aria-invalid={errors.name ? true : undefined}
+                      aria-describedby={errors.name ? 'contact-name-error' : undefined}
+                      className={`w-full p-3 rounded-lg border bg-surface-container-lowest text-sm text-on-surface placeholder:text-secondary focus:outline-none focus-visible:ring-1 focus-visible:ring-primary/40 ${errors.name ? 'border-error focus:border-error' : 'border-outline-variant focus:border-primary'}`}
+                    />
+                    {errors.name && (
+                      <p id="contact-name-error" role="alert" className="mt-1.5 font-body text-xs text-error">{errors.name}</p>
+                    )}
                   </div>
                   <div>
-                    <label className="block font-label text-xs font-medium text-on-surface mb-1.5 uppercase tracking-wider">Email <span className="text-error">*</span></label>
-                    <input value={email} onChange={(e) => setEmail(e.target.value)} required type="email" placeholder="you@example.com" className="w-full p-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-sm text-on-surface placeholder:text-secondary focus:outline-none focus:border-primary focus-visible:ring-1 focus-visible:ring-primary/40" />
+                    <label htmlFor="contact-email" className="block font-label text-xs font-medium text-on-surface mb-1.5 uppercase tracking-wider">Email <span className="text-error">*</span></label>
+                    <input
+                      id="contact-email"
+                      value={email}
+                      onChange={(e) => { setEmail(e.target.value); clearFieldError('email'); }}
+                      type="email"
+                      placeholder="you@example.com"
+                      aria-invalid={errors.email ? true : undefined}
+                      aria-describedby={errors.email ? 'contact-email-error' : undefined}
+                      className={`w-full p-3 rounded-lg border bg-surface-container-lowest text-sm text-on-surface placeholder:text-secondary focus:outline-none focus-visible:ring-1 focus-visible:ring-primary/40 ${errors.email ? 'border-error focus:border-error' : 'border-outline-variant focus:border-primary'}`}
+                    />
+                    {errors.email && (
+                      <p id="contact-email-error" role="alert" className="mt-1.5 font-body text-xs text-error">{errors.email}</p>
+                    )}
                   </div>
                 </div>
 
@@ -116,10 +176,31 @@ export default function ContactPage({ onBack }: { onBack: () => void }) {
                 </div>
 
                 <div>
-                  <label className="block font-label text-xs font-medium text-on-surface mb-1.5 uppercase tracking-wider">Message <span className="text-error">*</span></label>
-                  <textarea value={message} onChange={(e) => setMessage(e.target.value)} required rows={6} placeholder="Tell us how we can help you..." className="w-full p-3 rounded-lg border border-outline-variant bg-surface-container-lowest text-sm text-on-surface placeholder:text-secondary focus:outline-none focus:border-primary focus-visible:ring-1 focus-visible:ring-primary/40 resize-y min-h-[120px]" />
-                  <p className="font-caption text-[10px] text-secondary text-right mt-1">{message.length} / 20 min characters</p>
+                  <label htmlFor="contact-message" className="block font-label text-xs font-medium text-on-surface mb-1.5 uppercase tracking-wider">Message <span className="text-error">*</span></label>
+                  <textarea
+                    id="contact-message"
+                    value={message}
+                    onChange={(e) => { setMessage(e.target.value); clearFieldError('message'); }}
+                    rows={6}
+                    placeholder="Tell us how we can help you..."
+                    aria-invalid={errors.message ? true : undefined}
+                    aria-describedby={errors.message ? 'contact-message-error' : 'contact-message-hint'}
+                    className={`w-full p-3 rounded-lg border bg-surface-container-lowest text-sm text-on-surface placeholder:text-secondary focus:outline-none focus-visible:ring-1 focus-visible:ring-primary/40 resize-y min-h-[120px] ${errors.message ? 'border-error focus:border-error' : 'border-outline-variant focus:border-primary'}`}
+                  />
+                  {errors.message ? (
+                    <p id="contact-message-error" role="alert" className="mt-1.5 font-body text-xs text-error">{errors.message}</p>
+                  ) : (
+                    <p id="contact-message-hint" className="font-caption text-[10px] text-secondary text-right mt-1">
+                      {message.trim().length} / 20 min characters
+                    </p>
+                  )}
                 </div>
+
+                {submitError && (
+                  <p role="alert" className="rounded-lg border border-error/30 bg-error/10 px-4 py-3 font-body text-xs text-error">
+                    {submitError}
+                  </p>
+                )}
 
                 <button
                   type="submit"

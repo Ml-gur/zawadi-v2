@@ -84,6 +84,15 @@ test('header nav links resolve to real routes', async ({ page }) => {
 test('footer links resolve', async ({ page }) => {
   await page.goto('/scholarships/browse', { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(600);
+
+  // The cookie banner is fixed to the bottom of the viewport, so until a
+  // choice is recorded it covers the footer and intercepts clicks on it.
+  const consent = page.getByRole('region', { name: 'Cookie consent' });
+  if (await consent.isVisible().catch(() => false)) {
+    await consent.getByRole('button', { name: 'Essential only' }).click();
+    await consent.waitFor({ state: 'hidden' });
+  }
+
   for (const [label, path] of [
     ['Privacy Policy', '/privacy'],
     ['Terms of Service', '/terms'],
