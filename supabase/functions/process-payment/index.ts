@@ -2,8 +2,11 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 // ─── Environment ──────────────────────────────────────────────────
-const ENVIRONMENT = Deno.env.get('ENVIRONMENT') || 'development'
-const PRODUCTION = ENVIRONMENT === 'production'
+// Fail closed: an unset ENVIRONMENT means production. The sandbox payment
+// paths (no Paystack key) only run when ENVIRONMENT=development is set
+// explicitly, so a missing secret can never grant a plan for free.
+const ENVIRONMENT = Deno.env.get('ENVIRONMENT') || 'production'
+const SANDBOX = ENVIRONMENT === 'development'
 
 // ─── CORS ─────────────────────────────────────────────────────────
 // CORS is defence-in-depth here, NOT authorisation: every non-webhook
@@ -107,14 +110,6 @@ function resolvePlanFromCode(planCode: string) {
     }
   }
   return null
-}
-
-function normalizePaystackMetadata(metadata: any): Record<string, any> {
-  if (!metadata) return {}
-  if (typeof metadata === 'string') {
-    try { return JSON.parse(metadata) } catch { return {} }
-  }
-  return metadata
 }
 
 // ─── Main handler ─────────────────────────────────────────────────
@@ -252,8 +247,13 @@ async function handleInitialize(
         return json(req, { error: `Paystack init failed: ${initData.message}` }, 502)
       }
 
-      // Persist payment record
-      await supabase.from('payments').upsert({
+      // Persist payment record. verify and the webhook both treat this row as
+      // the source of truth, so a checkout must never start without it.
+      // Plain insert with an explicit id: payments.id has no default, and the
+      // unique index on paystack_reference is partial, which upsert's
+      // onConflict cannot target. Paystack references are fresh per call.
+      const { error: recordError } = await supabase.from('payments').insert({
+        id: crypto.randomUUID(),
         user_email: userEmail,
         paystack_reference: initData.data.reference,
         paystack_subscription_code: intent.planCode,
@@ -265,7 +265,11 @@ async function handleInitialize(
         authorization_url: initData.data.authorization_url || '',
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-      }, { onConflict: 'paystack_reference' })
+      })
+      if (recordError) {
+        console.error('[process-payment] Could not record pending payment', { message: recordError.message })
+        return json(req, { error: 'Could not start checkout. Please try again.' }, 500)
+      }
 
       return json(req, {
         access_code: initData.data.access_code,
@@ -282,14 +286,15 @@ async function handleInitialize(
     }
   }
 
-  // Production: fail if Paystack key is missing
-  if (PRODUCTION) {
+  // No Paystack key: refuse unless the sandbox is explicitly enabled
+  if (!SANDBOX) {
     return json(req, { error: 'Payment gateway not configured. Please contact support.' }, 500)
   }
 
   // Sandbox fallback (development only)
   const sandboxRef = `sandbox_${Date.now()}`
-  await supabase.from('payments').upsert({
+  await supabase.from('payments').insert({
+    id: crypto.randomUUID(),
     user_email: userEmail,
     paystack_reference: sandboxRef,
     paystack_subscription_code: intent.planCode,
@@ -300,7 +305,7 @@ async function handleInitialize(
     status: 'pending',
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-  }, { onConflict: 'paystack_reference' })
+  })
 
   return json(req, {
     access_code: sandboxRef,
@@ -369,14 +374,14 @@ async function handleVerify(
         return json(req, { error: `Payment is not successful. Status: ${paystackData.status}.` }, 402)
       }
 
-      const metadata = normalizePaystackMetadata(paystackData.metadata)
-      const planName = payment.plan || metadata.plan_name
-      const billingPeriod = payment.billing_period || metadata.billing_period || 'monthly'
-      const intent = resolvePaymentIntent(planName, billingPeriod)
+      // Same rules as the webhook: plan and amount come from our own record,
+      // never from transaction metadata, and amounts compare in minor units.
+      const intent = resolvePaymentIntent(payment.plan, payment.billing_period)
+      const expectedMinor = expectedMinorUnits(payment.plan, payment.billing_period)
 
-      const paidAmount = Math.round((paystackData.amount || 0) / 100)
-      const paidCurrency = paystackData.currency || 'KES'
-      const customerEmail = paystackData.customer?.email || metadata.user_email || userEmail
+      const paidMinor = Number(paystackData.amount)
+      const paidCurrency = String(paystackData.currency || '').toUpperCase()
+      const customerEmail = String(paystackData.customer?.email || '')
 
       if (customerEmail.toLowerCase() !== userEmail.toLowerCase()) {
         await supabase.from('payments')
@@ -385,36 +390,25 @@ async function handleVerify(
         return json(req, { error: 'Verified payment belongs to another Paystack customer.' }, 403)
       }
 
-      if ((intent as any).error || paidAmount !== intent.amount || paidCurrency !== intent.currency) {
+      if ((intent as any).error || expectedMinor === null || paidMinor !== expectedMinor || paidCurrency !== 'KES') {
         await supabase.from('payments')
           .update({ status: 'failed', failure_reason: `Amount/currency mismatch` })
           .eq('paystack_reference', reference)
         return json(req, { error: 'Verified payment amount does not match the selected plan.' }, 402)
       }
 
-      // Complete the payment — upgrade user plan
-      await supabase.from('payments')
-        .update({
-          status: 'success',
-          paid_at: paystackData.paid_at || new Date().toISOString(),
-          webhook_event_id: String(paystackData.id || ''),
-          updated_at: new Date().toISOString(),
-        })
-        .eq('paystack_reference', reference)
+      // Grant the plan first, then mark the payment settled: if the plan write
+      // fails the row stays pending and a retry (or the webhook) can finish it.
+      // Never moves an account down a tier (e.g. an older, cheaper checkout
+      // paid after a newer, higher one).
+      const granted = await setPlanIfNotLower(supabase, payment.user_email || userEmail, intent.planName as string)
+      await markPaymentSuccess(supabase, reference, paystackData)
 
-      await supabase.from('profiles')
-        .update({ plan: intent.planName })
-        .eq('email', userEmail)
-
-      // Audit log
-      await supabase.from('audit_logs').insert({
-        user_email: userEmail,
-        action: 'plan_upgrade',
-        target_type: 'user',
-        target_id: userEmail,
-        details: `Upgraded to ${intent.planName} plan via payment ${reference}`,
-        created_at: new Date().toISOString(),
-      })
+      await writeAudit(supabase, 'plan_upgrade', 'user', userEmail,
+        granted
+          ? `Upgraded to ${intent.planName} plan via payment ${reference}`
+          : `Payment ${reference} for ${intent.planName} settled; plan unchanged (already higher or no profile)`,
+        `user:${userEmail}`)
 
       const { data: updatedUser } = await supabase
         .from('profiles')
@@ -425,12 +419,15 @@ async function handleVerify(
       return json(req, { success: true, user: updatedUser ? { ...updatedUser, password_hash: undefined } : null })
     } catch (e: any) {
       console.error('[Payment] Verify error:', e)
+      if (e instanceof DatabaseError) {
+        return json(req, { error: 'Payment received but the upgrade could not be saved yet. Please retry in a moment.' }, 500)
+      }
       return json(req, { error: 'Could not reach Paystack verification service.' }, 502)
     }
   }
 
-  // Production: fail if verify-without-paystack
-  if (PRODUCTION) {
+  // No Paystack key: refuse unless the sandbox is explicitly enabled
+  if (!SANDBOX) {
     return json(req, { error: 'Payment verification service unavailable.' }, 502)
   }
 
@@ -549,54 +546,268 @@ async function handleWebhook(
   const data = body.data
   if (!event || !data) return json(req, { error: 'Invalid webhook payload' }, 400)
 
-  const metadata = normalizePaystackMetadata(data.metadata)
-  const reference = data.reference || metadata.reference || ''
+  // Transaction metadata is set by whoever starts the checkout, so nothing
+  // in it is trusted here. Plan, amount and account come from our own
+  // payments record or from the Paystack plan code.
+  const reference = String(data.reference || '')
   const eventId = String(data.id || data.event_id || `${event}:${reference}`)
+  // Keep the address as Paystack sent it (it is the one we gave Paystack at
+  // checkout, so it matches profiles.email exactly); compare lower-cased.
+  const customerEmail = String(data.customer?.email || '').trim()
 
-  if (event === 'charge.success' && data.status === 'success') {
-    const planFromCode = resolvePlanFromCode(data.plan?.plan_code || '')
-    const planName = (metadata.plan_name || planFromCode?.planName || '').toLowerCase()
-    const email = (metadata.user_email || data.customer?.email || '').toLowerCase()
-
-    if (email && planName && PLAN_CATALOG[planName]) {
-      // Update payment
-      await supabase.from('payments')
-        .upsert({
-          paystack_reference: reference,
-          user_email: email,
-          amount: Math.round((data.amount || 0) / 100),
-          currency: data.currency || 'KES',
-          plan: planName,
-          status: 'success',
-          paid_at: data.paid_at || new Date().toISOString(),
-          webhook_event_id: eventId,
-          updated_at: new Date().toISOString(),
-        }, { onConflict: 'paystack_reference' })
-
-      // Upgrade user plan
-      await supabase.from('profiles')
-        .update({ plan: planName })
-        .eq('email', email)
-
-      // Audit log
-      await supabase.from('audit_logs').insert({
-        user_email: email,
-        action: 'webhook_plan_upgrade',
-        target_type: 'payment',
-        target_id: reference,
-        details: `Webhook: upgraded to ${planName} plan via payment ${reference}`,
-        created_at: new Date().toISOString(),
-      })
-
-      console.log('[process-payment] Webhook upgraded plan', { email, planName, reference })
-    } else {
-      console.warn('[process-payment] Webhook ignored — unidentifiable plan/user', {
-        reference, planName, hasEmail: Boolean(email),
-      })
+  try {
+    if (event === 'charge.success' && data.status === 'success') {
+      await handleChargeSuccess(supabase, data, reference, eventId, customerEmail)
+    } else if (event === 'subscription.disable') {
+      await handleSubscriptionDisable(supabase, data, customerEmail)
+    } else if (event === 'subscription.not_renew') {
+      // Cancelled, but stays active until the period ends; Paystack sends
+      // subscription.disable on the next payment date.
+      await writeAudit(supabase, 'webhook_subscription_not_renew', 'user', customerEmail || 'unknown',
+        `Subscription ${subscriptionCode(data)} set to not renew`)
+    } else if (event === 'invoice.payment_failed') {
+      // Paystack marks the subscription "attention" and does not disable it.
+      // The plan is kept for now; the grace-period policy is a product decision.
+      await writeAudit(supabase, 'webhook_invoice_payment_failed', 'user', customerEmail || 'unknown',
+        `Renewal payment failed for subscription ${subscriptionCode(data)}: ${String(data.description || data.status || 'no reason given').slice(0, 200)}`)
+      console.warn('[process-payment] Renewal payment failed', { customerEmail, subscription: subscriptionCode(data) })
     }
+  } catch (e) {
+    // A database failure must NOT be acknowledged: a 5xx makes Paystack
+    // redeliver, and every step above is safe to repeat.
+    if (e instanceof DatabaseError) {
+      console.error('[process-payment] Webhook database error — asking Paystack to retry', { event, reference, message: e.message })
+      return json(req, { error: 'Temporary failure' }, 500)
+    }
+    throw e
   }
 
+  // 200 for everything handled, including events we deliberately rejected,
+  // so Paystack does not keep redelivering them.
   return json(req, { received: true })
+}
+
+// ─── Webhook helpers ──────────────────────────────────────────────
+// No generated DB types exist for this project, so the typed client resolves
+// every table to `never`; keep these helpers untyped on purpose.
+// deno-lint-ignore no-explicit-any
+type SupabaseClient = any
+
+// Infrastructure failure (as opposed to a payment we chose to reject).
+class DatabaseError extends Error {}
+
+function check(result: { error?: { message?: string; code?: string } | null }, what: string) {
+  if (result?.error) throw new DatabaseError(`${what}: ${result.error.message || result.error.code || 'unknown error'}`)
+}
+
+function expectedMinorUnits(planName: string, billingPeriod: string): number | null {
+  const plan = PLAN_CATALOG[String(planName || '').toLowerCase()]
+  if (!plan) return null
+  return Math.round(plan[billingPeriod === 'annual' ? 'annual' : 'monthly'].amount * 100)
+}
+
+function webhookPlanCode(data: any): string {
+  return String(data.plan?.plan_code || data.subscription?.plan?.plan_code || '')
+}
+
+function subscriptionCode(data: any): string {
+  return String(data.subscription_code || data.subscription?.subscription_code || 'unknown')
+}
+
+// audit_logs columns: id (no default), admin_email (the actor), action,
+// target_type, target_id, details, created_at — same shape admin-api writes.
+// Best effort: a failed audit write is logged but never blocks a payment.
+async function writeAudit(
+  supabase: SupabaseClient,
+  action: string,
+  targetType: string,
+  targetId: string,
+  details: string,
+  actor = 'system:paystack-webhook',
+) {
+  const { error } = await supabase.from('audit_logs').insert({
+    id: crypto.randomUUID(),
+    admin_email: actor,
+    action,
+    target_type: targetType,
+    target_id: targetId,
+    details,
+    created_at: new Date().toISOString(),
+  })
+  if (error) console.error('[process-payment] audit log write failed', { action, message: error.message })
+}
+
+// Sets the plan unless the account is already on a higher tier. Returns true
+// when the profile now has `planName`. Throws DatabaseError on read/write failure.
+async function setPlanIfNotLower(supabase: SupabaseClient, email: string, planName: string): Promise<boolean> {
+  const read = await supabase
+    .from('profiles')
+    .select('plan')
+    .eq('email', email)
+    .maybeSingle()
+  check(read, 'read profile')
+  if (!read.data) return false
+  const currentRank = PLAN_HIERARCHY[String(read.data.plan || 'explorer').toLowerCase()] ?? 0
+  const targetRank = PLAN_HIERARCHY[planName] ?? -1
+  if (targetRank < currentRank) return false
+  check(await supabase.from('profiles').update({ plan: planName }).eq('email', email), 'update profile plan')
+  return true
+}
+
+async function markPaymentSuccess(supabase: SupabaseClient, reference: string, data: any) {
+  check(await supabase.from('payments')
+    .update({
+      status: 'success',
+      paid_at: data.paid_at || new Date().toISOString(),
+      webhook_event_id: String(data.id || ''),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('paystack_reference', reference), 'mark payment success')
+}
+
+async function rejectCharge(
+  supabase: SupabaseClient,
+  reference: string,
+  email: string,
+  reason: string,
+  hasRecord: boolean,
+) {
+  if (hasRecord) {
+    check(await supabase.from('payments')
+      .update({ status: 'failed', failure_reason: reason, updated_at: new Date().toISOString() })
+      .eq('paystack_reference', reference), 'mark payment failed')
+  }
+  await writeAudit(supabase, 'webhook_payment_rejected', 'payment', reference || 'unknown',
+    `${reason} (customer ${email || 'unknown'})`)
+  console.warn('[process-payment] Webhook charge rejected', { reference, reason })
+}
+
+async function handleChargeSuccess(
+  supabase: SupabaseClient,
+  data: any,
+  reference: string,
+  eventId: string,
+  customerEmail: string,
+) {
+  const paidMinor = Number(data.amount)
+  const currency = String(data.currency || '').toUpperCase()
+  const chargedPlan = resolvePlanFromCode(webhookPlanCode(data))
+
+  let record: any = null
+  if (reference) {
+    const lookup = await supabase.from('payments').select('*').eq('paystack_reference', reference).maybeSingle()
+    check(lookup, 'look up payment record')
+    record = lookup.data
+  }
+
+  // ── Checkout we initialised: the payments record is the source of truth ──
+  if (record) {
+    if (record.status === 'success') return // already settled by verify or an earlier delivery
+
+    const recordEmail = String(record.user_email || '')
+    const planName = String(record.plan || '').toLowerCase()
+    const billingPeriod = record.billing_period === 'annual' ? 'annual' : 'monthly'
+    const expected = expectedMinorUnits(planName, billingPeriod)
+
+    if (expected === null) {
+      return rejectCharge(supabase, reference, customerEmail, 'Payment record has no valid plan', true)
+    }
+    if (paidMinor !== expected || currency !== 'KES') {
+      return rejectCharge(supabase, reference, customerEmail,
+        `Amount/currency mismatch: paid ${paidMinor} ${currency}, expected ${expected} KES`, true)
+    }
+    if (!customerEmail || customerEmail.toLowerCase() !== recordEmail.toLowerCase()) {
+      return rejectCharge(supabase, reference, customerEmail, 'Customer email does not match payment record', true)
+    }
+    if (chargedPlan && (chargedPlan.planName !== planName || chargedPlan.billingPeriod !== billingPeriod)) {
+      return rejectCharge(supabase, reference, customerEmail,
+        `Charged plan ${chargedPlan.planName}/${chargedPlan.billingPeriod} does not match record ${planName}/${billingPeriod}`, true)
+    }
+
+    // Plan first, then settle: if settling fails, a redelivery repeats both
+    // (setting the same plan twice is harmless).
+    const upgraded = await setPlanIfNotLower(supabase, recordEmail, planName)
+    await markPaymentSuccess(supabase, reference, data)
+    await writeAudit(supabase, 'webhook_plan_upgrade', 'user', recordEmail,
+      upgraded
+        ? `Upgraded to ${planName} via payment ${reference}`
+        : `Payment ${reference} for ${planName} settled; plan unchanged (already higher or no profile)`)
+    return
+  }
+
+  // ── No record: a subscription renewal Paystack charged on its own ──
+  if (!chargedPlan) {
+    return rejectCharge(supabase, reference, customerEmail,
+      'No payment record and no recognised subscription plan code', false)
+  }
+  const expectedRenewal = Math.round(chargedPlan.amount * 100)
+  if (paidMinor !== expectedRenewal || currency !== 'KES') {
+    return rejectCharge(supabase, reference, customerEmail,
+      `Renewal amount/currency mismatch: paid ${paidMinor} ${currency}, expected ${expectedRenewal} KES`, false)
+  }
+  if (!customerEmail) {
+    return rejectCharge(supabase, reference, customerEmail, 'Renewal has no customer email', false)
+  }
+
+  const renewalRef = reference || `renewal:${eventId}`
+  // Plan first, then record. The record is what makes a redelivery a no-op
+  // (the lookup above returns it), so a late replay of an old renewal after
+  // subscription.disable cannot re-grant the plan.
+  const renewed = await setPlanIfNotLower(supabase, customerEmail, chargedPlan.planName)
+  const inserted = await supabase.from('payments').insert({
+    id: crypto.randomUUID(),
+    paystack_reference: renewalRef,
+    paystack_subscription_code: chargedPlan.planCode,
+    user_email: customerEmail,
+    amount: chargedPlan.amount,
+    currency: 'KES',
+    plan: chargedPlan.planName,
+    billing_period: chargedPlan.billingPeriod,
+    status: 'success',
+    paid_at: data.paid_at || new Date().toISOString(),
+    webhook_event_id: eventId,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  })
+  // 23505 = a concurrent delivery recorded it first; that is fine.
+  if (inserted.error && inserted.error.code !== '23505') check(inserted, 'record renewal')
+
+  await writeAudit(supabase, 'webhook_subscription_renewal', 'user', customerEmail,
+    renewed
+      ? `Renewal ${renewalRef} kept/set plan ${chargedPlan.planName}`
+      : `Renewal ${renewalRef} for ${chargedPlan.planName}; plan unchanged (already higher or no profile)`)
+}
+
+async function handleSubscriptionDisable(supabase: SupabaseClient, data: any, customerEmail: string) {
+  const plan = resolvePlanFromCode(webhookPlanCode(data))
+  const sub = subscriptionCode(data)
+  if (!customerEmail || !plan) {
+    await writeAudit(supabase, 'webhook_subscription_disable_ignored', 'user', customerEmail || 'unknown',
+      `Subscription ${sub} disabled but plan or customer not recognised`)
+    return
+  }
+
+  const read = await supabase
+    .from('profiles')
+    .select('plan')
+    .eq('email', customerEmail)
+    .maybeSingle()
+  check(read, 'read profile')
+  const currentPlan = String(read.data?.plan || '').toLowerCase()
+
+  // Only downgrade when the ended subscription's tier is the current plan; an
+  // account that has since moved to another tier keeps it.
+  // Known gap: matching is by tier, not by subscription code (no column for
+  // the active subscription code yet), and an upgrade does not cancel the
+  // previous Paystack subscription.
+  if (read.data && currentPlan === plan.planName) {
+    check(await supabase.from('profiles').update({ plan: 'explorer' }).eq('email', customerEmail), 'downgrade profile')
+    await writeAudit(supabase, 'webhook_subscription_disabled', 'user', customerEmail,
+      `Subscription ${sub} (${plan.planName}) ended; downgraded to explorer`)
+  } else {
+    await writeAudit(supabase, 'webhook_subscription_disabled', 'user', customerEmail,
+      `Subscription ${sub} (${plan.planName}) ended; current plan ${currentPlan || 'none'} left unchanged`)
+  }
 }
 
 // ─── Hex to bytes helper ──────────────────────────────────────────
