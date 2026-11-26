@@ -149,7 +149,7 @@ export default function StudentProfile({ user, onUpdateProfile, onNavigateToTab 
 
   return (
     <div className="bg-pure-white text-off-black-ink max-w-[1200px] mx-auto px-4 sm:px-6 py-14 md:py-20">
-      <SEO title="Your Profile | Techsari" description="Confirm your academic details so the matching engine checks exact eligibility rules for you." path="/studentprofile" noindex />
+      <SEO title="Your Profile | Techsari" description="Confirm your academic details so the matching engine checks exact eligibility rules for you." path="/profile" noindex />
 
       <div className="space-y-10">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">

@@ -13,6 +13,7 @@ export default function NotFoundPage({ onBack }: NotFoundPageProps) {
         title="Page Not Found — Techsari"
         description="The page you are looking for does not exist. Return to the Techsari homepage to find scholarships for African students."
         path="/404"
+        noindex
       />
       <div className="w-full max-w-lg bg-parchment border border-ash rounded-ed p-8 md:p-12 text-center animate-sweep">
         <span className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-electric-lime mb-6" aria-hidden>

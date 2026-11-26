@@ -275,7 +275,7 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
           </nav>
           <div className="flex items-center gap-2 shrink-0">
             <ShareButton
-              url={`/scholarships/browse/${scholarship.slug}`}
+              url={`/scholarships/browse/${scholarship.slug || scholarship.id}`}
               title={scholarship.name}
               iconOnly
               size="md"

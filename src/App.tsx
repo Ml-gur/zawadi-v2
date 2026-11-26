@@ -631,7 +631,6 @@ export default function App() {
         });
         toast.success("Listing saved successfully!");
         fetchUserData(user.email);
-        fetch('https://www.google.com/ping?sitemap=https://www.techsari.online/sitemap.xml').catch(() => {});
         // Trigger notification system when creating a published scholarship
         if (scholPayload.published) {
           supabase.functions.invoke('process-new-listing', {
@@ -661,7 +660,6 @@ export default function App() {
       const { data, error } = await togglePublishScholarship(id, current?.published ?? false);
       if (!error && data) {
         setScholarships(prev => prev.map(s => s.id === id ? { ...s, published: data.published ?? !s.published } : s));
-        fetch('https://www.google.com/ping?sitemap=https://www.techsari.online/sitemap.xml').catch(() => {});
         toast.success(data.published ? "Opportunity published" : "Opportunity unpublished");
         // Trigger notification system when publishing
         if (data.published) {
@@ -806,7 +804,7 @@ export default function App() {
                       </div>
                     ) : (
                       <Suspense fallback={<DashboardSkeleton />}>
-                        <Dashboard user={user} scholarships={scholarships} applications={applications} documents={documents} essays={essays} onNavigateToTab={handleNavigateToTab} onViewScholarship={(schol) => navigate(`/scholarships/browse/${schol.slug}`)} onTriggerQuickDraft={() => navigate('/essays')} />
+                        <Dashboard user={user} scholarships={scholarships} applications={applications} documents={documents} essays={essays} onNavigateToTab={handleNavigateToTab} onViewScholarship={(schol) => navigate(`/scholarships/browse/${schol.slug || schol.id}`)} onTriggerQuickDraft={() => navigate('/essays')} />
                       </Suspense>
                     )
                   } />

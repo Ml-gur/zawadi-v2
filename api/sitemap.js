@@ -18,7 +18,7 @@ export default async function handler(req, res) {
   try {
     const { data } = await supabase
       .from('scholarships')
-      .select('slug,updated_at')
+      .select('slug,id,updated_at')
       .eq('published', true)
       .or('deadline.is.null,deadline.gte.' + new Date().toISOString().split('T')[0])
       .order('updated_at', { ascending: false });
@@ -41,8 +41,9 @@ export default async function handler(req, res) {
 
     for (const page of staticPages) {
       xml += '  <url>\n';
+      // No <lastmod> for static pages: stamping them "today" on every request
+      // tells Google they always change, and it then ignores lastmod site-wide.
       xml += `    <loc>${page.loc}</loc>\n`;
-      xml += `    <lastmod>${today}</lastmod>\n`;
       xml += `    <changefreq>${page.freq}</changefreq>\n`;
       xml += `    <priority>${page.priority}</priority>\n`;
       xml += '  </url>\n';
@@ -50,9 +51,13 @@ export default async function handler(req, res) {
 
     if (data) {
       for (const s of data) {
+        // Rows without a slug were emitted as /browse/null (10 dead URLs).
+        // The detail page and API accept the id too, so fall back to it.
+        const key = s.slug || s.id;
+        if (!key) continue;
         const lastmod = s.updated_at ? s.updated_at.split('T')[0] : today;
         xml += '  <url>\n';
-        xml += `    <loc>https://www.techsari.online/scholarships/browse/${encodeURIComponent(s.slug)}</loc>\n`;
+        xml += `    <loc>https://www.techsari.online/scholarships/browse/${encodeURIComponent(key)}</loc>\n`;
         xml += `    <lastmod>${lastmod}</lastmod>\n`;
         xml += '    <changefreq>weekly</changefreq>\n';
         xml += '    <priority>0.8</priority>\n';

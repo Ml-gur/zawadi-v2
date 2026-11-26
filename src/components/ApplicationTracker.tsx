@@ -80,7 +80,7 @@ export default function ApplicationTracker({
 
   return (
     <div className="animate-sweep">
-      <SEO title="Application Tracker | Techsari" description="Track every scholarship from saved to awarded, with deadlines sorted by what closes next." path="/applicationtracker" noindex />
+      <SEO title="Application Tracker | Techsari" description="Track every scholarship from saved to awarded, with deadlines sorted by what closes next." path="/applications" noindex />
 
       <span className="text-ed-eyebrow uppercase text-graphite">Applications</span>
       <h1 className="mt-2 text-ed-h1-sm text-off-black-ink tracking-tight">Your application pipeline.</h1>

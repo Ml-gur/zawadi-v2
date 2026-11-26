@@ -1,12 +1,5 @@
 User-agent: *
 Allow: /
-Allow: /scholarships
-Allow: /about
-Allow: /faq
-Allow: /how-it-works
-Allow: /privacy
-Allow: /terms
-Allow: /contact
 Disallow: /dashboard
 Disallow: /applications
 Disallow: /vault
@@ -15,20 +8,20 @@ Disallow: /profile
 Disallow: /billing
 Disallow: /admin
 Disallow: /mentor
-Sitemap: https://www.techsari.online/sitemap.xml
 
+# A crawler obeys only the most specific group that names it, so every named
+# group must repeat the private-path rules. (The old "User-agent: Googlebot"
+# group with only Allow lines let Googlebot crawl /dashboard, /admin, etc.)
 User-agent: GPTBot
-Allow: /
-Allow: /scholarships
-Allow: /about
-Allow: /faq
-
 User-agent: Claude-Web
 Allow: /
-Allow: /scholarships
-Allow: /about
-Allow: /faq
+Disallow: /dashboard
+Disallow: /applications
+Disallow: /vault
+Disallow: /essays
+Disallow: /profile
+Disallow: /billing
+Disallow: /admin
+Disallow: /mentor
 
-User-agent: Googlebot
-Allow: /
-Allow: /scholarships
+Sitemap: https://www.techsari.online/sitemap.xml
