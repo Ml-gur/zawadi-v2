@@ -366,7 +366,7 @@ export default function SubscriptionPlans({ user, onPlanUpdated, onNavigateToTab
 
   return (
     <div className="bg-pure-white text-off-black-ink">
-      <SEO title="Plans & Pricing | Techsari" description="Free Explorer tier plus Scholar Plus and Application Pro plans. Pay in KES via M-Pesa or card." path="/subscriptionplans" noindex />
+      <SEO title="Plans & Pricing | Techsari" description="Free Explorer tier plus Scholar Plus and Application Pro plans. Pay in KES via M-Pesa or card." path="/billing" noindex />
 
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-16 md:py-24 space-y-14 md:space-y-20 animate-sweep">
 

@@ -15,6 +15,10 @@ import './index.css';
 
 document.documentElement.classList.add('js');
 
+// Crawler-only head tags injected by middleware.ts. <SEO> re-creates them per
+// route, so drop the server copies to keep one title/canonical in the DOM.
+document.querySelectorAll('head [data-mw]').forEach((el) => el.remove());
+
 /* Animated favicon — swaps between two frames while the tab is visible. */
 (function animateFavicon() {
   const frameA = document.querySelector<HTMLLinkElement>('link[rel="icon"]');

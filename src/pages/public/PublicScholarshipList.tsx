@@ -7,15 +7,8 @@ import { SEO } from '../../components/SEO';
 import { Breadcrumbs } from '../../components/Breadcrumbs';
 import BrowseCard from './BrowseCard';
 import BrowseTable from './BrowseTable';
-import type { ScholarshipTeaser } from './browse-shared';
-
-interface ListResponse {
-  scholarships: ScholarshipTeaser[];
-  total: number;
-  page: number;
-  limit: number;
-  hasMore: boolean;
-}
+import { usePublicScholarships } from '../../lib/usePublicScholarships';
+import { HUBS, hubPath, intakeYear } from '../../lib/scholarship-hubs';
 
 function SkeletonCard() {
   return (
@@ -37,8 +30,7 @@ const chipClass = (active: boolean) =>
   }`;
 
 export default function PublicScholarshipList({ user }: { user?: any } = {}) {
-  const [data, setData] = useState<ListResponse | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { items, loading } = usePublicScholarships();
   const [page, setPage] = useState(1);
   const limit = 20;
 
@@ -54,41 +46,6 @@ export default function PublicScholarshipList({ user }: { user?: any } = {}) {
 
   const { ids: compareIds, open: compareOpen, setOpen: setCompareOpen, toggle: toggleCompare, clear: clearCompare } = useCompare();
 
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    fetch(`/api/scholarships-public?page=${page}&limit=${limit}`)
-      .then(r => { if (!r.ok) throw new Error(String(r.status)); return r.json(); })
-      .then(d => { if (!cancelled) { setData(d); setLoading(false); } })
-      .catch(async () => {
-        try {
-          const { supabase } = await import('../../lib/supabase');
-          const offset = (page - 1) * limit;
-          const today = new Date().toISOString().split('T')[0];
-          const baseColumns = 'id,slug,name,provider,countries,degree_levels,funding_type,amount,deadline,urgency,description,no_ielts,targets_financial_need,targets_first_generation,is_intra_african,fields_of_study,host_region,iso2,opens_at,updated_at';
-          const runQuery = (columns: string) => supabase.from('scholarships').select(columns).eq('published', true).or(`deadline.is.null,deadline.gte.${today}`).order('deadline', { ascending: true, nullsFirst: false }).range(offset, offset + limit - 1);
-          const [countRes, dataRes0] = await Promise.all([
-            supabase.from('scholarships').select('id', { count: 'exact', head: true }).eq('published', true).or(`deadline.is.null,deadline.gte.${today}`),
-            runQuery(baseColumns),
-          ]);
-          // migration 015 (opens_at) not applied yet — retry without the column
-          const needsRetry = Boolean(dataRes0.error) && (
-            (dataRes0.error as any)?.code === 'PGRST204' ||
-            (dataRes0.error as any)?.code === '42703' ||
-            /opens_at/.test((dataRes0.error as any)?.message || '')
-          );
-          const dataRes: any = needsRetry ? await runQuery(baseColumns.replace(',opens_at', '')) : dataRes0;
-          if (cancelled) return;
-          if (dataRes.error) throw dataRes.error;
-          const scholarships = (dataRes.data || []).map(s => ({ ...s, description: s.description ? String(s.description).slice(0, 300) : null })) as ScholarshipTeaser[];
-          setData({ scholarships, total: countRes.count ?? scholarships.length, page, limit, hasMore: offset + limit < (countRes.count ?? 0) });
-        } catch { /* keep empty */ }
-        if (!cancelled) setLoading(false);
-      });
-    return () => { cancelled = true; };
-  }, [page]);
-
-  const items = data?.scholarships ?? [];
 
   const levels = useMemo(
     () => [...new Set(items.flatMap(s => s.degree_levels || []))].sort(),
@@ -136,17 +93,25 @@ export default function PublicScholarshipList({ user }: { user?: any } = {}) {
     });
   }, [items, query, country, level, region, funding, noIeltsOnly, closingSoonOnly]);
 
+  // Filters change the result set — start again from the first page
+  useEffect(() => { setPage(1); }, [query, country, level, region, funding, noIeltsOnly, closingSoonOnly]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / limit));
+  // Clamp: a filter change can shrink the results before the reset effect runs
+  const safePage = Math.min(page, totalPages);
+  const pageItems = filtered.slice((safePage - 1) * limit, safePage * limit);
+  const year = intakeYear();
+
   const clearFilters = () => { setQuery(''); setCountry(''); setLevel(''); setRegion(''); setFunding(''); setNoIeltsOnly(false); setClosingSoonOnly(false); };
   const hasFilters = Boolean(query || country || level || region || funding || noIeltsOnly || closingSoonOnly);
-  const totalPages = data ? Math.ceil(data.total / limit) : 0;
 
   const openAuth = () => window.dispatchEvent(new CustomEvent('open-auth'));
 
   return (
     <div id="browse-root" className="min-h-[100dvh] bg-parchment text-off-black-ink flex flex-col">
       <SEO
-        title="Open Scholarships for African Students | Techsari"
-        description={`Browse ${data?.total || 'available'} open scholarships for African students. Find opportunities you're 100% eligible for.`}
+        title={`Scholarships for African Students ${year}: All Open Awards | Techsari`}
+        description={`Browse ${items.length || 'all'} open scholarships for African students for ${year}. Fully funded, no-IELTS, Masters, PhD and undergraduate awards, with deadlines and eligibility checked.`}
         path="/scholarships/browse"
       />
 
@@ -156,10 +121,10 @@ export default function PublicScholarshipList({ user }: { user?: any } = {}) {
         <div className="mb-10 md:mb-12">
           <Breadcrumbs items={[{ name: 'Scholarships', path: '/scholarships/browse' }]} />
           <p className="text-ed-caption uppercase text-graphite mb-5">Scholarship database</p>
-          <h1 className="text-ed-h1-sm md:text-ed-h1 text-off-black-ink max-w-[20ch]">100% Eligible Opportunities</h1>
+          <h1 className="text-ed-h1-sm md:text-ed-h1 text-off-black-ink max-w-[20ch]">Scholarships for African Students</h1>
           <p className="mt-4 text-ed-sub font-normal text-graphite">
-            {data
-              ? `${data.total} verified listing${data.total !== 1 ? 's' : ''}, refreshed daily.`
+            {!loading
+              ? `${items.length} open listing${items.length !== 1 ? 's' : ''} for the ${year} intake, checked for live deadlines and real eligibility.`
               : 'Loading verified listings…'}
           </p>
         </div>
@@ -339,7 +304,7 @@ export default function PublicScholarshipList({ user }: { user?: any } = {}) {
         {/* Results */}
         {!loading && items.length > 0 && (
           <p className="mb-5 text-ed-body-sm text-graphite" role="status">
-            Showing {filtered.length} of {items.length} listings on this page
+            Showing {filtered.length === 0 ? 0 : (safePage - 1) * limit + 1}–{Math.min(safePage * limit, filtered.length)} of {filtered.length}{hasFilters ? ` matching (${items.length} total)` : ' scholarships'}
             {hasFilters && (
               <>
                 {' · '}
@@ -375,10 +340,10 @@ export default function PublicScholarshipList({ user }: { user?: any } = {}) {
             )}
           </div>
         ) : view === 'table' ? (
-          <BrowseTable items={filtered} />
+          <BrowseTable items={pageItems} />
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2.5 md:gap-5 lg:gap-6">
-            {filtered.map((s, i) => {
+            {pageItems.map((s, i) => {
               const isDark = i % 3 === 2;
               return (
                 <div key={s.id} className={`h-full ${isDark ? 'col-span-2 md:col-span-2 lg:col-span-1' : ''}`}>
@@ -395,25 +360,42 @@ export default function PublicScholarshipList({ user }: { user?: any } = {}) {
         )}
 
         {/* Pagination */}
-        {!loading && data && data.total > limit && (
+        {!loading && filtered.length > limit && (
           <nav aria-label="Pagination" className="flex items-center justify-center gap-4 mt-12">
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1}
+              disabled={safePage === 1}
               className="px-6 min-h-[48px] rounded-full border border-off-black-ink text-sm font-medium text-off-black-ink hover:bg-off-black-ink hover:text-pure-white transition-colors disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
             >
               Previous
             </button>
-            <span className="text-ed-body-sm text-graphite">Page {page} of {totalPages}</span>
+            <span className="text-ed-body-sm text-graphite">Page {safePage} of {totalPages}</span>
             <button
-              onClick={() => setPage(p => p + 1)}
-              disabled={!data.hasMore}
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={safePage >= totalPages}
               className="px-6 min-h-[48px] rounded-full border border-off-black-ink text-sm font-medium text-off-black-ink hover:bg-off-black-ink hover:text-pure-white transition-colors disabled:opacity-30 disabled:pointer-events-none cursor-pointer"
             >
               Next
             </button>
           </nav>
         )}
+
+        {/* Crawlable entry points into every listing, grouped by how students search */}
+        <nav aria-labelledby="browse-by" className="mt-16 rounded-ed border border-ash/70 bg-pure-white p-8 md:p-10">
+          <h2 id="browse-by" className="text-ed-sub text-off-black-ink">Browse scholarships by country, level and type</h2>
+          {(['country', 'level', 'feature'] as const).map(kind => (
+            <div key={kind} className="mt-6">
+              <p className="text-ed-caption uppercase text-graphite mb-3">{kind === 'country' ? 'By country' : kind === 'level' ? 'By level' : 'By type'}</p>
+              <ul className="flex flex-wrap gap-2">
+                {HUBS.filter(h => h.kind === kind).map(h => (
+                  <li key={h.slug}>
+                    <Link to={hubPath(h)} className={chipClass(false)}>{h.kind === 'country' ? `Scholarships for ${h.demonym} students` : h.subject.replace(' for African Students', '')}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </nav>
 
         {/* Floating comparison bar */}
         {compareIds.size > 0 && !compareOpen && (

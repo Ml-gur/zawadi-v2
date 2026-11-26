@@ -3,6 +3,8 @@
 // They only read the static HTML. This middleware intercepts their requests,
 // fetches the SPA's index.html, and injects route-specific OG tags server-side.
 
+import { hubDescription, hubFromPath, hubPath, hubTitle, intakeYear, scholarshipDescription, scholarshipTitle } from './src/lib/scholarship-hubs';
+
 const SITE_URL = 'https://www.techsari.online';
 
 const CRAWLER_PATTERNS = [
@@ -28,8 +30,9 @@ interface RouteMeta {
 
 const ROUTE_META: Record<string, RouteMeta> = {
   '/': {
-    title: 'Techsari | Scholarships Matched to You',
-    description: 'An end-to-end scholarship platform for African students. Find scholarships matched to your profile, prepare applications with AI, and get support from mentors.',
+    // Getters: the intake year is worked out per request, not frozen when the isolate starts
+    get title() { return `Scholarships for African Students ${intakeYear()} — Matched to You | Techsari`; },
+    get description() { return `Find ${intakeYear()} scholarships for African students from all 54 countries: fully funded, no-IELTS, Masters, PhD and undergraduate. See only the ones you qualify for.`; },
     image: `${SITE_URL}/og-home-v2.png`,
     ogTitle: 'Techsari | Scholarships Matched to You',
     ogDescription: 'An end-to-end scholarship platform for African students. Find scholarships matched to your profile, prepare applications with AI, and get support from mentors.',
@@ -37,6 +40,13 @@ const ROUTE_META: Record<string, RouteMeta> = {
   '/scholarships': {
     title: 'Scholarships for African Students | Techsari',
     description: 'Browse verified scholarships open to students from all 54 African countries. Every listing checked for active deadlines and real eligibility. Full funding and partial funding available.',
+    image: `${SITE_URL}/og-scholarships-v2.png`,
+    ogTitle: 'Scholarships for African Students | Techsari',
+    ogDescription: 'Browse verified scholarships open to African students. Every listing is checked for active deadlines and real eligibility. Full and partial funding from universities worldwide.',
+  },
+  '/scholarships/browse': {
+    get title() { return `Scholarships for African Students ${intakeYear()}: All Open Awards | Techsari`; },
+    get description() { return `Browse open scholarships for African students for ${intakeYear()}. Fully funded, no-IELTS, Masters, PhD and undergraduate awards, with deadlines and eligibility checked.`; },
     image: `${SITE_URL}/og-scholarships-v2.png`,
     ogTitle: 'Scholarships for African Students | Techsari',
     ogDescription: 'Browse verified scholarships open to African students. Every listing is checked for active deadlines and real eligibility. Full and partial funding from universities worldwide.',
@@ -81,9 +91,35 @@ const ROUTE_META: Record<string, RouteMeta> = {
   },
 };
 
-function getMeta(pathname: string): RouteMeta {
-  const normalized = pathname.endsWith('/') && pathname !== '/' ? pathname.slice(0, -1) : pathname;
-  return ROUTE_META[normalized] || ROUTE_META['/scholarships'];
+function normalizePath(pathname: string): string {
+  return pathname.endsWith('/') && pathname !== '/' ? pathname.slice(0, -1) : pathname;
+}
+
+// Public SPA routes that exist but carry no route-specific meta of their own
+const OTHER_PUBLIC_ROUTES = new Set(['/forgot-password', '/reset-password']);
+
+const NOT_FOUND_META: RouteMeta = {
+  title: 'Page Not Found | Techsari',
+  description: 'The page you are looking for does not exist. Browse verified scholarships for African students on Techsari.',
+  image: `${SITE_URL}/og-image-v2.png`,
+};
+
+// Returns null when the path is not a route the SPA serves, so crawlers get a real 404
+function getMeta(pathname: string): RouteMeta | null {
+  const normalized = normalizePath(pathname);
+  // React Router matches case-insensitively, so /About renders the About page too
+  const lower = normalized.toLowerCase();
+  if (ROUTE_META[lower]) return ROUTE_META[lower];
+  if (OTHER_PUBLIC_ROUTES.has(lower)) return ROUTE_META['/'];
+  const hub = hubFromPath(normalized);
+  if (hub) {
+    const title = hubTitle(hub);
+    const description = hubDescription(hub);
+    return { title, description, image: `${SITE_URL}/og-scholarships-v2.png`, ogTitle: title, ogDescription: description };
+  }
+  // /scholarships/:slug is a client-side redirect to /scholarships/browse/:slug
+  if (/^\/scholarships\/(browse\/)?[^/]+$/.test(normalized)) return ROUTE_META['/scholarships'];
+  return null;
 }
 
 function slugFromPath(pathname: string): string | null {
@@ -119,38 +155,24 @@ function formatDeadlineEdge(dateStr: string): string {
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 }
 
-function buildScholarDescription(data: Record<string, any>): string {
-  const parts: string[] = [];
-
-  // Build a factual, specific description
-  const funding = data.funding_type === 'Full' ? 'Fully funded' : data.funding_type === 'Partial' ? 'Partially funded' : '';
-  const degrees = Array.isArray(data.degree_levels) ? data.degree_levels.join(', ') : '';
-  const countries = Array.isArray(data.countries) ? data.countries.join(', ') : '';
-  const deadline = data.deadline ? formatDeadlineEdge(String(data.deadline)) : '';
-
-  if (funding || degrees) {
-    const level = degrees ? `${degrees} scholarship` : 'scholarship';
-    parts.push(`${funding ? funding + ' ' : ''}${level}`.trim());
-  }
-  if (countries) {
-    parts.push(`for eligible African students from ${countries}`);
-  } else {
-    parts.push('for eligible African students');
-  }
-
-  let desc = parts.join(' ');
-  if (deadline && deadline !== 'Check website') {
-    desc += `. Deadline: ${deadline}`;
-  }
-  desc += '. View eligibility, funding details and application information.';
-
-  return desc.slice(0, 200);
-}
-
-function buildMetaTags(meta: RouteMeta, url: string): string {
+function buildMetaTags(meta: RouteMeta, url: string, noindex = false): string {
   const title = meta.ogTitle || meta.title;
   const desc = meta.ogDescription || meta.description;
-  return `\n<meta charset="UTF-8" />\n<meta name="viewport" content="width=device-width, initial-scale=1.0" />\n<title>${escapeHtml(meta.title)}</title>\n<meta name="description" content="${escapeHtml(meta.description)}" />\n<meta property="og:type" content="website" />\n<meta property="og:url" content="${escapeHtml(url)}" />\n<meta property="og:title" content="${escapeHtml(title)}" />\n<meta property="og:description" content="${escapeHtml(desc)}" />\n<meta property="og:image" content="${escapeHtml(meta.image)}" />\n<meta property="og:image:width" content="1200" />\n<meta property="og:image:height" content="630" />\n<meta property="og:image:alt" content="${escapeHtml(title)}" />\n<meta property="og:site_name" content="Techsari" />\n<meta property="og:locale" content="en_US" />\n<meta name="twitter:card" content="summary_large_image" />\n<meta name="twitter:title" content="${escapeHtml(title)}" />\n<meta name="twitter:description" content="${escapeHtml(desc)}" />\n<meta name="twitter:image" content="${escapeHtml(meta.image)}" />\n<meta name="twitter:image:alt" content="${escapeHtml(title)}" />\n<meta name="twitter:site" content="@techsari" />\n<meta name="twitter:creator" content="@techsari" />\n`;
+  const indexing = noindex
+    ? '<meta name="robots" content="noindex" />'
+    : `<link rel="canonical" href="${escapeHtml(url)}" />`;
+  return `\n${indexing}\n<title>${escapeHtml(meta.title)}</title>\n<meta name="description" content="${escapeHtml(meta.description)}" />\n<meta property="og:type" content="website" />\n<meta property="og:url" content="${escapeHtml(url)}" />\n<meta property="og:title" content="${escapeHtml(title)}" />\n<meta property="og:description" content="${escapeHtml(desc)}" />\n<meta property="og:image" content="${escapeHtml(meta.image)}" />\n<meta property="og:image:width" content="1200" />\n<meta property="og:image:height" content="630" />\n<meta property="og:image:alt" content="${escapeHtml(title)}" />\n<meta property="og:site_name" content="Techsari" />\n<meta property="og:locale" content="en_US" />\n<meta name="twitter:card" content="summary_large_image" />\n<meta name="twitter:title" content="${escapeHtml(title)}" />\n<meta name="twitter:description" content="${escapeHtml(desc)}" />\n<meta name="twitter:image" content="${escapeHtml(meta.image)}" />\n<meta name="twitter:image:alt" content="${escapeHtml(title)}" />\n<meta name="twitter:site" content="@techsari" />\n<meta name="twitter:creator" content="@techsari" />\n`;
+}
+
+// The SPA shell ships generic fallback tags. Remove them before injecting the
+// route-specific set, otherwise crawlers see two <title>s and conflicting og:* tags.
+function stripDefaultHeadTags(html: string): string {
+  return html
+    .replace(/<title\b[^>]*>[\s\S]*?<\/title>\s*/i, '')
+    .replace(/<link\b[^>]*rel="canonical"[^>]*>\s*/gi, '')
+    .replace(/<meta\b[^>]*name="(?:description|robots)"[^>]*>\s*/gi, '')
+    .replace(/<meta\b[^>]*property="og:[^"]*"[^>]*>\s*/gi, '')
+    .replace(/<meta\b[^>]*name="twitter:[^"]*"[^>]*>\s*/gi, '');
 }
 
 function escapeHtml(s: string): string {
@@ -163,27 +185,28 @@ export const config = {
   ],
 };
 
-export default async function middleware(request: Request): Promise<Response> {
+// Returning undefined lets Vercel continue to the origin without an extra subrequest
+export default async function middleware(request: Request): Promise<Response | undefined> {
   const userAgent = request.headers.get('user-agent') || '';
   const url = new URL(request.url);
   const pathname = url.pathname;
 
   // Only intercept social media crawlers
   if (!isCrawler(userAgent)) {
-    return fetch(request);
+    return undefined;
   }
 
   // Skip API, static files, authenticated routes
   const skipPrefixes = ['/api/', '/dashboard', '/admin', '/vault', '/essays', '/applications', '/profile', '/billing', '/mentor'];
   for (const prefix of skipPrefixes) {
     if (pathname.startsWith(prefix)) {
-      return fetch(request);
+      return undefined;
     }
   }
 
   // Skip if this is already a re-fetch from the middleware (avoid loop)
   if (request.headers.get('x-vercel-og')) {
-    return fetch(request);
+    return undefined;
   }
 
   try {
@@ -198,8 +221,20 @@ export default async function middleware(request: Request): Promise<Response> {
     const html = await originResponse.text();
 
     // Try per-scholarship OG tags for /scholarships/browse/:slug
-    let meta = getMeta(pathname);
-    const slug = slugFromPath(pathname);
+    const routeMeta = getMeta(pathname);
+    let notFound = routeMeta === null;
+    let meta: RouteMeta = routeMeta || NOT_FOUND_META;
+    const slug = notFound ? null : slugFromPath(pathname);
+
+    // Canonical must match what the client-side <SEO> component emits, or
+    // Google sees two disagreeing canonicals after rendering and ignores both.
+    const normalizedPath = normalizePath(pathname);
+    let canonicalPath = ROUTE_META[normalizedPath.toLowerCase()] ? normalizedPath.toLowerCase() : normalizedPath;
+    const hubMatch = hubFromPath(normalizedPath);
+    if (hubMatch) canonicalPath = hubPath(hubMatch);
+    const legacySlug = hubMatch ? null : normalizedPath.match(/^\/scholarships\/(?!browse(?:\/|$))([^/]+)$/);
+    if (legacySlug) canonicalPath = `/scholarships/browse/${legacySlug[1]}`;
+
     if (slug) {
       try {
         const apiUrl = `${SITE_URL}/api/scholarships-public-detail?slug=${encodeURIComponent(slug)}`;
@@ -207,17 +242,24 @@ export default async function middleware(request: Request): Promise<Response> {
         if (apiRes.ok) {
           const data = await apiRes.json();
           const ogImageUrl = buildScholarOgUrl(data);
-          const seoDesc = buildScholarDescription(data);
-          // Name-first title: "Scholarship Name | Techsari"
+          const seoDesc = scholarshipDescription(data);
+          const seoTitle = scholarshipTitle(data);
+          // PublicScholarshipDetail uses slug || id, so an id URL canonicalises to the slug URL
+          const key = data.slug || data.id;
+          if (key) canonicalPath = `/scholarships/browse/${encodeURIComponent(String(key))}`;
           meta = {
-            title: `${data.name} | Techsari`,
+            title: seoTitle,
             description: seoDesc,
             image: ogImageUrl,
-            ogTitle: `${data.name} | Techsari`,
+            ogTitle: seoTitle,
             ogDescription: seoDesc,
           };
+        } else if (apiRes.status === 404 || apiRes.status === 400) {
+          // Unpublished/unknown scholarship, or a slug the API rejects outright — tell crawlers it is gone
+          notFound = true;
+          meta = NOT_FOUND_META;
         } else {
-          // API returned non-200 — use a scholarship-aware fallback
+          // API error — use a scholarship-aware fallback
           const displayName = slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
           meta = {
             title: `${displayName} | Techsari`,
@@ -240,13 +282,19 @@ export default async function middleware(request: Request): Promise<Response> {
       }
     }
 
-    const metaTags = buildMetaTags(meta, url.href);
+    const canonicalUrl = `${SITE_URL}${canonicalPath}`;
+    // data-mw marks these tags so src/main.tsx can remove them before React's
+    // <SEO> adds its own — otherwise JS-rendering crawlers (Googlebot, Bingbot)
+    // would see every tag twice in the rendered DOM.
+    const metaTags = buildMetaTags(meta, canonicalUrl, notFound).replace(/<(title|meta|link)\b/g, '<$1 data-mw');
 
-    // Inject meta tags into <head>
-    const modifiedHTML = html.replace('<head>', `<head>${metaTags}`);
+    // Replace the shell's generic tags with the route-specific set.
+    // Function replacer: metaTags holds DB text, and a "$&" or "$'" in a
+    // scholarship name would otherwise be expanded by String.replace.
+    const modifiedHTML = stripDefaultHeadTags(html).replace('</head>', () => `${metaTags}</head>`);
 
     return new Response(modifiedHTML, {
-      status: 200,
+      status: notFound ? 404 : 200,
       headers: {
         'content-type': 'text/html;charset=utf-8',
         'cache-control': 'public, max-age=3600, stale-while-revalidate=86400',
@@ -255,6 +303,6 @@ export default async function middleware(request: Request): Promise<Response> {
     });
   } catch {
     // If anything fails, pass through normally
-    return fetch(request);
+    return undefined;
   }
 }

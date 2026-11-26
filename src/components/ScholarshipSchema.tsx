@@ -9,6 +9,7 @@ interface ScholarshipSchemaProps {
     countries: string[];
     degree_levels: string[];
     slug: string;
+    id?: string;
     updated_at: string;
   };
 }
@@ -26,7 +27,7 @@ export function ScholarshipSchema({ scholarship }: ScholarshipSchemaProps) {
       '@type': 'EducationalOccupationalCredential',
       name: scholarship.name,
       description: (scholarship.description || '').slice(0, 300),
-      url: `https://www.techsari.online/scholarships/browse/${scholarship.slug}`,
+      url: `https://www.techsari.online/scholarships/browse/${scholarship.slug || scholarship.id}`,
       dateModified: scholarship.updated_at,
       offers: {
         '@type': 'Offer',

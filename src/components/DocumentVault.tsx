@@ -241,7 +241,7 @@ export default function DocumentVault({
 
   return (
     <div className="bg-pure-white text-off-black-ink max-w-[1200px] mx-auto px-4 sm:px-6 py-14 md:py-20">
-      <SEO title="Document Vault | Techsari" description="Store transcripts, MOI letters and recommendations once — reuse them across every application." path="/documentvault" noindex />
+      <SEO title="Document Vault | Techsari" description="Store transcripts, MOI letters and recommendations once — reuse them across every application." path="/vault" noindex />
 
       <div className="space-y-8 animate-sweep">
 

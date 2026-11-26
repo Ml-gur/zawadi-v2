@@ -1,5 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
 
+// Copy of the hub slugs in src/lib/scholarship-hubs.ts (this Node function
+// can't import the app's TypeScript). Update both lists together.
+const HUB_PATHS = [
+  '/scholarships/fully-funded', '/scholarships/no-ielts',
+  '/scholarships/level/masters', '/scholarships/level/phd', '/scholarships/level/undergraduate',
+  ...['kenya', 'nigeria', 'ghana', 'south-africa', 'uganda', 'tanzania', 'rwanda', 'zambia'].map(c => `/scholarships/country/${c}`),
+];
+
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).end();
@@ -18,7 +26,7 @@ export default async function handler(req, res) {
   try {
     const { data } = await supabase
       .from('scholarships')
-      .select('slug,updated_at')
+      .select('slug,id,updated_at')
       .eq('published', true)
       .or('deadline.is.null,deadline.gte.' + new Date().toISOString().split('T')[0])
       .order('updated_at', { ascending: false });
@@ -37,12 +45,15 @@ export default async function handler(req, res) {
       { loc: 'https://www.techsari.online/contact', freq: 'monthly', priority: '0.4' },
       { loc: 'https://www.techsari.online/privacy', freq: 'yearly', priority: '0.3' },
       { loc: 'https://www.techsari.online/terms', freq: 'yearly', priority: '0.3' },
+      // Landing pages — keep in sync with HUBS in src/lib/scholarship-hubs.ts
+      ...HUB_PATHS.map(path => ({ loc: `https://www.techsari.online${path}`, freq: 'daily', priority: '0.8' })),
     ];
 
     for (const page of staticPages) {
       xml += '  <url>\n';
+      // No <lastmod> for static pages: stamping them "today" on every request
+      // tells Google they always change, and it then ignores lastmod site-wide.
       xml += `    <loc>${page.loc}</loc>\n`;
-      xml += `    <lastmod>${today}</lastmod>\n`;
       xml += `    <changefreq>${page.freq}</changefreq>\n`;
       xml += `    <priority>${page.priority}</priority>\n`;
       xml += '  </url>\n';
@@ -50,9 +61,13 @@ export default async function handler(req, res) {
 
     if (data) {
       for (const s of data) {
+        // Rows without a slug were emitted as /browse/null (10 dead URLs).
+        // The detail page and API accept the id too, so fall back to it.
+        const key = s.slug || s.id;
+        if (!key) continue;
         const lastmod = s.updated_at ? s.updated_at.split('T')[0] : today;
         xml += '  <url>\n';
-        xml += `    <loc>https://www.techsari.online/scholarships/browse/${encodeURIComponent(s.slug)}</loc>\n`;
+        xml += `    <loc>https://www.techsari.online/scholarships/browse/${encodeURIComponent(key)}</loc>\n`;
         xml += `    <lastmod>${lastmod}</lastmod>\n`;
         xml += '    <changefreq>weekly</changefreq>\n';
         xml += '    <priority>0.8</priority>\n';

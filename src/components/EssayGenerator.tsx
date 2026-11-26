@@ -346,7 +346,7 @@ export default function EssayGenerator({
 
   return (
     <div className="flex-1 w-full min-h-full flex flex-col lg:flex-row overflow-hidden gap-6 lg:gap-0 bg-parchment text-off-black-ink animate-sweep">
-      <SEO title="AI Essay Studio | Techsari" description="Draft, critique and polish scholarship essays with AI guidance and human mentor review." path="/essaygenerator" noindex />
+      <SEO title="AI Essay Studio | Techsari" description="Draft, critique and polish scholarship essays with AI guidance and human mentor review." path="/essays" noindex />
 
 
       {/* Chat Panel */}

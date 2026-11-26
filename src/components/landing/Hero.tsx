@@ -22,7 +22,7 @@ export default function Hero({ onGetStarted, onLogin, countriesCount }: HeroProp
 
           <FadeUp delay={0.08}>
             <h1 className="mt-7 text-ed-h1-sm md:text-ed-hero-sm text-off-black-ink max-w-[20ch] lg:max-w-[24ch]">
-              End-to-end scholarship platform for African students
+              Scholarships for African students, matched to you
             </h1>
           </FadeUp>
 

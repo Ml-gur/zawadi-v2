@@ -422,7 +422,7 @@ export default function Scholarships({
                       </div>
                       </div>
                       <div className={`mt-3 md:mt-6 pt-2.5 md:pt-4 border-t flex items-center justify-between gap-2 md:gap-3 ${isDark ? 'border-stone' : 'border-ash'}`}>
-                        <ShareButton url={`/scholarships/browse/${s.slug}`} iconOnly size="sm" tone={isDark ? 'dark' : 'light'} />
+                        <ShareButton url={`/scholarships/browse/${s.slug || s.id}`} iconOnly size="sm" tone={isDark ? 'dark' : 'light'} />
                         <span className={`hidden md:flex items-center gap-1.5 text-xs ${isDark ? 'text-smoke' : 'text-graphite'}`}><Lock className="w-3 h-3" />Sign up for match score</span>
                         <span className={`text-xs md:text-sm font-medium ${isDark ? 'text-electric-lime' : 'text-off-black-ink'}`}>Sign Up Free</span>
                       </div>
@@ -480,9 +480,9 @@ export default function Scholarships({
                 <button onClick={() => setSelectedSchol(null)} className="flex items-center gap-1.5 text-xs font-bold text-muted hover:text-primary transition-colors cursor-pointer">
                   <ArrowLeft className="w-3.5 h-3.5" /> Back
                 </button>
-                {selectedSchol.slug && (
+                {(selectedSchol.slug || selectedSchol.id) && (
                   <ShareButton
-                    url={`/scholarships/browse/${selectedSchol.slug}`}
+                    url={`/scholarships/browse/${selectedSchol.slug || selectedSchol.id}`}
                     title={selectedSchol.name}
                     iconOnly
                     size="sm"

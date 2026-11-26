@@ -23,6 +23,8 @@ import {
 import ShareButton from '../../components/ShareButton';
 import { flagFor } from '../../lib/flags';
 import EligibilityList from '../../components/EligibilityList';
+import RelatedScholarships from './RelatedScholarships';
+import { scholarshipDescription, scholarshipTitle } from '../../lib/scholarship-hubs';
 
 interface ScholarshipDetail {
   id: string;
@@ -225,16 +227,8 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
   const isClosed = Boolean(scholarship.deadline && scholarship.deadline < today);
   const closingSoon = !isClosed && isClosingSoon(scholarship.deadline, scholarship.urgency);
   const cleanDesc = stripHtml(scholarship.description || '');
-  // Factual description for social previews — no "100% eligible" claims
-  const fundingLabel = scholarship.funding_type === 'Full' ? 'Fully funded' : scholarship.funding_type === 'Partial' ? 'Partially funded' : '';
-  const degreeLabel = scholarship.degree_levels?.length ? scholarship.degree_levels.join(', ') : '';
-  const countryLabel = scholarship.countries?.length ? scholarship.countries.join(', ') : 'eligible African students';
-  const seoDesc = [
-    fundingLabel || degreeLabel ? `${fundingLabel ? fundingLabel + ' ' : ''}${degreeLabel ? degreeLabel + ' scholarship' : 'scholarship'}`.trim() : 'Scholarship opportunity',
-    `for eligible African students from ${countryLabel}.`,
-    scholarship.deadline ? `Deadline: ${formatDeadline(scholarship.deadline)}.` : '',
-    'View eligibility requirements, funding details and application information.',
-  ].filter(Boolean).join(' ').slice(0, 200);
+  // Shared with middleware.ts so crawlers and the rendered page agree
+  const seoDesc = scholarshipDescription(scholarship);
 
   const ogName = (scholarship.name || '').slice(0, 60);
   const ogProvider = (scholarship.provider || '').slice(0, 50);
@@ -253,7 +247,7 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
   return (
     <div className="min-h-[100dvh] bg-surface-container-lowest text-on-surface font-body antialiased flex flex-col justify-between">
       <SEO
-        title={`${scholarship.name} | Techsari`}
+        title={scholarshipTitle(scholarship)}
         description={seoDesc}
         path={`/scholarships/browse/${scholarship.slug || scholarship.id}`}
         image={ogImageUrl}
@@ -275,7 +269,7 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
           </nav>
           <div className="flex items-center gap-2 shrink-0">
             <ShareButton
-              url={`/scholarships/browse/${scholarship.slug}`}
+              url={`/scholarships/browse/${scholarship.slug || scholarship.id}`}
               title={scholarship.name}
               iconOnly
               size="md"
@@ -591,6 +585,8 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
           </aside>
 
         </div>
+
+        <RelatedScholarships current={scholarship} />
 
       </main>
     </div>
