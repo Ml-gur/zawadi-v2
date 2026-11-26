@@ -3,6 +3,8 @@
 // They only read the static HTML. This middleware intercepts their requests,
 // fetches the SPA's index.html, and injects route-specific OG tags server-side.
 
+import { hubDescription, hubFromPath, hubPath, hubTitle, intakeYear, scholarshipDescription, scholarshipTitle } from './src/lib/scholarship-hubs';
+
 const SITE_URL = 'https://www.techsari.online';
 
 const CRAWLER_PATTERNS = [
@@ -28,8 +30,9 @@ interface RouteMeta {
 
 const ROUTE_META: Record<string, RouteMeta> = {
   '/': {
-    title: 'Techsari | Scholarships Matched to You',
-    description: 'An end-to-end scholarship platform for African students. Find scholarships matched to your profile, prepare applications with AI, and get support from mentors.',
+    // Getters: the intake year is worked out per request, not frozen when the isolate starts
+    get title() { return `Scholarships for African Students ${intakeYear()} — Matched to You | Techsari`; },
+    get description() { return `Find ${intakeYear()} scholarships for African students from all 54 countries: fully funded, no-IELTS, Masters, PhD and undergraduate. See only the ones you qualify for.`; },
     image: `${SITE_URL}/og-home-v2.png`,
     ogTitle: 'Techsari | Scholarships Matched to You',
     ogDescription: 'An end-to-end scholarship platform for African students. Find scholarships matched to your profile, prepare applications with AI, and get support from mentors.',
@@ -42,8 +45,8 @@ const ROUTE_META: Record<string, RouteMeta> = {
     ogDescription: 'Browse verified scholarships open to African students. Every listing is checked for active deadlines and real eligibility. Full and partial funding from universities worldwide.',
   },
   '/scholarships/browse': {
-    title: 'Scholarships for African Students | Techsari',
-    description: 'Browse verified scholarships open to students from all 54 African countries. Every listing checked for active deadlines and real eligibility. Full funding and partial funding available.',
+    get title() { return `Scholarships for African Students ${intakeYear()}: All Open Awards | Techsari`; },
+    get description() { return `Browse open scholarships for African students for ${intakeYear()}. Fully funded, no-IELTS, Masters, PhD and undergraduate awards, with deadlines and eligibility checked.`; },
     image: `${SITE_URL}/og-scholarships-v2.png`,
     ogTitle: 'Scholarships for African Students | Techsari',
     ogDescription: 'Browse verified scholarships open to African students. Every listing is checked for active deadlines and real eligibility. Full and partial funding from universities worldwide.',
@@ -108,6 +111,12 @@ function getMeta(pathname: string): RouteMeta | null {
   const lower = normalized.toLowerCase();
   if (ROUTE_META[lower]) return ROUTE_META[lower];
   if (OTHER_PUBLIC_ROUTES.has(lower)) return ROUTE_META['/'];
+  const hub = hubFromPath(normalized);
+  if (hub) {
+    const title = hubTitle(hub);
+    const description = hubDescription(hub);
+    return { title, description, image: `${SITE_URL}/og-scholarships-v2.png`, ogTitle: title, ogDescription: description };
+  }
   // /scholarships/:slug is a client-side redirect to /scholarships/browse/:slug
   if (/^\/scholarships\/(browse\/)?[^/]+$/.test(normalized)) return ROUTE_META['/scholarships'];
   return null;
@@ -146,34 +155,6 @@ function formatDeadlineEdge(dateStr: string): string {
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 }
 
-function buildScholarDescription(data: Record<string, any>): string {
-  const parts: string[] = [];
-
-  // Build a factual, specific description
-  const funding = data.funding_type === 'Full' ? 'Fully funded' : data.funding_type === 'Partial' ? 'Partially funded' : '';
-  const degrees = Array.isArray(data.degree_levels) ? data.degree_levels.join(', ') : '';
-  const countries = Array.isArray(data.countries) ? data.countries.join(', ') : '';
-  const deadline = data.deadline ? formatDeadlineEdge(String(data.deadline)) : '';
-
-  if (funding || degrees) {
-    const level = degrees ? `${degrees} scholarship` : 'scholarship';
-    parts.push(`${funding ? funding + ' ' : ''}${level}`.trim());
-  }
-  if (countries) {
-    parts.push(`for eligible African students from ${countries}`);
-  } else {
-    parts.push('for eligible African students');
-  }
-
-  let desc = parts.join(' ');
-  if (deadline && deadline !== 'Check website') {
-    desc += `. Deadline: ${deadline}`;
-  }
-  desc += '. View eligibility, funding details and application information.';
-
-  return desc.slice(0, 200);
-}
-
 function buildMetaTags(meta: RouteMeta, url: string, noindex = false): string {
   const title = meta.ogTitle || meta.title;
   const desc = meta.ogDescription || meta.description;
@@ -187,11 +168,11 @@ function buildMetaTags(meta: RouteMeta, url: string, noindex = false): string {
 // route-specific set, otherwise crawlers see two <title>s and conflicting og:* tags.
 function stripDefaultHeadTags(html: string): string {
   return html
-    .replace(/<title>[\s\S]*?<\/title>\s*/i, '')
-    .replace(/<link rel="canonical"[^>]*>\s*/gi, '')
-    .replace(/<meta name="(?:description|robots)"[^>]*>\s*/gi, '')
-    .replace(/<meta property="og:[^"]*"[^>]*>\s*/gi, '')
-    .replace(/<meta name="twitter:[^"]*"[^>]*>\s*/gi, '');
+    .replace(/<title\b[^>]*>[\s\S]*?<\/title>\s*/i, '')
+    .replace(/<link\b[^>]*rel="canonical"[^>]*>\s*/gi, '')
+    .replace(/<meta\b[^>]*name="(?:description|robots)"[^>]*>\s*/gi, '')
+    .replace(/<meta\b[^>]*property="og:[^"]*"[^>]*>\s*/gi, '')
+    .replace(/<meta\b[^>]*name="twitter:[^"]*"[^>]*>\s*/gi, '');
 }
 
 function escapeHtml(s: string): string {
@@ -249,7 +230,9 @@ export default async function middleware(request: Request): Promise<Response | u
     // Google sees two disagreeing canonicals after rendering and ignores both.
     const normalizedPath = normalizePath(pathname);
     let canonicalPath = ROUTE_META[normalizedPath.toLowerCase()] ? normalizedPath.toLowerCase() : normalizedPath;
-    const legacySlug = normalizedPath.match(/^\/scholarships\/(?!browse(?:\/|$))([^/]+)$/);
+    const hubMatch = hubFromPath(normalizedPath);
+    if (hubMatch) canonicalPath = hubPath(hubMatch);
+    const legacySlug = hubMatch ? null : normalizedPath.match(/^\/scholarships\/(?!browse(?:\/|$))([^/]+)$/);
     if (legacySlug) canonicalPath = `/scholarships/browse/${legacySlug[1]}`;
 
     if (slug) {
@@ -259,16 +242,16 @@ export default async function middleware(request: Request): Promise<Response | u
         if (apiRes.ok) {
           const data = await apiRes.json();
           const ogImageUrl = buildScholarOgUrl(data);
-          const seoDesc = buildScholarDescription(data);
+          const seoDesc = scholarshipDescription(data);
+          const seoTitle = scholarshipTitle(data);
           // PublicScholarshipDetail uses slug || id, so an id URL canonicalises to the slug URL
           const key = data.slug || data.id;
           if (key) canonicalPath = `/scholarships/browse/${encodeURIComponent(String(key))}`;
-          // Name-first title: "Scholarship Name | Techsari"
           meta = {
-            title: `${data.name} | Techsari`,
+            title: seoTitle,
             description: seoDesc,
             image: ogImageUrl,
-            ogTitle: `${data.name} | Techsari`,
+            ogTitle: seoTitle,
             ogDescription: seoDesc,
           };
         } else if (apiRes.status === 404 || apiRes.status === 400) {

@@ -1,5 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
 
+// Copy of the hub slugs in src/lib/scholarship-hubs.ts (this Node function
+// can't import the app's TypeScript). Update both lists together.
+const HUB_PATHS = [
+  '/scholarships/fully-funded', '/scholarships/no-ielts',
+  '/scholarships/level/masters', '/scholarships/level/phd', '/scholarships/level/undergraduate',
+  ...['kenya', 'nigeria', 'ghana', 'south-africa', 'uganda', 'tanzania', 'rwanda', 'zambia'].map(c => `/scholarships/country/${c}`),
+];
+
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).end();
@@ -37,6 +45,8 @@ export default async function handler(req, res) {
       { loc: 'https://www.techsari.online/contact', freq: 'monthly', priority: '0.4' },
       { loc: 'https://www.techsari.online/privacy', freq: 'yearly', priority: '0.3' },
       { loc: 'https://www.techsari.online/terms', freq: 'yearly', priority: '0.3' },
+      // Landing pages — keep in sync with HUBS in src/lib/scholarship-hubs.ts
+      ...HUB_PATHS.map(path => ({ loc: `https://www.techsari.online${path}`, freq: 'daily', priority: '0.8' })),
     ];
 
     for (const page of staticPages) {

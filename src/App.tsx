@@ -31,9 +31,30 @@ import {
   getBotIngestions,
   getAuditLogs,
 } from './lib/supabase-queries';
+import { hubFromPath } from './lib/scholarship-hubs';
+import { SEO } from './components/SEO';
 
+// Pages without their own <SEO> would otherwise have no <title> once the
+// static fallback tags are removed at startup (see main.tsx).
+function PrivateTitle({ title, path }: { title: string; path: string }) {
+  return <SEO title={`${title} | Techsari`} description="Techsari account page." path={path} noindex />;
+}
+
+// Landing pages: /scholarships/fully-funded, /scholarships/no-ielts,
+// /scholarships/country/<country>, /scholarships/level/<level>.
+function ScholarshipHubRoute() {
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const hub = hubFromPath(pathname);
+  if (!hub) return <Suspense fallback={null}><NotFoundPage onBack={() => navigate('/')} /></Suspense>;
+  return <Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading scholarships...</div>}><ScholarshipHubPage key={hub.slug} hub={hub} /></Suspense>;
+}
+
+// /scholarships/<slug> is a legacy link to a scholarship — unless it names a hub
 function ScholarshipRedirect() {
   const { slug } = useParams();
+  const { pathname } = useLocation();
+  if (hubFromPath(pathname)) return <ScholarshipHubRoute />;
   return <Navigate to={`/scholarships/browse/${slug}`} replace />;
 }
 
@@ -57,6 +78,7 @@ function DashboardSkeleton() {
 }
 
 const LandingPage = lazy(() => import('./components/LandingPage'));
+const ScholarshipHubPage = lazy(() => import('./pages/public/ScholarshipHubPage'));
 import LandingHeader from './components/landing/LandingHeader';
 import LandingFooter from './components/landing/LandingFooter';
 const AuthScreen = lazy(() => import('./components/AuthScreen'));
@@ -778,18 +800,20 @@ export default function App() {
               <Route path="/how-it-works" element={<HowItWorksPage onBack={() => navigate('/')} onGetStarted={() => { setShowAuth(true); navigate('/'); }} />} />
               <Route path="/scholarships/browse" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading scholarships...</div>}><PublicScholarshipList user={user} /></Suspense>} />
               <Route path="/scholarships/browse/:slug" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading...</div>}><PublicScholarshipDetail user={user} /></Suspense>} />
+              <Route path="/scholarships/country/:hub" element={<ScholarshipHubRoute />} />
+              <Route path="/scholarships/level/:hub" element={<ScholarshipHubRoute />} />
               <Route path="/scholarships/:slug" element={<ScholarshipRedirect />} />
               <Route path="/scholarships" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading scholarships...</div>}><Scholarships user={user} scholarships={scholarships} applications={applications} documents={documents} onTrackScholarship={handleTrackScholarship} onUploadMetadata={handleUploadDocument} onNavigateToTab={handleNavigateToTab} /></Suspense>} />
               <Route path="/contact" element={<ContactPage onBack={() => navigate('/')} />} />
-              <Route path="/forgot-password" element={<Suspense fallback={null}><ForgotPassword onBack={() => { setShowAuth(false); navigate('/'); }} /></Suspense>} />
-              <Route path="/reset-password" element={<Suspense fallback={null}><ResetPassword onBackToLogin={() => { setShowAuth(false); navigate('/'); }} /></Suspense>} />
-              <Route path="/admin/login" element={<Suspense fallback={null}><AdminLoginPage /></Suspense>} />
+              <Route path="/forgot-password" element={<Suspense fallback={null}><PrivateTitle title="Reset your password" path="/forgot-password" /><ForgotPassword onBack={() => { setShowAuth(false); navigate('/'); }} /></Suspense>} />
+              <Route path="/reset-password" element={<Suspense fallback={null}><PrivateTitle title="Choose a new password" path="/reset-password" /><ResetPassword onBackToLogin={() => { setShowAuth(false); navigate('/'); }} /></Suspense>} />
+              <Route path="/admin/login" element={<Suspense fallback={null}><PrivateTitle title="Admin sign in" path="/admin/login" /><AdminLoginPage /></Suspense>} />
               <Route path="/admin" element={
                 !user
                   ? <Navigate to="/admin/login" replace />
                   : user.role !== 'super_admin'
                     ? <Navigate to="/admin/login" replace />
-                    : <Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading admin...</div>}>
+                    : <Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading admin...</div>}><PrivateTitle title="Admin" path="/admin" />
                         <AdminPortal user={user} scholarships={scholarships} botQueue={botQueue} auditLogs={auditLogs} onAddScholarship={handleAddScholarship} onRemoveScholarship={handleRemoveScholarship} onBulkRemoveScholarships={handleBulkRemoveScholarships} onBulkSetPublished={handleBulkSetPublished} onTogglePublish={handleTogglePublish} onTriggerScrapeCampaign={handleTriggerScrapeCampaign} onReviewBotItem={handleReviewBotItem} />
                       </Suspense>
               } />
@@ -825,7 +849,7 @@ export default function App() {
                   <Route path="/profile" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading profile...</div>}><StudentProfile user={user} onUpdateProfile={handleUpdateProfile} onNavigateToTab={handleNavigateToTab} /></Suspense>} />
                   <Route path="/applications" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading tracker...</div>}><ApplicationTracker scholarships={scholarships} applications={applications} onTrackScholarship={handleTrackScholarship} onRemoveTrack={handleRemoveTrack} onNavigateToTab={handleNavigateToTab} /></Suspense>} />
                   <Route path="/billing" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading plans...</div>}><SubscriptionPlans user={user} onPlanUpdated={(u) => { setUser(u); fetchUserData(u.email); }} onNavigateToTab={handleNavigateToTab} /></Suspense>} />
-                  <Route path="/mentor" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading mentor portal...</div>}><MentorPortal user={user} onBack={() => navigate('/dashboard')} /></Suspense>} />
+                  <Route path="/mentor" element={<Suspense fallback={<div className="py-24 text-center text-xs text-on-surface-variant">Loading mentor portal...</div>}><PrivateTitle title="Mentor portal" path="/mentor" /><MentorPortal user={user} onBack={() => navigate('/dashboard')} /></Suspense>} />
                   <Route path="*" element={<Suspense fallback={null}><NotFoundPage onBack={() => navigate('/')} /></Suspense>} />
                 </>
               ) : (

@@ -6,7 +6,7 @@ export default async function handler(req, res) {
   }
 
   const page = Math.max(1, parseInt(req.query.page) || 1);
-  const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 20));
+  const limit = Math.min(200, Math.max(1, parseInt(req.query.limit) || 20));
   const offset = (page - 1) * limit;
 
   const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;

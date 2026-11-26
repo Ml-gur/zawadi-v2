@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { openCookieSettings } from '../../lib/consent';
+import { HUBS, hubPath } from '../../lib/scholarship-hubs';
 
 const FOOTER_LINKS = [
   { label: 'Privacy Policy', to: '/privacy' },
@@ -42,6 +43,18 @@ export default function LandingFooter() {
           </li>
         </ul>
       </div>
+      {/* Site-wide links to the landing pages for the main search intents */}
+      <nav aria-label="Scholarship lists" className="border-t border-white/10">
+        <ul className="max-w-[1200px] mx-auto px-4 sm:px-6 py-6 flex flex-wrap justify-center md:justify-start gap-x-5 gap-y-2">
+          {HUBS.map(h => (
+            <li key={h.slug}>
+              <Link to={hubPath(h)} className="text-ed-caption text-smoke hover:text-electric-lime transition-colors">
+                {h.kind === 'country' ? `Scholarships for ${h.demonym} students` : h.subject}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
     </footer>
   );
 }
