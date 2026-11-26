@@ -1,16 +1,36 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import {defineConfig} from 'vite';
+import {defineConfig, type Plugin} from 'vite';
 import {VitePWA} from 'vite-plugin-pwa';
 
-export default defineConfig(() => {
+// scripts/prerender.mjs overwrites dist/index.html with the prerendered home
+// page, so keep an untouched copy of the SPA shell for every other route
+// (vercel.json fallback) and for the service worker's navigation fallback.
+// Emitted during the bundle so the PWA precache manifest includes it.
+function appShell(): Plugin {
+  return {
+    name: 'techsari-app-shell',
+    apply: 'build',
+    enforce: 'post',
+    generateBundle(_options, bundle) {
+      const index = bundle['index.html'];
+      if (index && index.type === 'asset') {
+        this.emitFile({ type: 'asset', fileName: 'app-shell.html', source: index.source });
+      }
+    },
+  };
+}
+
+export default defineConfig(({ isSsrBuild }) => {
   const isDev = process.env.NODE_ENV !== 'production';
   return {
     plugins: [
       react(),
       tailwindcss(),
-      VitePWA({
+      ...(isSsrBuild ? [] : [appShell()]),
+      // The build-time renderer (vite build --ssr) needs no service worker
+      isSsrBuild ? null : VitePWA({
         registerType: 'autoUpdate',
         includeAssets: ['favicon.svg'],
         devOptions: {
@@ -65,6 +85,10 @@ export default defineConfig(() => {
         },
         workbox: {
           globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+          // Offline / repeat-visit navigations get the plain shell, not the
+          // prerendered home page that now lives at index.html
+          navigateFallback: 'app-shell.html',
+          navigateFallbackDenylist: [/^\/api\//, /\/sitemap\.xml$/, /\/robots\.txt$/],
           runtimeCaching: [
             {
               urlPattern: /^https?:\/\/.+\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/,
@@ -93,7 +117,7 @@ export default defineConfig(() => {
     },
     build: {
       rollupOptions: {
-        output: {
+        output: isSsrBuild ? {} : {
           manualChunks(id) {
             if (id.includes('node_modules/lucide-react')) return 'vendor-icons';
             if (id.includes('node_modules/@supabase')) return 'vendor-supabase';

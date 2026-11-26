@@ -12,12 +12,19 @@ import '@fontsource/inter-tight/600.css';
 import '@fontsource/jetbrains-mono/400.css';
 import '@fontsource/jetbrains-mono/500.css';
 import './index.css';
+import { readSeedFromDom } from './lib/prerender-seed';
 
 document.documentElement.classList.add('js');
 
 // Crawler-only head tags injected by middleware.ts. <SEO> re-creates them per
 // route, so drop the server copies to keep one title/canonical in the DOM.
 document.querySelectorAll('head [data-mw]').forEach((el) => el.remove());
+
+// Prerendered pages embed the data they were built with (scripts/prerender.mjs).
+// The client renders from scratch (createRoot, not hydrateRoot): the auth and
+// cookie UI differ per visitor, so the server HTML is a first paint for people
+// and the full content for crawlers, then React takes over.
+readSeedFromDom();
 
 /* Animated favicon — swaps between two frames while the tab is visible. */
 (function animateFavicon() {

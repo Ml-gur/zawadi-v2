@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { ScholarshipTeaser } from '../pages/public/browse-shared';
+import { getSeed } from './prerender-seed';
 
 // Every open listing (~160 rows today). The directory, the hub pages and the
 // "related scholarships" block all filter this same list, so filters work
@@ -62,12 +63,17 @@ export function loadPublicScholarships(): Promise<ScholarshipTeaser[]> {
  * "no scholarships", which is indistinguishable from an empty database.
  */
 export function usePublicScholarships() {
-  const [state, setState] = useState<{ items: ScholarshipTeaser[] | null; error: boolean }>({ items: null, error: false });
+  // Prerendered pages ship the list they were built with: render it straight
+  // away (and identically on the server), then swap in the live list.
+  const [state, setState] = useState<{ items: ScholarshipTeaser[] | null; error: boolean }>(
+    () => ({ items: getSeed().list ?? null, error: false }),
+  );
   useEffect(() => {
     let cancelled = false;
     loadPublicScholarships().then(
       list => { if (!cancelled) setState({ items: list, error: false }); },
-      () => { if (!cancelled) setState({ items: EMPTY, error: true }); },
+      // Keep the seeded list if the refresh fails
+      () => { if (!cancelled) setState(prev => (prev.items ? prev : { items: EMPTY, error: true })); },
     );
     return () => { cancelled = true; };
   }, []);

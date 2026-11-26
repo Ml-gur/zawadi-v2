@@ -25,6 +25,7 @@ import { flagFor } from '../../lib/flags';
 import EligibilityList from '../../components/EligibilityList';
 import RelatedScholarships from './RelatedScholarships';
 import { scholarshipDescription, scholarshipTitle } from '../../lib/scholarship-hubs';
+import { getSeed } from '../../lib/prerender-seed';
 
 interface ScholarshipDetail {
   id: string;
@@ -90,8 +91,13 @@ interface PublicScholarshipDetailProps {
 export default function PublicScholarshipDetail({ user }: PublicScholarshipDetailProps) {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const [scholarship, setScholarship] = useState<ScholarshipDetail | null>(null);
-  const [loading, setLoading] = useState(true);
+  // A prerendered page carries the scholarship it was built with
+  const seeded = (() => {
+    const d = getSeed().detail as ScholarshipDetail | undefined;
+    return d && slug && (d.slug === slug || d.id === slug) ? d : null;
+  })();
+  const [scholarship, setScholarship] = useState<ScholarshipDetail | null>(seeded);
+  const [loading, setLoading] = useState(!seeded);
   const [notFound, setNotFound] = useState(false);
 
   const openAuth = (action?: string) => {
@@ -101,7 +107,9 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
   useEffect(() => {
     if (!slug) return;
     let isCancelled = false;
-    setLoading(true);
+    // Refresh quietly when the prerendered copy is already on screen
+    const showingSeed = Boolean(seeded);
+    if (!showingSeed) setLoading(true);
     setNotFound(false);
 
     const fetchDetail = async () => {
@@ -179,7 +187,8 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
         }
       } catch {}
 
-      if (!isCancelled) {
+      // A failed refresh must not replace the prerendered copy with "not found"
+      if (!isCancelled && !showingSeed) {
         setNotFound(true);
         setLoading(false);
       }
