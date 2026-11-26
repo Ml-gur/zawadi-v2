@@ -50,7 +50,8 @@ export function SEO({ title, description, ogDescription, ogTitle, path, image = 
       <meta name="twitter:creator" content={TWITTER_HANDLE} />
 
       {schema && (
-        <script type="application/ld+json">{JSON.stringify(schema)}</script>
+        /* "<" escaped: schema can contain scraped scholarship names */
+        <script type="application/ld+json">{JSON.stringify(schema).replace(/</g, '\\u003c')}</script>
       )}
 
       {children}

@@ -89,13 +89,13 @@ export default function LandingPage({ onGetStarted, onLogin, countries, onViewAl
   return (
     <div id="landing-root" className="bg-pure-white text-off-black-ink min-h-[100dvh]">
       <SEO
-        title={`Scholarships for African Students ${intakeYear()} — Matched to You | Techsari`}
-        description={`Find ${intakeYear()} scholarships for African students from all 54 countries: fully funded, no-IELTS, Masters, PhD and undergraduate. See only the ones you qualify for.`}
+        title={`Scholarship Finder for African Students ${intakeYear()} | Techsari`}
+        description={`Find ${intakeYear()} scholarships you qualify for: fully funded and no-IELTS awards for students from all 54 African countries. Free profile, first matches in 3 minutes.`}
         keywords="scholarships for African students, Africa scholarship matching, no IELTS scholarships Africa, fully funded scholarships Africa, scholarship application Africa"
         path="/"
         image="https://www.techsari.online/og-home-v2.png"
-        ogTitle="Techsari — Find Scholarships You Actually Qualify For"
-        ogDescription="Strict eligibility matching for African students. See only scholarships where you meet every requirement. No spam. No data selling. No IELTS barrier."
+        ogTitle="Find Scholarships You Qualify For | Techsari"
+        ogDescription="Strict eligibility matching for African students: fully funded and no-IELTS scholarships, deadlines checked. No spam, no data selling. Free profile."
         schema={[websiteSchema, organizationSchema]}
       />
 

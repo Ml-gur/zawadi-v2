@@ -31,11 +31,12 @@ interface RouteMeta {
 const ROUTE_META: Record<string, RouteMeta> = {
   '/': {
     // Getters: the intake year is worked out per request, not frozen when the isolate starts
-    get title() { return `Scholarships for African Students ${intakeYear()} — Matched to You | Techsari`; },
-    get description() { return `Find ${intakeYear()} scholarships for African students from all 54 countries: fully funded, no-IELTS, Masters, PhD and undergraduate. See only the ones you qualify for.`; },
+    // Same copy as LandingPage.tsx (used only if the page wasn't prerendered)
+    get title() { return `Scholarship Finder for African Students ${intakeYear()} | Techsari`; },
+    get description() { return `Find ${intakeYear()} scholarships you qualify for: fully funded and no-IELTS awards for students from all 54 African countries. Free profile, first matches in 3 minutes.`; },
     image: `${SITE_URL}/og-home-v2.png`,
-    ogTitle: 'Techsari | Scholarships Matched to You',
-    ogDescription: 'An end-to-end scholarship platform for African students. Find scholarships matched to your profile, prepare applications with AI, and get support from mentors.',
+    ogTitle: 'Find Scholarships You Qualify For | Techsari',
+    ogDescription: 'Strict eligibility matching for African students: fully funded and no-IELTS scholarships, deadlines checked. No spam, no data selling. Free profile.',
   },
   '/scholarships': {
     title: 'Scholarships for African Students | Techsari',
@@ -220,7 +221,21 @@ export default async function middleware(request: Request): Promise<Response | u
 
     const html = await originResponse.text();
 
-    // Try per-scholarship OG tags for /scholarships/browse/:slug
+    // Prerendered at build time (scripts/prerender.mjs): it already has the
+    // page's own title, description, canonical and full content — serve it
+    // untouched rather than overwriting its tags with the generic copy below.
+    if (originResponse.ok && html.includes('id="__TECHSARI_SEED__"')) {
+      return new Response(html, {
+        status: 200,
+        headers: {
+          'content-type': 'text/html;charset=utf-8',
+          'cache-control': 'public, max-age=3600, stale-while-revalidate=86400',
+          'x-prerendered': '1',
+        },
+      });
+    }
+
+    // Not prerendered (the SPA shell): inject route-specific tags for /scholarships/browse/:slug
     const routeMeta = getMeta(pathname);
     let notFound = routeMeta === null;
     let meta: RouteMeta = routeMeta || NOT_FOUND_META;

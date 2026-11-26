@@ -5,7 +5,7 @@ import { Breadcrumbs } from '../../components/Breadcrumbs';
 import BrowseTable from './BrowseTable';
 import { formatDeadline, type ScholarshipTeaser } from './browse-shared';
 import { usePublicScholarships } from '../../lib/usePublicScholarships';
-import { HUBS, hubDescription, hubPath, hubTitle, intakeYear, isOpenToAllAfricans, type Hub } from '../../lib/scholarship-hubs';
+import { HUBS, hubCounts, hubDescription, hubPath, hubTitle, intakeYear, isOpenToAllAfricans, type Hub } from '../../lib/scholarship-hubs';
 
 const SITE_URL = 'https://www.techsari.online';
 const PAN_AFRICAN_PREVIEW = 12;
@@ -69,6 +69,8 @@ export default function ScholarshipHubPage({ hub }: { hub: Hub }) {
   const restShown = hub.kind === 'country' ? rest.slice(0, PAN_AFRICAN_PREVIEW) : rest;
   // Thin, empty or failed pages stay out of the index (doorway-page risk)
   const noindex = !loading && (error || all.length === 0 || (hub.kind === 'country' && countryOnly.length < MIN_COUNTRY_ONLY));
+  // Live counts in the title/description (prerendered, so crawlers see them)
+  const counts = loading || error ? undefined : hubCounts(hub, all);
   const questions = useMemo(() => buildQuestions(hub, all, year), [hub, all, year]);
 
   const listed = [...countryOnly, ...restShown].slice(0, 50);
@@ -84,7 +86,7 @@ export default function ScholarshipHubPage({ hub }: { hub: Hub }) {
 
   return (
     <div className="min-h-[100dvh] bg-parchment text-off-black-ink flex flex-col">
-      <SEO title={hubTitle(hub, year)} description={hubDescription(hub, year)} path={hubPath(hub)} schema={listed.length ? itemList : undefined} noindex={noindex} />
+      <SEO title={hubTitle(hub, year, counts)} description={hubDescription(hub, year, counts)} path={hubPath(hub)} schema={listed.length ? itemList : undefined} noindex={noindex} />
 
       <main className="flex-grow w-full max-w-[1200px] mx-auto px-4 sm:px-6 py-14 md:py-20">
         <Breadcrumbs items={[{ name: 'Scholarships', path: '/scholarships/browse' }, { name: hub.subject }]} />
@@ -118,7 +120,7 @@ export default function ScholarshipHubPage({ hub }: { hub: Hub }) {
           <>
             {countryOnly.length > 0 && (
               <section aria-labelledby="country-only" className="mb-12">
-                <h2 id="country-only" className="text-ed-sub mb-5">Only for applicants from {hub.country} ({countryOnly.length})</h2>
+                <h2 id="country-only" className="text-ed-sub mb-5">Limited to selected countries, {hub.country} included ({countryOnly.length})</h2>
                 <BrowseTable items={countryOnly} />
               </section>
             )}

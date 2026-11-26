@@ -96,20 +96,32 @@ const escapeJson = (value) => JSON.stringify(value).replace(/</g, '\\u003c');
 // them. Move them into <head>, marked data-mw so src/main.tsx removes them
 // before the client re-creates its own (no duplicates in the live DOM), and so
 // middleware.ts can strip them for crawlers.
-const HEAD_TAG_RE = /<title\b[^>]*>[\s\S]*?<\/title>|<meta\b[^>]*\b(?:name|property)="(?:description|robots|keywords|og:[^"]*|twitter:[^"]*)"[^>]*\/?>|<link\b[^>]*\brel="canonical"[^>]*\/?>/gi;
+//
+// React flushes these hoistable tags at the very start of the output, before
+// any page markup. Only that leading run is moved: matching across the whole
+// body would also lift tag-like text out of JSON-LD (scraped scholarship
+// names), letting data inject a canonical or robots tag into <head>.
+const LEADING_TAG_RE = /^\s*(<title\b[^>]*>[^<]*<\/title>|<meta\b[^>]*>|<link\b[^>]*>)/i;
+const SEO_TAG_RE = /^<title\b|^<meta\b[^>]*\b(?:name|property)="(?:description|robots|keywords|og:[^"]*|twitter:[^"]*)"|^<link\b[^>]*\brel="canonical"/i;
 
 function splitHead(appHtml) {
   const head = [];
-  const body = appHtml.replace(HEAD_TAG_RE, (tag) => {
-    head.push(tag.replace(/^<(title|meta|link)\b/i, '<$1 data-mw'));
-    return '';
-  });
+  let body = appHtml;
+  for (let m = body.match(LEADING_TAG_RE); m; m = body.match(LEADING_TAG_RE)) {
+    const tag = m[1];
+    head.push(SEO_TAG_RE.test(tag) ? tag.replace(/^<(title|meta|link)\b/i, '<$1 data-mw') : tag);
+    body = body.slice(m[0].length);
+  }
   return { head, body };
 }
 
 // The shell's own fallback tags are data-mw marked (index.html); a page's
 // rendered tags replace them.
-const SHELL_TAG_RE = /<(?:title|meta|link)\b[^>]*\bdata-mw\b[^>]*>(?:[\s\S]*?<\/title>)?\s*/gi;
+const SHELL_TAG_RE = /<title\b[^>]*\bdata-mw\b[^>]*>[\s\S]*?<\/title>\s*|<(?:meta|link)\b[^>]*\bdata-mw\b[^>]*>\s*/gi;
+
+// Slugs become directory names: allow only what a URL segment needs, so a
+// bad row (e.g. "../..") can't overwrite other files or escape dist/.
+const SAFE_SEGMENT_RE = /^[a-z0-9][a-z0-9-]*$/i;
 
 function buildPage(shell, appHtml, seed) {
   const { head, body } = splitHead(appHtml);
@@ -122,7 +134,10 @@ function buildPage(shell, appHtml, seed) {
 }
 
 async function writeRoute(route, html) {
-  const file = route === '/' ? path.join(DIST, 'index.html') : path.join(DIST, ...route.split('/').filter(Boolean), 'index.html');
+  const segments = route.split('/').filter(Boolean);
+  if (!segments.every((s) => SAFE_SEGMENT_RE.test(s))) throw new Error('unsafe path segment, skipped');
+  const file = route === '/' ? path.join(DIST, 'index.html') : path.join(DIST, ...segments, 'index.html');
+  if (!path.resolve(file).startsWith(path.resolve(DIST) + path.sep)) throw new Error('path escapes dist/, skipped');
   await mkdir(path.dirname(file), { recursive: true });
   await writeFile(file, html);
 }
@@ -159,7 +174,7 @@ async function main() {
   const jobs = [
     ...STATIC_ROUTES.map((route) => ({ route, seed: route === '/scholarships/browse' && list ? { list } : {} })),
     ...(list ? ssr.HUBS.map((hub) => ({ route: ssr.hubPath(hub), seed: { list } })) : []),
-    ...details.map((detail) => ({ route: `/scholarships/browse/${detail.slug || detail.id}`, seed: { detail, list: slim } })),
+    ...details.map((detail) => ({ route: `/scholarships/browse/${detail.slug || detail.id}`, seed: { detail, list: slim, listSlim: true } })),
   ];
 
   let ok = 0;

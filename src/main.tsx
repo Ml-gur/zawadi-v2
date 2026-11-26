@@ -52,7 +52,7 @@ if ('requestIdleCallback' in window) {
   });
 }
 
-createRoot(document.getElementById('root')!).render(
+const app = (
   <StrictMode>
     <HelmetProvider>
       <BrowserRouter>
@@ -63,5 +63,29 @@ createRoot(document.getElementById('root')!).render(
         <CookieConsent />
       </BrowserRouter>
     </HelmetProvider>
-  </StrictMode>,
+  </StrictMode>
 );
+
+const container = document.getElementById('root')!;
+
+if (container.hasChildNodes()) {
+  // Prerendered page: rendering straight into it would wipe the content and
+  // show "Loading…" while the lazy route chunk downloads (a visible flash and
+  // layout shift). Render off-screen instead and swap once the page's heading
+  // exists, or after 3s at the latest.
+  const next = document.createElement('div');
+  next.hidden = true;
+  container.after(next);
+  createRoot(next).render(app);
+  const started = performance.now();
+  // A timer, not requestAnimationFrame: rAF pauses in background tabs
+  const timer = window.setInterval(() => {
+    if (!next.querySelector('h1') && performance.now() - started < 3000) return;
+    window.clearInterval(timer);
+    container.remove();
+    next.id = 'root';
+    next.hidden = false;
+  }, 30);
+} else {
+  createRoot(container).render(app);
+}

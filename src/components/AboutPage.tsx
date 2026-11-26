@@ -10,8 +10,8 @@ export default function AboutPage({ onBack }: AboutPageProps) {
   return (
     <div className="bg-surface-container-lowest text-on-surface font-body min-h-[100dvh]">
       <SEO
-        title="About Techsari — Scholarship Platform Built for African Students"
-        description="Techsari is an eligibility-first scholarship matching engine for African students. We read every listing's actual requirements, check them against your profile, and pair AI tools with human mentor review."
+        title="About Techsari | Eligibility-First Scholarship Matching"
+        description="Techsari checks each scholarship's real eligibility rules against your profile, so African students in all 54 countries see awards that fit. No data selling."
         path="/about"
         image="https://www.techsari.online/og-about-v2.png"
         ogTitle="About Techsari — Built for African Students"

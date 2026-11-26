@@ -72,8 +72,9 @@ export function usePublicScholarships() {
     let cancelled = false;
     loadPublicScholarships().then(
       list => { if (!cancelled) setState({ items: list, error: false }); },
-      // Keep the seeded list if the refresh fails
-      () => { if (!cancelled) setState(prev => (prev.items ? prev : { items: EMPTY, error: true })); },
+      // Keep a full seeded list if the refresh fails; a slimmed one (detail
+      // pages) lacks the fields directory tables need, so report the error
+      () => { if (!cancelled) setState(prev => (prev.items && !getSeed().listSlim ? prev : { items: EMPTY, error: true })); },
     );
     return () => { cancelled = true; };
   }, []);

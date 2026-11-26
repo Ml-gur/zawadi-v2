@@ -85,6 +85,9 @@ export default defineConfig(({ isSsrBuild }) => {
         },
         workbox: {
           globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+          // index.html becomes the prerendered home page after this manifest is
+          // built; leave it out so / falls through to app-shell.html
+          globIgnores: ['index.html'],
           // Offline / repeat-visit navigations get the plain shell, not the
           // prerendered home page that now lives at index.html
           navigateFallback: 'app-shell.html',
@@ -116,6 +119,8 @@ export default defineConfig(({ isSsrBuild }) => {
       },
     },
     build: {
+      // The SSR renderer needs no copy of public/ (2.5 MB of images)
+      copyPublicDir: !isSsrBuild,
       rollupOptions: {
         output: isSsrBuild ? {} : {
           manualChunks(id) {

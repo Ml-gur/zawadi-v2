@@ -107,10 +107,19 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
   useEffect(() => {
     if (!slug) return;
     let isCancelled = false;
-    // Refresh quietly when the prerendered copy is already on screen
+    // Refresh quietly when the prerendered copy is already on screen. The
+    // route doesn't remount between scholarships, so reset to this slug's seed.
     const showingSeed = Boolean(seeded);
-    if (!showingSeed) setLoading(true);
+    if (showingSeed) {
+      setScholarship(seeded);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
     setNotFound(false);
+    // True once a source answers "no such published scholarship" (as opposed
+    // to failing): then even a prerendered copy must give way to "not found".
+    let definitelyMissing = false;
 
     const fetchDetail = async () => {
       // 1. Direct Supabase query as primary source
@@ -167,6 +176,7 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
           setLoading(false);
           return;
         }
+        if (!res.error && !res.data) definitelyMissing = true;
       } catch (err) {
         console.warn('Direct supabase fetch failed, trying API fallback', err);
       }
@@ -174,6 +184,7 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
       // 2. Fallback to API route
       try {
         const r = await fetch(`/api/scholarships-public-detail?slug=${encodeURIComponent(slug)}`);
+        if (r.status === 404) definitelyMissing = true;
         if (r.ok) {
           const contentType = r.headers.get('content-type');
           if (contentType && contentType.includes('application/json')) {
@@ -187,8 +198,8 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
         }
       } catch {}
 
-      // A failed refresh must not replace the prerendered copy with "not found"
-      if (!isCancelled && !showingSeed) {
+      // A failed refresh keeps the prerendered copy; an unpublished one doesn't
+      if (!isCancelled && (!showingSeed || definitelyMissing)) {
         setNotFound(true);
         setLoading(false);
       }
@@ -294,7 +305,8 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
               { '@type': 'ListItem', position: 2, name: 'Scholarships', item: 'https://www.techsari.online/scholarships/browse' },
               { '@type': 'ListItem', position: 3, name: scholarship.name, item: `https://www.techsari.online/scholarships/browse/${scholarship.slug || scholarship.id}` },
             ],
-          })}
+          // Escape "<" so scraped text can't close the script or inject tags
+          }).replace(/</g, '\\u003c')}
         </script>
 
         {/* Logged-in Banner */}

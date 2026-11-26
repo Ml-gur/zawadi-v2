@@ -12,6 +12,8 @@ import type { ScholarshipTeaser } from '../pages/public/browse-shared';
 export interface PrerenderSeed {
   /** Open listings. On detail pages this is a slimmed copy (enough for "Similar scholarships"). */
   list?: ScholarshipTeaser[];
+  /** True when `list` is the slimmed copy (detail pages): fine for links, not for full tables. */
+  listSlim?: boolean;
   /** The scholarship a detail page shows (never includes apply_url / source_url). */
   detail?: Record<string, any>;
 }

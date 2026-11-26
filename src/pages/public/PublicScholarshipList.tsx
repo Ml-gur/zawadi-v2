@@ -8,7 +8,7 @@ import { Breadcrumbs } from '../../components/Breadcrumbs';
 import BrowseCard from './BrowseCard';
 import BrowseTable from './BrowseTable';
 import { usePublicScholarships } from '../../lib/usePublicScholarships';
-import { HUBS, hubPath, intakeYear } from '../../lib/scholarship-hubs';
+import { HUBS, fitDesc, fitTitle, hubPath, intakeYear } from '../../lib/scholarship-hubs';
 
 function SkeletonCard() {
   return (
@@ -110,8 +110,12 @@ export default function PublicScholarshipList({ user }: { user?: any } = {}) {
   return (
     <div id="browse-root" className="min-h-[100dvh] bg-parchment text-off-black-ink flex flex-col">
       <SEO
-        title={`Scholarships for African Students ${year}: All Open Awards | Techsari`}
-        description={`Browse ${items.length || 'all'} open scholarships for African students for ${year}. Fully funded, no-IELTS, Masters, PhD and undergraduate awards, with deadlines and eligibility checked.`}
+        title={fitTitle(items.length
+          ? [`Scholarships for African Students ${year}: ${items.length} Open | Techsari`, `Scholarships for African Students ${year}: ${items.length} Open`]
+          : [`Scholarships for African Students ${year} | Techsari`])}
+        description={fitDesc(items.length
+          ? [`Browse ${items.length} open scholarships for African students for ${year}: ${items.filter(s => s.funding_type === 'Full').length} fully funded, ${items.filter(s => s.no_ielts).length} with no IELTS, from Masters and PhD to undergraduate. Soonest deadline first.`]
+          : [`Browse open scholarships for African students for ${year}: fully funded and no-IELTS awards, from Masters and PhD to undergraduate. Soonest deadline first.`])}
         path="/scholarships/browse"
       />
 
@@ -121,7 +125,7 @@ export default function PublicScholarshipList({ user }: { user?: any } = {}) {
         <div className="mb-10 md:mb-12">
           <Breadcrumbs items={[{ name: 'Scholarships', path: '/scholarships/browse' }]} />
           <p className="text-ed-caption uppercase text-graphite mb-5">Scholarship database</p>
-          <h1 className="text-ed-h1-sm md:text-ed-h1 text-off-black-ink max-w-[20ch]">Scholarships for African Students</h1>
+          <h1 className="text-ed-h1-sm md:text-ed-h1 text-off-black-ink max-w-[20ch]">Scholarships for African Students {year}</h1>
           <p className="mt-4 text-ed-sub font-normal text-graphite">
             {!loading
               ? `${items.length} open listing${items.length !== 1 ? 's' : ''} for the ${year} intake, checked for live deadlines and real eligibility.`

@@ -104,8 +104,8 @@ export default function FAQPage({ onBack }: FAQPageProps) {
   return (
     <div className="min-h-[100dvh] bg-surface-container-lowest text-on-surface font-body antialiased">
       <SEO
-        title="Scholarship FAQ for African Students — Techsari"
-        description="Answers to common questions about finding scholarships as an African student. Covers IELTS alternatives, eligibility matching, how to apply, and which countries qualify."
+        title="Scholarship FAQ for African Students: IELTS, GPA, Scams"
+        description="26 answers for African scholarship applicants: MOI letters instead of IELTS, converting KCSE or WAEC grades to GPA, what fully funded covers and fake offers."
         path="/faq"
         image="https://www.techsari.online/og-faq-v2.png"
         ogTitle="Scholarship FAQ for African Students — Techsari"
@@ -117,7 +117,7 @@ export default function FAQPage({ onBack }: FAQPageProps) {
 
         <span className="font-eyebrow text-eyebrow uppercase tracking-wider text-graphite block mb-2">Knowledge Base</span>
         <h1 className="font-display text-4xl md:text-5xl font-medium text-on-surface tracking-tight mb-3">
-          Frequently Asked Questions
+          Scholarship FAQ for African Students
         </h1>
         <p className="font-body text-base text-secondary mb-8">
           Answers to common questions about Techsari, IELTS alternatives, and the matching engine. Need personalized guidance?{' '}

@@ -28,6 +28,11 @@ export async function render(url: string, seed: PrerenderSeed): Promise<string> 
         </StaticRouter>
       </HelmetProvider>
     </StrictMode>,
+    // React 19 "outlines" Suspense boundaries above ~12 KB into a hidden
+    // segment plus an inline swap script, even in static prerender. Crawlers
+    // that don't run JS would then see the "Loading…" fallback instead of the
+    // page. Keep every boundary inline.
+    { progressiveChunkSize: Number.POSITIVE_INFINITY },
   );
   let html = '';
   for await (const chunk of prelude) html += typeof chunk === 'string' ? chunk : Buffer.from(chunk).toString('utf8');

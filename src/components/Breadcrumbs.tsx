@@ -28,7 +28,8 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
 
   return (
     <>
-      <script type="application/ld+json">{JSON.stringify(schema)}</script>
+      {/* "<" escaped: crumb names can be scraped scholarship names */}
+      <script type="application/ld+json">{JSON.stringify(schema).replace(/</g, '\\u003c')}</script>
       <nav aria-label="Breadcrumb" className="mb-8">
         <ol className="flex items-center gap-2 text-ed-body-sm text-graphite whitespace-nowrap">
           {trail.map((c, i) => {

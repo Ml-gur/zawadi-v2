@@ -103,8 +103,8 @@ export default function ContactPage({ onBack }: { onBack: () => void }) {
   return (
     <div className="min-h-[100dvh] bg-surface-container-lowest text-on-surface font-body antialiased">
       <SEO
-        title="Contact Techsari — Get Help or Partner With Us"
-        description="Contact the Techsari team for student support, scholarship provider listings, institutional partnerships, or press inquiries."
+        title="Contact Techsari | Student Support and Partnerships"
+        description="Questions about a scholarship, your account or listing an award? Students, providers and universities can reach us. Replies within 24 hours on business days."
         path="/contact"
         ogTitle="Contact Techsari — We're Here to Help"
         ogDescription="Reach out to the Techsari team for student support, institutional partnerships, or scholarship provider inquiries. We respond within 24 hours."
@@ -115,7 +115,7 @@ export default function ContactPage({ onBack }: { onBack: () => void }) {
         <Breadcrumbs items={[{ name: 'Contact', path: '/contact' }]} />
 
         <span className="font-eyebrow text-eyebrow uppercase tracking-wider text-graphite block mb-2">Support & Partnerships</span>
-        <h1 className="font-display text-4xl md:text-5xl font-medium text-on-surface tracking-tight mb-3">Get in Touch</h1>
+        <h1 className="font-display text-4xl md:text-5xl font-medium text-on-surface tracking-tight mb-3">Contact Techsari</h1>
         <p className="font-body text-base text-secondary max-w-2xl mb-12 leading-relaxed">
           Whether you are an African student with a question, a scholarship provider who wants to list verified opportunities, or an academic partner, we are here to support you.
         </p>
