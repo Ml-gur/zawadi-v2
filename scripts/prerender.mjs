@@ -31,9 +31,9 @@ const STATIC_ROUTES = ['/', '/about', '/faq', '/how-it-works', '/contact', '/pri
 
 // Same columns the public list API returns
 const LIST_COLUMNS = 'id,slug,name,provider,countries,degree_levels,funding_type,amount,deadline,urgency,description,no_ielts,targets_financial_need,targets_first_generation,is_intra_african,fields_of_study,host_region,iso2,opens_at,updated_at';
-// What the detail page renders — deliberately without apply_url / source_url,
-// which must not be published in static HTML (see SEO.md)
-const DETAIL_COLUMNS = 'id,slug,name,provider,countries,degree_levels,funding_type,amount,deadline,urgency,description,no_ielts,targets_financial_need,targets_first_generation,is_intra_african,updated_at,fields_of_study,instruction_language,host_institution,host_country,host_region,iso2,targets_rural_origin,targets_ldc_countries,stem_focus,development_focus,min_gpa_normalised,requires_leadership,requires_community,required_documents,eligibility,published';
+// What the detail page renders. source_url (the provider's official programme
+// page) is public by decision; apply_url stays out of static HTML (see SEO.md).
+const DETAIL_COLUMNS = 'id,slug,name,provider,countries,degree_levels,funding_type,amount,deadline,urgency,description,no_ielts,targets_financial_need,targets_first_generation,is_intra_african,updated_at,fields_of_study,instruction_language,host_institution,host_country,host_region,iso2,targets_rural_origin,targets_ldc_countries,stem_focus,development_focus,min_gpa_normalised,requires_leadership,requires_community,required_documents,eligibility,published,source_url';
 // Enough for "Similar scholarships" and hub chips on detail pages
 const SLIM_KEYS = ['id', 'slug', 'name', 'countries', 'degree_levels', 'funding_type', 'deadline', 'no_ielts'];
 

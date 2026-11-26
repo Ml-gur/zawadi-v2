@@ -383,6 +383,24 @@ export default function PublicScholarshipDetail({ user }: PublicScholarshipDetai
               <p className="font-body text-base text-secondary leading-relaxed whitespace-pre-line">
                 {cleanDesc || 'This scholarship opportunity provides academic and financial support to deserving students across Africa. Review the eligibility requirements below and prepare your application materials.'}
               </p>
+              {/* Where the facts come from and how fresh they are: lets students
+                  (and answer engines) check the listing against the provider. */}
+              {(scholarship.source_url || scholarship.updated_at) && (
+                <p className="text-ed-body-sm text-graphite">
+                  {scholarship.source_url && (
+                    <>
+                      Source:{' '}
+                      <a href={scholarship.source_url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-4 hover:text-off-black-ink">
+                        official {scholarship.provider ? `${scholarship.provider} ` : ''}programme page
+                      </a>
+                      {scholarship.updated_at ? '. ' : ''}
+                    </>
+                  )}
+                  {scholarship.updated_at && !Number.isNaN(Date.parse(scholarship.updated_at)) && (
+                    <>Listing last updated {formatDeadline(scholarship.updated_at)}.</>
+                  )}
+                </p>
+              )}
             </section>
 
             <div className="w-full h-px bg-ash"></div>
