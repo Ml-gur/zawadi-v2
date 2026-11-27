@@ -1,4 +1,5 @@
 import React, { ErrorInfo, ReactNode } from 'react';
+import { TriangleAlert } from 'lucide-react';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -31,7 +32,7 @@ export default class ErrorBoundary extends React.Component<ErrorBoundaryProps, E
         <div className="min-h-[100dvh] flex items-center justify-center bg-background px-6">
           <div className="text-center max-w-md">
             <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-status-urgent/10 flex items-center justify-center">
-              <span className="material-symbols-outlined text-3xl text-status-urgent">warning</span>
+              <TriangleAlert className="w-7.5 h-7.5 text-status-urgent" aria-hidden />
             </div>
             <h1 className="text-2xl font-display font-black text-primary mb-3">Something went wrong</h1>
             <p className="text-sm text-on-surface-variant mb-8">An unexpected error occurred. Please refresh the page to continue.</p>

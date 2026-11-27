@@ -1,4 +1,5 @@
 import React from 'react';
+import { CircleAlert, Info, TriangleAlert } from 'lucide-react';
 
 interface ConfirmationDialogProps {
   isOpen: boolean;
@@ -31,7 +32,7 @@ export default function ConfirmationDialog({
           text: 'text-error',
           border: 'border-error/20',
           accent: 'bg-status-urgent/15 hover:bg-status-urgent/25 text-status-urgent border border-status-urgent/40 focus:ring-status-urgent/50',
-          icon: 'error'
+          icon: CircleAlert
         };
       case 'warning':
         return {
@@ -39,7 +40,7 @@ export default function ConfirmationDialog({
           text: 'text-status-warning',
           border: 'border-status-warning/20',
           accent: 'bg-status-warning/15 hover:bg-status-warning/25 text-status-warning border border-status-warning/40 focus:ring-status-warning/50',
-          icon: 'warning'
+          icon: TriangleAlert
         };
       case 'info':
       default:
@@ -48,7 +49,7 @@ export default function ConfirmationDialog({
           text: 'text-primary',
           border: 'border-primary/20',
           accent: 'bg-accent-green/15 hover:bg-accent-green/25 text-accent-green border border-accent-green/40 focus:ring-accent-green/50',
-          icon: 'info'
+          icon: Info
         };
     }
   };
@@ -72,9 +73,7 @@ export default function ConfirmationDialog({
         <div className="flex gap-4 items-start mt-2">
           {/* Warning Icon Container */}
           <div className={`p-3 rounded-xl shrink-0 ${theme.bg} ${theme.border} border`}>
-            <span className={`material-symbols-outlined text-2xl ${theme.text}`}>
-              {theme.icon}
-            </span>
+            <theme.icon className={`w-6 h-6 ${theme.text}`} aria-hidden />
           </div>
 
           <div className="flex-1 space-y-2">

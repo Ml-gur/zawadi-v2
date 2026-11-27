@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Building2, CheckCircle2, Mail, Send } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { SEO } from './SEO';
 import { Breadcrumbs } from './Breadcrumbs';
@@ -125,7 +126,7 @@ export default function ContactPage({ onBack }: { onBack: () => void }) {
           <div className="lg:col-span-3">
             {sent ? (
               <div className="bg-surface-container-low rounded-card border border-outline-variant p-8 md:p-10 text-center">
-                <span className="material-symbols-outlined text-5xl text-primary mb-4">check_circle</span>
+                <CheckCircle2 className="w-12 h-12 text-primary mx-auto mb-4" aria-hidden />
                 <h3 className="font-headline font-medium text-xl text-on-surface tracking-tight mb-2">Message Sent!</h3>
                 <p className="font-body text-sm text-secondary">Thank you for reaching out. Our student support team typically responds within 24 hours on business days.</p>
                 <button onClick={() => setSent(false)} className="mt-6 font-body text-xs font-semibold text-primary underline hover:text-on-surface cursor-pointer">Send another message</button>
@@ -214,7 +215,7 @@ export default function ContactPage({ onBack }: { onBack: () => void }) {
                     </>
                   ) : (
                     <>
-                      <span className="material-symbols-outlined text-sm">send</span>
+                      <Send className="w-3.5 h-3.5" aria-hidden />
                       Send Message
                     </>
                   )}
@@ -227,7 +228,7 @@ export default function ContactPage({ onBack }: { onBack: () => void }) {
           <div className="lg:col-span-2 space-y-4">
             <div className="bg-surface-container-low rounded-card border border-outline-variant p-6">
               <div className="w-10 h-10 rounded-full bg-primary-container text-on-surface flex items-center justify-center mb-3">
-                <span className="material-symbols-outlined text-lg">mail</span>
+                <Mail className="w-4.5 h-4.5" aria-hidden />
               </div>
               <h3 className="font-headline font-medium text-sm text-on-surface uppercase tracking-wider mb-1">Direct Support</h3>
               <p className="font-body text-sm font-semibold text-primary">hello@techsari.online</p>
@@ -236,7 +237,7 @@ export default function ContactPage({ onBack }: { onBack: () => void }) {
 
             <div className="bg-surface-container-low rounded-card border border-outline-variant p-6">
               <div className="w-10 h-10 rounded-full bg-primary-container text-on-surface flex items-center justify-center mb-3">
-                <span className="material-symbols-outlined text-lg">business</span>
+                <Building2 className="w-4.5 h-4.5" aria-hidden />
               </div>
               <h3 className="font-headline font-medium text-sm text-on-surface uppercase tracking-wider mb-1">For Scholarship Providers</h3>
               <p className="font-body text-sm text-secondary mb-3">Want to list your foundation or university scholarship on Techsari and reach verified candidates?</p>

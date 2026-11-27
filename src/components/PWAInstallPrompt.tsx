@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Share } from 'lucide-react';
 
 function isIOS() {
   return /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
@@ -81,7 +82,7 @@ export default function PWAInstallPrompt() {
 
         {isIosDevice && (
           <div className="bg-off-black-ink rounded-lg p-3 text-[10px] text-muted leading-relaxed flex items-start gap-2">
-            <span className="material-symbols-outlined text-base shrink-0 mt-0.5">ios_share</span>
+            <Share className="w-4 h-4 shrink-0 mt-0.5" aria-hidden />
             <span>
               Tap the <strong>Share</strong> button <span className="text-xs">⎙</span> in the Safari toolbar, then scroll down and tap <strong>Add to Home Screen</strong>.
             </span>

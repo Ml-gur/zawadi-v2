@@ -87,7 +87,9 @@ export default defineConfig(({ isSsrBuild }) => {
           globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
           // index.html becomes the prerendered home page after this manifest is
           // built; leave it out so / falls through to app-shell.html
-          globIgnores: ['index.html'],
+          // Staff-only chunks (admin, mentor, charts: ~450 KB) load on demand
+          // instead of being downloaded into every visitor's offline cache
+          globIgnores: ['index.html', '**/AdminPortal-*.js', '**/AdminLoginPage-*.js', '**/MentorPortal-*.js', '**/vendor-charts-*.js'],
           // Offline / repeat-visit navigations get the plain shell, not the
           // prerendered home page that now lives at index.html
           navigateFallback: 'app-shell.html',
